@@ -58,8 +58,8 @@ const DEFAULT_SETTINGS: NotificationSettings = {
  */
 export const requestNotificationPermissions = async (): Promise<boolean> => {
   if (!Device.isDevice) {
-    console.log('Notifications do not work on simulator');
-    return false;
+    console.log('⚠️ Simulator detected - notifications may not work properly');
+    // Simulator'da da izin iste, ama uyar
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();

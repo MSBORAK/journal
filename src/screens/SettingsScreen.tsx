@@ -1352,12 +1352,19 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     console.log('Permission status:', status);
                     
                     if (status !== 'granted') {
-                      showAlert('⚠️ İzin Gerekli', 'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.', 'warning', {
-                        text: 'Tamam',
-                        onPress: () => setShowCustomAlert(false),
-                        style: 'primary'
-                      });
-                      return;
+                      // İzin iste
+                      console.log('Requesting notification permission...');
+                      const { status: newStatus } = await Notifications.requestPermissionsAsync();
+                      console.log('New permission status:', newStatus);
+                      
+                      if (newStatus !== 'granted') {
+                        showAlert('⚠️ İzin Gerekli', 'Bildirim izni verilmedi. Lütfen:\n\n1. Settings → Notifications → Daily App\n2. Allow Notifications → ON', 'warning', {
+                          text: 'Tamam',
+                          onPress: () => setShowCustomAlert(false),
+                          style: 'primary'
+                        });
+                        return;
+                      }
                     }
                     
                     // Test bildirimi gönder
