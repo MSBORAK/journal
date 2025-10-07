@@ -885,6 +885,68 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     return streak;
   };
 
+  // Haftalık rapor verilerini hesapla
+  const calculateWeeklyReport = () => {
+    if (entries.length === 0) {
+      return {
+        entriesThisWeek: 0,
+        totalWords: 0,
+        averageMood: 0,
+        insight: 'Henüz günlük yazmadın. İlk günlüğünü yazarak başla! 🌟'
+      };
+    }
+
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Bu haftanın başlangıcı
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Bu haftanın sonu
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Bu haftaki günlükleri filtrele
+    const weeklyEntries = entries.filter(entry => {
+      const entryDate = new Date(entry.date);
+      return entryDate >= startOfWeek && entryDate <= endOfWeek;
+    });
+
+    // İstatistikleri hesapla
+    const entriesThisWeek = weeklyEntries.length;
+    const totalWords = weeklyEntries.reduce((sum, entry) => {
+      return sum + (entry.content?.split(/\s+/).length || 0);
+    }, 0);
+    
+    const averageMood = weeklyEntries.length > 0 
+      ? (weeklyEntries.reduce((sum, entry) => sum + entry.mood, 0) / weeklyEntries.length)
+      : 0;
+
+    // İçgörü oluştur
+    let insight = '';
+    if (entriesThisWeek === 0) {
+      insight = 'Bu hafta henüz günlük yazmadın. Hadi başla! ✨';
+    } else if (entriesThisWeek >= 5) {
+      insight = 'Bu hafta çok üretkensin! Harika gidiyorsun! 🚀';
+    } else if (entriesThisWeek >= 3) {
+      insight = 'Bu hafta iyi gidiyorsun! Biraz daha yazabilirsin. 💪';
+    } else {
+      insight = 'Bu hafta az yazmışsın. Daha fazla yazmaya ne dersin? 📝';
+    }
+
+    if (averageMood >= 4) {
+      insight += ' Ayrıca çok mutlu görünüyorsun! 😊';
+    } else if (averageMood <= 2) {
+      insight += ' Kendine iyi bak, seni düşünüyoruz! 💙';
+    }
+
+    return {
+      entriesThisWeek,
+      totalWords,
+      averageMood: Math.round(averageMood * 10) / 10,
+      insight
+    };
+  };
+
   const startFocusSession = () => {
     setIsFocusActive(true);
     
@@ -1856,23 +1918,22 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 <Text style={dynamicStyles.reportTitle}>📈 Bu Hafta</Text>
                 <View style={dynamicStyles.reportStats}>
                   <View style={dynamicStyles.reportItem}>
-                    <Text style={dynamicStyles.reportNumber}>5</Text>
+                    <Text style={dynamicStyles.reportNumber}>{calculateWeeklyReport().entriesThisWeek}</Text>
                     <Text style={dynamicStyles.reportLabel}>Günlük Yazıldı</Text>
                   </View>
                   <View style={dynamicStyles.reportItem}>
-                    <Text style={dynamicStyles.reportNumber}>2,450</Text>
+                    <Text style={dynamicStyles.reportNumber}>{calculateWeeklyReport().totalWords.toLocaleString('tr-TR')}</Text>
                     <Text style={dynamicStyles.reportLabel}>Toplam Kelime</Text>
                   </View>
                   <View style={dynamicStyles.reportItem}>
-                    <Text style={dynamicStyles.reportNumber}>4.2</Text>
+                    <Text style={dynamicStyles.reportNumber}>{calculateWeeklyReport().averageMood}</Text>
                     <Text style={dynamicStyles.reportLabel}>Ortalama Mood</Text>
                   </View>
                 </View>
                 <View style={dynamicStyles.reportInsight}>
                   <Text style={dynamicStyles.insightTitle}>💡 İçgörü</Text>
                   <Text style={dynamicStyles.insightText}>
-                    Bu hafta çok üretkensin! Pazartesi ve Salı günleri en verimli günlerin olmuş. 
-                    Hafta sonları biraz daha az yazmışsın, bu normal. Devam et! 🚀
+                    {calculateWeeklyReport().insight}
                   </Text>
                 </View>
               </View>
