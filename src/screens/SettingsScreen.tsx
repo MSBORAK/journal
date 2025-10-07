@@ -1338,7 +1338,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     console.log('Permission status:', status);
                     
                     if (status !== 'granted') {
-                      showAlert('İzin Gerekli', 'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.', 'warning');
+                      showAlert('⚠️ İzin Gerekli', 'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.', 'warning', {
+                        text: 'Tamam',
+                        onPress: () => setShowCustomAlert(false),
+                        style: 'primary'
+                      });
                       return;
                     }
                     
@@ -1354,10 +1358,18 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     
                     console.log('Test notification sent!');
-                    showAlert('Başarılı!', 'Test bildirimi gönderildi. Birkaç saniye içinde görmelisin.', 'success');
+                    showAlert('✅ Başarılı!', 'Test bildirimi gönderildi. Birkaç saniye içinde görmelisin.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   } catch (error) {
                     console.error('Test notification error:', error);
-                    showAlert('Hata', 'Test bildirimi gönderilemedi: ' + error, 'error');
+                    showAlert('❌ Hata', 'Test bildirimi gönderilemedi: ' + error, 'error', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   }
                 }}
               >
@@ -1376,15 +1388,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     const notifications = await listScheduledNotifications();
                     console.log('Found notifications:', notifications);
                     showAlert(
-                      'Planlı Bildirimler', 
+                      '📋 Planlı Bildirimler', 
                       notifications.length > 0 
                         ? `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.` 
                         : 'Hiç planlı bildirim yok.',
-                      'info'
+                      'info',
+                      {
+                        text: 'Tamam',
+                        onPress: () => setShowCustomAlert(false),
+                        style: 'primary'
+                      }
                     );
                   } catch (error) {
                     console.error('List notifications error:', error);
-                    showAlert('Hata', 'Bildirimler listelenemedi: ' + error, 'error');
+                    showAlert('❌ Hata', 'Bildirimler listelenemedi: ' + error, 'error', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   }
                 }}
               >
@@ -1402,10 +1423,18 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     console.log('Rescheduling all notifications...');
                     await scheduleAllNotifications();
                     console.log('All notifications rescheduled!');
-                    showAlert('Başarılı!', 'Tüm bildirimler yeniden planlandı.', 'success');
+                    showAlert('✅ Başarılı!', 'Tüm bildirimler yeniden planlandı.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   } catch (error) {
                     console.error('Reschedule error:', error);
-                    showAlert('Hata', 'Bildirimler yeniden planlanamadı: ' + error, 'error');
+                    showAlert('❌ Hata', 'Bildirimler yeniden planlanamadı: ' + error, 'error', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   }
                 }}
               >
@@ -1423,10 +1452,18 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     console.log('Cancelling all notifications...');
                     await cancelAllNotifications();
                     console.log('All notifications cancelled!');
-                    showAlert('Başarılı!', 'Tüm bildirimler iptal edildi.', 'success');
+                    showAlert('✅ Başarılı!', 'Tüm bildirimler iptal edildi.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   } catch (error) {
                     console.error('Cancel error:', error);
-                    showAlert('Hata', 'Bildirimler iptal edilemedi: ' + error, 'error');
+                    showAlert('❌ Hata', 'Bildirimler iptal edilemedi: ' + error, 'error', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   }
                 }}
               >
