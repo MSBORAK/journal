@@ -78,18 +78,26 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
   // Android için kanal oluştur
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+      name: 'Varsayılan Bildirimler',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
+      sound: 'default', // Ses ekle
+      enableVibrate: true,
+      enableLights: true,
+      showBadge: true,
     });
 
     // Farklı bildirim kategorileri için kanallar
     await Notifications.setNotificationChannelAsync('gentle-reminders', {
       name: 'Nazik Hatırlatmalar',
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: Notifications.AndroidImportance.HIGH, // DEFAULT'tan HIGH'a yükselt
       vibrationPattern: [0, 150, 150],
       lightColor: '#6366f1',
+      sound: 'default', // Ses ekle
+      enableVibrate: true,
+      enableLights: true,
+      showBadge: true,
     });
 
     await Notifications.setNotificationChannelAsync('task-reminders', {
@@ -97,14 +105,24 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#f59e0b',
+      sound: 'default', // Ses ekle
+      enableVibrate: true,
+      enableLights: true,
+      showBadge: true,
     });
 
     await Notifications.setNotificationChannelAsync('achievements', {
       name: 'Başarılar',
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 100, 100, 100],
       lightColor: '#10b981',
+      sound: 'default', // Ses ekle
+      enableVibrate: true,
+      enableLights: true,
+      showBadge: true,
     });
+    
+    console.log('Android notification channels created successfully');
   }
 
   return true;
@@ -177,13 +195,15 @@ export const sendLocalNotification = async (
     return;
   }
 
+  console.log('Sending notification:', { title, body, channelId });
+
   await Notifications.scheduleNotificationAsync({
     content: {
       title,
       body,
       data,
-      sound: true,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
+      sound: 'default', // 'default' string olarak kullanılmalı
+      priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
       ...(Platform.OS === 'android' && { 
         channelId: channelId === 'gentle-reminders' ? 'gentle-reminders' : 'default',
         vibrate: [0, 250, 250, 250],
@@ -191,6 +211,8 @@ export const sendLocalNotification = async (
     },
     trigger: null, // Hemen gönder
   });
+  
+  console.log('Notification sent successfully');
 };
 
 /**
@@ -212,14 +234,19 @@ export const scheduleNotification = async (
     repeats,
   };
 
+  console.log('Scheduling notification:', { identifier, title, hour, minute, channelId });
+
   return await Notifications.scheduleNotificationAsync({
     identifier,
     content: {
       title,
       body,
-      sound: true,
-      priority: Notifications.AndroidNotificationPriority.DEFAULT,
-      ...(Platform.OS === 'android' && { channelId }),
+      sound: 'default', // 'default' string olarak
+      priority: Notifications.AndroidNotificationPriority.HIGH, // HIGH priority
+      ...(Platform.OS === 'android' && { 
+        channelId,
+        vibrate: [0, 250, 250, 250],
+      }),
     },
     trigger,
   });

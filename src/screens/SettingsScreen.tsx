@@ -1287,9 +1287,34 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               
               <TouchableOpacity
                 style={dynamicStyles.testButton}
-                onPress={() => {
-                  console.log('Test button pressed!');
-                  showAlert('Test', 'Buton çalışıyor! Console\'da log görebilirsin.', 'info');
+                onPress={async () => {
+                  try {
+                    console.log('Sending test notification...');
+                    
+                    // İzin kontrol et
+                    const { status } = await Notifications.getPermissionsAsync();
+                    if (status !== 'granted') {
+                      showAlert('İzin Gerekli', 'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.', 'warning');
+                      return;
+                    }
+                    
+                    // Test bildirimi gönder
+                    await sendLocalNotification(
+                      '🧪 Test Bildirimi',
+                      'Bu bir test bildirimidir. Ses ve titreşim çalışmalı!',
+                      { type: 'test' },
+                      'default'
+                    );
+                    
+                    // Haptic feedback
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    
+                    console.log('Test notification sent!');
+                    showAlert('Başarılı!', 'Test bildirimi gönderildi. Birkaç saniye içinde görmelisin.', 'success');
+                  } catch (error) {
+                    console.error('Test notification error:', error);
+                    showAlert('Hata', 'Test bildirimi gönderilemedi: ' + error, 'error');
+                  }
                 }}
               >
                 <Ionicons name="send" size={20} color="white" />
@@ -1298,9 +1323,22 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#8b5cf6' }]}
-                onPress={() => {
-                  console.log('List notifications button pressed!');
-                  showAlert('Test', 'Liste butonu çalışıyor!', 'info');
+                onPress={async () => {
+                  try {
+                    console.log('Listing scheduled notifications...');
+                    const notifications = await listScheduledNotifications();
+                    console.log('Found notifications:', notifications);
+                    showAlert(
+                      'Planlı Bildirimler', 
+                      notifications.length > 0 
+                        ? `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.` 
+                        : 'Hiç planlı bildirim yok.',
+                      'info'
+                    );
+                  } catch (error) {
+                    console.error('List notifications error:', error);
+                    showAlert('Hata', 'Bildirimler listelenemedi: ' + error, 'error');
+                  }
                 }}
               >
                 <Ionicons name="list" size={20} color="white" />
@@ -1309,9 +1347,16 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#10b981' }]}
-                onPress={() => {
-                  console.log('Reschedule button pressed!');
-                  showAlert('Test', 'Yeniden planla butonu çalışıyor!', 'info');
+                onPress={async () => {
+                  try {
+                    console.log('Rescheduling all notifications...');
+                    await scheduleAllNotifications();
+                    console.log('All notifications rescheduled!');
+                    showAlert('Başarılı!', 'Tüm bildirimler yeniden planlandı.', 'success');
+                  } catch (error) {
+                    console.error('Reschedule error:', error);
+                    showAlert('Hata', 'Bildirimler yeniden planlanamadı: ' + error, 'error');
+                  }
                 }}
               >
                 <Ionicons name="refresh" size={20} color="white" />
@@ -1320,9 +1365,16 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#ef4444' }]}
-                onPress={() => {
-                  console.log('Cancel notifications button pressed!');
-                  showAlert('Test', 'İptal et butonu çalışıyor!', 'info');
+                onPress={async () => {
+                  try {
+                    console.log('Cancelling all notifications...');
+                    await cancelAllNotifications();
+                    console.log('All notifications cancelled!');
+                    showAlert('Başarılı!', 'Tüm bildirimler iptal edildi.', 'success');
+                  } catch (error) {
+                    console.error('Cancel error:', error);
+                    showAlert('Hata', 'Bildirimler iptal edilemedi: ' + error, 'error');
+                  }
                 }}
               >
                 <Ionicons name="close-circle" size={20} color="white" />
