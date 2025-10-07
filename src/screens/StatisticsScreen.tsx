@@ -6,7 +6,6 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
-  Modal,
   SafeAreaView,
 } from 'react-native';
 import { useDiary } from '../hooks/useDiary';
@@ -26,7 +25,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
   const { entries, getStreak } = useDiary(user?.uid);
 
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('week');
-  const [expandedChart, setExpandedChart] = useState<'mood' | 'activity' | 'distribution' | null>(null);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -651,12 +649,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               <Ionicons name="trending-up" size={20} color={currentTheme.colors.primary} />
               <Text style={dynamicStyles.chartTitle}>📈 Son 7 Gün Mood Trendi</Text>
             </View>
-            <TouchableOpacity 
-              style={dynamicStyles.chartActionButton}
-              onPress={() => setExpandedChart('mood')}
-            >
-              <Ionicons name="expand" size={16} color={currentTheme.colors.secondary} />
-            </TouchableOpacity>
           </View>
           <View style={dynamicStyles.modernChart}>
             <View style={dynamicStyles.chartVisual}>
@@ -703,12 +695,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               <Ionicons name="calendar" size={20} color={currentTheme.colors.primary} />
               <Text style={dynamicStyles.chartTitle}>📅 Haftalık Aktivite</Text>
             </View>
-            <TouchableOpacity 
-              style={dynamicStyles.chartActionButton}
-              onPress={() => setExpandedChart('activity')}
-            >
-              <Ionicons name="expand" size={16} color={currentTheme.colors.secondary} />
-            </TouchableOpacity>
           </View>
           <View style={dynamicStyles.modernChart}>
             <View style={dynamicStyles.activityGrid}>
@@ -748,12 +734,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               <Ionicons name="pie-chart" size={20} color={currentTheme.colors.primary} />
               <Text style={dynamicStyles.chartTitle}>🥧 Mood Dağılımı</Text>
             </View>
-            <TouchableOpacity 
-              style={dynamicStyles.chartActionButton}
-              onPress={() => setExpandedChart('distribution')}
-            >
-              <Ionicons name="expand" size={16} color={currentTheme.colors.secondary} />
-            </TouchableOpacity>
           </View>
           <View style={dynamicStyles.modernChart}>
             <View style={dynamicStyles.moodDistribution}>
@@ -799,125 +779,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       </View>
 
 
-      {/* Activity Detail Modal */}
-      <Modal
-        visible={expandedChart === 'activity'}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setExpandedChart(null)}
-      >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContainer}>
-            <View style={dynamicStyles.modalHeader}>
-              <Text style={dynamicStyles.modalTitle}>📅 Aktivite Detayı</Text>
-              <TouchableOpacity 
-                style={dynamicStyles.modalCloseButton}
-                onPress={() => setExpandedChart(null)}
-              >
-                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView 
-              style={dynamicStyles.modalContent}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ flexGrow: 1 }}
-            >
-              <View style={dynamicStyles.expandedChart}>
-                <Text style={dynamicStyles.expandedChartTitle}>Bu haftaki günlük yazma aktiviteniz</Text>
-                
-                <View style={dynamicStyles.activityWeekContainer}>
-                  {stats.weeklyActivity.map((isActive, index) => {
-                    const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-                    return (
-                      <View key={index} style={dynamicStyles.activityDayItem}>
-                        <View style={[
-                          dynamicStyles.activityDot, 
-                          { backgroundColor: isActive ? '#10b981' : '#e5e7eb' }
-                        ]} />
-                        <Text style={dynamicStyles.activityDayLabel}>{dayNames[index]}</Text>
-                      </View>
-                    );
-                  })}
-                </View>
-                
-                <View style={dynamicStyles.activitySummary}>
-                  <Text style={dynamicStyles.activitySummaryText}>
-                    Bu hafta {stats.weeklyActivity.filter(active => active).length} gün günlük yazdın
-                  </Text>
-                  <Text style={dynamicStyles.activityGoalText}>Hedef: 7 gün</Text>
-                  <View style={dynamicStyles.activityProgressBar}>
-                    <View style={[
-                      dynamicStyles.activityProgressFill, 
-                      { width: `${(stats.weeklyActivity.filter(active => active).length / 7) * 100}%` }
-                    ]} />
-                  </View>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Mood Trend Detail Modal */}
-      <Modal
-        visible={expandedChart === 'mood'}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setExpandedChart(null)}
-      >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContainer}>
-            <View style={dynamicStyles.modalHeader}>
-              <Text style={dynamicStyles.modalTitle}>📈 Mood Trendi Detayı</Text>
-              <TouchableOpacity 
-                style={dynamicStyles.modalCloseButton}
-                onPress={() => setExpandedChart(null)}
-              >
-                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView 
-              style={dynamicStyles.modalContent}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ flexGrow: 1 }}
-            >
-              <View style={dynamicStyles.expandedChart}>
-                <Text style={dynamicStyles.expandedChartTitle}>Son 7 gün mood durumunuz</Text>
-                
-                <View style={dynamicStyles.moodTrendChart}>
-                  {stats.last7DaysMood.map((mood, index) => {
-                    const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-                    const moodEmojis = ['', '😔', '😐', '😊', '😄', '🤩'];
-                    return (
-                      <View key={index} style={dynamicStyles.moodTrendItem}>
-                        <Text style={dynamicStyles.moodTrendValue}>{moodEmojis[mood]}</Text>
-                        <View style={[
-                          dynamicStyles.moodTrendBar, 
-                          { height: mood > 0 ? mood * 20 : 10 }
-                        ]} />
-                        <Text style={dynamicStyles.moodTrendLabel}>{dayNames[index]}</Text>
-                      </View>
-                    );
-                  })}
-                </View>
-                
-                <View style={dynamicStyles.moodTrendSummary}>
-                  <Text style={dynamicStyles.moodTrendSummaryText}>
-                    Ortalama mood: {stats.avgMood}/5
-                  </Text>
-                  <Text style={dynamicStyles.moodTrendInsight}>
-                    {stats.avgMood >= 4 ? 'Harika bir hafta geçirmişsin! 😊' : 
-                     stats.avgMood >= 3 ? 'İyi bir hafta geçirmişsin 👍' : 
-                     'Gelecek hafta daha iyi olacak! 💪'}
-                  </Text>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
