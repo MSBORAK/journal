@@ -43,9 +43,9 @@ export interface NotificationSettings {
   eveningTime: string; // "21:00" formatında
   taskRemindersEnabled: boolean;
   achievementsEnabled: boolean;
-  quietHoursEnabled: boolean;
-  quietStartTime: string; // "23:00"
-  quietEndTime: string; // "07:00"
+  // quietHoursEnabled: boolean; // Kaldırıldı
+  // quietStartTime: string; // Kaldırıldı
+  // quietEndTime: string; // Kaldırıldı
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
@@ -56,9 +56,9 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   eveningTime: '21:00',
   taskRemindersEnabled: true,
   achievementsEnabled: true,
-  quietHoursEnabled: true,
-  quietStartTime: '23:00',
-  quietEndTime: '07:00',
+  // quietHoursEnabled: true, // Kaldırıldı
+  // quietStartTime: '23:00', // Kaldırıldı
+  // quietEndTime: '07:00', // Kaldırıldı
 };
 
 /**
@@ -127,30 +127,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
   }
 };
 
-/**
- * Sessiz Saatleri Kontrol Et
- */
-const isQuietHours = (settings: NotificationSettings): boolean => {
-  if (!settings.quietHoursEnabled) return false;
-
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  const currentTime = currentHour * 60 + currentMinute;
-
-  const [startHour, startMinute] = settings.quietStartTime.split(':').map(Number);
-  const [endHour, endMinute] = settings.quietEndTime.split(':').map(Number);
-
-  const startTime = startHour * 60 + startMinute;
-  const endTime = endHour * 60 + endMinute;
-
-  // Gece yarısını geçen sessiz saatler için (örn: 23:00 - 07:00)
-  if (startTime > endTime) {
-    return currentTime >= startTime || currentTime < endTime;
-  } else {
-    return currentTime >= startTime && currentTime < endTime;
-  }
-};
+// isQuietHours fonksiyonu kaldırıldı
 
 /**
  * Yerel Bildirim Gönder
@@ -163,8 +140,8 @@ export const sendLocalNotification = async (
 ): Promise<void> => {
   const settings = await loadNotificationSettings();
 
-  if (!settings.enabled || isQuietHours(settings)) {
-    console.log('Notifications disabled or quiet hours');
+  if (!settings.enabled) {
+    console.log('Notifications disabled');
     return;
   }
 

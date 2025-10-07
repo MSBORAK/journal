@@ -60,11 +60,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const [selectedFont, setSelectedFont] = useState('system');
   // const [notificationSound, setNotificationSound] = useState('default'); // Kaldırıldı
-  const [quietHoursEnabled, setQuietHoursEnabled] = useState(false);
-  const [quietStartTime, setQuietStartTime] = useState('22:00');
-  const [quietEndTime, setQuietEndTime] = useState('08:00');
+  // const [quietHoursEnabled, setQuietHoursEnabled] = useState(false); // Kaldırıldı
+  // const [quietStartTime, setQuietStartTime] = useState('22:00'); // Kaldırıldı
+  // const [quietEndTime, setQuietEndTime] = useState('08:00'); // Kaldırıldı
   // const [showSoundModal, setShowSoundModal] = useState(false); // Kaldırıldı
-  const [showQuietHoursModal, setShowQuietHoursModal] = useState(false);
+  // const [showQuietHoursModal, setShowQuietHoursModal] = useState(false); // Kaldırıldı
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showWeeklyReportModal, setShowWeeklyReportModal] = useState(false);
@@ -792,16 +792,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   // saveNotificationSound fonksiyonu kaldırıldı
 
-  const saveQuietHours = async () => {
-    setShowQuietHoursModal(false);
-    try {
-      await AsyncStorage.setItem('quietHoursEnabled', quietHoursEnabled.toString());
-      await AsyncStorage.setItem('quietStartTime', quietStartTime);
-      await AsyncStorage.setItem('quietEndTime', quietEndTime);
-    } catch (error) {
-      console.error('Error saving quiet hours:', error);
-    }
-  };
+  // saveQuietHours fonksiyonu kaldırıldı
 
   const startFocusSession = () => {
     setIsFocusActive(true);
@@ -1166,12 +1157,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <TimePicker />
             </View>
             
-            <SettingItem
-              icon="moon-outline"
-              title="Sessiz Saatler"
-              subtitle="Belirli saatlerde bildirimleri sustur"
-              onPress={() => setShowQuietHoursModal(true)}
-            />
+            {/* Sessiz saatler kaldırıldı - Sistem ayarlarından kontrol edilir */}
             
             {/* Titreşim ayarı kaldırıldı - Sistem ayarlarından kontrol edilir */}
             
@@ -1572,96 +1558,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       {/* Bildirim Sesi Modal */}
       {/* Bildirim Sesi Modal kaldırıldı */}
 
-      {/* Sessiz Saatler Modal */}
-      <Modal
-        visible={showQuietHoursModal}
-        transparent={true}
-        animationType="none"
-        onRequestClose={() => setShowQuietHoursModal(false)}
-      >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContainer}>
-            <View style={dynamicStyles.modalHeader}>
-              <Text style={dynamicStyles.modalTitle}>🌙 Sessiz Saatler</Text>
-              <TouchableOpacity 
-                style={dynamicStyles.modalCloseButton}
-                onPress={() => setShowQuietHoursModal(false)}
-              >
-                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
-              </TouchableOpacity>
-            </View>
-            
-            <View style={dynamicStyles.modalContent}>
-              <View style={dynamicStyles.quietHoursToggle}>
-                <Text style={dynamicStyles.quietHoursLabel}>Sessiz Saatleri Etkinleştir</Text>
-                <Switch
-                  value={quietHoursEnabled}
-                  onValueChange={setQuietHoursEnabled}
-                  trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary }}
-                  thumbColor={quietHoursEnabled ? 'white' : currentTheme.colors.secondary}
-                />
-              </View>
-
-              {quietHoursEnabled && (
-                <>
-                  <View style={dynamicStyles.timeSelector}>
-                    <Text style={dynamicStyles.timeSelectorLabel}>Başlangıç Saati</Text>
-                    <View style={dynamicStyles.timeOptions}>
-                      {['22:00', '23:00', '00:00', '01:00'].map((time) => (
-                        <TouchableOpacity
-                          key={time}
-                          style={[
-                            dynamicStyles.timeOption,
-                            quietStartTime === time && dynamicStyles.selectedTimeOption
-                          ]}
-                          onPress={() => setQuietStartTime(time)}
-                        >
-                          <Text style={[
-                            dynamicStyles.timeOptionText,
-                            quietStartTime === time && dynamicStyles.selectedTimeOptionText
-                          ]}>
-                            {time}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View style={dynamicStyles.timeSelector}>
-                    <Text style={dynamicStyles.timeSelectorLabel}>Bitiş Saati</Text>
-                    <View style={dynamicStyles.timeOptions}>
-                      {['06:00', '07:00', '08:00', '09:00'].map((time) => (
-                        <TouchableOpacity
-                          key={time}
-                          style={[
-                            dynamicStyles.timeOption,
-                            quietEndTime === time && dynamicStyles.selectedTimeOption
-                          ]}
-                          onPress={() => setQuietEndTime(time)}
-                        >
-                          <Text style={[
-                            dynamicStyles.timeOptionText,
-                            quietEndTime === time && dynamicStyles.selectedTimeOptionText
-                          ]}>
-                            {time}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                </>
-              )}
-
-              <TouchableOpacity
-                style={dynamicStyles.saveButton}
-                onPress={saveQuietHours}
-              >
-                <Text style={dynamicStyles.saveButtonText}>Kaydet</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Sessiz Saatler Modal kaldırıldı */}
 
       {/* İlerleme Takibi Modal */}
       <Modal
