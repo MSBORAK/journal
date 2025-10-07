@@ -16,10 +16,25 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için ses dosyaları - string path olarak tanımla
-const gentleSoundPath = 'modern-chimes-light-mode-notification-interface-sound-360608.mp3';
-const taskSoundPath = 'new-notification-08-352461.mp3';
-const successSoundPath = 'success-1-6297.mp3';
+// iOS için ses dosyaları - require ile import et ve string'e çevir
+const gentleSoundAsset = require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
+const taskSoundAsset = require('../../assets/sounds/new-notification-08-352461.mp3');
+const successSoundAsset = require('../../assets/sounds/success-1-6297.mp3');
+
+// Asset'leri string path'e çevir
+const gentleSoundPath = gentleSoundAsset.uri || gentleSoundAsset;
+const taskSoundPath = taskSoundAsset.uri || taskSoundAsset;
+const successSoundPath = successSoundAsset.uri || successSoundAsset;
+
+// Debug: Asset'lerin içeriğini kontrol et
+console.log('🎵 Sound Assets Debug:', {
+  gentleSoundAsset,
+  gentleSoundPath,
+  taskSoundAsset,
+  taskSoundPath,
+  successSoundAsset,
+  successSoundPath
+});
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
