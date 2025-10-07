@@ -16,14 +16,13 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için sistem sesleri kullan - özel ses dosyaları çalışmıyor
-const getSystemSound = (channel: string) => {
-  // iOS'ta sistem seslerini kullan, farklılık titreşim ile yarat
+// Sadece sistem sesi kullan - özel ses dosyaları kaldırıldı
+const getSystemSound = () => {
   return 'default'; // Tüm kanallar için sistem sesi
 };
 
 // Debug: Ses stratejisi
-console.log('🎵 iOS Sound Strategy: Using system sounds with different vibration patterns');
+console.log('🎵 Sound Strategy: Using system sounds only');
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
@@ -204,18 +203,8 @@ export const sendLocalNotification = async (
     return;
   }
 
-  // Ses dosyası seçimi - iOS için sistem sesleri
-  const getSoundFile = (channel: string) => {
-    // iOS'ta özel ses dosyaları çalışmıyor, sistem sesi kullan
-    if (Platform.OS === 'ios') {
-      return getSystemSound(channel); // Sistem sesi kullan
-    } else {
-      // Android için sistem sesleri
-      return 'default';
-    }
-  };
-
-  const selectedSound = getSoundFile(channelId);
+  // Sadece sistem sesi kullan
+  const selectedSound = getSystemSound();
   console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
 
   // iOS için farklı titreşim pattern'leri
@@ -279,8 +268,8 @@ export const scheduleNotification = async (
     repeats,
   };
 
-  // Ses dosyası seçimi - sistem sesleri kullan
-  const selectedSound = getSystemSound(channelId);
+  // Sadece sistem sesi kullan
+  const selectedSound = getSystemSound();
   console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
 
   return await Notifications.scheduleNotificationAsync({
