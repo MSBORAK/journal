@@ -23,6 +23,7 @@ import {
   scheduleAllNotifications,
   cancelAllNotifications 
 } from '../services/notificationService';
+import * as Notifications from 'expo-notifications';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -856,16 +857,26 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   };
 
   const saveNotificationSound = async (sound: string) => {
-    setNotificationSound(sound);
-    
-    // Seçilen sesi çal
-    await playNotificationSound(sound);
-    
-    setShowSoundModal(false);
     try {
+      setNotificationSound(sound);
       await AsyncStorage.setItem('notificationSound', sound);
+      
+      // Modal'ı kapat
+      setShowSoundModal(false);
+      
+      // Başarı mesajı göster
+      showAlert('Başarılı!', `${sound} sesi seçildi`, 'success', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
     } catch (error) {
       console.error('Error saving notification sound:', error);
+      showAlert('Hata', 'Ses kaydedilemedi', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
     }
   };
 
@@ -1277,12 +1288,28 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <TouchableOpacity
                 style={dynamicStyles.testButton}
                 onPress={async () => {
-                  await sendLocalNotification(
-                    '🌸 Test Bildirimi',
-                    'Bu bir test bildirimidir. Çalışıyor! 🎉',
-                    { type: 'test' }
-                  );
-                  showAlert('Başarılı!', 'Test bildirimi gönderildi', 'success');
+                  try {
+                    // Önce bildirim iznini kontrol et
+                    const { status } = await Notifications.getPermissionsAsync();
+                    if (status !== 'granted') {
+                      showAlert('İzin Gerekli', 'Bildirim izni verilmemiş. Ayarlardan açın.', 'warning');
+                      return;
+                    }
+
+                    await sendLocalNotification(
+                      '🌸 Test Bildirimi',
+                      'Bu bir test bildirimidir. Çalışıyor! 🎉',
+                      { type: 'test' }
+                    );
+                    
+                    // Haptic feedback ekle
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    
+                    showAlert('Başarılı!', 'Test bildirimi gönderildi. Bildirim çubuğunu kontrol edin!', 'success');
+                  } catch (error) {
+                    console.error('Test notification error:', error);
+                    showAlert('Hata', 'Test bildirimi gönderilemedi. İzinleri kontrol edin.', 'error');
+                  }
                 }}
               >
                 <Ionicons name="send" size={20} color="white" />

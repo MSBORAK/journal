@@ -1011,7 +1011,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             
             <ScrollView style={dynamicStyles.modalContent}>
               <View style={dynamicStyles.expandedChart}>
-                <Text style={dynamicStyles.expandedChartTitle}>Son 7 gün mood değişiminiz</Text>
+                <Text style={dynamicStyles.expandedChartTitle}>Son 7 gün mood durumunuz</Text>
                 
                 <View style={dynamicStyles.moodTrendChart}>
                   {stats.last7DaysMood.map((mood, index) => {

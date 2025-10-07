@@ -183,7 +183,11 @@ export const sendLocalNotification = async (
       body,
       data,
       sound: true,
-      priority: Notifications.AndroidNotificationPriority.DEFAULT,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+      ...(Platform.OS === 'android' && { 
+        channelId: channelId === 'gentle-reminders' ? 'gentle-reminders' : 'default',
+        vibrate: [0, 250, 250, 250],
+      }),
     },
     trigger: null, // Hemen gönder
   });
