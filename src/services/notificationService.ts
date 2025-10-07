@@ -16,21 +16,17 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için ses dosyaları - require ile import et
-const gentleSound = require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
-const taskSound = require('../../assets/sounds/new-notification-08-352461.mp3');
-const successSound = require('../../assets/sounds/success-1-6297.mp3');
-
-// iOS'ta ses dosyaları için doğru yaklaşım
+// iOS için ses dosyaları - string path kullan
 const getCustomSound = (channel: string) => {
   if (Platform.OS === 'ios') {
+    // iOS'ta ses dosyaları için string path kullan
     switch (channel) {
       case 'gentle-reminders':
-        return gentleSound; // Nazik ses
+        return 'modern-chimes-light-mode-notification-interface-sound-360608.mp3'; // String path
       case 'task-reminders':
-        return taskSound; // Görev sesi
+        return 'new-notification-08-352461.mp3'; // String path
       case 'achievements':
-        return successSound; // Başarı sesi
+        return 'success-1-6297.mp3'; // String path
       default:
         return 'default'; // Sistem varsayılan sesi
     }
@@ -40,12 +36,7 @@ const getCustomSound = (channel: string) => {
 };
 
 // Debug: Ses dosyaları
-console.log('🎵 Sound Files Debug:', {
-  gentleSound,
-  taskSound,
-  successSound,
-  platform: Platform.OS
-});
+console.log('🎵 iOS Sound Strategy: Using string paths for custom sounds');
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
