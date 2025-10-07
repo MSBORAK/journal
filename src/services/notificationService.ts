@@ -16,27 +16,14 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için ses dosyaları - string path kullan
-const getCustomSound = (channel: string) => {
-  if (Platform.OS === 'ios') {
-    // iOS'ta ses dosyaları için string path kullan
-    switch (channel) {
-      case 'gentle-reminders':
-        return 'modern-chimes-light-mode-notification-interface-sound-360608.mp3'; // String path
-      case 'task-reminders':
-        return 'new-notification-08-352461.mp3'; // String path
-      case 'achievements':
-        return 'success-1-6297.mp3'; // String path
-      default:
-        return 'default'; // Sistem varsayılan sesi
-    }
-  } else {
-    return 'default'; // Android için sistem sesi
-  }
+// iOS için sistem sesleri kullan - özel ses dosyaları çalışmıyor
+const getSystemSound = (channel: string) => {
+  // iOS'ta sistem seslerini kullan, farklılık titreşim ile yarat
+  return 'default'; // Tüm kanallar için sistem sesi
 };
 
-// Debug: Ses dosyaları
-console.log('🎵 iOS Sound Strategy: Using string paths for custom sounds');
+// Debug: Ses stratejisi
+console.log('🎵 iOS Sound Strategy: Using system sounds with different vibration patterns');
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
@@ -217,11 +204,11 @@ export const sendLocalNotification = async (
     return;
   }
 
-  // Ses dosyası seçimi - iOS için özel sesler
+  // Ses dosyası seçimi - iOS için sistem sesleri
   const getSoundFile = (channel: string) => {
-    // iOS'ta özel ses dosyalarını kullan
+    // iOS'ta özel ses dosyaları çalışmıyor, sistem sesi kullan
     if (Platform.OS === 'ios') {
-      return getCustomSound(channel); // Özel ses dosyası kullan
+      return getSystemSound(channel); // Sistem sesi kullan
     } else {
       // Android için sistem sesleri
       return 'default';
@@ -292,8 +279,8 @@ export const scheduleNotification = async (
     repeats,
   };
 
-  // Ses dosyası seçimi - özel sesler kullan
-  const selectedSound = getCustomSound(channelId);
+  // Ses dosyası seçimi - sistem sesleri kullan
+  const selectedSound = getSystemSound(channelId);
   console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
 
   return await Notifications.scheduleNotificationAsync({
