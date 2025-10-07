@@ -1173,19 +1173,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               onPress={() => setShowQuietHoursModal(true)}
             />
             
-            <SettingItem
-              icon="vibrate-outline"
-              title="Titreşim"
-              subtitle="Bildirimlerde titreşim kullan"
-              rightComponent={
-                <Switch
-                  value={true}
-                  onValueChange={() => {}}
-                  trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary }}
-                  thumbColor={'white'}
-                />
-              }
-            />
+            {/* Titreşim ayarı kaldırıldı - Sistem ayarlarından kontrol edilir */}
             
             {/* Bildirim Sesi kaldırıldı - Artık tek bildirim var */}
 

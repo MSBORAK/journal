@@ -88,10 +88,9 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'Günlük Bildirimleri',
       importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
       sound: 'default',
-      enableVibrate: true,
+      enableVibrate: true, // Sistem titreşimi
       enableLights: true,
       showBadge: true,
     });
@@ -173,9 +172,8 @@ export const sendLocalNotification = async (
   const selectedSound = getSystemSound();
   console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
 
-  // Tek titreşim pattern'i
-  const vibrationPattern = [0, 250, 250, 250]; // Varsayılan titreşim
-  console.log('📳 Vibration pattern:', vibrationPattern);
+  // Sistem titreşimi kullan
+  console.log('📳 Using system vibration');
 
   await Notifications.scheduleNotificationAsync({
     content: {
@@ -186,10 +184,6 @@ export const sendLocalNotification = async (
       priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
       ...(Platform.OS === 'android' && { 
         channelId: 'default',
-        vibrate: vibrationPattern,
-      }),
-      ...(Platform.OS === 'ios' && {
-        vibrate: vibrationPattern, // iOS için titreşim pattern'i
       }),
     },
     trigger: null, // Hemen gönder
@@ -228,10 +222,9 @@ export const scheduleNotification = async (
       body,
       sound: selectedSound, // String path kullan
       priority: Notifications.AndroidNotificationPriority.HIGH, // HIGH priority
-      ...(Platform.OS === 'android' && { 
-        channelId,
-        vibrate: [0, 250, 250, 250],
-      }),
+        ...(Platform.OS === 'android' && { 
+          channelId,
+        }),
     },
     trigger,
   });
