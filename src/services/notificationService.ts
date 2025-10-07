@@ -197,18 +197,24 @@ export const sendLocalNotification = async (
 
   console.log('Sending notification:', { title, body, channelId });
 
-  // Ses dosyası seçimi
+  // Ses dosyası seçimi - Şimdilik sistem sesleri kullan
   const getSoundFile = (channel: string) => {
+    // require() ile ses dosyası yüklerken tip hatası oluşuyor
+    // Şimdilik sistem sesleri kullan, sonra düzeltilecek
+    return 'default'; // Tüm kanallar için sistem varsayılan sesi
+    
+    /* Ses dosyaları düzeltildiğinde:
     switch (channel) {
       case 'gentle-reminders':
-        return require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3'); // Yumuşak ses
+        return require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
       case 'task-reminders':
-        return require('../../assets/sounds/new-notification-08-352461.mp3'); // Dikkat çekici ses
+        return require('../../assets/sounds/new-notification-08-352461.mp3');
       case 'achievements':
-        return require('../../assets/sounds/success-1-6297.mp3'); // Kutlama sesi
+        return require('../../assets/sounds/success-1-6297.mp3');
       default:
-        return 'default'; // Sistem varsayılan sesi
+        return 'default';
     }
+    */
   };
 
   await Notifications.scheduleNotificationAsync({
