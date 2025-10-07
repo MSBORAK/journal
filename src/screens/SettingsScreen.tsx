@@ -1616,8 +1616,16 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         animationType="fade"
         onRequestClose={() => setShowSoundModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContainer}>
+        <TouchableOpacity
+          style={dynamicStyles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowSoundModal(false)}
+        >
+          <TouchableOpacity
+            style={dynamicStyles.modalContainer}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
             <View style={dynamicStyles.modalHeader}>
               <Text style={dynamicStyles.modalTitle}>🔔 Bildirim Sesi</Text>
               <TouchableOpacity 
@@ -1664,8 +1672,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       {/* Sessiz Saatler Modal */}
