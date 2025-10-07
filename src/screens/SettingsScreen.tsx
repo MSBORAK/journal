@@ -1287,29 +1287,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               
               <TouchableOpacity
                 style={dynamicStyles.testButton}
-                onPress={async () => {
-                  try {
-                    // Önce bildirim iznini kontrol et
-                    const { status } = await Notifications.getPermissionsAsync();
-                    if (status !== 'granted') {
-                      showAlert('İzin Gerekli', 'Bildirim izni verilmemiş. Ayarlardan açın.', 'warning');
-                      return;
-                    }
-
-                    await sendLocalNotification(
-                      '🌸 Test Bildirimi',
-                      'Bu bir test bildirimidir. Çalışıyor! 🎉',
-                      { type: 'test' }
-                    );
-                    
-                    // Haptic feedback ekle
-                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    
-                    showAlert('Başarılı!', 'Test bildirimi gönderildi. Bildirim çubuğunu kontrol edin!', 'success');
-                  } catch (error) {
-                    console.error('Test notification error:', error);
-                    showAlert('Hata', 'Test bildirimi gönderilemedi. İzinleri kontrol edin.', 'error');
-                  }
+                onPress={() => {
+                  console.log('Test button pressed!');
+                  showAlert('Test', 'Buton çalışıyor! Console\'da log görebilirsin.', 'info');
                 }}
               >
                 <Ionicons name="send" size={20} color="white" />
@@ -1318,14 +1298,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#8b5cf6' }]}
-                onPress={async () => {
-                  const notifications = await listScheduledNotifications();
-                  console.log('Planlı bildirimler:', notifications);
-                  showAlert(
-                    'Planlı Bildirimler',
-                    `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.`,
-                    'info'
-                  );
+                onPress={() => {
+                  console.log('List notifications button pressed!');
+                  showAlert('Test', 'Liste butonu çalışıyor!', 'info');
                 }}
               >
                 <Ionicons name="list" size={20} color="white" />
@@ -1334,13 +1309,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#10b981' }]}
-                onPress={async () => {
-                  await scheduleAllNotifications();
-                  showAlert(
-                    'Başarılı!',
-                    'Tüm bildirimler yeniden planlandı (Sabah 09:00, Akşam 21:00)',
-                    'success'
-                  );
+                onPress={() => {
+                  console.log('Reschedule button pressed!');
+                  showAlert('Test', 'Yeniden planla butonu çalışıyor!', 'info');
                 }}
               >
                 <Ionicons name="refresh" size={20} color="white" />
@@ -1350,24 +1321,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#ef4444' }]}
                 onPress={() => {
-                  showAlert(
-                    'Emin misin?',
-                    'Tüm planlı bildirimler iptal edilecek',
-                    'warning',
-                    {
-                      text: 'İptal Et',
-                      onPress: async () => {
-                        await cancelAllNotifications();
-                        showAlert('İptal Edildi', 'Tüm bildirimler iptal edildi', 'info');
-                      },
-                      style: 'danger'
-                    },
-                    {
-                      text: 'Vazgeç',
-                      onPress: () => {},
-                      style: 'secondary'
-                    }
-                  );
+                  console.log('Cancel notifications button pressed!');
+                  showAlert('Test', 'İptal et butonu çalışıyor!', 'info');
                 }}
               >
                 <Ionicons name="close-circle" size={20} color="white" />
