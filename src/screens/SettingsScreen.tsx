@@ -1367,12 +1367,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                       }
                     }
                     
-                    // Test bildirimi gönder
+                    // Test bildirimi gönder - farklı kanallar test et
+                    const testChannels = ['default', 'gentle-reminders', 'task-reminders', 'achievements'];
+                    const randomChannel = testChannels[Math.floor(Math.random() * testChannels.length)];
+                    
                     await sendLocalNotification(
                       '🧪 Test Bildirimi',
-                      'Bu bir test bildirimidir. Ses ve titreşim çalışmalı!',
-                      { type: 'test' },
-                      'default'
+                      `Bu bir test bildirimidir. Kanal: ${randomChannel}`,
+                      { type: 'test', channel: randomChannel },
+                      randomChannel
                     );
                     
                     // Haptic feedback

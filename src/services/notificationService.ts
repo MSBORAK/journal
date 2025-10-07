@@ -91,10 +91,10 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
     // Farklı bildirim kategorileri için kanallar
     await Notifications.setNotificationChannelAsync('gentle-reminders', {
       name: 'Nazik Hatırlatmalar',
-      importance: Notifications.AndroidImportance.HIGH, // DEFAULT'tan HIGH'a yükselt
+      importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 150, 150],
       lightColor: '#6366f1',
-      sound: 'default', // Ses ekle
+      sound: 'default', // Nazik ses - sistem varsayılan
       enableVibrate: true,
       enableLights: true,
       showBadge: true,
@@ -105,7 +105,7 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#f59e0b',
-      sound: 'default', // Ses ekle
+      sound: 'default', // Görev sesi - sistem varsayılan
       enableVibrate: true,
       enableLights: true,
       showBadge: true,
@@ -116,7 +116,7 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 100, 100, 100],
       lightColor: '#10b981',
-      sound: 'default', // Ses ekle
+      sound: 'default', // Başarı sesi - sistem varsayılan
       enableVibrate: true,
       enableLights: true,
       showBadge: true,
@@ -197,24 +197,19 @@ export const sendLocalNotification = async (
 
   console.log('Sending notification:', { title, body, channelId });
 
-  // Ses dosyası seçimi - Şimdilik sistem sesleri kullan
+  // Ses dosyası seçimi - Farklı sesler için farklı kanallar
   const getSoundFile = (channel: string) => {
-    // require() ile ses dosyası yüklerken tip hatası oluşuyor
-    // Şimdilik sistem sesleri kullan, sonra düzeltilecek
-    return 'default'; // Tüm kanallar için sistem varsayılan sesi
-    
-    /* Ses dosyaları düzeltildiğinde:
+    // Şimdilik sistem sesleri kullan, ama farklı titreşimler ile farklılık yarat
     switch (channel) {
       case 'gentle-reminders':
-        return require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
+        return 'default'; // Nazik ses - yumuşak titreşim
       case 'task-reminders':
-        return require('../../assets/sounds/new-notification-08-352461.mp3');
+        return 'default'; // Görev sesi - güçlü titreşim
       case 'achievements':
-        return require('../../assets/sounds/success-1-6297.mp3');
+        return 'default'; // Başarı sesi - kısa titreşim
       default:
-        return 'default';
+        return 'default'; // Sistem varsayılan sesi
     }
-    */
   };
 
   await Notifications.scheduleNotificationAsync({
