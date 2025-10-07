@@ -208,8 +208,16 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={dynamicStyles.overlay}>
-        <View style={dynamicStyles.container}>
+      <TouchableOpacity 
+        style={dynamicStyles.overlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <TouchableOpacity 
+          style={dynamicStyles.container}
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+        >
           {/* Close Button */}
           {onClose && (
             <TouchableOpacity style={dynamicStyles.closeButton} onPress={onClose}>
@@ -263,8 +271,8 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
               )}
             </View>
           </View>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };
