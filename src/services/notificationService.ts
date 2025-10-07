@@ -197,12 +197,26 @@ export const sendLocalNotification = async (
 
   console.log('Sending notification:', { title, body, channelId });
 
+  // Ses dosyası seçimi
+  const getSoundFile = (channel: string) => {
+    switch (channel) {
+      case 'gentle-reminders':
+        return require('../../assets/sounds/gentle.mp3'); // Yumuşak ses
+      case 'task-reminders':
+        return require('../../assets/sounds/alert.mp3'); // Dikkat çekici ses
+      case 'achievements':
+        return require('../../assets/sounds/celebration.mp3'); // Kutlama sesi
+      default:
+        return 'default'; // Sistem varsayılan sesi
+    }
+  };
+
   await Notifications.scheduleNotificationAsync({
     content: {
       title,
       body,
       data,
-      sound: 'default', // 'default' string olarak kullanılmalı
+      sound: getSoundFile(channelId),
       priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
       ...(Platform.OS === 'android' && { 
         channelId: channelId === 'gentle-reminders' ? 'gentle-reminders' : 'default',

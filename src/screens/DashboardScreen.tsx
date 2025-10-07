@@ -358,6 +358,67 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       marginTop: 8,
       fontStyle: 'italic',
     },
+    moodHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    moodBadge: {
+      backgroundColor: currentTheme.colors.primary,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    moodBadgeText: {
+      color: 'white',
+      fontSize: 10,
+      fontWeight: 'bold',
+    },
+    moodEmojiContainer: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moodEmojiContainerDefault: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 30,
+      width: 60,
+      height: 60,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
+      borderStyle: 'dashed',
+    },
+    moodPlusIcon: {
+      position: 'absolute',
+      bottom: -5,
+      right: -5,
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
+    },
+    moodTextContainer: {
+      flex: 1,
+      marginLeft: 16,
+      alignItems: 'flex-start',
+    },
+    moodActionContainer: {
+      marginTop: 16,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: currentTheme.colors.border,
+      alignItems: 'center',
+    },
+    moodActionText: {
+      fontSize: 14,
+      color: currentTheme.colors.primary,
+      fontWeight: '600',
+    },
     motivationCard: {
       backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
@@ -728,27 +789,61 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       <TouchableOpacity
         style={[
           dynamicStyles.moodCard,
-          (getTodayMood() as any)?.isDefault && { opacity: 0.8 }
+          (getTodayMood() as any)?.isDefault && { 
+            opacity: 0.9,
+            borderWidth: 2,
+            borderColor: currentTheme.colors.primary,
+            borderStyle: 'dashed'
+          }
         ]}
         onPress={() => {
           if ((getTodayMood() as any)?.isDefault) {
             navigation.navigate('WriteDiaryStep1' as never);
           }
         }}
-        activeOpacity={(getTodayMood() as any)?.isDefault ? 0.7 : 1}
+        activeOpacity={(getTodayMood() as any)?.isDefault ? 0.8 : 1}
         disabled={!(getTodayMood() as any)?.isDefault}
       >
-        <Text style={dynamicStyles.moodTitle}>
-          {(getTodayMood() as any)?.isDefault ? '💭 Bugünkü Ruh Halin' : '💚 Bugünkü Ruh Halin'}
-        </Text>
-        <View style={dynamicStyles.moodContent}>
-          <Text style={dynamicStyles.recentMood}>{getTodayMood()?.emoji}</Text>
-          <Text style={dynamicStyles.moodLabel}>{getTodayMood()?.label}</Text>
-        </View>
-        {(getTodayMood() as any)?.isDefault && (
-          <Text style={dynamicStyles.moodSubtitle}>
-            Günlük yazarak ruh halini belirt
+        <View style={dynamicStyles.moodHeader}>
+          <Text style={dynamicStyles.moodTitle}>
+            {(getTodayMood() as any)?.isDefault ? '💭 Bugünkü Ruh Halin' : '💚 Bugünkü Ruh Halin'}
           </Text>
+          {(getTodayMood() as any)?.isDefault && (
+            <View style={dynamicStyles.moodBadge}>
+              <Text style={dynamicStyles.moodBadgeText}>Yeni</Text>
+            </View>
+          )}
+        </View>
+        
+        <View style={dynamicStyles.moodContent}>
+          <View style={[
+            dynamicStyles.moodEmojiContainer,
+            (getTodayMood() as any)?.isDefault && dynamicStyles.moodEmojiContainerDefault
+          ]}>
+            <Text style={dynamicStyles.recentMood}>{getTodayMood()?.emoji}</Text>
+            {(getTodayMood() as any)?.isDefault && (
+              <View style={dynamicStyles.moodPlusIcon}>
+                <Ionicons name="add" size={16} color={currentTheme.colors.primary} />
+              </View>
+            )}
+          </View>
+          <View style={dynamicStyles.moodTextContainer}>
+            <Text style={dynamicStyles.moodLabel}>{getTodayMood()?.label}</Text>
+            {(getTodayMood() as any)?.isDefault && (
+              <Text style={dynamicStyles.moodSubtitle}>
+                Günlük yazarak ruh halini belirt
+              </Text>
+            )}
+          </View>
+        </View>
+        
+        {(getTodayMood() as any)?.isDefault && (
+          <View style={dynamicStyles.moodActionContainer}>
+            <Text style={dynamicStyles.moodActionText}>
+              <Ionicons name="arrow-forward" size={16} color={currentTheme.colors.primary} />
+              {' '}Günlük Yazmaya Başla
+            </Text>
+          </View>
         )}
       </TouchableOpacity>
 

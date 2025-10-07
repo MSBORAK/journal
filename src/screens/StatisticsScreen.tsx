@@ -298,6 +298,25 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     moodEmoji: {
       fontSize: 24,
     },
+    barWrapper: {
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      height: 160,
+    },
+    moodSummary: {
+      marginTop: 16,
+    },
+    moodSummaryTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      marginBottom: 8,
+    },
+    summaryText: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      lineHeight: 20,
+    },
     moodLabel: {
       fontSize: 14,
       color: currentTheme.colors.secondary,
@@ -806,41 +825,89 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               <View style={dynamicStyles.expandedChart}>
                 {expandedChart === 'mood' && (
                   <>
-                    <Text style={{ fontSize: 16, color: currentTheme.colors.text, marginBottom: 16, textAlign: 'center' }}>
-                      Son 7 günlük ruh halinizin detaylı analizi
+                    <Text style={{ 
+                      fontSize: 18, 
+                      fontWeight: 'bold',
+                      color: currentTheme.colors.text, 
+                      marginBottom: 8, 
+                      textAlign: 'center' 
+                    }}>
+                      📊 Son 7 Günlük Ruh Hali Analizi
                     </Text>
+                    <Text style={{ 
+                      fontSize: 14, 
+                      color: currentTheme.colors.secondary, 
+                      marginBottom: 24, 
+                      textAlign: 'center' 
+                    }}>
+                      Günlük mood değerlerinizin görsel analizi
+                    </Text>
+                    
                     <View style={dynamicStyles.barChart}>
-                      {stats.last7DaysMood.map((value, index) => (
-                        <View key={index} style={dynamicStyles.barContainer}>
-                          <View 
-                            style={[
-                              dynamicStyles.bar, 
-                              { 
-                                height: value > 0 ? (value / 5) * 150 : 12,
-                                backgroundColor: value >= 4 ? '#4ade80' : value >= 3 ? '#f59e0b' : value > 0 ? '#ef4444' : currentTheme.colors.border
-                              }
-                            ]} 
-                          />
-                          <Text style={dynamicStyles.barLabel}>{['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'][index]}</Text>
-                          {value > 0 && (
-                            <Text style={dynamicStyles.barValue}>{value}</Text>
-                          )}
-                        </View>
-                      ))}
+                      {stats.last7DaysMood.map((value, index) => {
+                        const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+                        const moodEmojis = ['', '😢', '😔', '😐', '😊', '🤩'];
+                        const getBarColor = (val: number) => {
+                          if (val >= 4) return '#10b981'; // Yeşil
+                          if (val >= 3) return '#f59e0b'; // Turuncu
+                          if (val > 0) return '#ef4444';  // Kırmızı
+                          return currentTheme.colors.border; // Gri
+                        };
+                        
+                        return (
+                          <View key={index} style={dynamicStyles.barContainer}>
+                            <View style={dynamicStyles.barWrapper}>
+                              <Text style={dynamicStyles.moodEmoji}>
+                                {value > 0 ? moodEmojis[value] : '📝'}
+                              </Text>
+                              <View 
+                                style={[
+                                  dynamicStyles.bar, 
+                                  { 
+                                    height: value > 0 ? (value / 5) * 120 + 20 : 12,
+                                    backgroundColor: getBarColor(value),
+                                    borderRadius: 8,
+                                    marginBottom: 8,
+                                  }
+                                ]} 
+                              />
+                              {value > 0 && (
+                                <Text style={dynamicStyles.barValue}>{value}/5</Text>
+                              )}
+                            </View>
+                            <Text style={dynamicStyles.barLabel}>{dayNames[index]}</Text>
+                          </View>
+                        );
+                      })}
                     </View>
-                    <View style={dynamicStyles.chartLegend}>
+                    
+                    <View style={[dynamicStyles.chartLegend, { marginTop: 20 }]}>
                       <View style={dynamicStyles.legendItem}>
-                        <View style={[dynamicStyles.legendDot, { backgroundColor: '#4ade80' }]} />
-                        <Text style={dynamicStyles.legendText}>İyi (4-5)</Text>
+                        <View style={[dynamicStyles.legendDot, { backgroundColor: '#10b981' }]} />
+                        <Text style={dynamicStyles.legendText}>Harika (4-5) 🤩</Text>
                       </View>
                       <View style={dynamicStyles.legendItem}>
                         <View style={[dynamicStyles.legendDot, { backgroundColor: '#f59e0b' }]} />
-                        <Text style={dynamicStyles.legendText}>Orta (3)</Text>
+                        <Text style={dynamicStyles.legendText}>Normal (3) 😐</Text>
                       </View>
                       <View style={dynamicStyles.legendItem}>
                         <View style={[dynamicStyles.legendDot, { backgroundColor: '#ef4444' }]} />
-                        <Text style={dynamicStyles.legendText}>Kötü (1-2)</Text>
+                        <Text style={dynamicStyles.legendText}>Zorlu (1-2) 😢</Text>
                       </View>
+                    </View>
+                    
+                    <View style={[dynamicStyles.moodSummary, { marginTop: 20, padding: 16, backgroundColor: currentTheme.colors.card, borderRadius: 12 }]}>
+                      <Text style={dynamicStyles.moodSummaryTitle}>
+                        📈 Genel Durumunuz
+                      </Text>
+                      <Text style={[dynamicStyles.summaryText, { fontSize: 14, color: currentTheme.colors.secondary }]}>
+                        Son 7 günde ortalama mood'unuz: <Text style={{ fontWeight: 'bold', color: currentTheme.colors.primary }}>{stats.avgMood.toFixed(1)}/5</Text>
+                      </Text>
+                      <Text style={[dynamicStyles.summaryText, { fontSize: 14, color: currentTheme.colors.secondary, marginTop: 4 }]}>
+                        {stats.avgMood >= 4 ? 'Harika bir hafta geçirmişsiniz! 🌟' :
+                         stats.avgMood >= 3 ? 'İyi bir hafta geçirmişsiniz 👍' :
+                         'Gelecek hafta daha iyi olacak! 💪'}
+                      </Text>
                     </View>
                   </>
                 )}
