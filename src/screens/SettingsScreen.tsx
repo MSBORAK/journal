@@ -893,36 +893,41 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const saveNotificationSound = async (sound: string) => {
     try {
       console.log('🔊 Saving notification sound:', sound);
+      console.log('🔍 Modal states before:', { showSoundModal, showCustomAlert });
       
-      // Önce modal'ı kapat - UI donmasını önle
+      // Modal'ı hemen kapat
       setShowSoundModal(false);
+      console.log('🔍 Modal closed');
       
-      // Sonra kaydet
-      setNotificationSound(sound);
+      // AsyncStorage işlemini ayrı thread'e at
+      await new Promise(res => setTimeout(res, 100));
       await AsyncStorage.setItem('notificationSound', sound);
+      setNotificationSound(sound);
       
       console.log('🔊 Sound saved successfully:', sound);
+      console.log('🔍 Modal states after save:', { showSoundModal, showCustomAlert });
       
-      // Basit alert - donmayı önlemek için
+      // Alert'i güvenli şekilde göster
       setTimeout(() => {
+        console.log('🔍 Showing alert after timeout');
         showAlert('✅ Başarılı!', `${sound} sesi seçildi`, 'success', {
           text: 'Tamam',
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         });
-      }, 100);
+      }, 300);
       
     } catch (error) {
       console.error('❌ Error saving notification sound:', error);
       
-      // Hata durumunda da basit alert
+      // Hata durumunda da güvenli alert
       setTimeout(() => {
         showAlert('❌ Hata', `Ses kaydedilemedi`, 'error', {
           text: 'Tamam',
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         });
-      }, 100);
+      }, 300);
     }
   };
 
@@ -1082,7 +1087,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info', primaryButton?: any, secondaryButton?: any) => {
+  const showAlert = React.useCallback((title: string, message: string, type: 'success' | 'warning' | 'error' | 'info', primaryButton?: any, secondaryButton?: any) => {
+    console.log('🔔 showAlert called:', { title, message, type });
     setAlertConfig({
       title,
       message,
@@ -1091,7 +1097,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       secondaryButton,
     });
     setShowCustomAlert(true);
-  };
+  }, []);
 
   const saveNotificationsEnabled = async (enabled: boolean) => {
     try {
@@ -1711,7 +1717,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showSoundModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowSoundModal(false)}
       >
         <TouchableOpacity
@@ -1778,7 +1784,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showQuietHoursModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowQuietHoursModal(false)}
       >
         <View style={dynamicStyles.modalOverlay}>
@@ -1869,7 +1875,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showProgressModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowProgressModal(false)}
       >
         <View style={dynamicStyles.modalOverlay}>
@@ -1918,7 +1924,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showProgressModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowProgressModal(false)}
       >
         <TouchableOpacity 
@@ -1979,7 +1985,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showAchievementsModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowAchievementsModal(false)}
       >
         <TouchableOpacity 
@@ -2034,7 +2040,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showWeeklyReportModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowWeeklyReportModal(false)}
       >
         <TouchableOpacity 
@@ -2091,7 +2097,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Modal
         visible={showFocusTimeModal}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowFocusTimeModal(false)}
       >
         <TouchableOpacity 
