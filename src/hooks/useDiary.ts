@@ -6,37 +6,83 @@ export const useDiary = (userId?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Mock data
+  // Mock data - son 7 günden günlükler
+  const getTodayDate = (daysAgo: number = 0): string => {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    return date.toISOString().split('T')[0];
+  };
+
   const mockEntries: DiaryEntry[] = [
     {
       id: '1',
-      title: 'İlk Günlük',
-      content: 'Bugün çok güzel bir gün geçirdim. Yeni projeme başladım ve çok heyecanlıyım!',
-      mood: 4,
-      tags: ['heyecan', 'proje', 'yeni başlangıç'],
-      date: '2024-01-15',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z',
+      title: 'Harika Bir Gün',
+      content: 'Bugün çok güzel bir gün geçirdim. Yeni projeme başladım ve çok heyecanlıyım! Sabah erkenden kalktım ve işe koyuldum. Öğlen arkadaşlarla kahve içtik. Akşam yürüyüş yaptım ve kendimi çok iyi hissettim.',
+      mood: 5,
+      tags: ['heyecan', 'proje', 'yeni başlangıç', 'mutlu', 'başarı'],
+      date: getTodayDate(0),
+      createdAt: new Date(Date.now()).toISOString(),
+      updatedAt: new Date(Date.now()).toISOString(),
     },
     {
       id: '2',
-      title: 'Harika Bir Gün',
-      content: 'Bugün arkadaşlarımla çok güzel vakit geçirdim. Yemek yedik, sohbet ettik.',
-      mood: 5,
-      tags: ['arkadaşlık', 'eğlence', 'yemek'],
-      date: '2024-01-14',
-      createdAt: '2024-01-14T18:30:00Z',
-      updatedAt: '2024-01-14T18:30:00Z',
+      title: 'Üretken Gün',
+      content: 'Bugün arkadaşlarımla çok güzel vakit geçirdim. Yemek yedik, sohbet ettik. Projede iyi ilerleme kaydettim. Akşam kitap okudum ve rahatladım.',
+      mood: 4,
+      tags: ['arkadaşlık', 'eğlence', 'yemek', 'kitap', 'mutlu'],
+      date: getTodayDate(1),
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '3',
+      title: 'Yorucu Ama İyi',
+      content: 'Bugün işte yoğun bir gün geçirdim. Çok yoruldum ama başardım. Akşam dinlendim ve yarına hazırlandım.',
+      mood: 4,
+      tags: ['iş', 'yorgun', 'başarı'],
+      date: getTodayDate(2),
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '4',
+      title: 'Rahat Bir Gün',
+      content: 'Bugün evde dinlendim. Film izledim, kitap okudum. Kendime zaman ayırdım.',
+      mood: 4,
+      tags: ['dinlenme', 'film', 'kitap', 'rahatlama'],
+      date: getTodayDate(3),
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '5',
+      title: 'Motivasyon Günü',
+      content: 'Bugün çok motive oldum. Yeni hedefler belirledim ve planlar yaptım. Gelecek hakkında heyecanlıyım.',
+      mood: 5,
+      tags: ['motivasyon', 'hedefler', 'heyecan', 'mutlu'],
+      date: getTodayDate(4),
+      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '6',
       title: 'Normal Bir Gün',
-      content: 'Bugün işte normal bir gün geçirdim. Özel bir şey olmadı.',
-      mood: 2,
-      tags: ['iş', 'rutin'],
-      date: '2024-01-13',
-      createdAt: '2024-01-13T20:00:00Z',
-      updatedAt: '2024-01-13T20:00:00Z',
+      content: 'Bugün işte normal bir gün geçirdim. Rutin işlerimi yaptım. Akşam hafif bir egzersiz yaptım.',
+      mood: 3,
+      tags: ['iş', 'rutin', 'egzersiz'],
+      date: getTodayDate(5),
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '7',
+      title: 'Keyifli Hafta Sonu',
+      content: 'Bugün hafta sonu olduğu için ailemle vakit geçirdim. Piknik yaptık, doğada yürüdük. Çok güzel bir gündü.',
+      mood: 5,
+      tags: ['aile', 'hafta sonu', 'piknik', 'doğa', 'mutlu'],
+      date: getTodayDate(6),
+      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ];
 

@@ -17,6 +17,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { CustomAlert } from '../components/CustomAlert';
+import { 
+  sendLocalNotification, 
+  listScheduledNotifications,
+  scheduleAllNotifications,
+  cancelAllNotifications 
+} from '../services/notificationService';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -485,7 +491,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       justifyContent: 'space-between',
       marginTop: 8,
     },
-    testButton: {
+    soundTestButton: {
       backgroundColor: currentTheme.colors.accent,
       paddingHorizontal: 12,
       paddingVertical: 6,
@@ -493,7 +499,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
     },
-    testButtonText: {
+    soundTestButtonText: {
       fontSize: 12,
       color: currentTheme.colors.text,
       fontWeight: '500',
@@ -667,6 +673,38 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       paddingHorizontal: 24,
       paddingVertical: 12,
       borderRadius: 12,
+    },
+    // Test Buttons Styles
+    testButtonsContainer: {
+      marginTop: 20,
+      padding: 16,
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      borderStyle: 'dashed',
+    },
+    testSectionTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: currentTheme.colors.secondary,
+      marginBottom: 12,
+      textAlign: 'center',
+    },
+    testButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: currentTheme.colors.primary,
+      padding: 14,
+      borderRadius: 12,
+      marginBottom: 10,
+      gap: 8,
+    },
+    testButtonText: {
+      color: 'white',
+      fontSize: 14,
+      fontWeight: '600',
     },
     startFocusText: {
       color: 'white',
@@ -1231,6 +1269,84 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               subtitle="Bildirim sesini değiştir"
               onPress={() => setShowSoundModal(true)}
             />
+
+            {/* Test Butonları - Geliştirme için */}
+            <View style={dynamicStyles.testButtonsContainer}>
+              <Text style={dynamicStyles.testSectionTitle}>🧪 Test Araçları</Text>
+              
+              <TouchableOpacity
+                style={dynamicStyles.testButton}
+                onPress={async () => {
+                  await sendLocalNotification(
+                    '🌸 Test Bildirimi',
+                    'Bu bir test bildirimidir. Çalışıyor! 🎉',
+                    { type: 'test' }
+                  );
+                  showAlert('Başarılı!', 'Test bildirimi gönderildi', 'success');
+                }}
+              >
+                <Ionicons name="send" size={20} color="white" />
+                <Text style={dynamicStyles.testButtonText}>Test Bildirimi Gönder</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[dynamicStyles.testButton, { backgroundColor: '#8b5cf6' }]}
+                onPress={async () => {
+                  const notifications = await listScheduledNotifications();
+                  console.log('Planlı bildirimler:', notifications);
+                  showAlert(
+                    'Planlı Bildirimler',
+                    `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.`,
+                    'info'
+                  );
+                }}
+              >
+                <Ionicons name="list" size={20} color="white" />
+                <Text style={dynamicStyles.testButtonText}>Planlı Bildirimleri Listele</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[dynamicStyles.testButton, { backgroundColor: '#10b981' }]}
+                onPress={async () => {
+                  await scheduleAllNotifications();
+                  showAlert(
+                    'Başarılı!',
+                    'Tüm bildirimler yeniden planlandı (Sabah 09:00, Akşam 21:00)',
+                    'success'
+                  );
+                }}
+              >
+                <Ionicons name="refresh" size={20} color="white" />
+                <Text style={dynamicStyles.testButtonText}>Bildirimleri Yeniden Planla</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[dynamicStyles.testButton, { backgroundColor: '#ef4444' }]}
+                onPress={() => {
+                  showAlert(
+                    'Emin misin?',
+                    'Tüm planlı bildirimler iptal edilecek',
+                    'warning',
+                    {
+                      text: 'İptal Et',
+                      onPress: async () => {
+                        await cancelAllNotifications();
+                        showAlert('İptal Edildi', 'Tüm bildirimler iptal edildi', 'info');
+                      },
+                      style: 'danger'
+                    },
+                    {
+                      text: 'Vazgeç',
+                      onPress: () => {},
+                      style: 'secondary'
+                    }
+                  );
+                }}
+              >
+                <Ionicons name="close-circle" size={20} color="white" />
+                <Text style={dynamicStyles.testButtonText}>Tüm Bildirimleri İptal Et</Text>
+              </TouchableOpacity>
+            </View>
           </>
         )}
       </View>

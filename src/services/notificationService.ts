@@ -437,9 +437,9 @@ export const sendStreakNotification = async (days: number): Promise<void> => {
 /**
  * Planlı Bildirimleri Listele (Debug için)
  */
-export const listScheduledNotifications = async (): Promise<void> => {
+export const listScheduledNotifications = async (): Promise<any[]> => {
   const notifications = await Notifications.getAllScheduledNotificationsAsync();
   console.log('Scheduled notifications:', notifications);
-  return notifications as any;
+  return notifications;
 };
 
