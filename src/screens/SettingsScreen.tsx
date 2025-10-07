@@ -59,11 +59,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [loading, setLoading] = useState(false);
 
   const [selectedFont, setSelectedFont] = useState('system');
-  const [notificationSound, setNotificationSound] = useState('default');
+  // const [notificationSound, setNotificationSound] = useState('default'); // Kaldırıldı
   const [quietHoursEnabled, setQuietHoursEnabled] = useState(false);
   const [quietStartTime, setQuietStartTime] = useState('22:00');
   const [quietEndTime, setQuietEndTime] = useState('08:00');
-  const [showSoundModal, setShowSoundModal] = useState(false);
+  // const [showSoundModal, setShowSoundModal] = useState(false); // Kaldırıldı
   const [showQuietHoursModal, setShowQuietHoursModal] = useState(false);
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
@@ -786,151 +786,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     }
   };
 
-  const notificationSounds = [
-    { name: 'default', label: '🔔 Varsayılan', description: 'Sistem bildirim sesi' },
-    { name: 'gentle', label: '🌸 Nazik Hatırlatma', description: 'Yumuşak bildirim sesi' },
-    { name: 'task', label: '🔔 Görev Hatırlatması', description: 'Dikkat çekici ses' },
-    { name: 'achievement', label: '🎊 Başarı Sesi', description: 'Kutlama sesi' },
-    { name: 'silent', label: '🔇 Sessiz', description: 'Sadece titreşim' },
-  ];
+  // notificationSounds array kaldırıldı
 
-  const playNotificationSound = async (soundType: string) => {
-    try {
-      console.log('🔊 Testing sound:', soundType);
-      
-      // Önce bildirim izni kontrol et
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== 'granted') {
-        showAlert(
-          '⚠️ İzin Gerekli',
-          'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.',
-          'warning',
-          {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          }
-        );
-        return;
-      }
+  // playNotificationSound fonksiyonu kaldırıldı
 
-      // Sessiz seçenek için sadece haptic
-      if (soundType === 'silent') {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        showAlert(
-          '🔇 Sessiz',
-          'Sadece titreşim - ses yok',
-          'info',
-          {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          }
-        );
-        return;
-      }
-
-      // Gerçek bildirim gönder (ses ile)
-      let channelId = 'gentle-reminders';
-      let title = '🔊 Ses Testi';
-      let body = `${soundType} sesi test ediliyor...`;
-
-      switch (soundType) {
-        case 'default':
-          channelId = 'default';
-          title = '🔔 Varsayılan Ses';
-          body = 'Sistem bildirim sesi test ediliyor';
-          break;
-        case 'gentle':
-          channelId = 'gentle-reminders';
-          title = '🌸 Nazik Hatırlatma';
-          body = 'Yumuşak bildirim sesi test ediliyor';
-          break;
-        case 'task':
-          channelId = 'task-reminders';
-          title = '🔔 Görev Hatırlatması';
-          body = 'Dikkat çekici ses test ediliyor';
-          break;
-        case 'achievement':
-          channelId = 'achievements';
-          title = '🎊 Başarı Sesi';
-          body = 'Kutlama sesi test ediliyor';
-          break;
-      }
-
-      // Test bildirimi gönder
-      await sendLocalNotification(title, body, { type: 'sound-test', soundType }, channelId);
-      
-      // Haptic feedback de ekle
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-      // Başarılı test mesajı
-      showAlert(
-        '🔊 Test Gönderildi',
-        `${soundType} sesi test bildirimi gönderildi! Birkaç saniye içinde duyacaksın.`,
-        'success',
-        {
-          text: 'Tamam',
-          onPress: () => setShowCustomAlert(false),
-          style: 'primary'
-        }
-      );
-      
-    } catch (error) {
-      console.error('Ses test hatası:', error);
-      showAlert(
-        '❌ Test Hatası',
-        `Ses test edilemedi: ${error}`,
-        'error',
-        {
-          text: 'Tamam',
-          onPress: () => setShowCustomAlert(false),
-          style: 'primary'
-        }
-      );
-    }
-  };
-
-  const saveNotificationSound = async (sound: string) => {
-    try {
-      console.log('🔊 Saving notification sound:', sound);
-      console.log('🔍 Modal states before:', { showSoundModal, showCustomAlert });
-      
-      // Modal'ı hemen kapat
-      setShowSoundModal(false);
-      console.log('🔍 Modal closed');
-      
-      // AsyncStorage işlemini ayrı thread'e at
-      await new Promise(res => setTimeout(res, 100));
-      await AsyncStorage.setItem('notificationSound', sound);
-      setNotificationSound(sound);
-      
-      console.log('🔊 Sound saved successfully:', sound);
-      console.log('🔍 Modal states after save:', { showSoundModal, showCustomAlert });
-      
-      // Alert'i güvenli şekilde göster
-      setTimeout(() => {
-        console.log('🔍 Showing alert after timeout');
-        showAlert('✅ Başarılı!', `${sound} sesi seçildi`, 'success', {
-          text: 'Tamam',
-          onPress: () => setShowCustomAlert(false),
-          style: 'primary'
-        });
-      }, 300);
-      
-    } catch (error) {
-      console.error('❌ Error saving notification sound:', error);
-      
-      // Hata durumunda da güvenli alert
-      setTimeout(() => {
-        showAlert('❌ Hata', `Ses kaydedilemedi`, 'error', {
-          text: 'Tamam',
-          onPress: () => setShowCustomAlert(false),
-          style: 'primary'
-        });
-      }, 300);
-    }
-  };
+  // saveNotificationSound fonksiyonu kaldırıldı
 
   const saveQuietHours = async () => {
     setShowQuietHoursModal(false);
@@ -1327,12 +1187,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               }
             />
             
-            <SettingItem
-              icon="musical-notes-outline"
-              title="Bildirim Sesi"
-              subtitle="Bildirim sesini değiştir"
-              onPress={() => setShowSoundModal(true)}
-            />
+            {/* Bildirim Sesi kaldırıldı - Artık tek bildirim var */}
 
             {/* Test Butonları - Geliştirme için */}
             <View style={dynamicStyles.testButtonsContainer}>
@@ -1727,71 +1582,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       </View>
 
       {/* Bildirim Sesi Modal */}
-      <Modal
-        visible={showSoundModal}
-        transparent={true}
-        animationType="none"
-        onRequestClose={() => setShowSoundModal(false)}
-      >
-        <TouchableOpacity
-          style={dynamicStyles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowSoundModal(false)}
-        >
-          <TouchableOpacity
-            style={dynamicStyles.modalContainer}
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={dynamicStyles.modalHeader}>
-              <Text style={dynamicStyles.modalTitle}>🔔 Bildirim Sesi</Text>
-              <TouchableOpacity 
-                style={dynamicStyles.modalCloseButton}
-                onPress={() => setShowSoundModal(false)}
-              >
-                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={dynamicStyles.modalContent}>
-              {notificationSounds.map((sound) => (
-                <TouchableOpacity
-                  key={sound.name}
-                  style={[
-                    dynamicStyles.soundOption,
-                    notificationSound === sound.name && dynamicStyles.selectedSoundOption
-                  ]}
-                  onPress={() => saveNotificationSound(sound.name)}
-                >
-                  <Text style={[
-                    dynamicStyles.soundLabel,
-                    notificationSound === sound.name && dynamicStyles.selectedSoundLabel
-                  ]}>
-                    {sound.label}
-                  </Text>
-                  <Text style={[
-                    dynamicStyles.soundDescription,
-                    notificationSound === sound.name && dynamicStyles.selectedSoundDescription
-                  ]}>
-                    {sound.description}
-                  </Text>
-                  <View style={dynamicStyles.soundActions}>
-                    <TouchableOpacity
-                      style={dynamicStyles.testButton}
-                      onPress={() => playNotificationSound(sound.name)}
-                    >
-                      <Text style={dynamicStyles.testButtonText}>🔊 Test</Text>
-                    </TouchableOpacity>
-                    {notificationSound === sound.name && (
-                      <Ionicons name="checkmark" size={20} color={currentTheme.colors.primary} />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+      {/* Bildirim Sesi Modal kaldırıldı */}
 
       {/* Sessiz Saatler Modal */}
       <Modal
