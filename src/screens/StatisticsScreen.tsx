@@ -389,6 +389,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     },
     modalContent: {
       padding: 20,
+      flex: 1,
     },
     expandedChart: {
       backgroundColor: currentTheme.colors.background,
@@ -820,7 +821,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={dynamicStyles.modalContent}>
+            <ScrollView 
+              style={dynamicStyles.modalContent}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1 }}
+            >
               <View style={dynamicStyles.expandedChart}>
                 {expandedChart === 'mood' && (
                   <>
@@ -1019,7 +1024,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={dynamicStyles.modalContent}>
+            <ScrollView 
+              style={dynamicStyles.modalContent}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1 }}
+            >
               <View style={dynamicStyles.expandedChart}>
                 <Text style={dynamicStyles.expandedChartTitle}>Bu haftaki günlük yazma aktiviteniz</Text>
                 
@@ -1075,7 +1084,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={dynamicStyles.modalContent}>
+            <ScrollView 
+              style={dynamicStyles.modalContent}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1 }}
+            >
               <View style={dynamicStyles.expandedChart}>
                 <Text style={dynamicStyles.expandedChartTitle}>Son 7 gün mood durumunuz</Text>
                 

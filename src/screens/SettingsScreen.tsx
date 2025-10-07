@@ -824,7 +824,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           title: milestone === 1 ? 'İlk Günlük!' : `${milestone}. Günlük!`,
           description: milestone === 1 ? 'İlk günlüğünü yazdın' : `${milestone} günlük yazdın`,
           unlocked: true,
-          date: entries[entries.length - milestone]?.createdAt
+          date: entries[entries.length - milestone]?.createdAt || undefined
         });
       }
     });
@@ -837,7 +837,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         icon: '🔥',
         title: '7 Gün Serisi',
         description: '7 gün üst üste günlük yazdın',
-        unlocked: true
+        unlocked: true,
+        date: undefined
       });
     }
 
@@ -853,7 +854,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         icon: '📚',
         title: 'Kelime Ustası',
         description: `${totalWords.toLocaleString('tr-TR')} kelime yazdın`,
-        unlocked: true
+        unlocked: true,
+        date: undefined
       });
     }
 
