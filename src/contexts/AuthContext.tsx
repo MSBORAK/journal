@@ -29,8 +29,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading
+    // Simulate loading and auto-login for development
     setTimeout(() => {
+      // Auto-login for development - remove this in production
+      const mockUser: User = {
+        uid: 'demo-user-id',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: undefined,
+      };
+      setUser(mockUser);
       setLoading(false);
     }, 1000);
   }, []);
