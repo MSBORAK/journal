@@ -87,6 +87,16 @@ export const useDiary = (userId?: string) => {
       createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     },
+    {
+      id: '8',
+      title: 'güzel',
+      content: 'Bugün çok güzel bir gün geçirdim. Kendimi iyi hissediyorum.',
+      mood: 4, // Pozitif mood - "güzel" başlığına uygun
+      tags: ['güzel', 'mutlu', 'iyi'],
+      date: getTodayDate(7),
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    },
   ];
 
   const fetchEntries = async () => {
