@@ -852,14 +852,14 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     </Text>
                     <View style={dynamicStyles.activityGrid}>
                       {stats.weeklyActivity.map((hasEntry, index) => {
-                        const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+                        const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
                         return (
                           <View key={index} style={{ alignItems: 'center', marginBottom: 16 }}>
                             <View style={[
                               dynamicStyles.activityDot,
                               { backgroundColor: hasEntry ? currentTheme.colors.primary : currentTheme.colors.border }
                             ]} />
-                            <Text style={[dynamicStyles.activityLabel, { marginTop: 8, fontSize: 14 }]}>
+                            <Text style={[dynamicStyles.activityLabel, { marginTop: 8, fontSize: 12 }]}>
                               {dayNames[index]}
                             </Text>
                           </View>
