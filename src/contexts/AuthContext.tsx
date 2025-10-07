@@ -65,10 +65,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           photoURL: currentUser.user_metadata?.avatar_url || undefined,
         };
         setUser(user);
+      } else {
+        // No user logged in - this is normal
+        setUser(null);
       }
       setLoading(false);
     } catch (error) {
       console.error('Auth initialization error:', error);
+      setUser(null);
       setLoading(false);
     }
   };
