@@ -13,6 +13,8 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useDiary } from '../hooks/useDiary';
+import { getAllInsights } from '../utils/insightsEngine';
 // import { View } from 'moti'; // Removed for now
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
@@ -53,6 +55,7 @@ interface FontOption {
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { user, signOut } = useAuth();
   const { currentTheme, setTheme, themes } = useTheme();
+  const { entries } = useDiary(user?.uid);
   const [reminderTime, setReminderTime] = useState('21:00');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState(currentTheme.name);
@@ -575,6 +578,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       textAlign: 'center',
       lineHeight: 16,
     },
+    achievementDate: {
+      fontSize: 10,
+      color: currentTheme.colors.primary,
+      textAlign: 'center',
+      marginTop: 4,
+      fontWeight: '500',
+    },
     reportCard: {
       backgroundColor: currentTheme.colors.card,
       borderRadius: 16,
@@ -793,6 +803,87 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   // saveNotificationSound fonksiyonu kaldırıldı
 
   // saveQuietHours fonksiyonu kaldırıldı
+
+  // Başarıları hesapla
+  const calculateAchievements = () => {
+    if (entries.length === 0) return [];
+
+    const achievements = [];
+    const allInsights = getAllInsights(entries);
+    
+    // Başarı türündeki insights'ları filtrele
+    const achievementInsights = allInsights.filter(insight => insight.type === 'achievement');
+    
+    // Milestone başarıları
+    const milestones = [1, 10, 25, 50, 100, 200, 365];
+    milestones.forEach(milestone => {
+      if (entries.length >= milestone) {
+        achievements.push({
+          id: `milestone-${milestone}`,
+          icon: milestone === 1 ? '🎉' : '🏆',
+          title: milestone === 1 ? 'İlk Günlük!' : `${milestone}. Günlük!`,
+          description: milestone === 1 ? 'İlk günlüğünü yazdın' : `${milestone} günlük yazdın`,
+          unlocked: true,
+          date: entries[entries.length - milestone]?.createdAt
+        });
+      }
+    });
+
+    // Streak başarıları
+    const currentStreak = calculateCurrentStreak();
+    if (currentStreak >= 7) {
+      achievements.push({
+        id: 'streak-7',
+        icon: '🔥',
+        title: '7 Gün Serisi',
+        description: '7 gün üst üste günlük yazdın',
+        unlocked: true
+      });
+    }
+
+    // Kelime başarıları
+    const totalWords = entries.reduce((sum, entry) => {
+      const words = entry.content?.split(/\s+/).length || 0;
+      return sum + words;
+    }, 0);
+
+    if (totalWords >= 1000) {
+      achievements.push({
+        id: 'words-1000',
+        icon: '📚',
+        title: 'Kelime Ustası',
+        description: `${totalWords.toLocaleString('tr-TR')} kelime yazdın`,
+        unlocked: true
+      });
+    }
+
+    return achievements;
+  };
+
+  // Mevcut streak'i hesapla
+  const calculateCurrentStreak = () => {
+    if (entries.length === 0) return 0;
+
+    const sortedEntries = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < sortedEntries.length; i++) {
+      const entryDate = new Date(sortedEntries[i].date);
+      entryDate.setHours(0, 0, 0, 0);
+      
+      const diffDays = Math.floor((today.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === streak) {
+        streak++;
+      } else if (diffDays > streak) {
+        break;
+      }
+    }
+
+    return streak;
+  };
 
   const startFocusSession = () => {
     setIsFocusActive(true);
@@ -1699,26 +1790,34 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             
             <ScrollView style={dynamicStyles.modalContent}>
               <View style={dynamicStyles.achievementGrid}>
-                <View style={dynamicStyles.achievementCard}>
-                  <Text style={dynamicStyles.achievementIcon}>🔥</Text>
-                  <Text style={dynamicStyles.achievementTitle}>7 Gün Serisi</Text>
-                  <Text style={dynamicStyles.achievementDesc}>7 gün üst üste günlük yazdın</Text>
-                </View>
-                <View style={dynamicStyles.achievementCard}>
-                  <Text style={dynamicStyles.achievementIcon}>📚</Text>
-                  <Text style={dynamicStyles.achievementTitle}>Kelime Ustası</Text>
-                  <Text style={dynamicStyles.achievementDesc}>1000+ kelime yazdın</Text>
-                </View>
-                <View style={dynamicStyles.achievementCard}>
-                  <Text style={dynamicStyles.achievementIcon}>💧</Text>
-                  <Text style={dynamicStyles.achievementTitle}>Su İçici</Text>
-                  <Text style={dynamicStyles.achievementDesc}>Hedef su miktarına ulaştın</Text>
-                </View>
-                <View style={dynamicStyles.achievementCard}>
-                  <Text style={dynamicStyles.achievementIcon}>🌅</Text>
-                  <Text style={dynamicStyles.achievementTitle}>Erken Kalkan</Text>
-                  <Text style={dynamicStyles.achievementDesc}>Sabah 7'den önce günlük yazdın</Text>
-                </View>
+                {calculateAchievements().length > 0 ? (
+                  calculateAchievements().map((achievement) => (
+                    <View 
+                      key={achievement.id} 
+                      style={[
+                        dynamicStyles.achievementCard,
+                        achievement.unlocked && { opacity: 1 }
+                      ]}
+                    >
+                      <Text style={dynamicStyles.achievementIcon}>{achievement.icon}</Text>
+                      <Text style={dynamicStyles.achievementTitle}>{achievement.title}</Text>
+                      <Text style={dynamicStyles.achievementDesc}>{achievement.description}</Text>
+                      {achievement.date && (
+                        <Text style={dynamicStyles.achievementDate}>
+                          {new Date(achievement.date).toLocaleDateString('tr-TR')}
+                        </Text>
+                      )}
+                    </View>
+                  ))
+                ) : (
+                  <View style={dynamicStyles.achievementCard}>
+                    <Text style={dynamicStyles.achievementIcon}>🎯</Text>
+                    <Text style={dynamicStyles.achievementTitle}>Henüz Başarı Yok</Text>
+                    <Text style={dynamicStyles.achievementDesc}>
+                      İlk günlüğünü yazarak başarılarını kazanmaya başla!
+                    </Text>
+                  </View>
+                )}
               </View>
             </ScrollView>
           </TouchableOpacity>
