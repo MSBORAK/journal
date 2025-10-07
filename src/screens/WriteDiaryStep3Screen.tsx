@@ -239,10 +239,15 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
   const handleSave = async () => {
     if (loading) return;
     
+    console.log('handleSave called');
+    console.log('user:', user);
+    console.log('user?.uid:', user?.uid);
+    
     setLoading(true);
     
     try {
       const content = generateContent();
+      console.log('Generated content:', content);
       
       const entry = {
         title: title.trim(),
@@ -253,7 +258,9 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
         createdAt: new Date().toISOString(),
       };
       
+      console.log('Entry to save:', entry);
       await addEntry(entry);
+      console.log('Entry saved successfully');
       
       showAlert(
         '🎉 Başarılı!',
@@ -263,7 +270,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
           text: '📖 Günlükleri Gör',
           onPress: () => {
             setShowCustomAlert(false);
-            navigation.navigate('MainTabs');
+            navigation.navigate('MainTabs', { screen: 'History' });
           },
           style: 'primary'
         }
