@@ -795,7 +795,25 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const playNotificationSound = async (soundType: string) => {
     try {
-      // Sessiz seçenek için hiçbir şey yapma
+      console.log('🔊 Testing sound:', soundType);
+      
+      // Önce bildirim izni kontrol et
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        showAlert(
+          '⚠️ İzin Gerekli',
+          'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.',
+          'warning',
+          {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          }
+        );
+        return;
+      }
+
+      // Sessiz seçenek için sadece haptic
       if (soundType === 'silent') {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         showAlert(
@@ -811,28 +829,44 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         return;
       }
 
-      // Farklı ses türleri için farklı titreşimler
+      // Gerçek bildirim gönder (ses ile)
+      let channelId = 'gentle-reminders';
+      let title = '🔊 Ses Testi';
+      let body = `${soundType} sesi test ediliyor...`;
+
       switch (soundType) {
         case 'default':
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          channelId = 'default';
+          title = '🔔 Varsayılan Ses';
+          body = 'Sistem bildirim sesi test ediliyor';
           break;
         case 'soft':
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          channelId = 'gentle-reminders';
+          title = '🌸 Nazik Ses';
+          body = 'Yumuşak bildirim sesi test ediliyor';
           break;
         case 'chime':
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          channelId = 'gentle-reminders';
+          title = '🎵 Melodi';
+          body = 'Kısa melodi sesi test ediliyor';
           break;
         case 'bell':
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          channelId = 'achievements';
+          title = '🔔 Çan';
+          body = 'Klasik çan sesi test ediliyor';
           break;
-        default:
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
+
+      // Test bildirimi gönder
+      await sendLocalNotification(title, body, { type: 'sound-test', soundType }, channelId);
+      
+      // Haptic feedback de ekle
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       // Başarılı test mesajı
       showAlert(
-        '🔊 Test Başarılı',
-        `${soundType} sesi test edildi!`,
+        '🔊 Test Gönderildi',
+        `${soundType} sesi test bildirimi gönderildi! Birkaç saniye içinde duyacaksın.`,
         'success',
         {
           text: 'Tamam',
@@ -842,11 +876,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       );
       
     } catch (error) {
-      console.log('Titreşim çalınamadı:', error);
+      console.error('Ses test hatası:', error);
       showAlert(
-        '🔊 Test',
-        `${soundType} sesi test edildi!`,
-        'info',
+        '❌ Test Hatası',
+        `Ses test edilemedi: ${error}`,
+        'error',
         {
           text: 'Tamam',
           onPress: () => setShowCustomAlert(false),
