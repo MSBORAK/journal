@@ -201,11 +201,11 @@ export const sendLocalNotification = async (
   const getSoundFile = (channel: string) => {
     switch (channel) {
       case 'gentle-reminders':
-        return require('../../assets/sounds/gentle.mp3'); // Yumuşak ses
+        return require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3'); // Yumuşak ses
       case 'task-reminders':
-        return require('../../assets/sounds/alert.mp3'); // Dikkat çekici ses
+        return require('../../assets/sounds/new-notification-08-352461.mp3'); // Dikkat çekici ses
       case 'achievements':
-        return require('../../assets/sounds/celebration.mp3'); // Kutlama sesi
+        return require('../../assets/sounds/success-1-6297.mp3'); // Kutlama sesi
       default:
         return 'default'; // Sistem varsayılan sesi
     }
