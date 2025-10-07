@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
-import { FontProvider } from './src/contexts/FontContext';
+// import { FontProvider } from './src/contexts/FontContext'; // Kaldırıldı
 import { Ionicons } from '@expo/vector-icons';
 // import './global.css'; // Disabled for now
 
@@ -149,7 +149,7 @@ function AppNavigator() {
               }}
             />
         <Stack.Screen name="ThemeSelection" component={ThemeSelectionScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="FontSelection" component={FontSelectionScreen} options={{ headerShown: false }} />
+        // <Stack.Screen name="FontSelection" component={FontSelectionScreen} options={{ headerShown: false }} /> // Kaldırıldı
         <Stack.Screen name="WriteDiaryStep1" component={WriteDiaryStep1Screen} options={{ headerShown: false }} />
         <Stack.Screen name="WriteDiaryStep2" component={WriteDiaryStep2Screen} options={{ headerShown: false }} />
         <Stack.Screen name="WriteDiaryStep3" component={WriteDiaryStep3Screen} options={{ headerShown: false }} />
@@ -169,14 +169,12 @@ function AppNavigator() {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <FontProvider>
+        <ThemeProvider>
           <AuthProvider>
             <AppNavigator />
             <StatusBar style="auto" />
           </AuthProvider>
-        </FontProvider>
-      </ThemeProvider>
+        </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

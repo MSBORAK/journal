@@ -1368,33 +1368,37 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                       }
                     }
                     
-                    // Test bildirimi gönder - farklı kanallar test et
+                    // Test bildirimi gönder - background thread'e taşı
                     const testChannels = ['default', 'gentle-reminders', 'task-reminders', 'achievements'];
                     const randomChannel = testChannels[Math.floor(Math.random() * testChannels.length)];
                     
                     console.log('🎵 iOS Test - Kanal:', randomChannel);
                     console.log('🎵 Platform:', Platform.OS);
                     
-                    await sendLocalNotification(
-                      '🧪 iOS Test Bildirimi',
-                      `Kanal: ${randomChannel} | Platform: ${Platform.OS}`,
-                      { type: 'test', channel: randomChannel },
-                      randomChannel
-                    );
-                    
-                    // Haptic feedback
+                    // Haptic feedback - hemen ver
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     
-                    console.log('Test notification sent!');
+                    // Notification'ı background'da gönder - UI'ı bloklamasın
+                    setTimeout(async () => {
+                      try {
+                        await sendLocalNotification(
+                          '🧪 iOS Test Bildirimi',
+                          `Kanal: ${randomChannel} | Platform: ${Platform.OS}`,
+                          { type: 'test', channel: randomChannel },
+                          randomChannel
+                        );
+                        console.log('Test notification sent!');
+                      } catch (notificationError) {
+                        console.error('Background notification error:', notificationError);
+                      }
+                    }, 100);
                     
-                    // Alert'i gecikmeyle göster - donmayı önle
-                    setTimeout(() => {
-                      showAlert('✅ Başarılı!', 'Test bildirimi gönderildi. Birkaç saniye içinde görmelisin.', 'success', {
-                        text: 'Tamam',
-                        onPress: () => setShowCustomAlert(false),
-                        style: 'primary'
-                      });
-                    }, 500);
+                    // Alert'i hemen göster - notification beklemesin
+                    showAlert('✅ Test Başlatıldı!', `Test bildirimi gönderiliyor... Kanal: ${randomChannel}`, 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   } catch (error) {
                     console.error('Test notification error:', error);
                     
@@ -1419,34 +1423,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 onPress={async () => {
                   console.log('🟣 LİSTE BUTONU ÇALIŞTI!');
                   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  try {
-                    console.log('Listing scheduled notifications...');
-                    const notifications = await listScheduledNotifications();
-                    console.log('Found notifications:', notifications);
-                    setTimeout(() => {
-                      showAlert(
-                        '📋 Planlı Bildirimler', 
-                        notifications.length > 0 
-                          ? `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.` 
-                          : 'Hiç planlı bildirim yok.',
-                        'info',
-                        {
-                          text: 'Tamam',
-                          onPress: () => setShowCustomAlert(false),
-                          style: 'primary'
-                        }
-                      );
-                    }, 300);
-                  } catch (error) {
-                    console.error('List notifications error:', error);
-                    setTimeout(() => {
-                      showAlert('❌ Hata', 'Bildirimler listelenemedi: ' + error, 'error', {
-                        text: 'Tamam',
-                        onPress: () => setShowCustomAlert(false),
-                        style: 'primary'
-                      });
-                    }, 300);
-                  }
+                  
+                  // Alert'i hemen göster - işlem beklemesin
+                  showAlert('📋 Planlı Bildirimler', 'Bildirimler listeleniyor...', 'info', {
+                    text: 'Tamam',
+                    onPress: () => setShowCustomAlert(false),
+                    style: 'primary'
+                  });
+                  
+                  // İşlemi background'da yap
+                  setTimeout(async () => {
+                    try {
+                      console.log('Listing scheduled notifications...');
+                      const notifications = await listScheduledNotifications();
+                      console.log('Found notifications:', notifications);
+                    } catch (error) {
+                      console.error('List notifications error:', error);
+                    }
+                  }, 100);
                 }}
               >
                 <Ionicons name="list" size={20} color="white" />
@@ -1459,23 +1453,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 onPress={async () => {
                   console.log('🟢 YENİDEN PLANLA BUTONU ÇALIŞTI!');
                   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  try {
-                    console.log('Rescheduling all notifications...');
-                    await scheduleAllNotifications();
-                    console.log('All notifications rescheduled!');
-                    showAlert('✅ Başarılı!', 'Tüm bildirimler yeniden planlandı.', 'success', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
-                  } catch (error) {
-                    console.error('Reschedule error:', error);
-                    showAlert('❌ Hata', 'Bildirimler yeniden planlanamadı: ' + error, 'error', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
-                  }
+                  
+                  // Alert'i hemen göster
+                  showAlert('✅ İşlem Başlatıldı!', 'Bildirimler yeniden planlanıyor...', 'success', {
+                    text: 'Tamam',
+                    onPress: () => setShowCustomAlert(false),
+                    style: 'primary'
+                  });
+                  
+                  // İşlemi background'da yap
+                  setTimeout(async () => {
+                    try {
+                      console.log('Rescheduling all notifications...');
+                      await scheduleAllNotifications();
+                      console.log('All notifications rescheduled!');
+                    } catch (error) {
+                      console.error('Reschedule error:', error);
+                    }
+                  }, 100);
                 }}
               >
                 <Ionicons name="refresh" size={20} color="white" />
@@ -1488,23 +1483,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 onPress={async () => {
                   console.log('🔴 İPTAL BUTONU ÇALIŞTI!');
                   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  try {
-                    console.log('Cancelling all notifications...');
-                    await cancelAllNotifications();
-                    console.log('All notifications cancelled!');
-                    showAlert('✅ Başarılı!', 'Tüm bildirimler iptal edildi.', 'success', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
-                  } catch (error) {
-                    console.error('Cancel error:', error);
-                    showAlert('❌ Hata', 'Bildirimler iptal edilemedi: ' + error, 'error', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
-                  }
+                  
+                  // Alert'i hemen göster
+                  showAlert('✅ İşlem Başlatıldı!', 'Tüm bildirimler iptal ediliyor...', 'success', {
+                    text: 'Tamam',
+                    onPress: () => setShowCustomAlert(false),
+                    style: 'primary'
+                  });
+                  
+                  // İşlemi background'da yap
+                  setTimeout(async () => {
+                    try {
+                      console.log('Cancelling all notifications...');
+                      await cancelAllNotifications();
+                      console.log('All notifications cancelled!');
+                    } catch (error) {
+                      console.error('Cancel error:', error);
+                    }
+                  }, 100);
                 }}
               >
                 <Ionicons name="close-circle" size={20} color="white" />
@@ -1525,12 +1521,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           onPress={() => navigation.navigate('ThemeSelection' as never)}
         />
         
-        <SettingItem
-          icon="text-outline"
-          title="Yazı Tipi"
-          subtitle="Metin boyutu ve stilini seçin"
-          onPress={() => navigation.navigate('FontSelection' as never)}
-        />
+        {/* Font Selection kaldırıldı */}
       </View>
 
       <View style={dynamicStyles.section}>

@@ -16,24 +16,36 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için ses dosyaları - sistem seslerini kullan
-// Özel ses dosyaları yerine sistem seslerini kullanarak farklılık yarat
-const getSystemSound = (channel: string) => {
-  // iOS'ta farklı sistem sesleri kullan
-  switch (channel) {
-    case 'gentle-reminders':
-      return 'default'; // Nazik ses
-    case 'task-reminders':
-      return 'default'; // Görev sesi
-    case 'achievements':
-      return 'default'; // Başarı sesi
-    default:
-      return 'default'; // Sistem varsayılan sesi
+// iOS için ses dosyaları - require ile import et
+const gentleSound = require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
+const taskSound = require('../../assets/sounds/new-notification-08-352461.mp3');
+const successSound = require('../../assets/sounds/success-1-6297.mp3');
+
+// iOS'ta ses dosyaları için doğru yaklaşım
+const getCustomSound = (channel: string) => {
+  if (Platform.OS === 'ios') {
+    switch (channel) {
+      case 'gentle-reminders':
+        return gentleSound; // Nazik ses
+      case 'task-reminders':
+        return taskSound; // Görev sesi
+      case 'achievements':
+        return successSound; // Başarı sesi
+      default:
+        return 'default'; // Sistem varsayılan sesi
+    }
+  } else {
+    return 'default'; // Android için sistem sesi
   }
 };
 
-// Debug: Ses seçimi
-console.log('🎵 iOS Sound Strategy: Using system sounds with different vibration patterns');
+// Debug: Ses dosyaları
+console.log('🎵 Sound Files Debug:', {
+  gentleSound,
+  taskSound,
+  successSound,
+  platform: Platform.OS
+});
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
@@ -214,11 +226,11 @@ export const sendLocalNotification = async (
     return;
   }
 
-  // Ses dosyası seçimi - iOS için sistem sesleri
+  // Ses dosyası seçimi - iOS için özel sesler
   const getSoundFile = (channel: string) => {
-    // iOS'ta sistem seslerini kullan, farklılık titreşim ile yarat
+    // iOS'ta özel ses dosyalarını kullan
     if (Platform.OS === 'ios') {
-      return getSystemSound(channel); // Sistem sesi kullan
+      return getCustomSound(channel); // Özel ses dosyası kullan
     } else {
       // Android için sistem sesleri
       return 'default';
@@ -289,8 +301,8 @@ export const scheduleNotification = async (
     repeats,
   };
 
-  // Ses dosyası seçimi - sistem sesleri kullan
-  const selectedSound = getSystemSound(channelId);
+  // Ses dosyası seçimi - özel sesler kullan
+  const selectedSound = getCustomSound(channelId);
   console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
 
   return await Notifications.scheduleNotificationAsync({

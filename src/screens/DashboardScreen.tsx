@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useFont } from '../contexts/FontContext';
+// import { useFont } from '../contexts/FontContext'; // Kaldırıldı
 import { useDiary } from '../hooks/useDiary';
 import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
@@ -27,7 +27,7 @@ interface DashboardScreenProps {
 export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { fontConfig } = useFont();
+  // const { fontConfig } = useFont(); // Kaldırıldı
   const { entries } = useDiary(user?.uid);
   const { 
     getTodayTasks, 
@@ -201,24 +201,24 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       paddingBottom: 20,
     },
     headerTitle: {
-      fontSize: fontConfig.size + 12,
+      fontSize: 28,
       fontWeight: 'bold',
       color: currentTheme.colors.text,
       marginBottom: 8,
     },
     headerSubtitle: {
-      fontSize: fontConfig.size,
+      fontSize: 16,
       color: currentTheme.colors.secondary,
       lineHeight: 24,
       marginBottom: 16,
     },
     userGreeting: {
-      fontSize: fontConfig.size + 2,
+      fontSize: 18,
       color: currentTheme.colors.text,
       marginBottom: 4,
     },
     userEmail: {
-      fontSize: fontConfig.size - 2,
+      fontSize: 14,
       color: currentTheme.colors.secondary,
     },
     statsContainer: {
