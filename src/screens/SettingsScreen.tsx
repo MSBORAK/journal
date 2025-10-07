@@ -894,27 +894,35 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     try {
       console.log('🔊 Saving notification sound:', sound);
       
+      // Önce modal'ı kapat - UI donmasını önle
+      setShowSoundModal(false);
+      
+      // Sonra kaydet
       setNotificationSound(sound);
       await AsyncStorage.setItem('notificationSound', sound);
       
-      // Modal'ı kapat
-      setShowSoundModal(false);
-      
-      // Başarı mesajı göster
-      showAlert('✅ Başarılı!', `${sound} sesi seçildi ve kaydedildi`, 'success', {
-        text: 'Tamam',
-        onPress: () => setShowCustomAlert(false),
-        style: 'primary'
-      });
-      
       console.log('🔊 Sound saved successfully:', sound);
+      
+      // Basit alert - donmayı önlemek için
+      setTimeout(() => {
+        showAlert('✅ Başarılı!', `${sound} sesi seçildi`, 'success', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+      }, 100);
+      
     } catch (error) {
       console.error('❌ Error saving notification sound:', error);
-      showAlert('❌ Hata', `Ses kaydedilemedi: ${error}`, 'error', {
-        text: 'Tamam',
-        onPress: () => setShowCustomAlert(false),
-        style: 'primary'
-      });
+      
+      // Hata durumunda da basit alert
+      setTimeout(() => {
+        showAlert('❌ Hata', `Ses kaydedilemedi`, 'error', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+      }, 100);
     }
   };
 
