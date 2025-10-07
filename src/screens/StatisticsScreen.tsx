@@ -342,8 +342,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       backgroundColor: currentTheme.colors.card,
       borderRadius: 24,
       margin: 20,
-      maxHeight: '80%',
-      width: '90%',
+      maxHeight: '85%',
+      width: '95%',
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.25,
@@ -369,36 +369,37 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       backgroundColor: currentTheme.colors.background,
     },
     modalContent: {
-      padding: 24,
+      padding: 20,
     },
     expandedChart: {
       backgroundColor: currentTheme.colors.background,
       borderRadius: 16,
-      padding: 20,
-      minHeight: 300,
+      padding: 16,
+      minHeight: 280,
     },
     expandedChartTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '600',
       color: currentTheme.colors.text,
-      marginBottom: 20,
+      marginBottom: 16,
       textAlign: 'center',
     },
     activityWeekContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: 20,
-      paddingHorizontal: 10,
+      paddingHorizontal: 5,
     },
     activityDayItem: {
       alignItems: 'center',
       flex: 1,
     },
     activityDayLabel: {
-      fontSize: 12,
+      fontSize: 10,
       color: currentTheme.colors.secondary,
-      marginTop: 8,
+      marginTop: 6,
       textAlign: 'center',
+      fontWeight: '500',
     },
     activitySummary: {
       marginTop: 20,
@@ -434,7 +435,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       alignItems: 'flex-end',
       height: 200,
       marginBottom: 20,
-      paddingHorizontal: 10,
+      paddingHorizontal: 5,
     },
     moodTrendItem: {
       alignItems: 'center',
@@ -451,8 +452,9 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       marginBottom: 8,
     },
     moodTrendLabel: {
-      fontSize: 12,
+      fontSize: 10,
       color: currentTheme.colors.secondary,
+      fontWeight: '500',
     },
     moodTrendSummary: {
       marginTop: 20,
@@ -957,7 +959,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 
                 <View style={dynamicStyles.activityWeekContainer}>
                   {stats.weeklyActivity.map((isActive, index) => {
-                    const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+                    const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
                     return (
                       <View key={index} style={dynamicStyles.activityDayItem}>
                         <View style={[
