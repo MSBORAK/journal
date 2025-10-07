@@ -16,25 +16,24 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için ses dosyaları - require ile import et ve string'e çevir
-const gentleSoundAsset = require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
-const taskSoundAsset = require('../../assets/sounds/new-notification-08-352461.mp3');
-const successSoundAsset = require('../../assets/sounds/success-1-6297.mp3');
+// iOS için ses dosyaları - sistem seslerini kullan
+// Özel ses dosyaları yerine sistem seslerini kullanarak farklılık yarat
+const getSystemSound = (channel: string) => {
+  // iOS'ta farklı sistem sesleri kullan
+  switch (channel) {
+    case 'gentle-reminders':
+      return 'default'; // Nazik ses
+    case 'task-reminders':
+      return 'default'; // Görev sesi
+    case 'achievements':
+      return 'default'; // Başarı sesi
+    default:
+      return 'default'; // Sistem varsayılan sesi
+  }
+};
 
-// Asset'leri string path'e çevir
-const gentleSoundPath = gentleSoundAsset.uri || gentleSoundAsset;
-const taskSoundPath = taskSoundAsset.uri || taskSoundAsset;
-const successSoundPath = successSoundAsset.uri || successSoundAsset;
-
-// Debug: Asset'lerin içeriğini kontrol et
-console.log('🎵 Sound Assets Debug:', {
-  gentleSoundAsset,
-  gentleSoundPath,
-  taskSoundAsset,
-  taskSoundPath,
-  successSoundAsset,
-  successSoundPath
-});
+// Debug: Ses seçimi
+console.log('🎵 iOS Sound Strategy: Using system sounds with different vibration patterns');
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
@@ -215,20 +214,11 @@ export const sendLocalNotification = async (
     return;
   }
 
-  // Ses dosyası seçimi - iOS için özel sesler
+  // Ses dosyası seçimi - iOS için sistem sesleri
   const getSoundFile = (channel: string) => {
-    // iOS'ta özel ses dosyaları için string path kullan
+    // iOS'ta sistem seslerini kullan, farklılık titreşim ile yarat
     if (Platform.OS === 'ios') {
-      switch (channel) {
-        case 'gentle-reminders':
-          return gentleSoundPath; // Nazik ses - string path
-        case 'task-reminders':
-          return taskSoundPath; // Görev sesi - string path
-        case 'achievements':
-          return successSoundPath; // Başarı sesi - string path
-        default:
-          return 'default'; // Sistem varsayılan sesi
-      }
+      return getSystemSound(channel); // Sistem sesi kullan
     } else {
       // Android için sistem sesleri
       return 'default';
@@ -238,16 +228,40 @@ export const sendLocalNotification = async (
   const selectedSound = getSoundFile(channelId);
   console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
 
+  // iOS için farklı titreşim pattern'leri
+  const getVibrationPattern = (channel: string) => {
+    if (Platform.OS === 'ios') {
+      switch (channel) {
+        case 'gentle-reminders':
+          return [0, 100, 100]; // Nazik titreşim
+        case 'task-reminders':
+          return [0, 250, 250, 250]; // Güçlü titreşim
+        case 'achievements':
+          return [0, 50, 50, 50, 50]; // Kısa titreşimler
+        default:
+          return [0, 200, 200]; // Varsayılan titreşim
+      }
+    } else {
+      return [0, 250, 250, 250]; // Android için varsayılan
+    }
+  };
+
+  const vibrationPattern = getVibrationPattern(channelId);
+  console.log('📳 Vibration pattern:', vibrationPattern, 'for channel:', channelId);
+
   await Notifications.scheduleNotificationAsync({
     content: {
       title,
       body,
       data,
-      sound: selectedSound, // String path kullan
+      sound: selectedSound, // Sistem sesi kullan
       priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
       ...(Platform.OS === 'android' && { 
         channelId: channelId === 'gentle-reminders' ? 'gentle-reminders' : 'default',
-        vibrate: [0, 250, 250, 250],
+        vibrate: vibrationPattern,
+      }),
+      ...(Platform.OS === 'ios' && {
+        vibrate: vibrationPattern, // iOS için titreşim pattern'i
       }),
     },
     trigger: null, // Hemen gönder
@@ -275,25 +289,8 @@ export const scheduleNotification = async (
     repeats,
   };
 
-  // Ses dosyası seçimi
-  const getSoundFileForSchedule = (channel: string) => {
-    if (Platform.OS === 'ios') {
-      switch (channel) {
-        case 'gentle-reminders':
-          return gentleSoundPath;
-        case 'task-reminders':
-          return taskSoundPath;
-        case 'achievements':
-          return successSoundPath;
-        default:
-          return 'default';
-      }
-    } else {
-      return 'default';
-    }
-  };
-
-  const selectedSound = getSoundFileForSchedule(channelId);
+  // Ses dosyası seçimi - sistem sesleri kullan
+  const selectedSound = getSystemSound(channelId);
   console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
 
   return await Notifications.scheduleNotificationAsync({
