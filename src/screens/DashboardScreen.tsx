@@ -132,6 +132,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     return moodOptions.find(mood => mood.value === todayEntry.mood);
   };
 
+  const getMoodEmoji = (moodValue: number) => {
+    const moodEmojis: { [key: number]: string } = {
+      0: '📝',
+      1: '😢',
+      2: '😔',
+      3: '😐',
+      4: '😊',
+      5: '🤩',
+    };
+    return moodEmojis[moodValue] || '📝';
+  };
+
   const getMotivationMessage = () => {
     const messages = [
       // Günlük motivasyon
@@ -1007,7 +1019,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   freeWriting: ''
                 })}
               >
-                <Text style={dynamicStyles.recentMood}>{getTodayMood()?.emoji}</Text>
+                <Text style={dynamicStyles.recentMood}>{getMoodEmoji(entry.mood)}</Text>
                 <View style={dynamicStyles.recentContent}>
                   <Text style={dynamicStyles.recentTitle} numberOfLines={1}>
                     {entry.title}
