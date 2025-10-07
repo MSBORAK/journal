@@ -892,6 +892,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const saveNotificationSound = async (sound: string) => {
     try {
+      console.log('🔊 Saving notification sound:', sound);
+      
       setNotificationSound(sound);
       await AsyncStorage.setItem('notificationSound', sound);
       
@@ -899,14 +901,16 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       setShowSoundModal(false);
       
       // Başarı mesajı göster
-      showAlert('Başarılı!', `${sound} sesi seçildi`, 'success', {
+      showAlert('✅ Başarılı!', `${sound} sesi seçildi ve kaydedildi`, 'success', {
         text: 'Tamam',
         onPress: () => setShowCustomAlert(false),
         style: 'primary'
       });
+      
+      console.log('🔊 Sound saved successfully:', sound);
     } catch (error) {
-      console.error('Error saving notification sound:', error);
-      showAlert('Hata', 'Ses kaydedilemedi', 'error', {
+      console.error('❌ Error saving notification sound:', error);
+      showAlert('❌ Hata', `Ses kaydedilemedi: ${error}`, 'error', {
         text: 'Tamam',
         onPress: () => setShowCustomAlert(false),
         style: 'primary'
