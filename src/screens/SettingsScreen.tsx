@@ -1287,12 +1287,18 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               
               <TouchableOpacity
                 style={dynamicStyles.testButton}
+                activeOpacity={0.7}
                 onPress={async () => {
+                  console.log('🔴 TEST BUTONU ÇALIŞTI!');
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                  
                   try {
                     console.log('Sending test notification...');
                     
                     // İzin kontrol et
                     const { status } = await Notifications.getPermissionsAsync();
+                    console.log('Permission status:', status);
+                    
                     if (status !== 'granted') {
                       showAlert('İzin Gerekli', 'Bildirim izni verilmedi. Lütfen ayarlardan izin verin.', 'warning');
                       return;
@@ -1323,7 +1329,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#8b5cf6' }]}
+                activeOpacity={0.7}
                 onPress={async () => {
+                  console.log('🟣 LİSTE BUTONU ÇALIŞTI!');
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   try {
                     console.log('Listing scheduled notifications...');
                     const notifications = await listScheduledNotifications();
@@ -1347,7 +1356,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#10b981' }]}
+                activeOpacity={0.7}
                 onPress={async () => {
+                  console.log('🟢 YENİDEN PLANLA BUTONU ÇALIŞTI!');
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   try {
                     console.log('Rescheduling all notifications...');
                     await scheduleAllNotifications();
@@ -1365,7 +1377,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
               <TouchableOpacity
                 style={[dynamicStyles.testButton, { backgroundColor: '#ef4444' }]}
+                activeOpacity={0.7}
                 onPress={async () => {
+                  console.log('🔴 İPTAL BUTONU ÇALIŞTI!');
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   try {
                     console.log('Cancelling all notifications...');
                     await cancelAllNotifications();
