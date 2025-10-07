@@ -1369,11 +1369,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     }
                     
                     // Test bildirimi gönder - background thread'e taşı
-                    const testChannels = ['default', 'gentle-reminders', 'task-reminders', 'achievements'];
-                    const randomChannel = testChannels[Math.floor(Math.random() * testChannels.length)];
-                    
-                    console.log('🎵 iOS Test - Kanal:', randomChannel);
-                    console.log('🎵 Platform:', Platform.OS);
+                    console.log('🎵 Test Bildirimi - Platform:', Platform.OS);
                     
                     // Haptic feedback - hemen ver
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -1382,10 +1378,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     setTimeout(async () => {
                       try {
                         await sendLocalNotification(
-                          '🧪 iOS Test Bildirimi',
-                          `Kanal: ${randomChannel} | Platform: ${Platform.OS}`,
-                          { type: 'test', channel: randomChannel },
-                          randomChannel
+                          '🧪 Test Bildirimi',
+                          `Platform: ${Platform.OS}`,
+                          { type: 'test' },
+                          'default'
                         );
                         console.log('Test notification sent!');
                       } catch (notificationError) {
@@ -1394,7 +1390,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     }, 100);
                     
                     // Alert'i hemen göster - notification beklemesin
-                    showAlert('✅ Test Başlatıldı!', `Test bildirimi gönderiliyor... Kanal: ${randomChannel}`, 'success', {
+                    showAlert('✅ Test Başlatıldı!', 'Test bildirimi gönderiliyor...', 'success', {
                       text: 'Tamam',
                       onPress: () => setShowCustomAlert(false),
                       style: 'primary'

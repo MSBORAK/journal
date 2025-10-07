@@ -83,54 +83,20 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
     return false;
   }
 
-  // Android için kanal oluştur
+  // Android için tek kanal oluştur
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'Varsayılan Bildirimler',
+      name: 'Günlük Bildirimleri',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
-      sound: 'default', // Ses ekle
-      enableVibrate: true,
-      enableLights: true,
-      showBadge: true,
-    });
-
-    // Farklı bildirim kategorileri için kanallar
-    await Notifications.setNotificationChannelAsync('gentle-reminders', {
-      name: 'Nazik Hatırlatmalar',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 150, 150],
-      lightColor: '#6366f1',
-      sound: 'default', // Nazik ses - sistem varsayılan
-      enableVibrate: true,
-      enableLights: true,
-      showBadge: true,
-    });
-
-    await Notifications.setNotificationChannelAsync('task-reminders', {
-      name: 'Görev Hatırlatmaları',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#f59e0b',
-      sound: 'default', // Görev sesi - sistem varsayılan
-      enableVibrate: true,
-      enableLights: true,
-      showBadge: true,
-    });
-
-    await Notifications.setNotificationChannelAsync('achievements', {
-      name: 'Başarılar',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 100, 100, 100],
-      lightColor: '#10b981',
-      sound: 'default', // Başarı sesi - sistem varsayılan
+      sound: 'default',
       enableVibrate: true,
       enableLights: true,
       showBadge: true,
     });
     
-    console.log('Android notification channels created successfully');
+    console.log('Android notification channel created successfully');
   }
 
   return true;
@@ -194,7 +160,7 @@ export const sendLocalNotification = async (
   title: string,
   body: string,
   data?: any,
-  channelId: string = 'gentle-reminders'
+  channelId: string = 'default'
 ): Promise<void> => {
   const settings = await loadNotificationSettings();
 
@@ -207,26 +173,9 @@ export const sendLocalNotification = async (
   const selectedSound = getSystemSound();
   console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
 
-  // iOS için farklı titreşim pattern'leri
-  const getVibrationPattern = (channel: string) => {
-    if (Platform.OS === 'ios') {
-      switch (channel) {
-        case 'gentle-reminders':
-          return [0, 100, 100]; // Nazik titreşim
-        case 'task-reminders':
-          return [0, 250, 250, 250]; // Güçlü titreşim
-        case 'achievements':
-          return [0, 50, 50, 50, 50]; // Kısa titreşimler
-        default:
-          return [0, 200, 200]; // Varsayılan titreşim
-      }
-    } else {
-      return [0, 250, 250, 250]; // Android için varsayılan
-    }
-  };
-
-  const vibrationPattern = getVibrationPattern(channelId);
-  console.log('📳 Vibration pattern:', vibrationPattern, 'for channel:', channelId);
+  // Tek titreşim pattern'i
+  const vibrationPattern = [0, 250, 250, 250]; // Varsayılan titreşim
+  console.log('📳 Vibration pattern:', vibrationPattern);
 
   await Notifications.scheduleNotificationAsync({
     content: {
@@ -236,7 +185,7 @@ export const sendLocalNotification = async (
       sound: selectedSound, // Sistem sesi kullan
       priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
       ...(Platform.OS === 'android' && { 
-        channelId: channelId === 'gentle-reminders' ? 'gentle-reminders' : 'default',
+        channelId: 'default',
         vibrate: vibrationPattern,
       }),
       ...(Platform.OS === 'ios' && {
@@ -259,7 +208,7 @@ export const scheduleNotification = async (
   hour: number,
   minute: number,
   repeats: boolean = true,
-  channelId: string = 'gentle-reminders'
+  channelId: string = 'default'
 ): Promise<string> => {
   const trigger: Notifications.CalendarTriggerInput = {
     type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
@@ -307,7 +256,7 @@ export const scheduleMorningNotification = async (): Promise<void> => {
     hour,
     minute,
     true,
-    'gentle-reminders'
+    'default'
   );
 
   console.log(`Morning notification scheduled for ${hour}:${minute}`);
@@ -332,7 +281,7 @@ export const scheduleEveningNotification = async (): Promise<void> => {
     hour,
     minute,
     true,
-    'gentle-reminders'
+    'default'
   );
 
   console.log(`Evening notification scheduled for ${hour}:${minute}`);
@@ -441,7 +390,7 @@ export const sendMissingYouNotification = async (): Promise<void> => {
     message.title,
     message.body,
     { type: 'missing' },
-    'gentle-reminders'
+    'default'
   );
 };
 
@@ -459,7 +408,7 @@ export const sendMotivationalNotification = async (): Promise<void> => {
     message.title,
     message.body,
     { type: 'motivation' },
-    'gentle-reminders'
+    'default'
   );
 };
 
