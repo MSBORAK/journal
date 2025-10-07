@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DiaryEntry } from '../types';
+
+const DIARY_STORAGE_KEY = 'diary_entries';
 
 export const useDiary = (userId?: string) => {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
@@ -91,9 +94,23 @@ export const useDiary = (userId?: string) => {
     
     try {
       setLoading(true);
-      // Mock data - no delay needed for development
-      setEntries(mockEntries);
+      
+      // AsyncStorage'dan veri yükle
+      const storedEntries = await AsyncStorage.getItem(`${DIARY_STORAGE_KEY}_${userId}`);
+      
+      if (storedEntries) {
+        // Kaydedilmiş veriler varsa onları kullan
+        const parsedEntries = JSON.parse(storedEntries);
+        setEntries(parsedEntries);
+        console.log('Loaded entries from AsyncStorage:', parsedEntries.length);
+      } else {
+        // İlk kullanımda mock data'yı yükle ve kaydet
+        setEntries(mockEntries);
+        await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(mockEntries));
+        console.log('First time - loaded mock entries:', mockEntries.length);
+      }
     } catch (err) {
+      console.error('Error fetching entries:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -111,15 +128,25 @@ export const useDiary = (userId?: string) => {
         updatedAt: new Date().toISOString(),
       };
 
-      setEntries((prev: DiaryEntry[]) => [newEntry, ...prev]);
+      // State'i güncelle
+      const updatedEntries = [newEntry, ...entries];
+      setEntries(updatedEntries);
+      
+      // AsyncStorage'a kaydet
+      await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
+      console.log('Entry saved to AsyncStorage:', newEntry.id);
+      
       return newEntry;
     } catch (err) {
+      console.error('Error adding entry:', err);
       setError(err instanceof Error ? err.message : 'Failed to add entry');
       throw err;
     }
   };
 
   const updateEntry = async (id: string, updates: Partial<DiaryEntry>) => {
+    if (!userId) throw new Error('User not authenticated');
+    
     try {
       const updatedEntry: DiaryEntry = {
         ...entries.find(e => e.id === id)!,
@@ -127,20 +154,37 @@ export const useDiary = (userId?: string) => {
         updatedAt: new Date().toISOString(),
       };
 
-      setEntries((prev: DiaryEntry[]) => prev.map((entry: DiaryEntry) => 
+      // State'i güncelle
+      const updatedEntries = entries.map((entry: DiaryEntry) => 
         entry.id === id ? updatedEntry : entry
-      ));
+      );
+      setEntries(updatedEntries);
+      
+      // AsyncStorage'a kaydet
+      await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
+      console.log('Entry updated in AsyncStorage:', id);
+      
       return updatedEntry;
     } catch (err) {
+      console.error('Error updating entry:', err);
       setError(err instanceof Error ? err.message : 'Failed to update entry');
       throw err;
     }
   };
 
   const deleteEntry = async (id: string) => {
+    if (!userId) throw new Error('User not authenticated');
+    
     try {
-      setEntries((prev: DiaryEntry[]) => prev.filter((entry: DiaryEntry) => entry.id !== id));
+      // State'i güncelle
+      const updatedEntries = entries.filter((entry: DiaryEntry) => entry.id !== id);
+      setEntries(updatedEntries);
+      
+      // AsyncStorage'a kaydet
+      await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
+      console.log('Entry deleted from AsyncStorage:', id);
     } catch (err) {
+      console.error('Error deleting entry:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete entry');
       throw err;
     }
