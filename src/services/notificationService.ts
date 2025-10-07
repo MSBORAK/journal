@@ -16,10 +16,10 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
-// iOS için ses dosyalarını import et
-const gentleSound = require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
-const taskSound = require('../../assets/sounds/new-notification-08-352461.mp3');
-const successSound = require('../../assets/sounds/success-1-6297.mp3');
+// iOS için ses dosyaları - string path olarak tanımla
+const gentleSoundPath = 'modern-chimes-light-mode-notification-interface-sound-360608.mp3';
+const taskSoundPath = 'new-notification-08-352461.mp3';
+const successSoundPath = 'success-1-6297.mp3';
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
@@ -200,19 +200,17 @@ export const sendLocalNotification = async (
     return;
   }
 
-  console.log('Sending notification:', { title, body, channelId });
-
   // Ses dosyası seçimi - iOS için özel sesler
   const getSoundFile = (channel: string) => {
-    // iOS'ta özel ses dosyaları için farklı yaklaşım
+    // iOS'ta özel ses dosyaları için string path kullan
     if (Platform.OS === 'ios') {
       switch (channel) {
         case 'gentle-reminders':
-          return gentleSound; // Nazik ses - require ile import edilen
+          return gentleSoundPath; // Nazik ses - string path
         case 'task-reminders':
-          return taskSound; // Görev sesi - require ile import edilen
+          return taskSoundPath; // Görev sesi - string path
         case 'achievements':
-          return successSound; // Başarı sesi - require ile import edilen
+          return successSoundPath; // Başarı sesi - string path
         default:
           return 'default'; // Sistem varsayılan sesi
       }
@@ -222,12 +220,15 @@ export const sendLocalNotification = async (
     }
   };
 
+  const selectedSound = getSoundFile(channelId);
+  console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
+
   await Notifications.scheduleNotificationAsync({
     content: {
       title,
       body,
       data,
-      sound: getSoundFile(channelId),
+      sound: selectedSound, // String path kullan
       priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
       ...(Platform.OS === 'android' && { 
         channelId: channelId === 'gentle-reminders' ? 'gentle-reminders' : 'default',
@@ -259,14 +260,33 @@ export const scheduleNotification = async (
     repeats,
   };
 
-  console.log('Scheduling notification:', { identifier, title, hour, minute, channelId });
+  // Ses dosyası seçimi
+  const getSoundFileForSchedule = (channel: string) => {
+    if (Platform.OS === 'ios') {
+      switch (channel) {
+        case 'gentle-reminders':
+          return gentleSoundPath;
+        case 'task-reminders':
+          return taskSoundPath;
+        case 'achievements':
+          return successSoundPath;
+        default:
+          return 'default';
+      }
+    } else {
+      return 'default';
+    }
+  };
+
+  const selectedSound = getSoundFileForSchedule(channelId);
+  console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
 
   return await Notifications.scheduleNotificationAsync({
     identifier,
     content: {
       title,
       body,
-      sound: 'default', // 'default' string olarak
+      sound: selectedSound, // String path kullan
       priority: Notifications.AndroidNotificationPriority.HIGH, // HIGH priority
       ...(Platform.OS === 'android' && { 
         channelId,
