@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,11 @@ import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
+import { getAllInsights, Insight } from '../utils/insightsEngine';
+import { 
+  requestNotificationPermissions, 
+  scheduleAllNotifications 
+} from '../services/notificationService';
 
 interface DashboardScreenProps {
   navigation: any;
@@ -33,10 +38,32 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   } = useTasks(user?.uid);
   const { getTodayReminders } = useReminders(user?.uid);
 
+  const [insights, setInsights] = useState<Insight[]>([]);
+
   const todayTasks = getTodayTasks();
   const todayCompletedCount = getTodayCompletedCount();
   const todayCompletionRate = getTodayCompletionRate();
   const todayReminders = getTodayReminders();
+
+  // Bildirim izinlerini başlat ve bildirimleri planla
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      const hasPermission = await requestNotificationPermissions();
+      if (hasPermission) {
+        await scheduleAllNotifications();
+      }
+    };
+
+    initializeNotifications();
+  }, []);
+
+  // İçgörüleri hesapla
+  useEffect(() => {
+    if (entries.length > 0) {
+      const allInsights = getAllInsights(entries);
+      setInsights(allInsights.slice(0, 3)); // En önemli 3 içgörüyü göster
+    }
+  }, [entries]);
 
   const getCurrentStreak = (): number => {
     // Calculate current streak logic
@@ -350,6 +377,50 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       fontStyle: 'italic',
       letterSpacing: 0.5,
     },
+    // Insights Styles
+    insightsSection: {
+      marginHorizontal: 20,
+      marginBottom: 20,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      marginBottom: 16,
+    },
+    insightCard: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      borderLeftWidth: 4,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    insightHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    insightIcon: {
+      fontSize: 24,
+      marginRight: 12,
+    },
+    insightTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      flex: 1,
+    },
+    insightDescription: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      lineHeight: 20,
+      marginLeft: 36,
+    },
     // Tasks Styles
     tasksCard: {
       backgroundColor: currentTheme.colors.card,
@@ -660,6 +731,30 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           {getMotivationMessage()}
         </Text>
       </View>
+
+      {/* Insights Section */}
+      {insights.length > 0 && (
+        <View style={dynamicStyles.insightsSection}>
+          <Text style={dynamicStyles.sectionTitle}>💡 Senin İçin İçgörüler</Text>
+          {insights.map((insight, index) => (
+            <View 
+              key={index} 
+              style={[
+                dynamicStyles.insightCard,
+                { borderLeftColor: insight.color }
+              ]}
+            >
+              <View style={dynamicStyles.insightHeader}>
+                <Text style={dynamicStyles.insightIcon}>{insight.icon}</Text>
+                <Text style={dynamicStyles.insightTitle}>{insight.title}</Text>
+              </View>
+              <Text style={dynamicStyles.insightDescription}>
+                {insight.description}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Daily Tasks */}
       <View style={dynamicStyles.tasksCard}>
