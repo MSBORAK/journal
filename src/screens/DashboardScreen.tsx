@@ -115,15 +115,19 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const getTodayMood = () => {
     const today = new Date().toISOString().split('T')[0];
     const todayEntry = entries.find(entry => entry.date === today);
-    if (!todayEntry) return null;
     
     const moodOptions = [
+      { value: 0, label: 'Henüz Belirtilmedi', emoji: '📝' }, // Varsayılan
       { value: 1, label: 'Çok Kötü', emoji: '😢' },
       { value: 2, label: 'Kötü', emoji: '😔' },
       { value: 3, label: 'Normal', emoji: '😐' },
       { value: 4, label: 'İyi', emoji: '😊' },
       { value: 5, label: 'Çok İyi', emoji: '🤩' },
     ];
+    
+    if (!todayEntry) {
+      return { ...moodOptions[0], isDefault: true }; // Varsayılan mood döndür
+    }
     
     return moodOptions.find(mood => mood.value === todayEntry.mood);
   };
@@ -346,6 +350,13 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     moodLabel: {
       fontSize: 16,
       color: currentTheme.colors.text,
+    },
+    moodSubtitle: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      textAlign: 'center',
+      marginTop: 8,
+      fontStyle: 'italic',
     },
     motivationCard: {
       backgroundColor: currentTheme.colors.card,
@@ -714,15 +725,32 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       </TouchableOpacity>
 
       {/* Today's Mood */}
-      {getTodayMood() && (
-        <View style={dynamicStyles.moodCard}>
-          <Text style={dynamicStyles.moodTitle}>Bugünkü Ruh Halin</Text>
-          <View style={dynamicStyles.moodContent}>
-            <Text style={dynamicStyles.recentMood}>{getTodayMood()?.emoji}</Text>
-            <Text style={dynamicStyles.moodLabel}>{getTodayMood()?.label}</Text>
-          </View>
+      <TouchableOpacity
+        style={[
+          dynamicStyles.moodCard,
+          (getTodayMood() as any)?.isDefault && { opacity: 0.8 }
+        ]}
+        onPress={() => {
+          if ((getTodayMood() as any)?.isDefault) {
+            navigation.navigate('WriteDiaryStep1' as never);
+          }
+        }}
+        activeOpacity={(getTodayMood() as any)?.isDefault ? 0.7 : 1}
+        disabled={!(getTodayMood() as any)?.isDefault}
+      >
+        <Text style={dynamicStyles.moodTitle}>
+          {(getTodayMood() as any)?.isDefault ? '💭 Bugünkü Ruh Halin' : '💚 Bugünkü Ruh Halin'}
+        </Text>
+        <View style={dynamicStyles.moodContent}>
+          <Text style={dynamicStyles.recentMood}>{getTodayMood()?.emoji}</Text>
+          <Text style={dynamicStyles.moodLabel}>{getTodayMood()?.label}</Text>
         </View>
-      )}
+        {(getTodayMood() as any)?.isDefault && (
+          <Text style={dynamicStyles.moodSubtitle}>
+            Günlük yazarak ruh halini belirt
+          </Text>
+        )}
+      </TouchableOpacity>
 
       {/* Motivation Message */}
       <View style={dynamicStyles.motivationCard}>
