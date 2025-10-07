@@ -19,7 +19,6 @@ type RootStackParamList = {
   WriteDiaryStep2: { title: string; mood: number };
   WriteDiaryStep3: { title: string; mood: number; answers: any; freeWriting: string };
   ThemeSelection: undefined;
-  FontSelection: undefined;
   WellnessTracking: undefined;
   Archive: undefined;
   Tasks: undefined;
@@ -41,7 +40,7 @@ import HistoryScreen from './src/screens/HistoryScreen';
 import StatisticsScreen from './src/screens/StatisticsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ThemeSelectionScreen from './src/screens/ThemeSelectionScreen';
-import FontSelectionScreen from './src/screens/FontSelectionScreen';
+// import FontSelectionScreen from './src/screens/FontSelectionScreen'; // Kaldırıldı
 import WriteDiaryStep1Screen from './src/screens/WriteDiaryStep1Screen';
 import WriteDiaryStep2Screen from './src/screens/WriteDiaryStep2Screen';
 import WriteDiaryStep3Screen from './src/screens/WriteDiaryStep3Screen';
@@ -149,7 +148,6 @@ function AppNavigator() {
               }}
             />
         <Stack.Screen name="ThemeSelection" component={ThemeSelectionScreen} options={{ headerShown: false }} />
-        // <Stack.Screen name="FontSelection" component={FontSelectionScreen} options={{ headerShown: false }} /> // Kaldırıldı
         <Stack.Screen name="WriteDiaryStep1" component={WriteDiaryStep1Screen} options={{ headerShown: false }} />
         <Stack.Screen name="WriteDiaryStep2" component={WriteDiaryStep2Screen} options={{ headerShown: false }} />
         <Stack.Screen name="WriteDiaryStep3" component={WriteDiaryStep3Screen} options={{ headerShown: false }} />
