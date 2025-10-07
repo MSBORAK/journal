@@ -789,8 +789,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const saveReminderTime = async (time: string) => {
     try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await AsyncStorage.setItem('reminderTime', time);
       setReminderTime(time);
+      console.log('Reminder time saved:', time);
     } catch (error) {
       console.error('Error saving reminder time:', error);
     }
