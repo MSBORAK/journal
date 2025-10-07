@@ -1697,7 +1697,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           icon="information-circle-outline"
           title="Hakkında"
           subtitle="Versiyon 1.0.0 - Daily Diary App"
-          onPress={() => showAlert('ℹ️ Hakkında', 'Daily Diary App v1.0.0\n\nGünlük yazma alışkanlığı kazanmanız için tasarlanmış modern bir uygulamadır.\n\nGeliştirici: Merve Sude Borak\n© 2024', 'info', {
+          onPress={() => showAlert('ℹ️ Hakkında', 'Daily Diary App v1.0.0\n\nGünlük yazma alışkanlığı kazanmanız için tasarlanmış modern bir uygulamadır.\n\nGeliştirici: Merve Sude Borak\n© 2025', 'info', {
             text: 'Tamam',
             onPress: () => setShowCustomAlert(false),
             style: 'primary'
