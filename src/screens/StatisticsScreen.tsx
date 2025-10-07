@@ -361,7 +361,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       backgroundColor: currentTheme.colors.card,
       borderRadius: 24,
       margin: 20,
-      maxHeight: '85%',
+      maxHeight: '90%',
       width: '95%',
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 10 },
@@ -394,7 +394,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       backgroundColor: currentTheme.colors.background,
       borderRadius: 16,
       padding: 16,
-      minHeight: 280,
     },
     expandedChartTitle: {
       fontSize: 16,
@@ -821,7 +820,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </TouchableOpacity>
             </View>
             
-            <View style={dynamicStyles.modalContent}>
+            <ScrollView style={dynamicStyles.modalContent}>
               <View style={dynamicStyles.expandedChart}>
                 {expandedChart === 'mood' && (
                   <>
@@ -996,7 +995,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   </>
                 )}
               </View>
-            </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
