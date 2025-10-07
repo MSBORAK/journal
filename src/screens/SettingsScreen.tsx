@@ -1379,18 +1379,26 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     
                     console.log('Test notification sent!');
-                    showAlert('✅ Başarılı!', 'Test bildirimi gönderildi. Birkaç saniye içinde görmelisin.', 'success', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
+                    
+                    // Alert'i gecikmeyle göster - donmayı önle
+                    setTimeout(() => {
+                      showAlert('✅ Başarılı!', 'Test bildirimi gönderildi. Birkaç saniye içinde görmelisin.', 'success', {
+                        text: 'Tamam',
+                        onPress: () => setShowCustomAlert(false),
+                        style: 'primary'
+                      });
+                    }, 500);
                   } catch (error) {
                     console.error('Test notification error:', error);
-                    showAlert('❌ Hata', 'Test bildirimi gönderilemedi: ' + error, 'error', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
+                    
+                    // Hata alert'i de gecikmeyle göster
+                    setTimeout(() => {
+                      showAlert('❌ Hata', 'Test bildirimi gönderilemedi: ' + error, 'error', {
+                        text: 'Tamam',
+                        onPress: () => setShowCustomAlert(false),
+                        style: 'primary'
+                      });
+                    }, 500);
                   }
                 }}
               >
@@ -1408,25 +1416,29 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     console.log('Listing scheduled notifications...');
                     const notifications = await listScheduledNotifications();
                     console.log('Found notifications:', notifications);
-                    showAlert(
-                      '📋 Planlı Bildirimler', 
-                      notifications.length > 0 
-                        ? `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.` 
-                        : 'Hiç planlı bildirim yok.',
-                      'info',
-                      {
+                    setTimeout(() => {
+                      showAlert(
+                        '📋 Planlı Bildirimler', 
+                        notifications.length > 0 
+                          ? `${notifications.length} adet planlı bildirim var. Console'da detayları görebilirsin.` 
+                          : 'Hiç planlı bildirim yok.',
+                        'info',
+                        {
+                          text: 'Tamam',
+                          onPress: () => setShowCustomAlert(false),
+                          style: 'primary'
+                        }
+                      );
+                    }, 300);
+                  } catch (error) {
+                    console.error('List notifications error:', error);
+                    setTimeout(() => {
+                      showAlert('❌ Hata', 'Bildirimler listelenemedi: ' + error, 'error', {
                         text: 'Tamam',
                         onPress: () => setShowCustomAlert(false),
                         style: 'primary'
-                      }
-                    );
-                  } catch (error) {
-                    console.error('List notifications error:', error);
-                    showAlert('❌ Hata', 'Bildirimler listelenemedi: ' + error, 'error', {
-                      text: 'Tamam',
-                      onPress: () => setShowCustomAlert(false),
-                      style: 'primary'
-                    });
+                      });
+                    }, 300);
                   }
                 }}
               >
