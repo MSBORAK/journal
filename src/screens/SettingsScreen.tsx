@@ -8,6 +8,7 @@ import {
   Alert,
   Switch,
   Modal,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
@@ -1371,9 +1372,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     const testChannels = ['default', 'gentle-reminders', 'task-reminders', 'achievements'];
                     const randomChannel = testChannels[Math.floor(Math.random() * testChannels.length)];
                     
+                    console.log('🎵 iOS Test - Kanal:', randomChannel);
+                    console.log('🎵 Platform:', Platform.OS);
+                    
                     await sendLocalNotification(
-                      '🧪 Test Bildirimi',
-                      `Bu bir test bildirimidir. Kanal: ${randomChannel}`,
+                      '🧪 iOS Test Bildirimi',
+                      `Kanal: ${randomChannel} | Platform: ${Platform.OS}`,
                       { type: 'test', channel: randomChannel },
                       randomChannel
                     );

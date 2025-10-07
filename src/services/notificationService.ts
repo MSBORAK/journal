@@ -16,6 +16,11 @@ import {
   motivationalMessages
 } from '../constants/notifications';
 
+// iOS için ses dosyalarını import et
+const gentleSound = require('../../assets/sounds/modern-chimes-light-mode-notification-interface-sound-360608.mp3');
+const taskSound = require('../../assets/sounds/new-notification-08-352461.mp3');
+const successSound = require('../../assets/sounds/success-1-6297.mp3');
+
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -197,18 +202,23 @@ export const sendLocalNotification = async (
 
   console.log('Sending notification:', { title, body, channelId });
 
-  // Ses dosyası seçimi - Farklı sesler için farklı kanallar
+  // Ses dosyası seçimi - iOS için özel sesler
   const getSoundFile = (channel: string) => {
-    // Şimdilik sistem sesleri kullan, ama farklı titreşimler ile farklılık yarat
-    switch (channel) {
-      case 'gentle-reminders':
-        return 'default'; // Nazik ses - yumuşak titreşim
-      case 'task-reminders':
-        return 'default'; // Görev sesi - güçlü titreşim
-      case 'achievements':
-        return 'default'; // Başarı sesi - kısa titreşim
-      default:
-        return 'default'; // Sistem varsayılan sesi
+    // iOS'ta özel ses dosyaları için farklı yaklaşım
+    if (Platform.OS === 'ios') {
+      switch (channel) {
+        case 'gentle-reminders':
+          return gentleSound; // Nazik ses - require ile import edilen
+        case 'task-reminders':
+          return taskSound; // Görev sesi - require ile import edilen
+        case 'achievements':
+          return successSound; // Başarı sesi - require ile import edilen
+        default:
+          return 'default'; // Sistem varsayılan sesi
+      }
+    } else {
+      // Android için sistem sesleri
+      return 'default';
     }
   };
 
