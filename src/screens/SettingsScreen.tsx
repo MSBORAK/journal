@@ -787,9 +787,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const notificationSounds = [
     { name: 'default', label: '🔔 Varsayılan', description: 'Sistem bildirim sesi' },
-    { name: 'gentle', label: '🌸 Nazik', description: 'Yumuşak ve sakin' },
-    { name: 'chime', label: '🎵 Melodi', description: 'Kısa melodi' },
-    { name: 'bell', label: '🔔 Çan', description: 'Klasik çan sesi' },
+    { name: 'gentle', label: '🌸 Nazik Hatırlatma', description: 'Yumuşak bildirim sesi' },
+    { name: 'task', label: '🔔 Görev Hatırlatması', description: 'Dikkat çekici ses' },
+    { name: 'achievement', label: '🎊 Başarı Sesi', description: 'Kutlama sesi' },
     { name: 'silent', label: '🔇 Sessiz', description: 'Sadece titreşim' },
   ];
 
@@ -840,20 +840,20 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           title = '🔔 Varsayılan Ses';
           body = 'Sistem bildirim sesi test ediliyor';
           break;
-        case 'soft':
+        case 'gentle':
           channelId = 'gentle-reminders';
-          title = '🌸 Nazik Ses';
+          title = '🌸 Nazik Hatırlatma';
           body = 'Yumuşak bildirim sesi test ediliyor';
           break;
-        case 'chime':
-          channelId = 'gentle-reminders';
-          title = '🎵 Melodi';
-          body = 'Kısa melodi sesi test ediliyor';
+        case 'task':
+          channelId = 'task-reminders';
+          title = '🔔 Görev Hatırlatması';
+          body = 'Dikkat çekici ses test ediliyor';
           break;
-        case 'bell':
+        case 'achievement':
           channelId = 'achievements';
-          title = '🔔 Çan';
-          body = 'Klasik çan sesi test ediliyor';
+          title = '🎊 Başarı Sesi';
+          body = 'Kutlama sesi test ediliyor';
           break;
       }
 
