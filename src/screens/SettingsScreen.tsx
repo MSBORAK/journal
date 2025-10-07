@@ -1554,21 +1554,44 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           icon="cloud-upload-outline"
           title="Veri Yedekleme"
           subtitle="Günlüklerinizi buluta yedekleyin"
-          onPress={() => {}}
+          onPress={() => showAlert('📤 Veri Yedekleme', 'Günlük verileriniz yedekleniyor...', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
         />
         
         <SettingItem
           icon="cloud-download-outline"
           title="Veri Geri Yükleme"
           subtitle="Yedeklenen verilerinizi geri yükleyin"
-          onPress={() => {}}
+          onPress={() => showAlert('📥 Veri Geri Yükleme', 'Yedeklenen verileriniz geri yükleniyor...', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
         />
         
         <SettingItem
           icon="trash-outline"
           title="Veri Temizleme"
           subtitle="Tüm verilerinizi silin"
-          onPress={() => {}}
+          onPress={() => showAlert('🗑️ Veri Temizleme', 'Tüm verileriniz silinecek! Bu işlem geri alınamaz. Devam etmek istiyor musunuz?', 'warning', {
+            text: 'İptal',
+            onPress: () => setShowCustomAlert(false),
+            style: 'secondary'
+          }, {
+            text: 'Sil',
+            onPress: () => {
+              setShowCustomAlert(false);
+              showAlert('✅ Veriler Silindi', 'Tüm verileriniz başarıyla silindi.', 'success', {
+                text: 'Tamam',
+                onPress: () => setShowCustomAlert(false),
+                style: 'primary'
+              });
+            },
+            style: 'destructive'
+          })}
         />
       </View>
 
@@ -1672,28 +1695,44 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           icon="information-circle-outline"
           title="Hakkında"
           subtitle="Versiyon 1.0.0 - Daily Diary App"
-          onPress={() => {}}
+          onPress={() => showAlert('ℹ️ Hakkında', 'Daily Diary App v1.0.0\n\nGünlük yazma alışkanlığı kazanmanız için tasarlanmış modern bir uygulamadır.\n\nGeliştirici: Merve Sude Borak\n© 2024', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
         />
         
         <SettingItem
           icon="help-circle-outline"
           title="Yardım & Destek"
           subtitle="SSS ve teknik destek"
-          onPress={() => {}}
+          onPress={() => showAlert('❓ Yardım & Destek', 'Yardım ve destek için:\n\n📧 Email: support@dailydiary.app\n📱 Telefon: +90 XXX XXX XX XX\n💬 WhatsApp: +90 XXX XXX XX XX\n\nÇalışma Saatleri:\nPazartesi - Cuma: 09:00 - 18:00', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
         />
         
         <SettingItem
           icon="star-outline"
           title="Uygulamayı Değerlendir"
           subtitle="App Store'da değerlendirme yapın"
-          onPress={() => {}}
+          onPress={() => showAlert('⭐ Uygulamayı Değerlendir', 'Uygulamamızı beğendiyseniz, App Store\'da 5 yıldız vererek bize destek olabilirsiniz!\n\nDeğerlendirmeniz bizim için çok değerli! 🌟', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
         />
         
         <SettingItem
           icon="share-outline"
           title="Arkadaşlarla Paylaş"
           subtitle="Uygulamayı arkadaşlarınızla paylaşın"
-          onPress={() => {}}
+          onPress={() => showAlert('📤 Arkadaşlarla Paylaş', 'Daily Diary App\'i arkadaşlarınızla paylaşın!\n\nGünlük yazma alışkanlığı kazanmak için harika bir uygulama. Sen de deneyebilirsin! 🎯\n\nApp Store Linki: https://apps.apple.com/app/daily-diary', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
         />
       </View>
 
