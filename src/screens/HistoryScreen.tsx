@@ -64,7 +64,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     header: {
       paddingHorizontal: 20,
-      paddingTop: 60,
+      paddingTop: 80,
       paddingBottom: 20,
     },
     title: {

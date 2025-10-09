@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useTasks } from '../hooks/useTasks';
 import { Ionicons } from '@expo/vector-icons';
 import { DailyTask } from '../types';
+import { recordUserActivity } from '../services/userActivityService';
+import { scheduleTaskReminder } from '../services/motivationNotificationService';
 
 interface TasksScreenProps {
   navigation: any;
@@ -60,6 +62,16 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
   const completedCount = getTodayCompletedCount();
   const completionRate = getTodayCompletionRate();
   const streak = getTaskStreak();
+
+  // Debug: Task state değişikliklerini logla
+  useEffect(() => {
+    console.log('TasksScreen - Tasks updated:', {
+      totalTasks: todayTasks.length,
+      completedCount: completedCount,
+      completionRate: completionRate,
+      tasks: todayTasks.map(t => ({ id: t.id, title: t.title, isCompleted: t.isCompleted }))
+    });
+  }, [todayTasks, completedCount, completionRate]);
 
   const filteredTasks = selectedCategory === 'all' 
     ? todayTasks 
@@ -186,14 +198,18 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       borderWidth: 2,
       borderColor: 'transparent',
       shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 6,
     },
     selectedCategoryCard: {
       borderColor: currentTheme.colors.primary,
-      backgroundColor: currentTheme.colors.accent,
+      backgroundColor: currentTheme.colors.primary,
+      shadowColor: currentTheme.colors.primary,
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8,
       transform: [{ scale: 1.05 }],
     },
     categoryIcon: {
@@ -207,7 +223,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       textAlign: 'center',
     },
     selectedCategoryName: {
-      color: currentTheme.colors.primary,
+      color: 'white',
     },
     categoryCount: {
       fontSize: 10,
@@ -215,7 +231,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       marginTop: 2,
     },
     selectedCategoryCount: {
-      color: currentTheme.colors.primary,
+      color: 'white',
     },
     tasksList: {
       paddingHorizontal: 20,
@@ -291,10 +307,20 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       color: currentTheme.colors.secondary,
       marginLeft: 4,
     },
+    priorityContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
     priorityIndicator: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+    },
+    priorityText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
     },
     taskActions: {
       flexDirection: 'row',
@@ -480,6 +506,10 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
         await updateTask(editingTask.id, taskData);
       } else {
         await addTask(taskData);
+        // Yeni görev eklendiğinde hatırlatıcı zamanla
+        await recordUserActivity('task_created');
+        await scheduleTaskReminder();
+        console.log('✅ Görev eklendi ve hatırlatıcı zamanlandı!');
       }
       
       setShowAddModal(false);
@@ -531,6 +561,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
     const option = priorityOptions.find(opt => opt.value === priority);
     return option ? option.color : '#6b7280';
   };
+
 
   return (
     <View style={dynamicStyles.container}>
@@ -712,10 +743,15 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                 </View>
 
                 <View style={dynamicStyles.taskActions}>
-                  <View style={[
-                    dynamicStyles.priorityIndicator,
-                    { backgroundColor: getPriorityColor(task.priority) }
-                  ]} />
+                  <View style={dynamicStyles.priorityContainer}>
+                    <View style={[
+                      dynamicStyles.priorityIndicator,
+                      { backgroundColor: getPriorityColor(task.priority) }
+                    ]} />
+                    <Text style={dynamicStyles.priorityText}>
+                      {priorityOptions.find(p => p.value === task.priority)?.label || 'Orta'}
+                    </Text>
+                  </View>
                   
                   <TouchableOpacity
                     style={dynamicStyles.actionButton}

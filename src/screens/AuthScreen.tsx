@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../i18n/LanguageContext';
 // import { MotiView } from 'moti'; // Removed for now
 
 export default function AuthScreen() {
@@ -21,17 +22,18 @@ export default function AuthScreen() {
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useTranslation();
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Lütfen email ve şifre girin');
+      Alert.alert(t('common.error'), t('auth.emailRequired') + ' & ' + t('auth.passwordRequired'));
       return;
     }
 
     if (!isLogin && !displayName) {
-      Alert.alert('Hata', 'Lütfen adınızı girin');
+      Alert.alert(t('common.error'), t('auth.displayNameRequired'));
       return;
     }
 
@@ -41,27 +43,17 @@ export default function AuthScreen() {
         await signIn(email, password);
       } else {
         await signUp(email, password, displayName);
-        Alert.alert('Başarılı', 'Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.');
+        Alert.alert(t('common.success'), 'Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.');
         setIsLogin(true);
         setDisplayName('');
       }
     } catch (error) {
-      Alert.alert('Hata', error instanceof Error ? error.message : 'Bir hata oluştu');
+      Alert.alert(t('common.error'), error instanceof Error ? error.message : 'Bir hata oluştu');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      Alert.alert('Hata', error instanceof Error ? error.message : 'Google ile giriş yapılamadı');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <KeyboardAvoidingView 
@@ -73,7 +65,7 @@ export default function AuthScreen() {
           style={styles.card}
         >
           <Text style={styles.title}>
-            {isLogin ? 'Giriş Yap' : 'Hesap Oluştur'}
+            {isLogin ? t('auth.signIn') : t('auth.signUp')}
           </Text>
           
           <Text style={styles.subtitle}>
@@ -85,19 +77,19 @@ export default function AuthScreen() {
 
           {!isLogin && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Adınız</Text>
+              <Text style={styles.label}>{t('auth.displayName')}</Text>
               <TextInput
                 style={styles.input}
                 value={displayName}
                 onChangeText={setDisplayName}
-                placeholder="Adınızı girin"
+                placeholder={t('auth.displayName')}
                 placeholderTextColor="#9ca3af"
               />
             </View>
           )}
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.email')}</Text>
             <TextInput
               style={styles.input}
               value={email}
@@ -110,12 +102,12 @@ export default function AuthScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Şifre</Text>
+            <Text style={styles.label}>{t('auth.password')}</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Şifrenizi girin"
+              placeholder={t('auth.password')}
               placeholderTextColor="#9ca3af"
               secureTextEntry
             />
@@ -127,23 +119,10 @@ export default function AuthScreen() {
             disabled={loading}
           >
             <Text style={styles.buttonText}>
-              {loading ? 'Yükleniyor...' : (isLogin ? 'Giriş Yap' : 'Hesap Oluştur')}
+              {loading ? t('common.loading') : (isLogin ? t('auth.signIn') : t('auth.signUp'))}
             </Text>
           </TouchableOpacity>
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>veya</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, styles.googleButton]}
-            onPress={handleGoogleSignIn}
-            disabled={loading}
-          >
-            <Text style={styles.googleButtonText}>Google ile Giriş Yap</Text>
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.switchButton}
@@ -154,8 +133,8 @@ export default function AuthScreen() {
           >
             <Text style={styles.switchText}>
               {isLogin 
-                ? 'Hesabınız yok mu? Kayıt olun' 
-                : 'Zaten hesabınız var mı? Giriş yapın'
+                ? t('auth.noAccount') 
+                : t('auth.hasAccount')
               }
             </Text>
           </TouchableOpacity>
@@ -168,7 +147,6 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -227,35 +205,10 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: '#a855f7',
   },
-  googleButton: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
   buttonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
-  },
-  googleButtonText: {
-    color: '#374151',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e5e7eb',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#6b7280',
-    fontSize: 14,
   },
   switchButton: {
     alignItems: 'center',

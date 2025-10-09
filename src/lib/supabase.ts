@@ -13,16 +13,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 // Auth helper functions
-export const signInWithGoogle = async () => {
-  try {
-    // Google Sign-In implementation will be added here
-    console.log('Google Sign-In not implemented yet');
-    return null;
-  } catch (error) {
-    console.error('Google Sign-In error:', error);
-    throw error;
-  }
-};
 
 export const signOut = async () => {
   try {
@@ -49,5 +39,47 @@ export const getCurrentUser = async () => {
   } catch (error) {
     console.error('Get user error:', error);
     return null;
+  }
+};
+
+// Email değiştirme
+export const updateEmail = async (newEmail: string) => {
+  try {
+    // Önce kullanıcı oturumunu kontrol et
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error('Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      email: newEmail
+    });
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Update email error:', error);
+    throw error;
+  }
+};
+
+// Şifre değiştirme
+export const updatePassword = async (newPassword: string) => {
+  try {
+    // Önce kullanıcı oturumunu kontrol et
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error('Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Update password error:', error);
+    throw error;
   }
 };

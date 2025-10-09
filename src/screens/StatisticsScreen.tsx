@@ -33,11 +33,12 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     },
     header: {
       paddingHorizontal: 24,
-      paddingTop: 60,
-      paddingBottom: 24,
+      paddingTop: 50,
+      paddingBottom: 50,
       backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
-      marginTop: 10,
+      marginTop: 100,
+      marginBottom: 40,
       borderRadius: 24,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 8 },
@@ -59,6 +60,39 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       color: currentTheme.colors.secondary,
       textAlign: 'center',
       marginBottom: 24,
+      fontWeight: '500',
+    },
+    journeyHeader: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 24,
+      padding: 28,
+      marginHorizontal: 20,
+      marginBottom: 24,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      borderTopWidth: 4,
+      borderTopColor: currentTheme.colors.primary,
+    },
+    journeyTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      marginBottom: 12,
+    },
+    journeyDate: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: currentTheme.colors.primary,
+      marginBottom: 8,
+    },
+    journeyDuration: {
+      fontSize: 16,
+      color: currentTheme.colors.secondary,
       fontWeight: '500',
     },
     periodSelector: {
@@ -88,84 +122,197 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       fontWeight: '600',
     },
     summaryContainer: {
-      flexDirection: 'row',
+      flexDirection: 'column',
       gap: 16,
-      marginBottom: 24,
+      marginBottom: 32,
       paddingHorizontal: 20,
     },
     summaryCard: {
-      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: currentTheme.colors.card,
       borderRadius: 16,
-      padding: 16,
-      minHeight: 140,
+      padding: 12,
+      minHeight: 60,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.08,
       shadowRadius: 8,
       elevation: 4,
-      borderWidth: 0.5,
+      borderWidth: 1,
       borderColor: currentTheme.colors.border,
     },
     streakCard: {
       borderTopWidth: 4,
       borderTopColor: '#ff6b35',
+      backgroundColor: '#fff7f0',
     },
     entriesCard: {
       borderTopWidth: 4,
       borderTopColor: '#4ade80',
+      backgroundColor: '#f0fdf4',
     },
     moodCard: {
       borderTopWidth: 4,
       borderTopColor: '#f59e0b',
+      backgroundColor: '#fffbeb',
     },
     cardIconContainer: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       backgroundColor: currentTheme.colors.accent,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 12,
-      alignSelf: 'center',
     },
     cardContent: {
-      alignItems: 'center',
+      flex: 1,
+      alignItems: 'flex-start',
+      marginLeft: 16,
     },
     summaryTitle: {
-      fontSize: 13,
+      fontSize: 14,
       color: currentTheme.colors.secondary,
-      fontWeight: '500',
+      fontWeight: '600',
       marginBottom: 4,
-      textAlign: 'center',
     },
     summaryValue: {
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: '800',
       color: currentTheme.colors.text,
       marginBottom: 2,
-      textAlign: 'center',
     },
     summaryLabel: {
-      fontSize: 10,
+      fontSize: 12,
       color: currentTheme.colors.secondary,
       fontWeight: '400',
-      textAlign: 'center',
+    },
+    milestoneContainer: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 24,
+      padding: 24,
+      marginHorizontal: 20,
+      marginBottom: 24,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      borderTopWidth: 4,
+      borderTopColor: '#F59E0B',
+    },
+    milestoneTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      marginBottom: 16,
+    },
+    milestoneItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+      paddingHorizontal: 12,
+      marginBottom: 12,
+      borderRadius: 16,
+      backgroundColor: currentTheme.colors.background,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    milestoneIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    milestoneContent: {
+      flex: 1,
+    },
+    milestoneLabel: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginBottom: 2,
+    },
+    milestoneStatus: {
+      fontSize: 13,
+      color: currentTheme.colors.secondary,
+    },
+    highlightContainer: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 24,
+      padding: 24,
+      marginHorizontal: 20,
+      marginBottom: 24,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      borderTopWidth: 4,
+      borderTopColor: '#8B5CF6',
+    },
+    highlightTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      marginBottom: 16,
+    },
+    highlightItem: {
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+    },
+    highlightEmoji: {
+      fontSize: 24,
+      marginBottom: 8,
+    },
+    highlightLabel: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      marginBottom: 4,
+    },
+    highlightValue: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
     },
     chartsContainer: {
       flex: 1,
       paddingHorizontal: 20,
+      paddingTop: 8,
     },
     chartContainer: {
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 24,
-      padding: 24,
-      marginBottom: 24,
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 20,
       shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.12,
-      shadowRadius: 12,
-      elevation: 6,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 4,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
     },
@@ -551,234 +698,144 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     };
   }, [filteredEntries, getStreak]);
 
+  // Calculate journey data
+  const firstEntry = entries.length > 0 ? entries[entries.length - 1] : null;
+  const firstDate = firstEntry ? new Date(firstEntry.date) : new Date();
+  const daysSinceStart = firstEntry 
+    ? Math.floor((new Date().getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  // Calculate milestones
+  const milestones = [
+    { 
+      icon: '✍️', 
+      label: 'İlk Günlük', 
+      status: entries.length > 0 ? 'Tamamlandı ✅' : 'Henüz başlamadın',
+      completed: entries.length > 0,
+      color: '#4ade80'
+    },
+    { 
+      icon: '🔥', 
+      label: '7 Gün Seri', 
+      status: stats.currentStreak >= 7 ? 'Tamamlandı ✅' : `${stats.currentStreak}/7 gün`,
+      completed: stats.currentStreak >= 7,
+      color: '#f59e0b'
+    },
+    { 
+      icon: '🎯', 
+      label: '30 Gün Hedefi', 
+      status: stats.totalEntries >= 30 ? 'Tamamlandı ✅' : `${stats.totalEntries}/30 günlük`,
+      completed: stats.totalEntries >= 30,
+      color: '#8b5cf6'
+    },
+    { 
+      icon: '💎', 
+      label: '100 Gün Efsanesi', 
+      status: stats.totalEntries >= 100 ? 'Tamamlandı ✅' : `${stats.totalEntries}/100 günlük`,
+      completed: stats.totalEntries >= 100,
+      color: '#ef4444'
+    },
+  ];
+
+  // Calculate highlights
+  const happiestDay = entries.length > 0 
+    ? entries.reduce((max, entry) => entry.mood > max.mood ? entry : max, entries[0])
+    : null;
+  
+  const longestEntry = entries.length > 0
+    ? entries.reduce((max, entry) => entry.content.length > max.content.length ? entry : max, entries[0])
+    : null;
+
   return (
-    <ScrollView style={dynamicStyles.container}>
-      <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.title}>📊 İstatistikler</Text>
-        <Text style={dynamicStyles.titleSubtitle}>Günlük alışkanlıklarınızı analiz edin</Text>
-        
-        <View style={dynamicStyles.periodSelector}>
-          <TouchableOpacity
-            style={[
-              dynamicStyles.periodButton,
-              selectedPeriod === 'week' && dynamicStyles.activePeriodButton
-            ]}
-            onPress={() => setSelectedPeriod('week')}
-          >
-            <Text style={[
-              dynamicStyles.periodButtonText,
-              selectedPeriod === 'week' && dynamicStyles.activePeriodButtonText
-            ]}>
-              Hafta
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              dynamicStyles.periodButton,
-              selectedPeriod === 'month' && dynamicStyles.activePeriodButton
-            ]}
-            onPress={() => setSelectedPeriod('month')}
-          >
-            <Text style={[
-              dynamicStyles.periodButtonText,
-              selectedPeriod === 'month' && dynamicStyles.activePeriodButtonText
-            ]}>
-              Ay
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              dynamicStyles.periodButton,
-              selectedPeriod === 'year' && dynamicStyles.activePeriodButton
-            ]}
-            onPress={() => setSelectedPeriod('year')}
-          >
-            <Text style={[
-              dynamicStyles.periodButtonText,
-              selectedPeriod === 'year' && dynamicStyles.activePeriodButtonText
-            ]}>
-              Yıl
-            </Text>
-          </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1, backgroundColor: currentTheme.colors.background }}>
+      <ScrollView 
+        style={dynamicStyles.container}
+        contentContainerStyle={{ paddingBottom: 180 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={dynamicStyles.header}>
+          <Text style={dynamicStyles.title}>🗺️ Yolculuğum</Text>
+          <Text style={dynamicStyles.titleSubtitle}>Günlük yazma serüvenin</Text>
         </View>
 
-        <View style={dynamicStyles.summaryContainer}>
-          <TouchableOpacity style={[dynamicStyles.summaryCard, dynamicStyles.streakCard]}>
-            <View style={dynamicStyles.cardIconContainer}>
-              <Ionicons name="flame" size={22} color="#ff6b35" />
-            </View>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.summaryTitle}>Seri</Text>
-              <Text style={dynamicStyles.summaryValue}>{stats.currentStreak}</Text>
-              <Text style={dynamicStyles.summaryLabel}>gün üst üste</Text>
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[dynamicStyles.summaryCard, dynamicStyles.entriesCard]}>
-            <View style={dynamicStyles.cardIconContainer}>
-              <Ionicons name="book" size={22} color="#4ade80" />
-            </View>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.summaryTitle}>Toplam</Text>
-              <Text style={dynamicStyles.summaryValue}>{stats.totalEntries}</Text>
-              <Text style={dynamicStyles.summaryLabel}>günlük</Text>
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[dynamicStyles.summaryCard, dynamicStyles.moodCard]}>
-            <View style={dynamicStyles.cardIconContainer}>
-              <Ionicons name="heart" size={22} color="#f59e0b" />
-            </View>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.summaryTitle}>Mood</Text>
-              <Text style={dynamicStyles.summaryValue}>
-                {stats.avgMood > 0 ? stats.avgMood.toFixed(1) : '-'}
-              </Text>
-              <Text style={dynamicStyles.summaryLabel}>ortalama</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        {/* Başlangıç Bölümü */}
+      <View style={dynamicStyles.journeyHeader}>
+        <Text style={dynamicStyles.journeyTitle}>🌅 Başlangıç</Text>
+        <Text style={dynamicStyles.journeyDate}>
+          {firstEntry ? new Date(firstEntry.date).toLocaleDateString('tr-TR', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+          }) : 'Henüz başlamadın'}
+        </Text>
+        <Text style={dynamicStyles.journeyDuration}>
+          {daysSinceStart > 0 ? `${daysSinceStart} gün önce başladın` : 'İlk günlüğünü yaz!'}
+        </Text>
       </View>
 
-      <View style={dynamicStyles.chartsContainer}>
-        <View style={dynamicStyles.chartContainer}>
-          <View style={dynamicStyles.chartHeader}>
-            <View style={dynamicStyles.chartTitleContainer}>
-              <Ionicons name="trending-up" size={20} color={currentTheme.colors.primary} />
-              <Text style={dynamicStyles.chartTitle}>📈 Son 7 Gün Mood Trendi</Text>
+      {/* Kilometre Taşları */}
+      <View style={dynamicStyles.milestoneContainer}>
+          <Text style={dynamicStyles.milestoneTitle}>🏆 Kilometre Taşları</Text>
+          {milestones.map((milestone, index) => (
+            <View key={index} style={dynamicStyles.milestoneItem}>
+              <View style={[dynamicStyles.milestoneIcon, { backgroundColor: milestone.completed ? milestone.color : currentTheme.colors.border }]}>
+                <Text style={{ fontSize: 20 }}>{milestone.icon}</Text>
+              </View>
+              <View style={dynamicStyles.milestoneContent}>
+                <Text style={dynamicStyles.milestoneLabel}>{milestone.label}</Text>
+                <Text style={dynamicStyles.milestoneStatus}>{milestone.status}</Text>
+              </View>
+              {milestone.completed && (
+                <Ionicons name="checkmark-circle" size={24} color={milestone.color} />
+              )}
             </View>
+          ))}
+        </View>
+
+        {/* Üretkenlik Bölümü */}
+        <View style={dynamicStyles.highlightContainer}>
+          <Text style={dynamicStyles.highlightTitle}>🎯 Üretkenlik</Text>
+          
+          <View style={dynamicStyles.highlightItem}>
+            <Text style={dynamicStyles.highlightEmoji}>📈</Text>
+            <Text style={dynamicStyles.highlightLabel}>İlerleme Takibi</Text>
+            <Text style={dynamicStyles.highlightValue}>
+              {entries.length} günlük yazdın • {entries.reduce((total, entry) => total + (entry.content?.length || 0), 0)} kelime
+            </Text>
           </View>
-          <View style={dynamicStyles.modernChart}>
-            <View style={dynamicStyles.chartVisual}>
-              <View style={dynamicStyles.barChart}>
-                {stats.last7DaysMood.map((value, index) => (
-                  <TouchableOpacity key={index} style={dynamicStyles.barContainer}>
-                    <View 
-                      style={[
-                        dynamicStyles.bar, 
-                        { 
-                          height: value > 0 ? (value / 5) * 80 : 8,
-                          backgroundColor: value >= 4 ? '#4ade80' : value >= 3 ? '#f59e0b' : value > 0 ? '#ef4444' : currentTheme.colors.border
-                        }
-                      ]} 
-                    />
-                    <Text style={dynamicStyles.barLabel}>{['P', 'S', 'Ç', 'P', 'C', 'C', 'P'][index]}</Text>
-                    {value > 0 && (
-                      <Text style={dynamicStyles.barValue}>{value}</Text>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            <View style={dynamicStyles.chartLegend}>
-              <View style={dynamicStyles.legendItem}>
-                <View style={[dynamicStyles.legendDot, { backgroundColor: '#4ade80' }]} />
-                <Text style={dynamicStyles.legendText}>İyi (4-5)</Text>
-              </View>
-              <View style={dynamicStyles.legendItem}>
-                <View style={[dynamicStyles.legendDot, { backgroundColor: '#f59e0b' }]} />
-                <Text style={dynamicStyles.legendText}>Orta (3)</Text>
-              </View>
-              <View style={dynamicStyles.legendItem}>
-                <View style={[dynamicStyles.legendDot, { backgroundColor: '#ef4444' }]} />
-                <Text style={dynamicStyles.legendText}>Kötü (1-2)</Text>
-              </View>
-            </View>
+
+          <View style={dynamicStyles.highlightItem}>
+            <Text style={dynamicStyles.highlightEmoji}>🏆</Text>
+            <Text style={dynamicStyles.highlightLabel}>Başarılarım</Text>
+            <Text style={dynamicStyles.highlightValue}>
+              {milestones.filter(m => m.completed).length}/{milestones.length} hedef tamamlandı
+            </Text>
+          </View>
+
+          <View style={dynamicStyles.highlightItem}>
+            <Text style={dynamicStyles.highlightEmoji}>📅</Text>
+            <Text style={dynamicStyles.highlightLabel}>Haftalık Rapor</Text>
+            <Text style={dynamicStyles.highlightValue}>
+              Bu hafta {(() => {
+                const startOfWeek = new Date();
+                startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+                startOfWeek.setHours(0, 0, 0, 0);
+                const weeklyEntries = entries.filter(entry => new Date(entry.date) >= startOfWeek);
+                return weeklyEntries.length;
+              })()} günlük yazdın
+            </Text>
+          </View>
+
+          <View style={dynamicStyles.highlightItem}>
+            <Text style={dynamicStyles.highlightEmoji}>⏰</Text>
+            <Text style={dynamicStyles.highlightLabel}>Odaklanma Süresi</Text>
+            <Text style={dynamicStyles.highlightValue}>
+              Ortalama günlük yazma süresi: {entries.length > 0 ? Math.round(entries.reduce((total, entry) => total + (entry.content?.length || 0), 0) / entries.length / 10) : 0} dakika
+            </Text>
           </View>
         </View>
 
-        <View style={dynamicStyles.chartContainer}>
-          <View style={dynamicStyles.chartHeader}>
-            <View style={dynamicStyles.chartTitleContainer}>
-              <Ionicons name="calendar" size={20} color={currentTheme.colors.primary} />
-              <Text style={dynamicStyles.chartTitle}>📅 Haftalık Aktivite</Text>
-            </View>
-          </View>
-          <View style={dynamicStyles.modernChart}>
-            <View style={dynamicStyles.activityGrid}>
-              {stats.weeklyActivity.map((hasEntry, index) => {
-                const dayNames = ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'];
-                return (
-                  <TouchableOpacity key={index} style={dynamicStyles.activityDay}>
-                    <View style={[
-                      dynamicStyles.activityDot,
-                      { backgroundColor: hasEntry ? currentTheme.colors.primary : currentTheme.colors.border }
-                    ]} />
-                    <Text style={dynamicStyles.activityLabel}>{dayNames[index]}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            <View style={dynamicStyles.activityStats}>
-              <Text style={dynamicStyles.activityStatText}>
-                Bu hafta {stats.weeklyActivity.filter(Boolean).length} gün günlük yazdın
-              </Text>
-              <Text style={dynamicStyles.activityStatSubtext}>
-                Hedef: 7 gün
-              </Text>
-              <View style={dynamicStyles.progressBar}>
-                <View style={[
-                  dynamicStyles.progressFill,
-                  { width: `${(stats.weeklyActivity.filter(Boolean).length / 7) * 100}%` }
-                ]} />
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <View style={dynamicStyles.chartContainer}>
-          <View style={dynamicStyles.chartHeader}>
-            <View style={dynamicStyles.chartTitleContainer}>
-              <Ionicons name="pie-chart" size={20} color={currentTheme.colors.primary} />
-              <Text style={dynamicStyles.chartTitle}>🥧 Mood Dağılımı</Text>
-            </View>
-          </View>
-          <View style={dynamicStyles.modernChart}>
-            <View style={dynamicStyles.moodDistribution}>
-              <View style={dynamicStyles.moodItem}>
-                <TouchableOpacity style={[dynamicStyles.moodCircle, { backgroundColor: '#ef4444' }]}>
-                  <Text style={dynamicStyles.moodEmoji}>😢</Text>
-                </TouchableOpacity>
-                <Text style={dynamicStyles.moodLabel}>Kötü (1-2)</Text>
-                <Text style={dynamicStyles.moodPercent}>
-                  {stats.totalEntries > 0 ? Math.round(((stats.moodCounts[1] + stats.moodCounts[2]) / stats.totalEntries) * 100) : 0}%
-                </Text>
-                <Text style={dynamicStyles.moodCount}>
-                  {stats.moodCounts[1] + stats.moodCounts[2]} gün
-                </Text>
-              </View>
-              <View style={dynamicStyles.moodItem}>
-                <TouchableOpacity style={[dynamicStyles.moodCircle, { backgroundColor: '#f59e0b' }]}>
-                  <Text style={dynamicStyles.moodEmoji}>😐</Text>
-                </TouchableOpacity>
-                <Text style={dynamicStyles.moodLabel}>Orta (3)</Text>
-                <Text style={dynamicStyles.moodPercent}>
-                  {stats.totalEntries > 0 ? Math.round((stats.moodCounts[3] / stats.totalEntries) * 100) : 0}%
-                </Text>
-                <Text style={dynamicStyles.moodCount}>
-                  {stats.moodCounts[3]} gün
-                </Text>
-              </View>
-              <View style={dynamicStyles.moodItem}>
-                <TouchableOpacity style={[dynamicStyles.moodCircle, { backgroundColor: '#4ade80' }]}>
-                  <Text style={dynamicStyles.moodEmoji}>😊</Text>
-                </TouchableOpacity>
-                <Text style={dynamicStyles.moodLabel}>İyi (4-5)</Text>
-                <Text style={dynamicStyles.moodPercent}>
-                  {stats.totalEntries > 0 ? Math.round(((stats.moodCounts[4] + stats.moodCounts[5]) / stats.totalEntries) * 100) : 0}%
-                </Text>
-                <Text style={dynamicStyles.moodCount}>
-                  {stats.moodCounts[4] + stats.moodCounts[5]} gün
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
-
-
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

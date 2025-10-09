@@ -181,8 +181,12 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
     navigation.setOptions({
       title: isEditing ? 'Günlüğü Düzenle' : 'Yeni Günlük',
       headerRight: () => (
-        <TouchableOpacity onPress={handleSave} disabled={loading}>
-          <Text style={styles.saveButton}>
+        <TouchableOpacity 
+          style={dynamicStyles.saveButton} 
+          onPress={handleSave} 
+          disabled={loading}
+        >
+          <Text style={dynamicStyles.saveButtonText}>
             {loading ? 'Kaydediliyor...' : 'Kaydet'}
           </Text>
         </TouchableOpacity>
@@ -215,8 +219,11 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
     saveButton: {
       backgroundColor: currentTheme.colors.primary,
       paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingVertical: 12,
       borderRadius: 20,
+      minHeight: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     saveButtonText: {
       color: 'white',
@@ -676,7 +683,6 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   scrollView: {
     flex: 1,

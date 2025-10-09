@@ -9,12 +9,17 @@ import {
   Switch,
   Modal,
   Platform,
+  TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { useDiary } from '../hooks/useDiary';
 import { getAllInsights } from '../utils/insightsEngine';
+import { getProfile, updateProfile, createProfile } from '../services/profileService';
+import { backupToCloud, restoreFromCloud, clearAllData, downloadUserData } from '../services/backupService';
+import { updateEmail, updatePassword } from '../lib/supabase';
 // import { View } from 'moti'; // Removed for now
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
@@ -26,7 +31,22 @@ import {
   scheduleAllNotifications,
   cancelAllNotifications 
 } from '../services/notificationService';
+import {
+  requestNotificationPermission,
+  saveNotificationSettings,
+  loadNotificationSettings,
+  scheduleMotivationNotifications,
+  cancelMotivationNotifications,
+  sendTestNotification,
+  sendTaskReminderNotification,
+  sendMissingUserNotification,
+  scheduleTaskReminder,
+  scheduleDailyTaskCheck
+} from '../services/motivationNotificationService';
+import { recordUserActivity, checkUserActivityAndNotify } from '../services/userActivityService';
 import * as Notifications from 'expo-notifications';
+import { useTimer } from '../contexts/TimerContext';
+import ModernToggle from '../components/ModernToggle';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -53,13 +73,38 @@ interface FontOption {
 }
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshSession } = useAuth();
   const { currentTheme, setTheme, themes } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const { entries } = useDiary(user?.uid);
+  const { timerState, startTimer, pauseTimer, stopTimer, resetTimer } = useTimer();
   const [reminderTime, setReminderTime] = useState('21:00');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  
+  // Motivasyon bildirim ayarları
+  const [motivationSettings, setMotivationSettings] = useState({
+    morningEnabled: true,
+    lunchEnabled: true,
+    eveningEnabled: true,
+    morningTime: '08:00',
+    lunchTime: '12:00',
+    eveningTime: '18:00',
+  });
   const [selectedTheme, setSelectedTheme] = useState(currentTheme.name);
   const [loading, setLoading] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileData, setProfileData] = useState({
+    full_name: user?.displayName || '',
+    bio: '',
+  });
+  
+  // Email ve şifre değiştirme modalları
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [selectedFont, setSelectedFont] = useState('system');
   // const [notificationSound, setNotificationSound] = useState('default'); // Kaldırıldı
@@ -72,9 +117,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showWeeklyReportModal, setShowWeeklyReportModal] = useState(false);
   const [showFocusTimeModal, setShowFocusTimeModal] = useState(false);
-  const [isFocusActive, setIsFocusActive] = useState(false);
-  const [focusTime, setFocusTime] = useState(25 * 60); // 25 dakika saniye cinsinden
-  const [focusTimerId, setFocusTimerId] = useState<NodeJS.Timeout | null>(null);
   
   // Custom Alert States
   const [showCustomAlert, setShowCustomAlert] = useState(false);
@@ -85,6 +127,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     primaryButton: null as any,
     secondaryButton: null as any,
   });
+
+  // Avatar renk fonksiyonu
+  const getAvatarColor = (name: string) => {
+    const colors = [
+      '#3b82f6', // Mavi
+      '#10b981', // Yeşil
+      '#8b5cf6', // Mor
+      '#f59e0b', // Sarı
+      '#ef4444', // Kırmızı
+      '#06b6d4', // Cyan
+      '#84cc16', // Lime
+      '#f97316', // Turuncu
+    ];
+    
+    const firstChar = name.charAt(0).toUpperCase();
+    const charCode = firstChar.charCodeAt(0);
+    return colors[charCode % colors.length];
+  };
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -114,16 +174,140 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     userInfo: {
       flexDirection: 'row',
       alignItems: 'center',
+      gap: 12,
+    },
+    avatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    avatarText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: 'white',
+    },
+    languageOption: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    languageOptionSelected: {
+      borderColor: currentTheme.colors.primary,
+      backgroundColor: currentTheme.colors.primary,
+    },
+    languageOptionContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+    },
+    languageOptionFlag: {
+      fontSize: 24,
+      marginRight: 12,
+    },
+    languageOptionFlagSelected: {
+      // Seçili durumda bayrak stili
+    },
+    languageOptionText: {
+      flex: 1,
+    },
+    languageOptionTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginBottom: 2,
+    },
+    languageOptionTitleSelected: {
+      color: 'white',
+    },
+    languageOptionSubtitle: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+    },
+    languageOptionSubtitleSelected: {
+      color: 'rgba(255, 255, 255, 0.8)',
+    },
+    // Renk Paleti Stilleri
+    colorPaletteContainer: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    colorPaletteHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 4,
+    },
+    colorPaletteTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+    },
+    colorPaletteSubtitle: {
+      fontSize: 13,
+      color: currentTheme.colors.secondary,
+      marginBottom: 16,
+    },
+    colorPaletteScroll: {
+      marginHorizontal: -4,
+    },
+    colorPaletteContent: {
+      paddingHorizontal: 4,
+      gap: 12,
+    },
+    colorPaletteItem: {
+      alignItems: 'center',
+      marginRight: 12,
+      padding: 8,
+      borderRadius: 12,
+      minWidth: 80,
+    },
+    colorPaletteItemSelected: {
+      backgroundColor: currentTheme.colors.accent,
+    },
+    colorPaletteCircle: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 8,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    colorPaletteLabel: {
+      fontSize: 11,
+      color: currentTheme.colors.text,
+      textAlign: 'center',
+      fontWeight: '500',
     },
     userName: {
       fontSize: 18,
       fontWeight: 'bold',
       color: currentTheme.colors.text,
-    },
-    userEmail: {
-      fontSize: 14,
-      color: currentTheme.colors.secondary,
-      marginTop: 4,
     },
     section: {
       marginBottom: 32,
@@ -484,6 +668,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       borderRadius: 12,
       alignItems: 'center',
       marginTop: 20,
+      minHeight: 56,
+      justifyContent: 'center',
     },
     saveButtonText: {
       color: 'white',
@@ -712,6 +898,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       borderRadius: 12,
       marginBottom: 10,
       gap: 8,
+      minHeight: 48,
+    },
+    testButtonsRow: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 16,
     },
     testButtonText: {
       color: 'white',
@@ -732,6 +924,102 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     },
     focusButtonContainer: {
       width: '100%',
+    },
+    // Profil Modal Styles
+    profileModalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    profileModalContainer: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 20,
+      width: '90%',
+      maxHeight: '80%',
+      elevation: 10,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+    },
+    profileModalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: currentTheme.colors.border,
+    },
+    profileModalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+    },
+    profileModalCloseButton: {
+      padding: 8,
+    },
+    profileModalContent: {
+      padding: 20,
+    },
+    inputContainer: {
+      marginBottom: 20,
+    },
+    inputLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginBottom: 8,
+    },
+    textInput: {
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 16,
+      backgroundColor: currentTheme.colors.background,
+      color: currentTheme.colors.text,
+    },
+    textArea: {
+      height: 100,
+      textAlignVertical: 'top',
+    },
+    inputHint: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      marginTop: 4,
+      fontStyle: 'italic',
+    },
+    profileModalButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+    },
+    profileModalButton: {
+      flex: 1,
+      paddingVertical: 16,
+      borderRadius: 12,
+      marginHorizontal: 8,
+    },
+    profileModalButtonPrimary: {
+      backgroundColor: '#3b82f6',
+    },
+    profileModalButtonSecondary: {
+      backgroundColor: currentTheme.colors.card,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+    },
+    profileModalButtonTextPrimary: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+    profileModalButtonTextSecondary: {
+      color: currentTheme.colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
     },
   });
 
@@ -769,7 +1057,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   useEffect(() => {
     loadSettings();
-  }, []);
+    loadProfile();
+    loadMotivationSettings();
+  }, [user?.uid]);
 
   const loadSettings = async () => {
     try {
@@ -787,6 +1077,29 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     }
   };
 
+  const loadMotivationSettings = async () => {
+    try {
+      const settings = await loadNotificationSettings();
+      setMotivationSettings(settings);
+    } catch (error) {
+      console.error('Error loading motivation settings:', error);
+    }
+  };
+
+  const saveMotivationSettings = async (newSettings: typeof motivationSettings) => {
+    try {
+      await saveNotificationSettings(newSettings);
+      setMotivationSettings(newSettings);
+      
+      // Bildirimleri yeniden zamanla
+      await scheduleMotivationNotifications();
+      
+      console.log('Motivation settings saved:', newSettings);
+    } catch (error) {
+      console.error('Error saving motivation settings:', error);
+    }
+  };
+
   const saveReminderTime = async (time: string) => {
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -795,6 +1108,285 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       console.log('Reminder time saved:', time);
     } catch (error) {
       console.error('Error saving reminder time:', error);
+    }
+  };
+
+  const loadProfile = async () => {
+    if (!user?.uid) return;
+    
+    try {
+      const profile = await getProfile(user.uid);
+      if (profile) {
+        setProfileData({
+          full_name: profile.full_name || user.displayName || '',
+          bio: profile.bio || '',
+        });
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const saveProfile = async () => {
+    if (!user?.uid) {
+      showAlert('❌ Hata', 'Kullanıcı bilgisi bulunamadı.', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      return;
+    }
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      
+      console.log('💾 Saving profile for user:', user.uid);
+      console.log('📝 Profile data:', profileData);
+      
+      // Önce profil var mı kontrol et
+      const existingProfile = await getProfile(user.uid);
+      console.log('🔍 Existing profile:', existingProfile);
+      
+      if (existingProfile) {
+        // Profil güncelle
+        console.log('🔄 Updating existing profile...');
+        await updateProfile(user.uid, profileData);
+        console.log('✅ Profile updated successfully');
+      } else {
+        // Yeni profil oluştur
+        console.log('🆕 Creating new profile...');
+        await createProfile(user.uid, profileData);
+        console.log('✅ Profile created successfully');
+      }
+      
+      setShowProfileModal(false);
+      showAlert('✅ Profil Güncellendi', 'Profil bilgileriniz başarıyla kaydedildi.', 'success', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+    } catch (error: any) {
+      console.error('❌ Error saving profile:', error);
+      const errorMessage = error?.message || error?.toString() || 'Bilinmeyen hata';
+      showAlert('❌ Hata', `Profil kaydedilemedi: ${errorMessage}`, 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+    }
+  };
+
+  const handleBackup = async () => {
+    if (!user?.uid) return;
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      showAlert('📤 Yedekleme Başlatılıyor', 'Verileriniz Supabase bulutuna yedekleniyor...', 'info', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+
+      const success = await backupToCloud(user.uid);
+      
+      if (success) {
+        showAlert('✅ Yedekleme Tamamlandı', 'Verileriniz başarıyla Supabase bulutuna yedeklendi.', 'success', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+      } else {
+        showAlert('❌ Yedekleme Hatası', 'Verileriniz yedeklenemedi. Lütfen tekrar deneyin.', 'error', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+      }
+    } catch (error) {
+      console.error('Backup error:', error);
+      showAlert('❌ Yedekleme Hatası', 'Verileriniz yedeklenemedi: ' + error, 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+    }
+  };
+
+  // Email değiştirme fonksiyonu
+  const handleEmailChange = async () => {
+    if (!newEmail.trim()) {
+      showAlert('❌ Hata', 'Email adresi boş olamaz.', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      showAlert('❌ Hata', 'Geçerli bir email adresi girin.', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      return;
+    }
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setShowEmailModal(false);
+      
+      showAlert('📧 Email Güncelleniyor', 'Email adresiniz güncelleniyor...', 'info', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+
+      // Önce session'ı yenile
+      const sessionRefreshed = await refreshSession();
+      if (!sessionRefreshed) {
+        showAlert('⚠️ Oturum Sorunu', 'Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.', 'error', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+        return;
+      }
+
+      await updateEmail(newEmail);
+      
+      showAlert('✅ Başarılı!', 'Email adresiniz başarıyla güncellendi. Yeni email adresinize doğrulama mesajı gönderildi.', 'success', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      
+      setNewEmail('');
+    } catch (error) {
+      console.error('Email update error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      showAlert('❌ Hata', 'Email güncellenirken hata oluştu: ' + errorMessage, 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+    }
+  };
+
+  // Dil değiştirme fonksiyonu
+  const handleLanguageChange = (newLanguage: 'tr' | 'en') => {
+    setLanguage(newLanguage);
+    setShowLanguageModal(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  // Şifre değiştirme fonksiyonu
+  const handlePasswordChange = async () => {
+    if (!newPassword.trim()) {
+      showAlert('❌ Hata', 'Yeni şifre boş olamaz.', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      showAlert('❌ Hata', 'Şifre en az 6 karakter olmalıdır.', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showAlert('❌ Hata', 'Şifreler eşleşmiyor.', 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      return;
+    }
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setShowPasswordModal(false);
+      
+      showAlert('🔑 Şifre Güncelleniyor', 'Şifreniz güncelleniyor...', 'info', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+
+      // Önce session'ı yenile
+      const sessionRefreshed = await refreshSession();
+      if (!sessionRefreshed) {
+        showAlert('⚠️ Oturum Sorunu', 'Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.', 'error', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+        return;
+      }
+
+      await updatePassword(newPassword);
+      
+      showAlert('✅ Başarılı!', 'Şifreniz başarıyla güncellendi.', 'success', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+      
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Password update error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      showAlert('❌ Hata', 'Şifre güncellenirken hata oluştu: ' + errorMessage, 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+    }
+  };
+
+  const handleDownloadData = async () => {
+    if (!user?.uid) return;
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      showAlert('📥 Veri İndiriliyor', 'Verileriniz hazırlanıyor...', 'info', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
+
+      const userData = await downloadUserData(user.uid);
+      
+      if (userData) {
+        showAlert('✅ Veri Hazır!', `Verileriniz JSON formatında hazırlandı.\n\nDosya boyutu: ${(userData.length / 1024).toFixed(1)} KB\n\nVerilerinizi kopyalamak için console\'u kontrol edin.`, 'success', {
+          text: 'Tamam',
+          onPress: () => {
+            console.log('📄 USER DATA EXPORT:', userData);
+            setShowCustomAlert(false);
+          },
+          style: 'primary'
+        });
+      } else {
+        showAlert('❌ İndirme Hatası', 'Verileriniz indirilemedi. Lütfen tekrar deneyin.', 'error', {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      showAlert('❌ İndirme Hatası', 'Verileriniz indirilemedi: ' + error, 'error', {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      });
     }
   };
 
@@ -952,132 +1544,58 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   };
 
   const startFocusSession = () => {
-    setIsFocusActive(true);
-    
-    // Eğer focusTime 0 ise yeni oturum, değilse devam et
-    if (focusTime === 0) {
-      setFocusTime(25 * 60); // Yeni 25 dakikalık oturum
-    }
-    
-    // Önceki timer'ı temizle
-    if (focusTimerId) {
-      clearInterval(focusTimerId);
-    }
-    
-    // Yeni timer başlat
-    const timer = setInterval(() => {
-      setFocusTime((prevTime) => {
-        if (prevTime <= 1) {
-          // Süre bitti
-          clearInterval(timer);
-          setFocusTimerId(null);
-          setIsFocusActive(false);
-          showAlert(
-            '🎉 Odaklanma Tamamlandı!',
-            '25 dakikalık odaklanma süreniz bitti. Şimdi 5 dakika mola verebilirsiniz!',
-            'success',
-            {
-              text: '☕ Mola Ver',
-              onPress: () => {
-                setShowCustomAlert(false);
-                startBreak();
-              },
-              style: 'primary'
-            },
-            {
-              text: '🔄 Yeni Oturum',
-              onPress: () => {
-                setShowCustomAlert(false);
-                setFocusTime(25 * 60);
-                startFocusSession();
-              },
-              style: 'secondary'
-            }
-          );
-          return 0;
+    if (!timerState.isActive) {
+      // Yeni timer başlat
+      startTimer(25, 'focus', 'Odaklanma');
+      setShowFocusTimeModal(false); // Modalı kapat
+      showAlert(
+        '🎯 Odaklanma Başladı!',
+        '25 dakikalık odaklanma süreniz başladı. Sağ üstteki mini zamanlayıcıdan takip edebilirsiniz!',
+        'success',
+        {
+          text: 'Tamam',
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
         }
-        return prevTime - 1;
-      });
-    }, 1000);
-    
-    setFocusTimerId(timer);
+      );
+    } else if (timerState.isPaused) {
+      // Duraklatılmış timer'ı devam ettir
+      // Timer Context'te resumeTimer fonksiyonu var
+      setShowFocusTimeModal(false);
+    }
   };
 
   const startBreak = () => {
-    setIsFocusActive(true);
-    setFocusTime(5 * 60); // 5 dakika mola
-    
-    // Önceki timer'ı temizle
-    if (focusTimerId) {
-      clearInterval(focusTimerId);
-    }
-    
-    const timer = setInterval(() => {
-      setFocusTime((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          setFocusTimerId(null);
-          setIsFocusActive(false);
-          showAlert(
-            '☕ Mola Bitti!',
-            'Mola süreniz tamamlandı. Yeni bir odaklanma oturumu başlatabilirsiniz!',
-            'success',
-            {
-              text: '🚀 Başla',
-              onPress: () => {
-                setShowCustomAlert(false);
-                startFocusSession();
-              },
-              style: 'primary'
-            }
-          );
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-    
-    setFocusTimerId(timer);
+    startTimer(5, 'break', 'Mola');
+    setShowFocusTimeModal(false);
+    showAlert(
+      '☕ Mola Başladı!',
+      '5 dakikalık mola süreniz başladı. İyi dinlenmeler!',
+      'success',
+      {
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
+        style: 'primary'
+      }
+    );
   };
 
   const stopFocusSession = () => {
-    // Timer'ı durdur ama focusTime'ı koru
-    if (focusTimerId) {
-      clearInterval(focusTimerId);
-      setFocusTimerId(null);
-    }
-    setIsFocusActive(false);
+    stopTimer();
     showAlert(
-      '⏸️ Odaklanma Duraklatıldı',
-      'Odaklanma oturumunuz duraklatıldı. Devam etmek için "Başlat" butonuna basın.',
+      '⏹️ Odaklanma Durduruldu',
+      'Odaklanma oturumunuz durduruldu.',
       'info',
       {
-        text: '▶️ Devam Et',
-        onPress: () => {
-          setShowCustomAlert(false);
-          startFocusSession();
-        },
+        text: 'Tamam',
+        onPress: () => setShowCustomAlert(false),
         style: 'primary'
-      },
-      {
-        text: '🔄 Sıfırla',
-        onPress: () => {
-          setShowCustomAlert(false);
-          resetFocusSession();
-        },
-        style: 'secondary'
       }
     );
   };
 
   const resetFocusSession = () => {
-    // Timer'ı durdur ve sıfırla
-    if (focusTimerId) {
-      clearInterval(focusTimerId);
-      setFocusTimerId(null);
-    }
-    setIsFocusActive(false);
-    setFocusTime(25 * 60);
+    resetTimer();
     showAlert(
       '🔄 Oturum Sıfırlandı',
       'Odaklanma oturumunuz sıfırlandı. Yeni bir oturum başlatabilirsiniz.',
@@ -1140,15 +1658,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       '🚪 Çıkış Yap',
       'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
       'warning',
-      {
+        {
         text: '✅ Çıkış Yap',
-        onPress: async () => {
+          onPress: async () => {
           setShowCustomAlert(false);
-          setLoading(true);
-          try {
-            await signOut();
-          } catch (error) {
-            setLoading(false);
+            setLoading(true);
+            try {
+              await signOut();
+            } catch (error) {
+              setLoading(false);
             showAlert('Hata', 'Çıkış yapılırken bir hata oluştu', 'error', {
               text: 'Tamam',
               onPress: () => setShowCustomAlert(false),
@@ -1202,24 +1720,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const TimePicker = () => (
     <View style={dynamicStyles.timePickerContainer}>
       <Text style={dynamicStyles.timePickerLabel}>Hatırlatma Saati</Text>
-      <View style={dynamicStyles.timePicker}>
-        {['18:00', '19:00', '20:00', '21:00', '22:00'].map((time) => (
-          <TouchableOpacity
-            key={time}
-            style={[
-              dynamicStyles.timeOption,
-              reminderTime === time && dynamicStyles.selectedTimeOption,
-            ]}
-            onPress={() => saveReminderTime(time)}
-          >
-            <Text style={[
-              dynamicStyles.timeOptionText,
-              reminderTime === time && dynamicStyles.selectedTimeOptionText,
-            ]}>
-              {time}
-            </Text>
-          </TouchableOpacity>
-        ))}
+    <View style={dynamicStyles.timePicker}>
+      {['18:00', '19:00', '20:00', '21:00', '22:00'].map((time) => (
+        <TouchableOpacity
+          key={time}
+          style={[
+            dynamicStyles.timeOption,
+            reminderTime === time && dynamicStyles.selectedTimeOption,
+          ]}
+          onPress={() => saveReminderTime(time)}
+        >
+          <Text style={[
+            dynamicStyles.timeOptionText,
+            reminderTime === time && dynamicStyles.selectedTimeOptionText,
+          ]}>
+            {time}
+          </Text>
+        </TouchableOpacity>
+      ))}
       </View>
     </View>
   );
@@ -1285,8 +1803,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         
         <View style={dynamicStyles.userCard}>
           <View style={dynamicStyles.userInfo}>
+            <View style={[
+              dynamicStyles.avatar,
+              { backgroundColor: getAvatarColor(user?.displayName || 'Kullanıcı') }
+            ]}>
+              <Text style={dynamicStyles.avatarText}>
+                {(user?.displayName || 'Kullanıcı').charAt(0).toUpperCase()}
+              </Text>
+            </View>
             <Text style={dynamicStyles.userName}>{user?.displayName || 'Kullanıcı'}</Text>
-            <Text style={dynamicStyles.userEmail}>{user?.email}</Text>
           </View>
         </View>
       </View>
@@ -1299,11 +1824,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           title="Günlük Hatırlatma"
           subtitle="Her gün günlük yazmanızı hatırlatır"
           rightComponent={
-            <Switch
+            <ModernToggle
               value={notificationsEnabled}
               onValueChange={saveNotificationsEnabled}
-              trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary }}
-              thumbColor={notificationsEnabled ? 'white' : currentTheme.colors.secondary}
+              type="day"
             />
           }
         />
@@ -1312,14 +1836,185 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <>
             <View style={{ marginTop: 12 }}>
               <TimePicker />
-            </View>
-            
+      </View>
+
             {/* Sessiz saatler kaldırıldı - Sistem ayarlarından kontrol edilir */}
             
             {/* Titreşim ayarı kaldırıldı - Sistem ayarlarından kontrol edilir */}
             
             {/* Bildirim Sesi kaldırıldı - Artık tek bildirim var */}
 
+            {/* Motivasyon Bildirimleri */}
+            <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: currentTheme.colors.border }}>
+              <Text style={[dynamicStyles.sectionTitle, { fontSize: 16, marginBottom: 12 }]}>💫 Motivasyon Bildirimleri</Text>
+        
+        <SettingItem
+                icon="sunny-outline"
+                title="Sabah Motivasyonu"
+                subtitle={`${motivationSettings.morningTime} - Güne pozitif başlangıç`}
+                rightComponent={
+                  <ModernToggle
+                    value={motivationSettings.morningEnabled}
+                    onValueChange={(value) => saveMotivationSettings({...motivationSettings, morningEnabled: value})}
+                    type="day"
+                  />
+                }
+        />
+        
+        <SettingItem
+                icon="partly-sunny-outline"
+                title="Öğlen Motivasyonu"
+                subtitle={`${motivationSettings.lunchTime} - Gün ortası enerji`}
+                rightComponent={
+                  <ModernToggle
+                    value={motivationSettings.lunchEnabled}
+                    onValueChange={(value) => saveMotivationSettings({...motivationSettings, lunchEnabled: value})}
+                    type="day"
+                  />
+                }
+              />
+              
+              <SettingItem
+                icon="moon-outline"
+                title="Akşam Motivasyonu"
+                subtitle={`${motivationSettings.eveningTime} - Gün değerlendirmesi`}
+                rightComponent={
+                  <ModernToggle
+                    value={motivationSettings.eveningEnabled}
+                    onValueChange={(value) => saveMotivationSettings({...motivationSettings, eveningEnabled: value})}
+                    type="night"
+                  />
+                }
+              />
+              
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#8b5cf6', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await sendTestNotification();
+                    showAlert('✅ Test Bildirimi', 'Test bildirimi gönderildi! 2 saniye sonra gelecek.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="send" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>Test Bildirimi</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#10b981', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await sendTaskReminderNotification();
+                    showAlert('📝 Görev Hatırlatıcısı', 'Görev hatırlatıcısı gönderildi! 2 saniye sonra gelecek.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>Görev Hatırlatıcısı</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#ef4444', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await sendMissingUserNotification();
+                    showAlert('😢 Özleyen Kullanıcı', 'Özleyen kullanıcı bildirimi gönderildi! 2 saniye sonra gelecek.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="heart" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>Seni Özledim</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Akıllı Bildirim Testleri */}
+              <Text style={dynamicStyles.sectionTitle}>🧠 Akıllı Bildirim Testleri</Text>
+              <View style={dynamicStyles.testButtonsRow}>
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#f59e0b', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await scheduleTaskReminder();
+                    showAlert('⏰ Görev Hatırlatıcısı', '2 saat sonra görev hatırlatıcısı gelecek!', 'info', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="time" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>2 Saat Sonra Hatırlat</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#6366f1', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await scheduleDailyTaskCheck();
+                    showAlert('📝 Günlük Kontrol', 'Akşam 20:00\'de günlük görev kontrolü gelecek!', 'info', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="calendar" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>Günlük Kontrol (20:00)</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={dynamicStyles.testButtonsRow}>
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#ec4899', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await recordUserActivity('task_created');
+                    showAlert('📝 Aktivite Kaydedildi', 'Görev oluşturma aktivitesi kaydedildi!', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>Görev Aktivitesi</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[dynamicStyles.testButton, { backgroundColor: '#14b8a6', flex: 1, minWidth: '48%' }]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await checkUserActivityAndNotify();
+                    showAlert('🔍 Aktivite Kontrolü', 'Kullanıcı aktivitesi kontrol edildi!', 'info', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }}
+                >
+                  <Ionicons name="search" size={20} color="white" />
+                  <Text style={dynamicStyles.testButtonText}>Aktivite Kontrolü</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            
             {/* Test Butonları - Geliştirme için */}
             <View style={dynamicStyles.testButtonsContainer}>
               <Text style={dynamicStyles.testSectionTitle}>🧪 Test Araçları</Text>
@@ -1419,8 +2114,31 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                       console.log('Listing scheduled notifications...');
                       const notifications = await listScheduledNotifications();
                       console.log('Found notifications:', notifications);
+                      
+                      if (notifications && notifications.length > 0) {
+                        const notificationList = notifications.map((notif, index) => 
+                          `${index + 1}. ${notif.content?.title || 'Başlıksız'} - ${new Date(notif.trigger?.date || Date.now()).toLocaleString('tr-TR')}`
+                        ).join('\n');
+                        
+                        showAlert('📋 Planlı Bildirimler', `Toplam ${notifications.length} bildirim bulundu:\n\n${notificationList}`, 'success', {
+                          text: 'Tamam',
+                          onPress: () => setShowCustomAlert(false),
+                          style: 'primary'
+                        });
+                      } else {
+                        showAlert('📋 Planlı Bildirimler', 'Henüz planlı bildirim bulunamadı. Önce bildirimleri planlayın.', 'info', {
+                          text: 'Tamam',
+                          onPress: () => setShowCustomAlert(false),
+                          style: 'primary'
+                        });
+                      }
                     } catch (error) {
                       console.error('List notifications error:', error);
+                      showAlert('❌ Hata', 'Bildirimler listelenirken hata oluştu: ' + error, 'error', {
+                        text: 'Tamam',
+                        onPress: () => setShowCustomAlert(false),
+                        style: 'primary'
+                      });
                     }
                   }, 100);
                 }}
@@ -1488,6 +2206,35 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 <Ionicons name="close-circle" size={20} color="white" />
                 <Text style={dynamicStyles.testButtonText}>Tüm Bildirimleri İptal Et</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[dynamicStyles.testButton, { backgroundColor: '#f59e0b' }]}
+                activeOpacity={0.7}
+                onPress={async () => {
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  
+                  if (!user?.uid) return;
+                  
+                  try {
+                    // AsyncStorage'dan tüm diary verilerini sil
+                    await AsyncStorage.removeItem(`diary_entries_${user.uid}`);
+                    showAlert('✅ Temizlendi!', 'Tüm günlük verileri silindi. Uygulamayı yeniden başlatın.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  } catch (error) {
+                    showAlert('❌ Hata', 'Veriler silinirken hata oluştu: ' + error, 'error', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  }
+                }}
+              >
+                <Ionicons name="trash" size={20} color="white" />
+                <Text style={dynamicStyles.testButtonText}>Mock Data'yı Temizle</Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
@@ -1496,11 +2243,56 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <View style={dynamicStyles.section}>
         <Text style={dynamicStyles.sectionTitle}>Görünüm</Text>
         
+        {/* Renk Paleti Seçici */}
+        <View style={dynamicStyles.colorPaletteContainer}>
+          <View style={dynamicStyles.colorPaletteHeader}>
+            <Ionicons name="color-filter-outline" size={20} color={currentTheme.colors.primary} />
+            <Text style={dynamicStyles.colorPaletteTitle}>Renk Paleti</Text>
+          </View>
+          <Text style={dynamicStyles.colorPaletteSubtitle}>Favori rengini seç</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={dynamicStyles.colorPaletteScroll}
+            contentContainerStyle={dynamicStyles.colorPaletteContent}
+          >
+            {/* UI Temaları */}
+            {themes.map((theme) => (
+              <TouchableOpacity
+                key={theme.name}
+                style={[
+                  dynamicStyles.colorPaletteItem,
+                  currentTheme.name === theme.name && dynamicStyles.colorPaletteItemSelected
+                ]}
+                onPress={async () => {
+                  await setTheme(theme.name);
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }}
+              >
+                <View 
+                  style={[
+                    dynamicStyles.colorPaletteCircle,
+                    { backgroundColor: theme.colors.primary }
+                  ]}
+                >
+                  {currentTheme.name === theme.name && (
+                    <Ionicons name="checkmark" size={24} color="white" />
+                  )}
+                </View>
+                <Text style={dynamicStyles.colorPaletteLabel}>{theme.label}</Text>
+              </TouchableOpacity>
+            ))}
+            
+            
+          </ScrollView>
+        </View>
+
+
         <SettingItem
-          icon="color-palette-outline"
-          title="Tema"
-          subtitle="Uygulama temasını seçin"
-          onPress={() => navigation.navigate('ThemeSelection' as never)}
+          icon="language-outline"
+          title={t('settings.language')}
+          subtitle={language === 'tr' ? t('settings.turkish') : t('settings.english')}
+          onPress={() => setShowLanguageModal(true)}
         />
         
         {/* Font Selection kaldırıldı */}
@@ -1517,37 +2309,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         />
       </View>
 
-      <View style={dynamicStyles.section}>
-        <Text style={dynamicStyles.sectionTitle}>🎯 Üretkenlik</Text>
-        
-        <SettingItem
-          icon="trending-up-outline"
-          title="İlerleme Takibi"
-          subtitle="Günlük hedeflerinizi ve ilerlemenizi görün"
-          onPress={() => setShowProgressModal(true)}
-        />
-        
-        <SettingItem
-          icon="trophy-outline"
-          title="Başarılarım"
-          subtitle="Kazanılan rozetler ve başarılar"
-          onPress={() => setShowAchievementsModal(true)}
-        />
-        
-        <SettingItem
-          icon="calendar-outline"
-          title="Haftalık Rapor"
-          subtitle="Haftalık aktivite ve mood raporu"
-          onPress={() => setShowWeeklyReportModal(true)}
-        />
-        
-        <SettingItem
-          icon="time-outline"
-          title="Odaklanma Süresi"
-          subtitle="Günlük yazma ve üretkenlik sürenizi takip edin"
-          onPress={() => setShowFocusTimeModal(true)}
-        />
-      </View>
 
       <View style={dynamicStyles.section}>
         <Text style={dynamicStyles.sectionTitle}>Veri & Yedekleme</Text>
@@ -1555,12 +2316,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <SettingItem
           icon="cloud-upload-outline"
           title="Veri Yedekleme"
-          subtitle="Günlüklerinizi buluta yedekleyin"
-          onPress={() => showAlert('📤 Veri Yedekleme', 'Günlük verileriniz yedekleniyor...', 'info', {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          })}
+          subtitle="Günlüklerinizi Supabase bulutuna yedekleyin"
+          onPress={handleBackup}
         />
         
         <SettingItem
@@ -1605,55 +2362,39 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           icon="person-outline"
           title="Profil Bilgileri"
           subtitle="Ad, email ve profil fotoğrafı"
-          onPress={() => showAlert('Profil Bilgileri', 'Bu özellik yakında eklenecek!', 'info', {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          })}
+          onPress={() => {
+            setShowProfileModal(true);
+            loadProfile();
+          }}
         />
         
         <SettingItem
           icon="mail-outline"
           title="Email Değiştir"
           subtitle="Hesap email adresinizi değiştirin"
-          onPress={() => showAlert('Email Değiştir', 'Bu özellik yakında eklenecek!', 'info', {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          })}
+          onPress={() => {
+            setNewEmail(user?.email || '');
+            setShowEmailModal(true);
+          }}
         />
         
         <SettingItem
           icon="key-outline"
           title="Şifre Değiştir"
           subtitle="Hesap şifrenizi güncelleyin"
-          onPress={() => showAlert('Şifre Değiştir', 'Bu özellik yakında eklenecek!', 'info', {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          })}
+          onPress={() => {
+            setNewPassword('');
+            setConfirmPassword('');
+            setShowPasswordModal(true);
+          }}
         />
         
-        <SettingItem
-          icon="shield-checkmark-outline"
-          title="Hesap Güvenliği"
-          subtitle="2FA ve güvenlik ayarları"
-          onPress={() => showAlert('Hesap Güvenliği', 'Bu özellik yakında eklenecek!', 'info', {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          })}
-        />
         
         <SettingItem
           icon="download-outline"
           title="Verilerimi İndir"
           subtitle="Tüm günlük verilerinizi JSON formatında indirin"
-          onPress={() => showAlert('Veri İndirme', 'Bu özellik yakında eklenecek!', 'info', {
-            text: 'Tamam',
-            onPress: () => setShowCustomAlert(false),
-            style: 'primary'
-          })}
+          onPress={handleDownloadData}
         />
         
         <SettingItem
@@ -1661,23 +2402,29 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           title="Hesabı Sil"
           subtitle="Tüm verilerinizi kalıcı olarak silin"
           onPress={() => showAlert(
-            '⚠️ Hesap Silme',
-            'Bu işlem geri alınamaz! Tüm günlük verileriniz kalıcı olarak silinecek. Devam etmek istediğinizden emin misiniz?',
+            '🗑️ Hesabı Sil',
+            'Hesabınızı ve tüm verilerinizi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!',
             'error',
             {
-              text: '✅ Evet, Sil',
-              onPress: () => {
+              text: '❌ Evet, Sil',
+              onPress: async () => {
                 setShowCustomAlert(false);
-                showAlert(
-                  '✅ Hesap Silindi',
-                  'Hesabınız başarıyla silindi.',
-                  'success',
-                  {
-                    text: 'Tamam',
-                    onPress: () => setShowCustomAlert(false),
-                    style: 'primary'
+                if (user?.uid) {
+                  const success = await clearAllData(user.uid);
+                  if (success) {
+                    showAlert('✅ Hesap Silindi', 'Hesabınız ve tüm verileriniz başarıyla silindi.', 'success', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
+                  } else {
+                    showAlert('❌ Hata', 'Hesap silinemedi. Lütfen tekrar deneyin.', 'error', {
+                      text: 'Tamam',
+                      onPress: () => setShowCustomAlert(false),
+                      style: 'primary'
+                    });
                   }
-                );
+                }
               },
               style: 'danger'
             },
@@ -1687,6 +2434,80 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               style: 'secondary'
             }
           )}
+        />
+      </View>
+
+      <View style={dynamicStyles.section}>
+        <Text style={dynamicStyles.sectionTitle}>Gizlilik & Güvenlik</Text>
+        
+        <SettingItem
+          icon="shield-outline"
+          title="Gizlilik Politikası"
+          subtitle="Veri kullanımı ve gizlilik haklarınız"
+          onPress={() => showAlert('🔒 Gizlilik Politikası', 'Gizlilik Politikamız:\n\n• Günlük verileriniz sadece sizin cihazınızda ve Supabase bulutunda saklanır\n• Verileriniz üçüncü taraflarla paylaşılmaz\n• Tüm verileriniz şifrelenir\n• İstediğiniz zaman verilerinizi silebilirsiniz\n• Anonim istatistikler için verileriniz anonimleştirilir\n\nDetaylı bilgi için: privacy@dailydiary.app', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
+        />
+        
+        <SettingItem
+          icon="eye-outline"
+          title="Veri Şeffaflığı"
+          subtitle="Hangi verilerinizin nasıl kullanıldığını görün"
+          onPress={() => showAlert('👁️ Veri Şeffaflığı', 'Verileriniz nasıl kullanılıyor:\n\n📝 Günlük Yazıları:\n• Sadece sizin erişiminizde\n• İstatistikler için analiz edilir\n• Anonimleştirilmiş içgörüler oluşturulur\n\n📊 Kullanım İstatistikleri:\n• Giriş yapma zamanları\n• Yazma alışkanlıkları\n• Genel uygulama kullanımı\n\n🔐 Güvenlik:\n• Tüm veriler şifrelenir\n• Supabase RLS ile korunur\n• Sadece siz erişebilirsiniz', 'info', {
+            text: 'Tamam',
+            onPress: () => setShowCustomAlert(false),
+            style: 'primary'
+          })}
+        />
+        
+        <SettingItem
+          icon="download-outline"
+          title="Verilerimi İndir"
+          subtitle="Tüm kişisel verilerinizi JSON formatında indirin"
+          onPress={handleDownloadData}
+        />
+        
+        <SettingItem
+          icon="trash-outline"
+          title="Hesabımı Tamamen Sil"
+          subtitle="Tüm verilerinizi kalıcı olarak silin"
+          onPress={() => showAlert('⚠️ Hesap Silme', 'Bu işlem GERİ ALINAMAZ!\n\nSilinecek veriler:\n• Tüm günlük yazıları\n• Profil bilgileri\n• İstatistikler ve içgörüler\n• Kullanım geçmişi\n\nEmin misiniz?', 'error', {
+            text: 'İptal',
+            onPress: () => setShowCustomAlert(false),
+            style: 'secondary'
+          }, {
+            text: 'SİL',
+            onPress: async () => {
+              if (!user?.uid) return;
+              
+              try {
+                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                await clearAllData(user.uid);
+                
+                // AsyncStorage'ı da temizle
+                await AsyncStorage.clear();
+                
+                showAlert('✅ Silindi!', 'Tüm verileriniz kalıcı olarak silindi. Uygulama kapatılacak.', 'success', {
+                  text: 'Tamam',
+                  onPress: async () => {
+                    setShowCustomAlert(false);
+                    // Uygulamayı kapat (Expo'da çalışmaz ama deneyelim)
+                    await signOut();
+                  },
+                  style: 'primary'
+                });
+              } catch (error) {
+                showAlert('❌ Hata', 'Veriler silinirken hata oluştu: ' + error, 'error', {
+                  text: 'Tamam',
+                  onPress: () => setShowCustomAlert(false),
+                  style: 'primary'
+                });
+              }
+            },
+            style: 'destructive'
+          })}
         />
       </View>
 
@@ -1799,72 +2620,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                   </View>
                   <Text style={dynamicStyles.progressValue}>4/7 gün</Text>
                 </View>
-              </View>
+      </View>
             </ScrollView>
           </View>
         </View>
       </Modal>
 
-      {/* İlerleme Takibi Modal */}
-      <Modal
-        visible={showProgressModal}
-        transparent={true}
-        animationType="none"
-        onRequestClose={() => setShowProgressModal(false)}
-      >
-        <TouchableOpacity 
-          style={dynamicStyles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowProgressModal(false)}
-        >
-          <TouchableOpacity 
-            style={dynamicStyles.modalContainer}
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={dynamicStyles.modalHeader}>
-              <Text style={dynamicStyles.modalTitle}>📈 İlerleme Takibi</Text>
-              <TouchableOpacity 
-                style={dynamicStyles.modalCloseButton}
-                onPress={() => setShowProgressModal(false)}
-              >
-                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={dynamicStyles.modalContent}>
-              <View style={styles.progressContainer}>
-                <View style={styles.progressCard}>
-                  <Text style={styles.progressTitle}>📝 Günlük Yazma</Text>
-                  <Text style={styles.progressValue}>15/30 gün</Text>
-                  <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: '50%' }]} />
-                  </View>
-                  <Text style={styles.progressDesc}>Bu ay 15 günlük yazdın</Text>
-                </View>
-                
-                <View style={styles.progressCard}>
-                  <Text style={styles.progressTitle}>💧 Su İçme</Text>
-                  <Text style={styles.progressValue}>8/8 bardak</Text>
-                  <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: '100%', backgroundColor: '#3b82f6' }]} />
-                  </View>
-                  <Text style={styles.progressDesc}>Bugün hedefini tamamladın!</Text>
-                </View>
-                
-                <View style={styles.progressCard}>
-                  <Text style={styles.progressTitle}>🎯 Hedefler</Text>
-                  <Text style={styles.progressValue}>3/5 tamamlandı</Text>
-                  <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: '60%', backgroundColor: '#10b981' }]} />
-                  </View>
-                  <Text style={styles.progressDesc}>Bu hafta 3 hedefini tamamladın</Text>
-                </View>
-              </View>
-            </ScrollView>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
 
       {/* Başarılar Modal */}
       <Modal
@@ -2015,17 +2776,17 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             <ScrollView style={dynamicStyles.modalContent}>
               <View style={dynamicStyles.focusCard}>
                 <Text style={dynamicStyles.focusTitle}>
-                  {isFocusActive ? '🔥 Aktif Odaklanma' : '🎯 Bugünkü Odaklanma'}
+                  {timerState.isActive ? '🔥 Aktif Odaklanma' : '🎯 Bugünkü Odaklanma'}
                 </Text>
                 <View style={dynamicStyles.focusTimer}>
                   <Text style={[
                     dynamicStyles.focusTime,
-                    isFocusActive && { color: '#ff6b35' }
+                    timerState.isActive && { color: '#ff6b35' }
                   ]}>
-                    {formatTime(focusTime)}
+                    {formatTime(timerState.isActive ? timerState.remainingTime : 25 * 60)}
                   </Text>
                   <Text style={dynamicStyles.focusLabel}>
-                    {isFocusActive ? 'kalan süre' : 'dakika'}
+                    {timerState.isActive ? 'kalan süre' : 'dakika'}
                   </Text>
                 </View>
                 <View style={dynamicStyles.focusStats}>
@@ -2039,37 +2800,37 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                   </View>
                 </View>
                 
-                {!isFocusActive ? (
+                {!timerState.isActive ? (
                   <View style={dynamicStyles.focusButtonContainer}>
                     <TouchableOpacity 
                       style={dynamicStyles.startFocusButton}
                       onPress={startFocusSession}
                     >
                       <Text style={dynamicStyles.startFocusText}>
-                        {focusTime === 25 * 60 ? '🚀 Odaklanma Başlat' : '▶️ Devam Et'}
+                        🚀 Odaklanma Başlat
                       </Text>
                     </TouchableOpacity>
-                    {focusTime !== 25 * 60 && (
-                      <TouchableOpacity 
-                        style={[dynamicStyles.startFocusButton, { backgroundColor: '#6b7280', marginTop: 8 }]}
-                        onPress={resetFocusSession}
-                      >
-                        <Text style={dynamicStyles.startFocusText}>🔄 Sıfırla</Text>
-                      </TouchableOpacity>
-                    )}
                   </View>
                 ) : (
-                  <TouchableOpacity 
-                    style={[dynamicStyles.startFocusButton, { backgroundColor: '#dc2626' }]}
-                    onPress={stopFocusSession}
-                  >
-                    <Text style={dynamicStyles.startFocusText}>⏸️ Duraklat</Text>
-                  </TouchableOpacity>
+                  <View style={dynamicStyles.focusButtonContainer}>
+                    <TouchableOpacity 
+                      style={[dynamicStyles.startFocusButton, { backgroundColor: '#dc2626' }]}
+                      onPress={stopFocusSession}
+                    >
+                      <Text style={dynamicStyles.startFocusText}>⏹️ Durdur</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[dynamicStyles.startFocusButton, { backgroundColor: '#6b7280', marginTop: 8 }]}
+                      onPress={resetFocusSession}
+                    >
+                      <Text style={dynamicStyles.startFocusText}>🔄 Sıfırla</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
                 
-                {isFocusActive && (
+                {timerState.isActive && (
                   <Text style={dynamicStyles.focusStatus}>
-                    🍅 Pomodoro tekniği aktif - Odaklan!
+                    🍅 Pomodoro tekniği aktif - Sağ üstten takip edebilirsin!
                   </Text>
                 )}
               </View>
@@ -2079,6 +2840,284 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       </Modal>
 
       {/* Custom Alert */}
+      {/* Profil Modal */}
+      <Modal
+        visible={showProfileModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowProfileModal(false)}
+      >
+        <View style={dynamicStyles.profileModalOverlay}>
+          <View style={dynamicStyles.profileModalContainer}>
+            <View style={dynamicStyles.profileModalHeader}>
+              <Text style={dynamicStyles.profileModalTitle}>👤 Profil Bilgileri</Text>
+              <TouchableOpacity 
+                style={dynamicStyles.profileModalCloseButton}
+                onPress={() => setShowProfileModal(false)}
+              >
+                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={dynamicStyles.profileModalContent}>
+              <View style={dynamicStyles.inputContainer}>
+                <Text style={dynamicStyles.inputLabel}>Ad Soyad</Text>
+                <TextInput
+                  style={dynamicStyles.textInput}
+                  value={profileData.full_name}
+                  onChangeText={(text) => setProfileData({...profileData, full_name: text})}
+                  placeholder="Adınızı girin"
+                  placeholderTextColor={currentTheme.colors.secondary}
+                />
+              </View>
+              
+              <View style={dynamicStyles.inputContainer}>
+                <Text style={dynamicStyles.inputLabel}>Email</Text>
+                <TextInput
+                  style={[dynamicStyles.textInput, { opacity: 0.6 }]}
+                  value={user?.email || ''}
+                  editable={false}
+                  placeholderTextColor={currentTheme.colors.secondary}
+                />
+                <Text style={dynamicStyles.inputHint}>
+                  Email değiştirmek için hesap ayarlarını kullanın
+                </Text>
+              </View>
+              
+              <View style={dynamicStyles.inputContainer}>
+                <Text style={dynamicStyles.inputLabel}>Hakkında</Text>
+                <TextInput
+                  style={[dynamicStyles.textInput, dynamicStyles.textArea]}
+                  value={profileData.bio}
+                  onChangeText={(text) => setProfileData({...profileData, bio: text})}
+                  placeholder="Kendiniz hakkında kısa bir açıklama yazın..."
+                  placeholderTextColor={currentTheme.colors.secondary}
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+              
+              <View style={dynamicStyles.profileModalButtonContainer}>
+                <TouchableOpacity 
+                  style={[dynamicStyles.profileModalButton, dynamicStyles.profileModalButtonSecondary]}
+                  onPress={() => setShowProfileModal(false)}
+                >
+                  <Text style={dynamicStyles.profileModalButtonTextSecondary}>İptal</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[dynamicStyles.profileModalButton, dynamicStyles.profileModalButtonPrimary]}
+                  onPress={saveProfile}
+                >
+                  <Text style={dynamicStyles.profileModalButtonTextPrimary}>Kaydet</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Email Değiştirme Modal */}
+      <Modal
+        visible={showEmailModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowEmailModal(false)}
+      >
+        <View style={dynamicStyles.profileModalOverlay}>
+          <View style={dynamicStyles.profileModalContainer}>
+            <View style={dynamicStyles.profileModalHeader}>
+              <Text style={dynamicStyles.profileModalTitle}>📧 Email Değiştir</Text>
+              <TouchableOpacity 
+                style={dynamicStyles.profileModalCloseButton}
+                onPress={() => setShowEmailModal(false)}
+              >
+                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={dynamicStyles.profileModalContent}>
+              <View style={dynamicStyles.inputContainer}>
+                <Text style={dynamicStyles.inputLabel}>Yeni Email Adresi</Text>
+                <TextInput
+                  style={dynamicStyles.textInput}
+                  value={newEmail}
+                  onChangeText={setNewEmail}
+                  placeholder="yeni@email.com"
+                  placeholderTextColor={currentTheme.colors.secondary}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <Text style={dynamicStyles.inputHint}>
+                  Yeni email adresinize doğrulama mesajı gönderilecek
+                </Text>
+              </View>
+              
+              <View style={dynamicStyles.profileModalButtonContainer}>
+                <TouchableOpacity 
+                  style={[dynamicStyles.profileModalButton, dynamicStyles.profileModalButtonSecondary]}
+                  onPress={() => setShowEmailModal(false)}
+                >
+                  <Text style={dynamicStyles.profileModalButtonTextSecondary}>İptal</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[dynamicStyles.profileModalButton, dynamicStyles.profileModalButtonPrimary]}
+                  onPress={handleEmailChange}
+                >
+                  <Text style={dynamicStyles.profileModalButtonTextPrimary}>Güncelle</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Şifre Değiştirme Modal */}
+      <Modal
+        visible={showPasswordModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPasswordModal(false)}
+      >
+        <View style={dynamicStyles.profileModalOverlay}>
+          <View style={dynamicStyles.profileModalContainer}>
+            <View style={dynamicStyles.profileModalHeader}>
+              <Text style={dynamicStyles.profileModalTitle}>🔑 Şifre Değiştir</Text>
+              <TouchableOpacity 
+                style={dynamicStyles.profileModalCloseButton}
+                onPress={() => setShowPasswordModal(false)}
+              >
+                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={dynamicStyles.profileModalContent}>
+              <View style={dynamicStyles.inputContainer}>
+                <Text style={dynamicStyles.inputLabel}>Yeni Şifre</Text>
+                <TextInput
+                  style={dynamicStyles.textInput}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="En az 6 karakter"
+                  placeholderTextColor={currentTheme.colors.secondary}
+                  secureTextEntry
+                />
+              </View>
+              
+              <View style={dynamicStyles.inputContainer}>
+                <Text style={dynamicStyles.inputLabel}>Şifre Tekrar</Text>
+                <TextInput
+                  style={dynamicStyles.textInput}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Şifrenizi tekrar girin"
+                  placeholderTextColor={currentTheme.colors.secondary}
+                  secureTextEntry
+                />
+              </View>
+              
+              <View style={dynamicStyles.profileModalButtonContainer}>
+                <TouchableOpacity 
+                  style={[dynamicStyles.profileModalButton, dynamicStyles.profileModalButtonSecondary]}
+                  onPress={() => setShowPasswordModal(false)}
+                >
+                  <Text style={dynamicStyles.profileModalButtonTextSecondary}>İptal</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[dynamicStyles.profileModalButton, dynamicStyles.profileModalButtonPrimary]}
+                  onPress={handlePasswordChange}
+                >
+                  <Text style={dynamicStyles.profileModalButtonTextPrimary}>Güncelle</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Dil Seçici Modal */}
+      <Modal
+        visible={showLanguageModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <View style={dynamicStyles.profileModalOverlay}>
+          <View style={dynamicStyles.profileModalContainer}>
+            <View style={dynamicStyles.profileModalHeader}>
+              <Text style={dynamicStyles.profileModalTitle}>🌐 {t('settings.language')}</Text>
+              <TouchableOpacity 
+                style={dynamicStyles.profileModalCloseButton}
+                onPress={() => setShowLanguageModal(false)}
+              >
+                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={dynamicStyles.profileModalContent}>
+              <TouchableOpacity
+                style={[
+                  dynamicStyles.languageOption,
+                  language === 'tr' && dynamicStyles.languageOptionSelected
+                ]}
+                onPress={() => handleLanguageChange('tr')}
+              >
+                <View style={dynamicStyles.languageOptionContent}>
+                  <Text style={[
+                    dynamicStyles.languageOptionFlag,
+                    language === 'tr' && dynamicStyles.languageOptionFlagSelected
+                  ]}>🇹🇷</Text>
+                  <View style={dynamicStyles.languageOptionText}>
+                    <Text style={[
+                      dynamicStyles.languageOptionTitle,
+                      language === 'tr' && dynamicStyles.languageOptionTitleSelected
+                    ]}>{t('settings.turkish')}</Text>
+                    <Text style={[
+                      dynamicStyles.languageOptionSubtitle,
+                      language === 'tr' && dynamicStyles.languageOptionSubtitleSelected
+                    ]}>Türkçe</Text>
+                  </View>
+                  {language === 'tr' && (
+                    <Ionicons name="checkmark-circle" size={24} color={currentTheme.colors.primary} />
+                  )}
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  dynamicStyles.languageOption,
+                  language === 'en' && dynamicStyles.languageOptionSelected
+                ]}
+                onPress={() => handleLanguageChange('en')}
+              >
+                <View style={dynamicStyles.languageOptionContent}>
+                  <Text style={[
+                    dynamicStyles.languageOptionFlag,
+                    language === 'en' && dynamicStyles.languageOptionFlagSelected
+                  ]}>🇺🇸</Text>
+                  <View style={dynamicStyles.languageOptionText}>
+                    <Text style={[
+                      dynamicStyles.languageOptionTitle,
+                      language === 'en' && dynamicStyles.languageOptionTitleSelected
+                    ]}>{t('settings.english')}</Text>
+                    <Text style={[
+                      dynamicStyles.languageOptionSubtitle,
+                      language === 'en' && dynamicStyles.languageOptionSubtitleSelected
+                    ]}>English</Text>
+                  </View>
+                  {language === 'en' && (
+                    <Ionicons name="checkmark-circle" size={24} color={currentTheme.colors.primary} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+
       <CustomAlert
         visible={showCustomAlert}
         title={alertConfig.title}
@@ -2136,5 +3175,101 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     fontStyle: 'italic',
+  },
+  // Profil Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: '90%',
+    maxHeight: '80%',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    backgroundColor: '#f9fafb',
+    color: '#374151',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  inputHint: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginHorizontal: 8,
+  },
+  modalButtonPrimary: {
+    backgroundColor: '#3b82f6',
+  },
+  modalButtonSecondary: {
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  modalButtonTextPrimary: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  modalButtonTextSecondary: {
+    color: '#374151',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

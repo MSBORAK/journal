@@ -9,95 +9,6 @@ export const useDiary = (userId?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Mock data - son 7 günden günlükler
-  const getTodayDate = (daysAgo: number = 0): string => {
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    return date.toISOString().split('T')[0];
-  };
-
-  const mockEntries: DiaryEntry[] = [
-    {
-      id: '1',
-      title: 'Harika Bir Gün',
-      content: 'Bugün çok güzel bir gün geçirdim. Yeni projeme başladım ve çok heyecanlıyım! Sabah erkenden kalktım ve işe koyuldum. Öğlen arkadaşlarla kahve içtik. Akşam yürüyüş yaptım ve kendimi çok iyi hissettim.',
-      mood: 5,
-      tags: ['heyecan', 'proje', 'yeni başlangıç', 'mutlu', 'başarı'],
-      date: getTodayDate(0),
-      createdAt: new Date(Date.now()).toISOString(),
-      updatedAt: new Date(Date.now()).toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Üretken Gün',
-      content: 'Bugün arkadaşlarımla çok güzel vakit geçirdim. Yemek yedik, sohbet ettik. Projede iyi ilerleme kaydettim. Akşam kitap okudum ve rahatladım.',
-      mood: 4,
-      tags: ['arkadaşlık', 'eğlence', 'yemek', 'kitap', 'mutlu'],
-      date: getTodayDate(1),
-      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '3',
-      title: 'Yorucu Ama İyi',
-      content: 'Bugün işte yoğun bir gün geçirdim. Çok yoruldum ama başardım. Akşam dinlendim ve yarına hazırlandım.',
-      mood: 4,
-      tags: ['iş', 'yorgun', 'başarı'],
-      date: getTodayDate(2),
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '4',
-      title: 'Rahat Bir Gün',
-      content: 'Bugün evde dinlendim. Film izledim, kitap okudum. Kendime zaman ayırdım.',
-      mood: 4,
-      tags: ['dinlenme', 'film', 'kitap', 'rahatlama'],
-      date: getTodayDate(3),
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '5',
-      title: 'Motivasyon Günü',
-      content: 'Bugün çok motive oldum. Yeni hedefler belirledim ve planlar yaptım. Gelecek hakkında heyecanlıyım.',
-      mood: 5,
-      tags: ['motivasyon', 'hedefler', 'heyecan', 'mutlu'],
-      date: getTodayDate(4),
-      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '6',
-      title: 'Normal Bir Gün',
-      content: 'Bugün işte normal bir gün geçirdim. Rutin işlerimi yaptım. Akşam hafif bir egzersiz yaptım.',
-      mood: 3,
-      tags: ['iş', 'rutin', 'egzersiz'],
-      date: getTodayDate(5),
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '7',
-      title: 'Keyifli Hafta Sonu',
-      content: 'Bugün hafta sonu olduğu için ailemle vakit geçirdim. Piknik yaptık, doğada yürüdük. Çok güzel bir gündü.',
-      mood: 5,
-      tags: ['aile', 'hafta sonu', 'piknik', 'doğa', 'mutlu'],
-      date: getTodayDate(6),
-      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '8',
-      title: 'güzel',
-      content: 'Bugün çok güzel bir gün geçirdim. Kendimi iyi hissediyorum.',
-      mood: 4, // Pozitif mood - "güzel" başlığına uygun
-      tags: ['güzel', 'mutlu', 'iyi'],
-      date: getTodayDate(7),
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  ];
 
   const fetchEntries = async () => {
     if (!userId) return;
@@ -114,10 +25,9 @@ export const useDiary = (userId?: string) => {
         setEntries(parsedEntries);
         console.log('Loaded entries from AsyncStorage:', parsedEntries.length);
       } else {
-        // İlk kullanımda mock data'yı yükle ve kaydet
-        setEntries(mockEntries);
-        await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(mockEntries));
-        console.log('First time - loaded mock entries:', mockEntries.length);
+        // İlk kullanımda boş array ile başla
+        setEntries([]);
+        console.log('First time - starting with empty entries');
       }
     } catch (err) {
       console.error('Error fetching entries:', err);

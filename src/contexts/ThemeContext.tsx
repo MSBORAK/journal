@@ -27,7 +27,7 @@ const themes: Theme[] = [
     name: 'light',
     label: '✨ Gün Işığı',
     colors: {
-      primary: '#a855f7',
+      primary: '#ffffff',
       background: '#fefefe',
       card: '#ffffff',
       text: '#1f2937',
@@ -41,13 +41,13 @@ const themes: Theme[] = [
     name: 'dark',
     label: '🌙 Gece Işıltısı',
     colors: {
-      primary: '#8b5cf6',
-      background: '#0f0f23',
-      card: '#1a1a2e',
-      text: '#e2e8f0',
-      accent: '#16213e',
+      primary: '#3b82f6',
+      background: '#0f172a',
+      card: '#1e293b',
+      text: '#f8fafc',
+      accent: '#334155',
       secondary: '#94a3b8',
-      border: '#334155',
+      border: '#475569',
       shadow: '#000000',
     },
   },
@@ -55,27 +55,13 @@ const themes: Theme[] = [
     name: 'ocean',
     label: '🌊 Okyanus Esintisi',
     colors: {
-      primary: '#0891b2',
+      primary: '#0ea5e9',
       background: '#f0f9ff',
-      card: '#ffffff',
-      text: '#0e7490',
-      accent: '#e0f2fe',
-      secondary: '#0284c7',
+      card: '#e0f2fe',
+      text: '#0c4a6e',
+      accent: '#bae6fd',
+      secondary: '#0369a1',
       border: '#7dd3fc',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'sunset',
-    label: '🌅 Gün Batımı',
-    colors: {
-      primary: '#ea580c',
-      background: '#fff7ed',
-      card: '#ffffff',
-      text: '#9a3412',
-      accent: '#fed7aa',
-      secondary: '#dc2626',
-      border: '#fdba74',
       shadow: '#000000',
     },
   },
@@ -83,12 +69,12 @@ const themes: Theme[] = [
     name: 'forest',
     label: '🌲 Orman Derinlikleri',
     colors: {
-      primary: '#059669',
+      primary: '#16a34a',
       background: '#f0fdf4',
-      card: '#ffffff',
-      text: '#065f46',
-      accent: '#dcfce7',
-      secondary: '#047857',
+      card: '#dcfce7',
+      text: '#14532d',
+      accent: '#bbf7d0',
+      secondary: '#15803d',
       border: '#86efac',
       shadow: '#000000',
     },
@@ -97,11 +83,11 @@ const themes: Theme[] = [
     name: 'lavender',
     label: '💜 Lavanta Rüyası',
     colors: {
-      primary: '#8b5cf6',
+      primary: '#a855f7',
       background: '#faf5ff',
-      card: '#ffffff',
-      text: '#6b21a8',
-      accent: '#f3e8ff',
+      card: '#f3e8ff',
+      text: '#581c87',
+      accent: '#e9d5ff',
       secondary: '#7c3aed',
       border: '#c4b5fd',
       shadow: '#000000',
@@ -112,30 +98,17 @@ const themes: Theme[] = [
     label: '🌹 Gül Bahçesi',
     colors: {
       primary: '#e11d48',
-      background: '#fff1f2',
-      card: '#ffffff',
-      text: '#9f1239',
-      accent: '#ffe4e6',
-      secondary: '#be123c',
-      border: '#fecaca',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'midnight',
-    label: '🌌 Gece Yarısı',
-    colors: {
-      primary: '#6366f1',
-      background: '#0f0f23',
-      card: '#1e1e3f',
-      text: '#e0e7ff',
-      accent: '#312e81',
-      secondary: '#8b5cf6',
-      border: '#4338ca',
+      background: '#fdf2f8',
+      card: '#fce7f3',
+      text: '#831843',
+      accent: '#f9a8d4',
+      secondary: '#be185d',
+      border: '#f472b6',
       shadow: '#000000',
     },
   },
 ];
+
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -176,8 +149,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   };
 
+
   return (
-    <ThemeContext.Provider value={{ currentTheme, setTheme, themes }}>
+    <ThemeContext.Provider value={{ 
+      currentTheme, 
+      setTheme, 
+      themes
+    }}>
       {children}
     </ThemeContext.Provider>
   );

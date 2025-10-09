@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -6,8 +6,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
+import { LanguageProvider, useLanguage } from './src/i18n/LanguageContext';
+import { TimerProvider } from './src/contexts/TimerContext';
+import FloatingTimer from './src/components/FloatingTimer';
+import BackgroundWrapper from './src/components/BackgroundWrapper';
 // import { FontProvider } from './src/contexts/FontContext'; // Kaldırıldı
 import { Ionicons } from '@expo/vector-icons';
+import { scheduleMotivationNotifications, requestNotificationPermission, scheduleSmartNotifications } from './src/services/motivationNotificationService';
+import { recordUserActivity } from './src/services/userActivityService';
 // import './global.css'; // Disabled for now
 
 // Type definitions for navigation
@@ -54,44 +60,65 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 function MainTabs() {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
+  
+  // Bildirimleri başlat
+  useEffect(() => {
+    const initNotifications = async () => {
+      try {
+        const hasPermission = await requestNotificationPermission();
+        if (hasPermission) {
+          await scheduleMotivationNotifications();
+          await scheduleSmartNotifications();
+          await recordUserActivity('app_launch');
+          console.log('✅ Tüm bildirimler başlatıldı!');
+        }
+      } catch (error) {
+        console.error('❌ Bildirimler başlatılamadı:', error);
+      }
+    };
+    
+    initNotifications();
+  }, []);
   
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: currentTheme.colors.card,
-          borderTopWidth: 1,
-          borderTopColor: currentTheme.colors.border,
-          paddingTop: 8,
-          paddingBottom: 8,
-          height: 80,
-        },
-        tabBarActiveTintColor: currentTheme.colors.primary,
-        tabBarInactiveTintColor: currentTheme.colors.secondary,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
-      }}
-    >
+    <BackgroundWrapper>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: currentTheme.colors.card,
+            borderTopWidth: 0,
+            borderTopColor: 'transparent',
+            paddingTop: 12,
+            paddingBottom: 12,
+            height: 85,
+            shadowColor: currentTheme.colors.shadow,
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 12,
+            elevation: 8,
+            borderRadius: 20,
+            marginHorizontal: 16,
+            marginBottom: 16,
+            position: 'absolute',
+          },
+          tabBarActiveTintColor: currentTheme.colors.primary,
+          tabBarInactiveTintColor: currentTheme.colors.secondary,
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 4,
+          },
+        }}
+      >
       <Tab.Screen
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          title: 'Ana Sayfa',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="History"
-        component={HistoryScreen}
-        options={{
-          title: 'Geçmiş',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
+          title: t('dashboard.title'),
+          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={size + 4} color={color} />
           ),
         }}
       />
@@ -99,9 +126,19 @@ function MainTabs() {
         name="Statistics"
         component={StatisticsScreen}
         options={{
-          title: 'İstatistikler',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="bar-chart-outline" size={size} color={color} />
+          title: ' Yolculuğum',
+          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+            <Ionicons name={focused ? "map" : "map-outline"} size={size + 4} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="History"
+        component={HistoryScreen}
+        options={{
+          title: t('history.title'),
+          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+            <Ionicons name={focused ? "calendar" : "calendar-outline"} size={size + 4} color={color} />
           ),
         }}
       />
@@ -109,18 +146,21 @@ function MainTabs() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          title: 'Ayarlar',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+          title: t('settings.title'),
+          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
+            <Ionicons name={focused ? "settings" : "settings-outline"} size={size + 4} color={color} />
           ),
         }}
       />
-    </Tab.Navigator>
+      </Tab.Navigator>
+    </BackgroundWrapper>
   );
 }
 
 function AppNavigator() {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
+  const { currentTheme } = useTheme();
 
   if (loading) {
     return null; // Loading screen can be added here
@@ -137,11 +177,11 @@ function AppNavigator() {
               component={WriteDiaryScreen}
               options={{
                 headerShown: true,
-                title: 'Yeni Günlük',
+                title: t('diary.writeEntry'),
                 headerStyle: {
-                  backgroundColor: '#f8fafc',
+                  backgroundColor: currentTheme.colors.card,
                 },
-                headerTintColor: '#1f2937',
+                headerTintColor: currentTheme.colors.text,
                 headerTitleStyle: {
                   fontWeight: 'bold',
                 },
@@ -167,12 +207,17 @@ function AppNavigator() {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider>
-          <AuthProvider>
-            <AppNavigator />
-            <StatusBar style="auto" />
-          </AuthProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <TimerProvider>
+              <AuthProvider>
+                <AppNavigator />
+                <FloatingTimer />
+                <StatusBar style="auto" />
+              </AuthProvider>
+            </TimerProvider>
+          </ThemeProvider>
+        </LanguageProvider>
     </GestureHandlerRootView>
   );
 }

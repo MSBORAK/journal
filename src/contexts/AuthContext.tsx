@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '../types';
-import { supabase, signInWithGoogle, signOut as supabaseSignOut, getCurrentUser } from '../lib/supabase';
+import { supabase, signOut as supabaseSignOut, getCurrentUser } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -77,75 +77,87 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      if (data.user) {
-        const user: User = {
-          uid: data.user.id,
-          email: data.user.email || '',
-          displayName: data.user.user_metadata?.full_name || email.split('@')[0],
-          photoURL: data.user.user_metadata?.avatar_url || undefined,
-        };
-        setUser(user);
-      }
-    } catch (error: any) {
-      throw new Error(error.message || 'Giriş yapılamadı');
-    } finally {
-      setLoading(false);
-    }
-  };
+        const signIn = async (email: string, password: string) => {
+          setLoading(true);
+          try {
+            // Validate input
+            if (!email || !password) {
+              throw new Error('Email ve şifre zorunludur');
+            }
 
-  const signUp = async (email: string, password: string, displayName: string) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: displayName,
-          },
-        },
-      });
-      
-      if (error) throw error;
-      
-      if (data.user) {
-        const user: User = {
-          uid: data.user.id,
-          email: data.user.email || '',
-          displayName: displayName,
-          photoURL: data.user.user_metadata?.avatar_url || undefined,
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email: email.toLowerCase().trim(),
+              password,
+            });
+            
+            if (error) {
+              console.error('❌ Sign in error:', error);
+              throw new Error(error.message || 'Giriş yapılamadı');
+            }
+            
+            if (data.user) {
+              const user: User = {
+                uid: data.user.id,
+                email: data.user.email || '',
+                displayName: data.user.user_metadata?.full_name || email.split('@')[0],
+                photoURL: data.user.user_metadata?.avatar_url || undefined,
+              };
+              setUser(user);
+              console.log('✅ User signed in successfully:', user);
+            }
+          } catch (error: any) {
+            console.error('❌ Sign in error:', error);
+            throw new Error(error.message || 'Giriş yapılamadı');
+          } finally {
+            setLoading(false);
+          }
         };
-        setUser(user);
-      }
-    } catch (error: any) {
-      throw new Error(error.message || 'Hesap oluşturulamadı');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    try {
-      // Google Sign-In will be implemented here
-      // For now, throw an error to indicate it's not implemented
-      throw new Error('Google Sign-In henüz aktif değil. Önce Supabase projesi kurulmalı.');
-    } catch (error: any) {
-      throw new Error(error.message || 'Google ile giriş yapılamadı');
-    } finally {
-      setLoading(false);
-    }
-  };
+        const signUp = async (email: string, password: string, displayName: string) => {
+          setLoading(true);
+          try {
+            // Validate input
+            if (!email || !password || !displayName) {
+              throw new Error('Tüm alanlar zorunludur');
+            }
+
+            if (password.length < 6) {
+              throw new Error('Şifre en az 6 karakter olmalıdır');
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+              email: email.toLowerCase().trim(),
+              password,
+              options: {
+                data: {
+                  full_name: displayName.trim(),
+                },
+              },
+            });
+            
+            if (error) {
+              console.error('❌ Sign up error:', error);
+              throw new Error(error.message || 'Hesap oluşturulamadı');
+            }
+            
+            if (data.user) {
+              const user: User = {
+                uid: data.user.id,
+                email: data.user.email || '',
+                displayName: displayName.trim(),
+                photoURL: data.user.user_metadata?.avatar_url || undefined,
+              };
+              setUser(user);
+              console.log('✅ User signed up successfully:', user);
+            }
+          } catch (error: any) {
+            console.error('❌ Sign up error:', error);
+            throw new Error(error.message || 'Hesap oluşturulamadı');
+          } finally {
+            setLoading(false);
+          }
+        };
+
 
   const signOut = async () => {
     setLoading(true);
@@ -160,13 +172,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshSession = async (): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (error) {
+        console.error('Session refresh error:', error);
+        return false;
+      }
+      console.log('Session refreshed successfully');
+      return true;
+    } catch (error) {
+      console.error('Session refresh error:', error);
+      return false;
+    }
+  };
+
   const value = {
     user,
     loading,
     signIn,
     signUp,
-    signInWithGoogle,
     signOut,
+    refreshSession,
   };
 
   return (

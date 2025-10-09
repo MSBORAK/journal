@@ -124,7 +124,7 @@ export default function FontSelectionScreen({ navigation }: FontSelectionScreenP
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: currentTheme.colors.background,
+      backgroundColor: 'transparent',
     },
     header: {
       flexDirection: 'row',
