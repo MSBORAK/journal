@@ -2583,7 +2583,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             {
               // Glassmorphism Effect
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
               borderWidth: 1,
               borderColor: 'rgba(255, 255, 255, 0.2)',
             }
@@ -2600,7 +2599,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               {
                 // Enhanced Glassmorphism
                 backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(15px)',
               },
               (getTodayMood() as any)?.isDefault && { 
                 opacity: 0.9,
@@ -2673,7 +2671,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           {
             // Glassmorphism Effect
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
             borderWidth: 1,
             borderColor: 'rgba(255, 255, 255, 0.2)',
           }
@@ -2798,7 +2795,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             {
               // Glassmorphism Effect
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
               borderWidth: 1,
               borderColor: 'rgba(255, 255, 255, 0.2)',
             }
@@ -2814,7 +2810,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               padding: 24,
               // Enhanced Glassmorphism
               backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(15px)',
             }}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -2826,7 +2821,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               {
                 // Glassmorphism Effect
                 backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(15px)',
                 borderWidth: 1,
                 borderColor: 'rgba(255, 255, 255, 0.15)',
                 borderLeftColor: insight.color,
@@ -2845,7 +2839,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 padding: 20,
                 // Enhanced Glassmorphism
                 backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                backdropFilter: 'blur(10px)',
               }}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -2887,7 +2880,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             {
               // Glassmorphism Effect
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
               borderWidth: 1,
               borderColor: 'rgba(255, 255, 255, 0.2)',
             }
@@ -2915,7 +2907,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                     {
                       // Glassmorphism Effect
                       backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      backdropFilter: 'blur(15px)',
                       borderWidth: 2,
                       borderColor: reminder.priority === 'high' ? 'rgba(239, 68, 68, 0.3)' : 
                                    reminder.priority === 'medium' ? 'rgba(245, 158, 11, 0.3)' : 
@@ -2933,7 +2924,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                       alignItems: 'center',
                       // Enhanced Glassmorphism
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
                     }}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
@@ -2965,7 +2955,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                     {
                       // Glassmorphism Effect
                       backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      backdropFilter: 'blur(15px)',
                       borderWidth: 2,
                       borderColor: 'rgba(255, 255, 255, 0.3)',
                     }
@@ -2979,7 +2968,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                       alignItems: 'center',
                       // Enhanced Glassmorphism
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
                     }}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
@@ -3086,7 +3074,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 shadowRadius: 8,
                 elevation: 4,
               }}
-              onPress={closeWelcomeModal}
             >
               <Text style={{
                 color: 'white',
