@@ -47,6 +47,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
   const [activeTab, setActiveTab] = useState<'dreams' | 'goals' | 'promise'>('dreams');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCustomAlert, setShowCustomAlert] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+    onConfirm: () => {},
+  });
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [selectedItemType, setSelectedItemType] = useState<'dream' | 'goal' | 'promise'>('dream');
   const [formData, setFormData] = useState({
@@ -61,6 +69,16 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
   });
   
   const stats = getStats();
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info', onConfirm?: () => void) => {
+    setAlertConfig({
+      title,
+      message,
+      type,
+      onConfirm: onConfirm || (() => setShowCustomAlert(false)),
+    });
+    setShowCustomAlert(true);
+  };
 
   const handleTabChange = (tab: 'dreams' | 'goals' | 'promise') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -83,8 +101,8 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
   const handleSave = async () => {
     try {
       if (activeTab === 'dreams') {
-        if (!formData.title || !formData.emoji) {
-          Alert.alert('Eksik Bilgi', 'Lütfen en azından bir başlık ve emoji ekleyin.');
+        if (!formData.title.trim() || !formData.emoji) {
+          showAlert('Eksik Bilgi', 'Lütfen en azından bir başlık ve emoji ekleyin.', 'error');
           return;
         }
         await addDream({
@@ -96,10 +114,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert('✨ Harika!', 'Hayalin eklendi! Şimdi onu gerçeğe dönüştürme zamanı.');
+        showAlert('✨ Harika!', 'Hayalin eklendi! Şimdi onu gerçeğe dönüştürme zamanı.', 'success', () => {
+          setShowCustomAlert(false);
+          setShowAddModal(false);
+          resetForm();
+        });
       } else if (activeTab === 'goals') {
-        if (!formData.title || !formData.emoji) {
-          Alert.alert('Eksik Bilgi', 'Lütfen en azından bir başlık ve emoji ekleyin.');
+        if (!formData.title.trim() || !formData.emoji) {
+          showAlert('Eksik Bilgi', 'Lütfen en azından bir başlık ve emoji ekleyin.', 'error');
           return;
         }
         await addGoal({
@@ -115,21 +137,27 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           notes: formData.notes,
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert('🎯 Tebrikler!', 'Hedefin oluşturuldu! Her adım seni hedefe yaklaştırıyor.');
+        showAlert('🎯 Tebrikler!', 'Hedefin oluşturuldu! Her adım seni hedefe yaklaştırıyor.', 'success', () => {
+          setShowCustomAlert(false);
+          setShowAddModal(false);
+          resetForm();
+        });
       } else if (activeTab === 'promise') {
-        if (!formData.promiseText) {
-          Alert.alert('Eksik Bilgi', 'Lütfen bir söz metni yazın.');
+        if (!formData.promiseText.trim()) {
+          showAlert('Eksik Bilgi', 'Lütfen bir söz metni yazın.', 'error');
           return;
         }
         await addPromise(formData.promiseText, formData.emoji || '💫');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert('💫 Harika!', 'Kendine verdiğin sözü unutma!');
+        showAlert('💫 Harika!', 'Kendine verdiğin sözü unutma!', 'success', () => {
+          setShowCustomAlert(false);
+          setShowAddModal(false);
+          resetForm();
+        });
       }
-      resetForm();
-      setShowAddModal(false);
     } catch (err) {
       console.error('Error saving:', err);
-      Alert.alert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.');
+      showAlert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
     }
   };
 
@@ -715,47 +743,103 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
         >
           <View style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.8)',
             justifyContent: 'flex-end',
           }}>
-            <View style={{
-              backgroundColor: currentTheme.colors.card,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              paddingTop: 20,
-              maxHeight: '80%',
-            }}>
+            <LinearGradient
+              colors={[
+                currentTheme.colors.primary + 'FF',
+                currentTheme.colors.accent + 'F0',
+                currentTheme.colors.card + 'FF'
+              ]}
+              style={{
+                borderTopLeftRadius: 32,
+                borderTopRightRadius: 32,
+                paddingTop: 20,
+                maxHeight: '80%',
+                shadowColor: currentTheme.colors.primary,
+                shadowOffset: { width: 0, height: -10 },
+                shadowOpacity: 0.3,
+                shadowRadius: 20,
+                elevation: 20,
+                borderWidth: 2,
+                borderColor: currentTheme.colors.primary + '20',
+              }}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
               {/* Modal Header */}
               <View style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingHorizontal: 20,
-                paddingBottom: 20,
+                paddingHorizontal: 28,
+                paddingBottom: 24,
+                backgroundColor: currentTheme.colors.primary + '20',
+                borderTopLeftRadius: 32,
+                borderTopRightRadius: 32,
                 borderBottomWidth: 1,
-                borderBottomColor: currentTheme.colors.border,
+                borderBottomColor: currentTheme.colors.primary + '30',
               }}>
-                <Text style={{
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                  color: currentTheme.colors.text,
-                }}>
-                  {activeTab === 'dreams' ? 'Hayalini hayata geçir' : activeTab === 'goals' ? 'Hedefini gerçekleştir' : 'İç sesinle bağlantı kur'}
-                </Text>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <Text style={{
+                    fontSize: 22,
+                    fontWeight: 'bold',
+                    color: '#FFFFFF',
+                    textAlign: 'center',
+                    textShadowColor: 'rgba(0,0,0,0.3)',
+                    textShadowOffset: { width: 0, height: 1 },
+                    textShadowRadius: 2,
+                  }}>
+                    {activeTab === 'dreams' ? '🌟 Hayalini Hayata Geçir' : 
+                     activeTab === 'goals' ? '🎯 Hedefini Gerçekleştir' : 
+                     '💫 İç Sesinle Bağlantı Kur'}
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#FFFFFF',
+                    textAlign: 'center',
+                    marginTop: 4,
+                    opacity: 0.9,
+                  }}>
+                    {activeTab === 'dreams' ? 'Hayallerin gerçeğe dönüşsün' : 
+                     activeTab === 'goals' ? 'Hedeflerine ulaş' : 
+                     'Kendine verdiğin sözleri tut'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setShowAddModal(false)}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginLeft: 16,
+                  }}
+                >
+                  <Ionicons name="close" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
               </View>
 
               {/* Modal Content */}
-              <View style={{ padding: 32 }}>
+              <View style={{ padding: 32, backgroundColor: 'rgba(255,255,255,0.95)' }}>
                 <ScrollView showsVerticalScrollIndicator={false}>
                   {activeTab === 'promise' ? (
                     // Promise Form
                     <View style={{ gap: 20 }}>
                       <View style={{
-                        backgroundColor: currentTheme.colors.primary + '08',
-                        borderRadius: 20,
-                        padding: 20,
-                        borderWidth: 1,
-                        borderColor: currentTheme.colors.primary + '15',
+                        backgroundColor: 'rgba(255,255,255,0.8)',
+                        borderRadius: 24,
+                        padding: 24,
+                        borderWidth: 2,
+                        borderColor: currentTheme.colors.primary + '25',
+                        shadowColor: currentTheme.colors.primary,
+                        shadowOffset: { width: 0, height: 8 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 16,
+                        elevation: 8,
                       }}>
                         <Text style={{ fontSize: 16, fontWeight: '700', color: currentTheme.colors.text, marginBottom: 12, textAlign: 'center' }}>
                           Kendine bir söz ver
@@ -784,11 +868,16 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                     // Dreams & Goals Form
                     <View style={{ gap: 20 }}>
                       <View style={{
-                        backgroundColor: currentTheme.colors.primary + '08',
-                        borderRadius: 20,
-                        padding: 20,
-                        borderWidth: 1,
-                        borderColor: currentTheme.colors.primary + '15',
+                        backgroundColor: 'rgba(255,255,255,0.8)',
+                        borderRadius: 24,
+                        padding: 24,
+                        borderWidth: 2,
+                        borderColor: currentTheme.colors.primary + '25',
+                        shadowColor: currentTheme.colors.primary,
+                        shadowOffset: { width: 0, height: 8 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 16,
+                        elevation: 8,
                       }}>
                         <Text style={{ fontSize: 16, fontWeight: '700', color: currentTheme.colors.text, marginBottom: 12 }}>
                           Başlık *
@@ -811,11 +900,16 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                       </View>
 
                       <View style={{
-                        backgroundColor: currentTheme.colors.primary + '08',
-                        borderRadius: 20,
-                        padding: 20,
-                        borderWidth: 1,
-                        borderColor: currentTheme.colors.primary + '15',
+                        backgroundColor: 'rgba(255,255,255,0.8)',
+                        borderRadius: 24,
+                        padding: 24,
+                        borderWidth: 2,
+                        borderColor: currentTheme.colors.primary + '25',
+                        shadowColor: currentTheme.colors.primary,
+                        shadowOffset: { width: 0, height: 8 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 16,
+                        elevation: 8,
                       }}>
                         <Text style={{ fontSize: 16, fontWeight: '700', color: currentTheme.colors.text, marginBottom: 12 }}>
                           Açıklama
@@ -847,28 +941,34 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
               {/* Modal Footer */}
               <View style={{
                 flexDirection: 'row',
-                gap: 12,
+                gap: 16,
                 paddingHorizontal: 32,
                 paddingBottom: 32,
+                backgroundColor: 'rgba(255,255,255,0.95)',
               }}>
                 <TouchableOpacity
                   onPress={() => setShowAddModal(false)}
                   style={{
                     flex: 1,
-                    backgroundColor: currentTheme.colors.background,
-                    borderRadius: 16,
-                    paddingVertical: 16,
+                    backgroundColor: 'rgba(255,255,255,0.8)',
+                    borderRadius: 20,
+                    paddingVertical: 18,
                     alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: currentTheme.colors.border,
+                    borderWidth: 2,
+                    borderColor: currentTheme.colors.primary + '25',
+                    shadowColor: currentTheme.colors.primary,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 4,
                   }}
                 >
                   <Text style={{
-                    color: currentTheme.colors.text,
+                    color: currentTheme.colors.primary,
                     fontSize: 16,
-                    fontWeight: '600',
+                    fontWeight: '700',
                   }}>
-                    İptal
+                    ❌ İptal
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -876,21 +976,31 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                   style={{
                     flex: 1,
                     backgroundColor: currentTheme.colors.primary,
-                    borderRadius: 16,
-                    paddingVertical: 16,
+                    borderRadius: 20,
+                    paddingVertical: 18,
                     alignItems: 'center',
+                    shadowColor: currentTheme.colors.primary,
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 16,
+                    elevation: 8,
+                    borderWidth: 2,
+                    borderColor: currentTheme.colors.accent,
                   }}
                 >
                   <Text style={{
                     color: 'white',
                     fontSize: 16,
-                    fontWeight: '600',
+                    fontWeight: '700',
+                    textShadowColor: 'rgba(0,0,0,0.3)',
+                    textShadowOffset: { width: 0, height: 1 },
+                    textShadowRadius: 2,
                   }}>
-                    Kaydet
+                    ✨ Kaydet
                   </Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </LinearGradient>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -937,23 +1047,218 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
               </Text>
             )}
 
-            <TouchableOpacity
-              onPress={() => setShowDetailModal(false)}
-              style={{
-                backgroundColor: currentTheme.colors.primary + '15',
-                borderRadius: 16,
-                paddingVertical: 14,
+            {/* Action Buttons */}
+            <View style={{ gap: 12 }}>
+              {selectedItemType === 'dream' && (
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    toggleDreamCompletion(selectedItem.id);
+                    setShowDetailModal(false);
+                  }}
+                  style={{
+                    backgroundColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
+                    borderRadius: 16,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    shadowColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
+                >
+                  <Text style={{
+                    color: 'white',
+                    fontSize: 16,
+                    fontWeight: '700',
+                  }}>
+                    {selectedItem.isCompleted ? '🔄 Gerçekleşmedi İşaretle' : '⭐ Gerçekleşti İşaretle'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {selectedItemType === 'goal' && (
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    // TODO: Toggle goal completion
+                    setShowDetailModal(false);
+                  }}
+                  style={{
+                    backgroundColor: selectedItem.status === 'completed' ? '#F59E0B' : '#FFD700',
+                    borderRadius: 16,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    shadowColor: selectedItem.status === 'completed' ? '#F59E0B' : '#FFD700',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
+                >
+                  <Text style={{
+                    color: 'white',
+                    fontSize: 16,
+                    fontWeight: '700',
+                  }}>
+                    {selectedItem.status === 'completed' ? '🔄 Aktif Yap' : '⭐ Tamamla'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {selectedItemType === 'promise' && (
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    togglePromiseCompletion(selectedItem.id);
+                    setShowDetailModal(false);
+                  }}
+                  style={{
+                    backgroundColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
+                    borderRadius: 16,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    shadowColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
+                >
+                  <Text style={{
+                    color: 'white',
+                    fontSize: 16,
+                    fontWeight: '700',
+                  }}>
+                    {selectedItem.isCompleted ? '🔄 Söz Tutulmadı İşaretle' : '⭐ Söz Tutuldu İşaretle'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                onPress={() => setShowDetailModal(false)}
+                style={{
+                  backgroundColor: currentTheme.colors.primary + '15',
+                  borderRadius: 16,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: currentTheme.colors.primary + '30',
+                }}
+              >
+                <Text style={{
+                  color: currentTheme.colors.primary,
+                  fontSize: 16,
+                  fontWeight: '600',
+                }}>
+                  ✨ Tamam
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Custom Alert Modal */}
+      <Modal
+        visible={showCustomAlert}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCustomAlert(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+        }}>
+          <View style={{
+            backgroundColor: currentTheme.colors.card,
+            borderRadius: 28,
+            padding: 28,
+            width: '100%',
+            maxWidth: 350,
+            shadowColor: currentTheme.colors.primary,
+            shadowOffset: { width: 0, height: 20 },
+            shadowOpacity: 0.3,
+            shadowRadius: 30,
+            elevation: 20,
+            borderWidth: 2,
+            borderColor: currentTheme.colors.primary + '20',
+          }}>
+            {/* Header */}
+            <View style={{
+              alignItems: 'center',
+              marginBottom: 20,
+            }}>
+              <View style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                backgroundColor: alertConfig.type === 'error' ? '#FF6B6B' + '20' :
+                               alertConfig.type === 'success' ? '#4ECDC4' + '20' :
+                               alertConfig.type === 'warning' ? '#FFD93D' + '20' :
+                               currentTheme.colors.primary + '20',
                 alignItems: 'center',
-                borderWidth: 1,
-                borderColor: currentTheme.colors.primary + '30',
+                justifyContent: 'center',
+                marginBottom: 16,
+              }}>
+                <Text style={{ fontSize: 32 }}>
+                  {alertConfig.type === 'error' ? '❌' :
+                   alertConfig.type === 'success' ? '✅' :
+                   alertConfig.type === 'warning' ? '⚠️' : 'ℹ️'}
+                </Text>
+              </View>
+              
+              <Text style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: currentTheme.colors.text,
+                textAlign: 'center',
+                marginBottom: 8,
+              }}>
+                {alertConfig.title}
+              </Text>
+              
+              <Text style={{
+                fontSize: 16,
+                color: currentTheme.colors.secondary,
+                textAlign: 'center',
+                lineHeight: 24,
+              }}>
+                {alertConfig.message}
+              </Text>
+            </View>
+
+            {/* Action Button */}
+            <TouchableOpacity
+              onPress={alertConfig.onConfirm}
+              style={{
+                backgroundColor: alertConfig.type === 'error' ? '#FF6B6B' :
+                               alertConfig.type === 'success' ? '#4ECDC4' :
+                               alertConfig.type === 'warning' ? '#FFD93D' :
+                               currentTheme.colors.primary,
+                borderRadius: 16,
+                paddingVertical: 16,
+                alignItems: 'center',
+                shadowColor: alertConfig.type === 'error' ? '#FF6B6B' :
+                            alertConfig.type === 'success' ? '#4ECDC4' :
+                            alertConfig.type === 'warning' ? '#FFD93D' :
+                            currentTheme.colors.primary,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 6,
               }}
             >
               <Text style={{
-                color: currentTheme.colors.primary,
+                color: 'white',
                 fontSize: 16,
-                fontWeight: '600',
+                fontWeight: '700',
               }}>
-                ✨ Tamam
+                Tamam
               </Text>
             </TouchableOpacity>
           </View>
