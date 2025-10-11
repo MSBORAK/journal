@@ -2594,7 +2594,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           >
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
-            🎨 Express Yourself
+            {t('dashboard.expressYourself')}
           </Text>
         </View>
         
@@ -2606,9 +2606,9 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={dynamicStyles.recentMood}>✍️</Text>
           </View>
           <View style={dynamicStyles.moodTextContainer}>
-            <Text style={dynamicStyles.moodLabel}>Capture This Moment</Text>
+            <Text style={dynamicStyles.moodLabel}>{t('dashboard.captureThisMoment')}</Text>
             <Text style={dynamicStyles.moodSubtitle}>
-              Your thoughts, your story, your journey
+              {t('dashboard.yourThoughtsYourStory')}
             </Text>
           </View>
         </View>
@@ -2624,7 +2624,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           >
             <Text style={dynamicStyles.moodActionText}>
               <Ionicons name="create-outline" size={18} color={currentTheme.colors.primary} />
-              {' '}Write Today
+              {' '}{t('dashboard.writeToday')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -2663,7 +2663,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Text style={dynamicStyles.motivationTitle}>🌅 Daily Reflection</Text>
+            <Text style={dynamicStyles.motivationTitle}>{t('dashboard.dailyReflection')}</Text>
             <Text style={dynamicStyles.motivationMessage}>
               {getMotivationMessage()}
             </Text>

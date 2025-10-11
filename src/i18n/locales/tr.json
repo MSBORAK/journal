@@ -57,7 +57,12 @@
     "tasks": "görev",
     "howAreYou": "Bugün nasıl hissediyorsun? 💭",
     "tasksToday": "Bugün {{count}} görev var",
-    "allTasksDone": "Tüm görevler tamamlandı! 🎉"
+    "allTasksDone": "Tüm görevler tamamlandı! 🎉",
+    "dailyReflection": "🌅 Günlük Yansıma",
+    "expressYourself": "🎨 Kendini İfade Et",
+    "captureThisMoment": "Bu Anı Yakala",
+    "yourThoughtsYourStory": "Düşüncelerin, hikayen, yolculuğun",
+    "writeToday": "Bugün Yaz"
   },
   "tasks": {
     "title": "Görevler",

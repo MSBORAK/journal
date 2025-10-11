@@ -57,7 +57,12 @@
     "tasks": "tasks",
     "howAreYou": "How are you feeling today? 💭",
     "tasksToday": "You have {{count}} tasks today",
-    "allTasksDone": "All tasks completed! 🎉"
+    "allTasksDone": "All tasks completed! 🎉",
+    "dailyReflection": "🌅 Daily Reflection",
+    "expressYourself": "🎨 Express Yourself",
+    "captureThisMoment": "Capture This Moment",
+    "yourThoughtsYourStory": "Your thoughts, your story, your journey",
+    "writeToday": "Write Today"
   },
   "tasks": {
     "title": "Tasks",
