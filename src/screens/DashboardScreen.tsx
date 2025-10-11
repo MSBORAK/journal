@@ -2269,7 +2269,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             {/* Modal Header */}
             <View style={dynamicStyles.modalHeader}>
               <TouchableOpacity 
-                onPress={() => setShowStreakModal(false)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowStreakModal(false);
+                }}
                 style={dynamicStyles.modalCloseButton}
               >
                 <Ionicons name="close" size={28} color={currentTheme.colors.text} />
@@ -2404,7 +2407,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             {/* Modal Header */}
             <View style={dynamicStyles.modalHeader}>
               <TouchableOpacity 
-                onPress={() => setShowHealthModal(false)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowHealthModal(false);
+                }}
                 style={dynamicStyles.modalCloseButton}
               >
                 <Ionicons name="close" size={28} color={currentTheme.colors.text} />
@@ -2572,16 +2578,30 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           transform: [{ scale: Animated.multiply(scaleAnims.mood, pulseAnims.mood) }],
         }}
       >
-          <View style={dynamicStyles.moodCard}>
+          <View style={[
+            dynamicStyles.moodCard,
+            {
+              // Glassmorphism Effect
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            }
+          ]}>
           <LinearGradient
             colors={[
-              currentTheme.colors.primary + '35',
-              currentTheme.colors.accent + '40',
-              currentTheme.colors.card,
-              currentTheme.name === 'dark' ? currentTheme.colors.accent + '45' : currentTheme.colors.accent + '35'
+              currentTheme.colors.primary + '25',
+              currentTheme.colors.accent + '30',
+              'rgba(255, 255, 255, 0.1)',
+              currentTheme.name === 'dark' ? currentTheme.colors.accent + '35' : currentTheme.colors.accent + '25'
             ]}
             style={[
               dynamicStyles.moodCardGradient,
+              {
+                // Enhanced Glassmorphism
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(15px)',
+              },
               (getTodayMood() as any)?.isDefault && { 
                 opacity: 0.9,
                 borderWidth: 2,
@@ -2617,6 +2637,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           <TouchableOpacity
             style={dynamicStyles.moodActionButton}
             onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               animateCardPress('mood');
               navigation.navigate('WriteDiaryStep1' as never);
             }}
@@ -2647,12 +2668,22 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           }]
         }}
       >
-        <View style={dynamicStyles.motivationCard}>
+        <View style={[
+          dynamicStyles.motivationCard,
+          {
+            // Glassmorphism Effect
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+          }
+        ]}>
           <LinearGradient
             colors={[
-              currentTheme.colors.primary + '40',
-              currentTheme.colors.accent + '45',
-              currentTheme.colors.primary + '35',
+              currentTheme.colors.primary + '30',
+              currentTheme.colors.accent + '35',
+              'rgba(255, 255, 255, 0.1)',
+              currentTheme.colors.primary + '25',
               currentTheme.colors.accent + '40',
             ]}
             style={{
@@ -2685,7 +2716,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       >
         <TouchableOpacity
           style={dynamicStyles.achievementsCard}
-          onPress={() => navigation.navigate('Achievements')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            navigation.navigate('Achievements');
+          }}
           activeOpacity={0.8}
         >
           <View style={dynamicStyles.achievementsHeader}>
@@ -2733,7 +2767,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 
           <TouchableOpacity 
             style={dynamicStyles.achievementsButton}
-            onPress={() => navigation.navigate('Achievements')}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              navigation.navigate('Achievements');
+            }}
             activeOpacity={0.8}
           >
             <Text style={dynamicStyles.achievementsButtonText}>
@@ -2756,29 +2793,60 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             }]
           }}
         >
+          <View style={[
+            dynamicStyles.insightsSection,
+            {
+              // Glassmorphism Effect
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            }
+          ]}>
           <LinearGradient
             colors={[
-              currentTheme.colors.card,
-              currentTheme.colors.accent + '30',
-              currentTheme.colors.primary + '25',
+              'rgba(255, 255, 255, 0.1)',
+              currentTheme.colors.accent + '25',
+              currentTheme.colors.primary + '20',
             ]}
-            style={dynamicStyles.insightsSection}
+            style={{
+              borderRadius: 28,
+              padding: 24,
+              // Enhanced Glassmorphism
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(15px)',
+            }}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
           <Text style={dynamicStyles.sectionTitle}>💡 Kişisel İçgörülerin</Text>
           {insights.map((insight, index) => (
+            <View style={[
+              dynamicStyles.insightCard,
+              {
+                // Glassmorphism Effect
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(15px)',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.15)',
+                borderLeftColor: insight.color,
+                borderLeftWidth: 4,
+              }
+            ]}>
             <LinearGradient
-              key={index}
               colors={[
-                insight.color + '35',
-                insight.color + '25',
-                currentTheme.colors.card,
+                insight.color + '20',
+                insight.color + '15',
+                'rgba(255, 255, 255, 0.05)',
+                currentTheme.colors.card + '80',
               ]}
-              style={[
-                dynamicStyles.insightCard,
-                { borderLeftColor: insight.color }
-              ]}
+              style={{
+                borderRadius: 20,
+                padding: 20,
+                // Enhanced Glassmorphism
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(10px)',
+              }}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
@@ -2790,8 +2858,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 {insight.description}
               </Text>
             </LinearGradient>
+            </View>
           ))}
           </LinearGradient>
+          </View>
         </Animated.View>
       )}
 
@@ -2812,7 +2882,16 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           }]
         }}
       >
-          <View style={dynamicStyles.remindersBubblesContainer}>
+          <View style={[
+            dynamicStyles.remindersBubblesContainer,
+            {
+              // Glassmorphism Effect
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            }
+          ]}>
             <View style={dynamicStyles.remindersHeader}>
               <Text style={dynamicStyles.remindersBubblesTitle}>⏰ Bugünün Planı</Text>
             </View>
@@ -2831,18 +2910,31 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   }}
                   activeOpacity={0.7}
                 >
+                  <View style={[
+                    dynamicStyles.reminderBubble,
+                    {
+                      // Glassmorphism Effect
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      backdropFilter: 'blur(15px)',
+                      borderWidth: 2,
+                      borderColor: reminder.priority === 'high' ? 'rgba(239, 68, 68, 0.3)' : 
+                                   reminder.priority === 'medium' ? 'rgba(245, 158, 11, 0.3)' : 
+                                   'rgba(16, 185, 129, 0.3)',
+                    }
+                  ]}>
                   <LinearGradient
-                    colors={reminder.priority === 'high' ? ['#fca5a5', '#f87171'] :
-                           reminder.priority === 'medium' ? ['#fcd34d', '#f59e0b'] :
-                           ['#6ee7b7', '#34d399']}
-                    style={[
-                      dynamicStyles.reminderBubble,
-                      { 
-                        borderColor: reminder.priority === 'high' ? '#ef4444' : 
-                                     reminder.priority === 'medium' ? '#f59e0b' : 
-                                     '#10b981'
-                      }
-                    ]}
+                    colors={reminder.priority === 'high' ? ['rgba(252, 165, 165, 0.8)', 'rgba(248, 113, 113, 0.8)'] :
+                           reminder.priority === 'medium' ? ['rgba(252, 211, 77, 0.8)', 'rgba(245, 158, 11, 0.8)'] :
+                           ['rgba(110, 231, 183, 0.8)', 'rgba(52, 211, 153, 0.8)']}
+                    style={{
+                      borderRadius: 20,
+                      padding: 16,
+                      minWidth: 120,
+                      alignItems: 'center',
+                      // Enhanced Glassmorphism
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                    }}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
@@ -2856,6 +2948,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                     {reminder.title.length > 10 ? reminder.title.substring(0, 10) + '...' : reminder.title}
                   </Text>
                   </LinearGradient>
+                  </View>
                 </TouchableOpacity>
               ))}
               
@@ -2867,9 +2960,27 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   }}
                   activeOpacity={0.7}
                 >
+                  <View style={[
+                    dynamicStyles.moreBubble,
+                    {
+                      // Glassmorphism Effect
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      backdropFilter: 'blur(15px)',
+                      borderWidth: 2,
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                    }
+                  ]}>
                   <LinearGradient
-                    colors={[currentTheme.colors.primary + '40', currentTheme.colors.accent + '35']}
-                    style={dynamicStyles.moreBubble}
+                    colors={[currentTheme.colors.primary + '30', currentTheme.colors.accent + '25', 'rgba(255, 255, 255, 0.1)']}
+                    style={{
+                      borderRadius: 20,
+                      padding: 16,
+                      minWidth: 120,
+                      alignItems: 'center',
+                      // Enhanced Glassmorphism
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                    }}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
@@ -2885,6 +2996,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                       color={currentTheme.colors.primary} 
                     />
                   </LinearGradient>
+                  </View>
                 </TouchableOpacity>
               )}
             </ScrollView>
@@ -2959,6 +3071,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </View>
             
             <TouchableOpacity 
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setShowWelcomeModal(false);
+              }}
               style={{
                 backgroundColor: currentTheme.colors.primary,
                 paddingHorizontal: 32,
