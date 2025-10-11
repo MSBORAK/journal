@@ -1184,7 +1184,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     moodTitle: {
       fontSize: 18,
-      fontWeight: '600',
+      fontFamily: 'Poppins_700Bold',
       color: currentTheme.colors.text,
       marginBottom: 12,
     },
@@ -1198,14 +1198,15 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     moodLabel: {
       fontSize: 16,
+      fontFamily: 'Poppins_600SemiBold',
       color: currentTheme.colors.text,
     },
     moodSubtitle: {
       fontSize: 12,
+      fontFamily: 'Poppins_400Regular',
       color: currentTheme.colors.secondary,
       textAlign: 'center',
       marginTop: 8,
-      fontStyle: 'italic',
     },
     moodHeader: {
       flexDirection: 'row',
@@ -1294,7 +1295,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     motivationTitle: {
       fontSize: 20,
-      fontWeight: 'bold',
+      fontFamily: 'Poppins_700Bold',
       color: currentTheme.colors.primary,
       marginBottom: 16,
       textAlign: 'center',
@@ -2593,34 +2594,22 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           >
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
-            {(getTodayMood() as any)?.isDefault ? '💭 Bugün Nasıl Hissediyorsun?' : '🪄 Bugünkü Ruh Halin'}
+            🎨 Express Yourself
           </Text>
-          {(getTodayMood() as any)?.isDefault && (
-            <View style={dynamicStyles.moodBadge}>
-              <Text style={dynamicStyles.moodBadgeText}>Yeni</Text>
-            </View>
-          )}
         </View>
         
         <View style={dynamicStyles.moodContent}>
           <View style={[
             dynamicStyles.moodEmojiContainer,
-            (getTodayMood() as any)?.isDefault && dynamicStyles.moodEmojiContainerDefault
+            dynamicStyles.moodEmojiContainerDefault
           ]}>
-            <Text style={dynamicStyles.recentMood}>{getTodayMood()?.emoji}</Text>
-            {(getTodayMood() as any)?.isDefault && (
-              <View style={dynamicStyles.moodPlusIcon}>
-                <Ionicons name="add" size={16} color={currentTheme.colors.primary} />
-              </View>
-            )}
+            <Text style={dynamicStyles.recentMood}>✍️</Text>
           </View>
           <View style={dynamicStyles.moodTextContainer}>
-            <Text style={dynamicStyles.moodLabel}>{getTodayMood()?.label}</Text>
-            {(getTodayMood() as any)?.isDefault && (
-              <Text style={dynamicStyles.moodSubtitle}>
-                Duygularını keşfet, kendini tanı
-              </Text>
-            )}
+            <Text style={dynamicStyles.moodLabel}>Capture This Moment</Text>
+            <Text style={dynamicStyles.moodSubtitle}>
+              Your thoughts, your story, your journey
+            </Text>
           </View>
         </View>
         
@@ -2634,8 +2623,8 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             activeOpacity={0.8}
           >
             <Text style={dynamicStyles.moodActionText}>
-              <Ionicons name="arrow-forward" size={16} color={currentTheme.colors.primary} />
-              {' '}{(getTodayMood() as any)?.isDefault ? 'Ruh halini belirt' : 'Günlük yaz'}
+              <Ionicons name="create-outline" size={18} color={currentTheme.colors.primary} />
+              {' '}Write Today
             </Text>
           </TouchableOpacity>
         </View>
@@ -2674,7 +2663,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Text style={dynamicStyles.motivationTitle}>✨ Bugünün Mesajı</Text>
+            <Text style={dynamicStyles.motivationTitle}>🌅 Daily Reflection</Text>
             <Text style={dynamicStyles.motivationMessage}>
               {getMotivationMessage()}
             </Text>

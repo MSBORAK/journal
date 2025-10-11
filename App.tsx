@@ -16,7 +16,12 @@ import BackgroundWrapper from './src/components/BackgroundWrapper';
 import { Ionicons } from '@expo/vector-icons';
 import { scheduleMotivationNotifications, requestNotificationPermission, scheduleSmartNotifications } from './src/services/motivationNotificationService';
 import { recordUserActivity } from './src/services/userActivityService';
+import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import * as SplashScreen from 'expo-splash-screen';
 // import './global.css'; // Disabled for now
+
+// Keep splash screen visible while loading fonts
+SplashScreen.preventAutoHideAsync();
 
 // Type definitions for navigation
 type RootStackParamList = {
@@ -253,6 +258,22 @@ function AppNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
         <LanguageProvider>
