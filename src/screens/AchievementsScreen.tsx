@@ -142,17 +142,17 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
     },
     statCard: {
       flex: 1,
-      backgroundColor: currentTheme.colors.card + 'F5',
-      borderRadius: 20,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: 24,
       padding: 20,
       alignItems: 'center',
       shadowColor: currentTheme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      elevation: 4,
-      borderWidth: 1,
-      borderColor: currentTheme.colors.primary + '05',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      elevation: 8,
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
     },
     statNumber: {
       fontSize: 28,
@@ -172,16 +172,16 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       flexDirection: 'row',
       marginHorizontal: 20,
       marginBottom: 24,
-      backgroundColor: currentTheme.colors.card + 'F0',
-      borderRadius: 20,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: 24,
       padding: 8,
       shadowColor: currentTheme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
-      borderWidth: 1,
-      borderColor: currentTheme.colors.primary + '04',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      elevation: 8,
     },
     tab: {
       flex: 1,
@@ -225,11 +225,14 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       width: '48%',
       marginBottom: 20,
       borderRadius: 24,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
       shadowColor: currentTheme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      elevation: 4,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      elevation: 8,
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
     },
     achievementGradient: {
       borderRadius: 24,
@@ -541,18 +544,33 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
 
         {/* Stats */}
         <View style={dynamicStyles.statsContainer}>
-          <View style={dynamicStyles.statCard}>
+          <LinearGradient
+            colors={[currentTheme.colors.primary + '25', 'rgba(255, 255, 255, 0.1)', currentTheme.colors.accent + '20']}
+            style={dynamicStyles.statCard}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
             <Text style={dynamicStyles.statNumber}>{stats.unlocked}</Text>
             <Text style={dynamicStyles.statLabel}>Kazanılan</Text>
-          </View>
-          <View style={dynamicStyles.statCard}>
+          </LinearGradient>
+          <LinearGradient
+            colors={[currentTheme.colors.accent + '25', 'rgba(255, 255, 255, 0.1)', currentTheme.colors.primary + '20']}
+            style={dynamicStyles.statCard}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
             <Text style={dynamicStyles.statNumber}>{stats.total}</Text>
             <Text style={dynamicStyles.statLabel}>Toplam</Text>
-          </View>
-          <View style={dynamicStyles.statCard}>
+          </LinearGradient>
+          <LinearGradient
+            colors={[currentTheme.colors.primary + '30', 'rgba(255, 255, 255, 0.1)', currentTheme.colors.accent + '25']}
+            style={dynamicStyles.statCard}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
             <Text style={dynamicStyles.statNumber}>{Math.round(stats.completionRate)}%</Text>
             <Text style={dynamicStyles.statLabel}>Tamamlanma</Text>
-          </View>
+          </LinearGradient>
         </View>
 
         {/* Tab Bar */}
