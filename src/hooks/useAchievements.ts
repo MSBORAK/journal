@@ -1,0 +1,607 @@
+import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Achievement } from '../types';
+import { sendAchievementNotification } from '../services/notificationService';
+
+const ACHIEVEMENTS_STORAGE_KEY = '@daily_achievements';
+const USER_STATS_STORAGE_KEY = '@daily_user_stats';
+
+export interface UserStats {
+  // Günlük yazma istatistikleri
+  totalDiaryEntries: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastDiaryDate?: string;
+  
+  // Görev istatistikleri
+  totalTasksCompleted: number;
+  tasksCompletedThisWeek: number;
+  
+  // Sağlık istatistikleri
+  healthTrackingDays: number;
+  lastHealthDate?: string;
+  
+  // Hatırlatıcı istatistikleri
+  totalReminders: number;
+  activeReminders: number;
+  
+  // Genel istatistikler
+  appUsageDays: number;
+  firstAppUseDate?: string;
+}
+
+export interface AchievementDefinition {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: Achievement['category'];
+  requirement: {
+    type: 'streak' | 'total' | 'consecutive' | 'milestone';
+    value: number;
+    period?: 'daily' | 'weekly' | 'monthly';
+  };
+  reward?: {
+    points: number;
+    special?: string;
+  };
+}
+
+export const useAchievements = (userId?: string) => {
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalDiaryEntries: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    totalTasksCompleted: 0,
+    tasksCompletedThisWeek: 0,
+    healthTrackingDays: 0,
+    totalReminders: 0,
+    activeReminders: 0,
+    appUsageDays: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Başarı tanımları
+  const achievementDefinitions: AchievementDefinition[] = [
+    // Streak Başarıları
+    {
+      id: 'first_streak_3',
+      title: 'Başlangıç',
+      description: '3 gün üst üste günlük yazdın!',
+      icon: '🔥',
+      category: 'streak',
+      requirement: { type: 'streak', value: 3 },
+      reward: { points: 10 }
+    },
+    {
+      id: 'streak_7',
+      title: 'Haftalık Usta',
+      description: '7 gün üst üste günlük yazdın!',
+      icon: '⭐',
+      category: 'streak',
+      requirement: { type: 'streak', value: 7 },
+      reward: { points: 25 }
+    },
+    {
+      id: 'streak_14',
+      title: 'İki Hafta Kahramanı',
+      description: '14 gün üst üste günlük yazdın!',
+      icon: '🏆',
+      category: 'streak',
+      requirement: { type: 'streak', value: 14 },
+      reward: { points: 50 }
+    },
+    {
+      id: 'streak_30',
+      title: 'Aylık Efsane',
+      description: '30 gün üst üste günlük yazdın!',
+      icon: '👑',
+      category: 'streak',
+      requirement: { type: 'streak', value: 30 },
+      reward: { points: 100 }
+    },
+    {
+      id: 'streak_100',
+      title: 'Yüz Gün Efsanesi',
+      description: '100 gün üst üste günlük yazdın!',
+      icon: '💎',
+      category: 'streak',
+      requirement: { type: 'streak', value: 100 },
+      reward: { points: 500 }
+    },
+    
+    // Yazma Başarıları
+    {
+      id: 'first_entry',
+      title: 'İlk Adım',
+      description: 'İlk günlük yazını yazdın!',
+      icon: '📝',
+      category: 'writing',
+      requirement: { type: 'total', value: 1 },
+      reward: { points: 5 }
+    },
+    {
+      id: 'writer_10',
+      title: 'Yazıcı',
+      description: '10 günlük yazısı yazdın!',
+      icon: '✍️',
+      category: 'writing',
+      requirement: { type: 'total', value: 10 },
+      reward: { points: 20 }
+    },
+    {
+      id: 'diarist_50',
+      title: 'Günlük Tutucu',
+      description: '50 günlük yazısı yazdın!',
+      icon: '📖',
+      category: 'writing',
+      requirement: { type: 'total', value: 50 },
+      reward: { points: 75 }
+    },
+    {
+      id: 'master_writer_100',
+      title: 'Yazar',
+      description: '100 günlük yazısı yazdın!',
+      icon: '📚',
+      category: 'writing',
+      requirement: { type: 'total', value: 100 },
+      reward: { points: 200 }
+    },
+    
+    // Görev Başarıları
+    {
+      id: 'first_task',
+      title: 'Görevci',
+      description: 'İlk görevini tamamladın!',
+      icon: '✅',
+      category: 'goals',
+      requirement: { type: 'total', value: 1 },
+      reward: { points: 10 }
+    },
+    {
+      id: 'productive_10',
+      title: 'Üretken',
+      description: '10 görev tamamladın!',
+      icon: '🎯',
+      category: 'goals',
+      requirement: { type: 'total', value: 10 },
+      reward: { points: 30 }
+    },
+    {
+      id: 'achiever_50',
+      title: 'Başarılı',
+      description: '50 görev tamamladın!',
+      icon: '🏅',
+      category: 'goals',
+      requirement: { type: 'total', value: 50 },
+      reward: { points: 100 }
+    },
+    
+    // Sağlık Başarıları
+    {
+      id: 'health_tracker_7',
+      title: 'Sağlıklı',
+      description: '7 gün üst üste sağlık takibi yaptın!',
+      icon: '💪',
+      category: 'mood',
+      requirement: { type: 'consecutive', value: 7 },
+      reward: { points: 40 }
+    },
+    {
+      id: 'wellness_master_30',
+      title: 'Wellness Ustası',
+      description: '30 gün üst üste sağlık takibi yaptın!',
+      icon: '🌱',
+      category: 'mood',
+      requirement: { type: 'consecutive', value: 30 },
+      reward: { points: 150 }
+    },
+    
+    // Hatırlatıcı Başarıları
+    {
+      id: 'reminder_master',
+      title: 'Hatırlatıcı Ustası',
+      description: '10 hatırlatıcı oluşturdun!',
+      icon: '🔔',
+      category: 'goals',
+      requirement: { type: 'total', value: 10 },
+      reward: { points: 25 }
+    },
+    
+    // Alışkanlık Başarıları
+    {
+      id: 'habit_starter',
+      title: 'Alışkanlık Başlangıcı',
+      description: 'İlk alışkanlığını tamamladın!',
+      icon: '🌟',
+      category: 'goals',
+      requirement: { type: 'total', value: 1 },
+      reward: { points: 10 }
+    },
+    {
+      id: 'habit_streak_7',
+      title: 'Haftalık Alışkanlık',
+      description: 'Bir alışkanlığı 7 gün üst üste tamamladın!',
+      icon: '🔥',
+      category: 'streak',
+      requirement: { type: 'streak', value: 7 },
+      reward: { points: 50 }
+    },
+    {
+      id: 'habit_streak_30',
+      title: 'Aylık Alışkanlık Ustası',
+      description: 'Bir alışkanlığı 30 gün üst üste tamamladın!',
+      icon: '👑',
+      category: 'streak',
+      requirement: { type: 'streak', value: 30 },
+      reward: { points: 200 }
+    },
+    {
+      id: 'habit_master_100',
+      title: 'Alışkanlık Efsanesi',
+      description: '100 alışkanlık tamamladın!',
+      icon: '🏆',
+      category: 'goals',
+      requirement: { type: 'total', value: 100 },
+      reward: { points: 300 }
+    },
+    {
+      id: 'habit_perfect_week',
+      title: 'Mükemmel Hafta',
+      description: 'Bir hafta boyunca tüm alışkanlıklarını tamamladın!',
+      icon: '⭐',
+      category: 'goals',
+      requirement: { type: 'milestone', value: 7 },
+      reward: { points: 100 }
+    },
+    
+    // Özel Başarılar
+    {
+      id: 'app_lover_30',
+      title: 'Uygulama Sevgilisi',
+      description: '30 gün uygulamayı kullandın!',
+      icon: '💖',
+      category: 'streak',
+      requirement: { type: 'consecutive', value: 30 },
+      reward: { points: 100 }
+    }
+  ];
+
+  useEffect(() => {
+    loadData();
+  }, [userId]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Başarıları yükle
+      const achievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+      if (achievementsData) {
+        setAchievements(JSON.parse(achievementsData));
+      }
+      
+      // Kullanıcı istatistiklerini yükle
+      const statsData = await AsyncStorage.getItem(USER_STATS_STORAGE_KEY);
+      if (statsData) {
+        setUserStats(JSON.parse(statsData));
+      }
+    } catch (error) {
+      console.error('Error loading achievements data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveAchievements = async (newAchievements: Achievement[]) => {
+    try {
+      await AsyncStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(newAchievements));
+      setAchievements(newAchievements);
+    } catch (error) {
+      console.error('Error saving achievements:', error);
+    }
+  };
+
+  const saveUserStats = async (newStats: UserStats) => {
+    try {
+      await AsyncStorage.setItem(USER_STATS_STORAGE_KEY, JSON.stringify(newStats));
+      setUserStats(newStats);
+    } catch (error) {
+      console.error('Error saving user stats:', error);
+    }
+  };
+
+  // Başarı kontrolü
+  const checkAchievements = async (stats: Partial<UserStats>) => {
+    const newStats = { ...userStats, ...stats };
+    const newAchievements: Achievement[] = [];
+    
+    for (const definition of achievementDefinitions) {
+      // Zaten kazanılmış mı kontrol et
+      const alreadyEarned = achievements.find(a => a.id === definition.id);
+      if (alreadyEarned) continue;
+      
+      let isEarned = false;
+      
+      switch (definition.requirement.type) {
+        case 'streak':
+          if (newStats.currentStreak >= definition.requirement.value) {
+            isEarned = true;
+          }
+          break;
+          
+        case 'total':
+          if (definition.id.includes('entry') || definition.id.includes('writer') || definition.id.includes('diarist') || definition.id.includes('master_writer')) {
+            if (newStats.totalDiaryEntries >= definition.requirement.value) {
+              isEarned = true;
+            }
+          } else if (definition.id.includes('task') || definition.id.includes('productive') || definition.id.includes('achiever')) {
+            if (newStats.totalTasksCompleted >= definition.requirement.value) {
+              isEarned = true;
+            }
+          } else if (definition.id.includes('reminder')) {
+            if (newStats.totalReminders >= definition.requirement.value) {
+              isEarned = true;
+            }
+          }
+          break;
+          
+        case 'consecutive':
+          if (definition.id.includes('health')) {
+            if (newStats.healthTrackingDays >= definition.requirement.value) {
+              isEarned = true;
+            }
+          } else if (definition.id.includes('app_lover')) {
+            if (newStats.appUsageDays >= definition.requirement.value) {
+              isEarned = true;
+            }
+          }
+          break;
+      }
+      
+      if (isEarned) {
+        const achievement: Achievement = {
+          id: definition.id,
+          title: definition.title,
+          description: definition.description,
+          icon: definition.icon,
+          unlockedAt: new Date().toISOString(),
+          category: definition.category,
+        };
+        
+        newAchievements.push(achievement);
+        
+        // Başarı bildirimi gönder
+        try {
+          await sendAchievementNotification(
+            definition.title,
+            definition.description
+          );
+        } catch (error) {
+          console.error('Error sending achievement notification:', error);
+        }
+      }
+    }
+    
+    if (newAchievements.length > 0) {
+      const updatedAchievements = [...achievements, ...newAchievements];
+      await saveAchievements(updatedAchievements);
+    }
+    
+    await saveUserStats(newStats);
+    return newAchievements;
+  };
+
+  // Günlük yazma başarısı kontrolü
+  const checkDiaryAchievements = async (entryCount: number, currentStreak: number) => {
+    return await checkAchievements({
+      totalDiaryEntries: entryCount,
+      currentStreak: currentStreak,
+      longestStreak: Math.max(userStats.longestStreak, currentStreak),
+      lastDiaryDate: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  // Görev başarısı kontrolü
+  const checkTaskAchievements = async (completedTasks: number) => {
+    return await checkAchievements({
+      totalTasksCompleted: completedTasks,
+      tasksCompletedThisWeek: userStats.tasksCompletedThisWeek + 1,
+    });
+  };
+
+  // Sağlık takibi başarısı kontrolü
+  const checkHealthAchievements = async (healthDays: number) => {
+    return await checkAchievements({
+      healthTrackingDays: healthDays,
+      lastHealthDate: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  // Hatırlatıcı başarısı kontrolü
+  const checkReminderAchievements = async (reminderCount: number, activeCount: number) => {
+    return await checkAchievements({
+      totalReminders: reminderCount,
+      activeReminders: activeCount,
+    });
+  };
+
+  // Kategorilere göre başarıları getir
+  const getAchievementsByCategory = (category: Achievement['category']) => {
+    return achievements.filter(a => a.category === category);
+  };
+
+  // Kazanılmamış başarıları getir
+  const getUnlockedAchievements = () => {
+    return achievementDefinitions.filter(def => 
+      !achievements.find(a => a.id === def.id)
+    );
+  };
+
+  // İlerleme bilgisi
+  const getAchievementProgress = (achievementId: string) => {
+    const definition = achievementDefinitions.find(d => d.id === achievementId);
+    if (!definition) return null;
+    
+    const alreadyEarned = achievements.find(a => a.id === achievementId);
+    if (alreadyEarned) {
+      return { progress: 100, current: definition.requirement.value, required: definition.requirement.value };
+    }
+    
+    let current = 0;
+    
+    switch (definition.requirement.type) {
+      case 'streak':
+        current = userStats.currentStreak;
+        break;
+      case 'total':
+        if (achievementId.includes('entry') || achievementId.includes('writer') || achievementId.includes('diarist') || achievementId.includes('master_writer')) {
+          current = userStats.totalDiaryEntries;
+        } else if (achievementId.includes('task') || achievementId.includes('productive') || achievementId.includes('achiever')) {
+          current = userStats.totalTasksCompleted;
+        } else if (achievementId.includes('reminder')) {
+          current = userStats.totalReminders;
+        }
+        break;
+      case 'consecutive':
+        if (achievementId.includes('health')) {
+          current = userStats.healthTrackingDays;
+        } else if (achievementId.includes('app_lover')) {
+          current = userStats.appUsageDays;
+        }
+        break;
+    }
+    
+    const required = definition.requirement.value;
+    const progress = Math.min((current / required) * 100, 100);
+    
+    return { progress, current, required };
+  };
+
+  // Başarı istatistikleri
+  const getAchievementStats = () => {
+    const total = achievementDefinitions.length;
+    const unlocked = achievements.length;
+    const byCategory = achievementDefinitions.reduce((acc, def) => {
+      acc[def.category] = (acc[def.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const unlockedByCategory = achievements.reduce((acc, ach) => {
+      acc[ach.category] = (acc[ach.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return {
+      total,
+      unlocked,
+      locked: total - unlocked,
+      byCategory,
+      unlockedByCategory,
+      completionRate: total > 0 ? (unlocked / total) * 100 : 0,
+    };
+  };
+
+  return {
+    // Data
+    achievements,
+    userStats,
+    loading,
+    achievementDefinitions,
+    
+    // Actions
+    checkAchievements,
+    checkDiaryAchievements,
+    checkTaskAchievements,
+    checkHealthAchievements,
+    checkReminderAchievements,
+    checkHabitAchievements: async (totalCompletions: number, longestStreak: number, perfectWeeks: number = 0) => {
+      const newAchievements: Achievement[] = [];
+      
+      // İlk alışkanlık tamamlama
+      if (totalCompletions >= 1 && !achievements.find(a => a.id === 'habit_starter')) {
+        const achievement: Achievement = {
+          id: 'habit_starter',
+          title: 'Alışkanlık Başlangıcı',
+          description: 'İlk alışkanlığını tamamladın!',
+          icon: '🌟',
+          category: 'goals',
+          unlockedAt: new Date().toISOString(),
+        };
+        newAchievements.push(achievement);
+        await sendAchievementNotification(achievement.title, achievement.description);
+      }
+      
+      // 7 günlük streak
+      if (longestStreak >= 7 && !achievements.find(a => a.id === 'habit_streak_7')) {
+        const achievement: Achievement = {
+          id: 'habit_streak_7',
+          title: 'Haftalık Alışkanlık',
+          description: 'Bir alışkanlığı 7 gün üst üste tamamladın!',
+          icon: '🔥',
+          category: 'streak',
+          unlockedAt: new Date().toISOString(),
+        };
+        newAchievements.push(achievement);
+        await sendAchievementNotification(achievement.title, achievement.description);
+      }
+      
+      // 30 günlük streak
+      if (longestStreak >= 30 && !achievements.find(a => a.id === 'habit_streak_30')) {
+        const achievement: Achievement = {
+          id: 'habit_streak_30',
+          title: 'Aylık Alışkanlık Ustası',
+          description: 'Bir alışkanlığı 30 gün üst üste tamamladın!',
+          icon: '👑',
+          category: 'streak',
+          unlockedAt: new Date().toISOString(),
+        };
+        newAchievements.push(achievement);
+        await sendAchievementNotification(achievement.title, achievement.description);
+      }
+      
+      // 100 alışkanlık tamamlama
+      if (totalCompletions >= 100 && !achievements.find(a => a.id === 'habit_master_100')) {
+        const achievement: Achievement = {
+          id: 'habit_master_100',
+          title: 'Alışkanlık Efsanesi',
+          description: '100 alışkanlık tamamladın!',
+          icon: '🏆',
+          category: 'goals',
+          unlockedAt: new Date().toISOString(),
+        };
+        newAchievements.push(achievement);
+        await sendAchievementNotification(achievement.title, achievement.description);
+      }
+      
+      // Mükemmel hafta
+      if (perfectWeeks >= 1 && !achievements.find(a => a.id === 'habit_perfect_week')) {
+        const achievement: Achievement = {
+          id: 'habit_perfect_week',
+          title: 'Mükemmel Hafta',
+          description: 'Bir hafta boyunca tüm alışkanlıklarını tamamladın!',
+          icon: '⭐',
+          category: 'goals',
+          unlockedAt: new Date().toISOString(),
+        };
+        newAchievements.push(achievement);
+        await sendAchievementNotification(achievement.title, achievement.description);
+      }
+      
+      if (newAchievements.length > 0) {
+        const updated = [...achievements, ...newAchievements];
+        setAchievements(updated);
+        await saveAchievements(updated);
+      }
+      
+      return newAchievements;
+    },
+    
+    // Getters
+    getAchievementsByCategory,
+    getUnlockedAchievements,
+    getAchievementProgress,
+    getAchievementStats,
+  };
+};

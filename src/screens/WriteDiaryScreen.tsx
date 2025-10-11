@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useFont } from '../contexts/FontContext';
+// import { useFont } from '../contexts/FontContext'; // Kaldırıldı
 import { CustomAlert } from '../components/CustomAlert';
 import { useDiary } from '../hooks/useDiary';
 // import { View } from 'moti'; // Removed for now
@@ -27,7 +27,7 @@ interface WriteDiaryScreenProps {
 export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { fontConfig } = useFont();
+  // const { fontConfig } = useFont(); // Kaldırıldı
   const { addEntry, updateEntry } = useDiary(user?.uid);
 
   const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info', primaryButton?: any, secondaryButton?: any) => {
@@ -247,8 +247,8 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       backgroundColor: currentTheme.colors.card,
       borderRadius: 12,
       padding: 16,
-      fontSize: fontConfig.size + 2,
-      fontWeight: fontConfig.weight,
+      fontSize: 16,
+      fontWeight: '600',
       color: currentTheme.colors.text,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
@@ -257,13 +257,13 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       backgroundColor: currentTheme.colors.card,
       borderRadius: 12,
       padding: 16,
-      fontSize: fontConfig.size,
+      fontSize: 16,
       color: currentTheme.colors.text,
       textAlignVertical: 'top',
       minHeight: 200,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
-      fontWeight: fontConfig.weight,
+      fontWeight: '400',
     },
     moodSection: {
       marginBottom: 20,

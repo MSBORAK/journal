@@ -8,6 +8,8 @@ import {
   TextInput,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -780,7 +782,11 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
         animationType="fade"
         onRequestClose={() => setShowAddModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardAvoidingView 
+          style={dynamicStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={dynamicStyles.modalContent}>
             <View style={dynamicStyles.modalHeader}>
               <Text style={dynamicStyles.modalTitle}>
@@ -794,7 +800,11 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
               {/* Title */}
               <View style={dynamicStyles.formGroup}>
                 <Text style={dynamicStyles.formLabel}>Başlık *</Text>
@@ -919,7 +929,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

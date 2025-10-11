@@ -9,7 +9,9 @@ import {
   Modal,
   Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -18,14 +20,15 @@ import { useDiary } from '../hooks/useDiary';
 import { useProfile } from '../hooks/useProfile';
 import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
+import { useAchievements } from '../hooks/useAchievements';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { DiaryEntry } from '../types';
 import { getAllInsights, Insight } from '../utils/insightsEngine';
 import { 
   requestNotificationPermissions, 
   scheduleAllNotifications 
 } from '../services/notificationService';
+import { getInspirationByMood, InspirationMessage } from '../data/inspirationMessages';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +48,29 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useTranslation();
+
+  // Animation values
+  const fadeAnims = useRef({
+    mood: new Animated.Value(0),
+    tasks: new Animated.Value(0),
+    health: new Animated.Value(0),
+    welcome: new Animated.Value(0),
+    motivation: new Animated.Value(0),
+    insights: new Animated.Value(0),
+    reminders: new Animated.Value(0),
+  }).current;
+
+  const scaleAnims = useRef({
+    mood: new Animated.Value(0.95),
+    tasks: new Animated.Value(0.95),
+    health: new Animated.Value(0.95),
+  }).current;
+
+  const pulseAnims = useRef({
+    mood: new Animated.Value(1),
+    motivation: new Animated.Value(1),
+    reminders: new Animated.Value(1),
+  }).current;
   // const { fontConfig } = useFont(); // Kaldırıldı
   const { entries } = useDiary(user?.uid);
   const { profile } = useProfile(user?.uid);
@@ -56,11 +82,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     getCategoryById
   } = useTasks(user?.uid);
   const { getTodayReminders } = useReminders(user?.uid);
+  const { achievements, getAchievementStats } = useAchievements(user?.uid);
 
   const [insights, setInsights] = useState<Insight[]>([]);
   const [showHealthModal, setShowHealthModal] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [dailyInspiration, setDailyInspiration] = useState<InspirationMessage | null>(null);
+  const [inspirationRefreshing, setInspirationRefreshing] = useState(false);
   const [wellnessData, setWellnessData] = useState<WellnessData>({
     waterGlasses: 0,
     exerciseMinutes: 0,
@@ -68,6 +97,122 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     meditationMinutes: 0,
     date: new Date().toISOString().split('T')[0],
   });
+
+  // Animation functions
+  const startCardAnimations = () => {
+    const animations = [
+      Animated.timing(fadeAnims.welcome, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnims.mood, {
+        toValue: 1,
+        duration: 800,
+        delay: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnims.tasks, {
+        toValue: 1,
+        duration: 800,
+        delay: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnims.health, {
+        toValue: 1,
+        duration: 800,
+        delay: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnims.motivation, {
+        toValue: 1,
+        duration: 800,
+        delay: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnims.insights, {
+        toValue: 1,
+        duration: 800,
+        delay: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnims.reminders, {
+        toValue: 1,
+        duration: 800,
+        delay: 1200,
+        useNativeDriver: true,
+      }),
+    ];
+
+    Animated.parallel(animations).start();
+
+    // Pulse animations for interactive elements
+    setTimeout(() => {
+      const pulseAnimations = [
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnims.mood, {
+              toValue: 1.03,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnims.mood, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnims.motivation, {
+              toValue: 1.02,
+              duration: 2000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnims.motivation, {
+              toValue: 1,
+              duration: 2000,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnims.reminders, {
+              toValue: 1.01,
+              duration: 2500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnims.reminders, {
+              toValue: 1,
+              duration: 2500,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+      ];
+
+      pulseAnimations.forEach(anim => anim.start());
+    }, 1500);
+  };
+
+  const animateCardPress = (cardName: 'mood' | 'tasks' | 'health') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    Animated.sequence([
+      Animated.timing(scaleAnims[cardName], {
+        toValue: 0.98,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnims[cardName], {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
   
   // Animasyon state'leri
   const [animatingTasks, setAnimatingTasks] = useState<Set<string>>(new Set());
@@ -75,16 +220,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const glowAnimations = useRef<{[key: string]: Animated.Value}>({});
   const checkmarkAnimations = useRef<{[key: string]: Animated.Value}>({});
   
-  // Kart animasyonları
-  const fadeAnims = useRef({
-    health: new Animated.Value(0),
-    mood: new Animated.Value(0),
-    motivation: new Animated.Value(0),
-    insights: new Animated.Value(0),
-    tasks: new Animated.Value(0),
-    welcome: new Animated.Value(0),
-    reminders: new Animated.Value(0),
-  }).current;
 
   const todayTasks = getTodayTasks();
   const todayCompletedCount = getTodayCompletedCount();
@@ -100,6 +235,16 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       tasks: todayTasks.map(t => ({ id: t.id, title: t.title, isCompleted: t.isCompleted }))
     });
   }, [todayTasks, todayCompletedCount, todayCompletionRate]);
+
+  // Start animations on mount
+  useEffect(() => {
+    startCardAnimations();
+  }, []);
+
+  // Günün ilhamını yükle
+  useEffect(() => {
+    loadDailyInspiration();
+  }, [entries]); // Entries değiştiğinde yeniden yükle (ruh hali güncellendiğinde)
 
   // Animasyon fonksiyonları
   const animateTaskCompletion = async (taskId: string) => {
@@ -482,17 +627,73 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     return recommendations.slice(0, 3);
   };
 
+  // Günün ilhamını yükle
+  const loadDailyInspiration = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const savedDate = await AsyncStorage.getItem('inspiration_date');
+      const savedMessage = await AsyncStorage.getItem('inspiration_message');
+
+      // Eğer bugünün mesajı varsa, onu kullan
+      if (savedDate === today && savedMessage) {
+        setDailyInspiration(JSON.parse(savedMessage));
+      } else {
+        // Yeni mesaj oluştur
+        await refreshInspiration();
+      }
+    } catch (error) {
+      console.error('İlham mesajı yüklenirken hata:', error);
+      // Hata olursa rastgele bir mesaj göster
+      const today = getTodayMood();
+      const moodValue = today && typeof today === 'object' && 'value' in today ? today.value : 3;
+      const moodType = moodValue >= 5 ? 'happy' : moodValue === 4 ? 'happy' : moodValue === 3 ? 'neutral' : 'sad';
+      setDailyInspiration(getInspirationByMood(moodType as any));
+    }
+  };
+
+  // İlham mesajını yenile
+  const refreshInspiration = async () => {
+    setInspirationRefreshing(true);
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const todayMood = getTodayMood();
+      const moodValue = todayMood && typeof todayMood === 'object' && 'value' in todayMood ? todayMood.value : 3;
+      
+      // Ruh haline göre mesaj seç
+      let moodType: any = 'neutral';
+      if (moodValue >= 5) moodType = 'happy';        // Harika
+      else if (moodValue === 4) moodType = 'happy';  // Mutlu
+      else if (moodValue === 3) moodType = 'neutral'; // Yorgun
+      else if (moodValue <= 2) moodType = 'sad';     // Üzgün/Normal
+      
+      const newMessage = getInspirationByMood(moodType);
+      setDailyInspiration(newMessage);
+      
+      // Kaydet
+      await AsyncStorage.setItem('inspiration_date', today);
+      await AsyncStorage.setItem('inspiration_message', JSON.stringify(newMessage));
+      
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('İlham mesajı yenilenirken hata:', error);
+    } finally {
+      setTimeout(() => setInspirationRefreshing(false), 500);
+    }
+  };
+
   const getTodayMood = () => {
     const today = new Date().toISOString().split('T')[0];
     const todayEntry = entries.find(entry => entry.date === today);
     
     const moodOptions = [
       { value: 0, label: 'Henüz Belirtilmedi', emoji: '📝' }, // Varsayılan
-      { value: 1, label: 'Çok Kötü', emoji: '😢' },
-      { value: 2, label: 'Kötü', emoji: '😔' },
-      { value: 3, label: 'Normal', emoji: '😐' },
-      { value: 4, label: 'İyi', emoji: '😊' },
-      { value: 5, label: 'Çok İyi', emoji: '🤩' },
+      { value: 1, label: 'Üzgün', emoji: '😔' },        // WriteDiary ile uyumlu
+      { value: 2, label: 'Normal', emoji: '😐' },
+      { value: 3, label: 'Yorgun', emoji: '🫠' },       // WriteDiary ile uyumlu
+      { value: 4, label: 'Mutlu', emoji: '😎' },        // WriteDiary ile uyumlu
+      { value: 5, label: 'Harika', emoji: '🤩' },       // WriteDiary ile uyumlu
     ];
     
     if (!todayEntry) {
@@ -504,12 +705,12 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 
   const getMoodEmoji = (moodValue: number) => {
     const moodEmojis: { [key: number]: string } = {
-      0: '📝',
-      1: '😢',
-      2: '😔',
-      3: '😐',
-      4: '😊',
-      5: '🤩',
+      0: '📝',  // Henüz Belirtilmedi
+      1: '😔',  // Üzgün
+      2: '😐',  // Normal
+      3: '🫠',  // Yorgun
+      4: '😎',  // Mutlu
+      5: '🤩',  // Harika
     };
     return moodEmojis[moodValue] || '📝';
   };
@@ -721,8 +922,66 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       'Bugünü kutla! Sen başardın! 🎊',
     ];
     
-    const randomIndex = Math.floor(Math.random() * messages.length);
-    return messages[randomIndex];
+    // Ruh haline göre mesaj seç
+    const todayMood = getTodayMood();
+    const moodValue = todayMood && typeof todayMood === 'object' && 'value' in todayMood ? todayMood.value : 3;
+    
+    let selectedMessages = messages;
+    
+    if (moodValue >= 5) {
+      // Harika ruh hali - çok pozitif mesajlar
+      selectedMessages = [
+        'Bu enerjiyi koru! Sen muhteşemsin! 🌟',
+        'Bu mutluluğu dünyaya yay! Pozitif enerji bulaşıcıdır! ☀️',
+        'Bugün senin günün! Bu anı yaşa! 🎉',
+        'Bu pozitif enerjiyi kullan, hayallerine adım at! 🚀',
+        'Sen harikasın! Bu enerjiyle her şeyi başarabilirsin! 💪',
+        'Bu enerjiyle devam et! Sen doğru yoldasın! 🌈',
+        'Sen muhteşemsin! Bugün de bunu hatırla! 🌈',
+      ];
+    } else if (moodValue === 4) {
+      // Mutlu ruh hali - pozitif mesajlar
+      selectedMessages = [
+        'Bu enerjiyle devam et! Sen doğru yoldasın! 🌈',
+        'Güzel bir gün geçiriyorsun! Böyle devam et! ✨',
+        'Bu pozitiflik seni güzel yerlere götürecek! 🦋',
+        'Bugün de kendini sevmeye devam et! 💕',
+        'Bu enerjiyi kullan, hedeflerine odaklan! 🎯',
+        'Bugün de harika bir gün geçireceğini biliyorum! 🌟',
+        'Her yeni gün yeni fırsatlar demek! Sen hazırsın! 🚀',
+      ];
+    } else if (moodValue === 3) {
+      // Yorgun ruh hali - dinlenme mesajları
+      selectedMessages = [
+        'Yorgun hissediyorsan bu normal! Kendine zaman ver! 😴',
+        'Dinlenmek de bir ihtiyaç! Bugün kendini şımart! 🛁',
+        'Yorgunluk geçici! Yarın daha enerjik olacaksın! ⚡',
+        'Bugün dinlen! Yarın daha güçlü başlayacaksın! 💪',
+        'Kendine şefkatli ol! Yorgunluk da bir deneyim! 🤗',
+        'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
+        'Dinlenmek, yenilenmek demek! Kendine izin ver! 🧘',
+      ];
+    } else if (moodValue <= 2) {
+      // Düşük ruh hali - destekleyici mesajlar
+      selectedMessages = [
+        'Bugün zor geçiyorsa, bu normal! Sen güçlüsün! 💙',
+        'Her gün aynı olmak zorunda değil! Bugün farklı olabilir! 🌈',
+        'Kendini dinle! İhtiyacın olan şey ne? 🤗',
+        'Bugün küçük adımlar atsan da yeter! Her adım değerli! 👣',
+        'Zor zamanlar geçici! Sen kalıcısın! ⏳',
+        'Kendine şefkatli ol! Sen insansın! 💝',
+        'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
+        'Bugün dinlen! Yarın daha iyi olacak! 😴',
+        'Sen değerlisin, modun nasıl olursa olsun! 💎',
+        'Kendini yargılamadan kabul et! Sen mükemmelsin! 🕊️',
+        'Bugün küçük şeylerle mutlu ol! 🌸',
+        'Kendine zaman ver! Her şey yerli yerine gelecek! ⏰',
+        'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
+      ];
+    }
+    
+    const randomIndex = Math.floor(Math.random() * selectedMessages.length);
+    return selectedMessages[randomIndex];
   };
 
 
@@ -767,7 +1026,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     statCard: {
       flex: 1,
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       alignItems: 'center',
       shadowColor: currentTheme.colors.shadow,
@@ -813,7 +1072,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
       marginBottom: 20,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 20,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 2 },
@@ -852,17 +1111,76 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       color: currentTheme.colors.secondary,
     },
     moodCard: {
-      backgroundColor: currentTheme.colors.card,
+      marginHorizontal: 20,
+      marginBottom: 40,
+      borderRadius: 28,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.25,
+      shadowRadius: 20,
+      elevation: 12,
+      minHeight: 160,
+      transform: [{ translateY: -4 }],
+    },
+    moodCardGradient: {
+      borderRadius: 28,
+      padding: 24,
+      minHeight: 160,
+    },
+    // İlham Kartı Stilleri
+    inspirationCard: {
       marginHorizontal: 20,
       marginBottom: 32,
-      borderRadius: 20,
-      padding: 24,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.15,
-      shadowRadius: 12,
+      borderRadius: 24,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.2,
+      shadowRadius: 16,
       elevation: 8,
-      minHeight: 160,
+      transform: [{ translateY: -2 }],
+      overflow: 'hidden',
+    },
+    inspirationGradient: {
+      borderRadius: 24,
+      padding: 24,
+      minHeight: 140,
+    },
+    inspirationHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    inspirationTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      opacity: 0.8,
+    },
+    inspirationEmoji: {
+      fontSize: 32,
+      marginBottom: 12,
+    },
+    inspirationText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      lineHeight: 28,
+      marginBottom: 8,
+    },
+    inspirationAuthor: {
+      fontSize: 13,
+      color: currentTheme.colors.secondary,
+      fontStyle: 'italic',
+      marginTop: 8,
+    },
+    refreshButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: currentTheme.colors.primary + '20',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     moodTitle: {
       fontSize: 18,
@@ -945,22 +1263,32 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       borderTopColor: currentTheme.colors.border,
       alignItems: 'center',
     },
+    moodActionButton: {
+      backgroundColor: currentTheme.colors.primary + '15',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '30',
+    },
     moodActionText: {
       fontSize: 14,
       color: currentTheme.colors.primary,
       fontWeight: '600',
     },
     motivationCard: {
-      backgroundColor: currentTheme.colors.accent,
+      backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
-      marginBottom: 32,
-      borderRadius: 20,
+      marginBottom: 20,
+      borderRadius: 28,
       padding: 24,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.12,
-      shadowRadius: 12,
-      elevation: 5,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.2,
+      shadowRadius: 16,
+      elevation: 8,
+      transform: [{ translateY: -2 }],
+      overflow: 'hidden',
       borderWidth: 1.5,
       borderColor: currentTheme.colors.primary + '20',
     },
@@ -983,10 +1311,105 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     // Insights Styles
     insightsSection: {
       marginHorizontal: 20,
-      marginBottom: 32,
+      marginBottom: 20,
       backgroundColor: currentTheme.colors.background,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
+    },
+    // Achievements Styles
+    achievementsCard: {
+      backgroundColor: currentTheme.colors.card + 'F8',
+      marginHorizontal: 20,
+      marginBottom: 20,
+      borderRadius: 28,
+      padding: 24,
+      shadowColor: '#FFD700',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 4,
+      transform: [{ translateY: -1 }],
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: '#FFD700' + '15',
+    },
+    achievementsHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    achievementsTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      flex: 1,
+    },
+    achievementsIcon: {
+      fontSize: 24,
+      marginRight: 8,
+    },
+    achievementsStats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 16,
+    },
+    achievementStat: {
+      flex: 1,
+      alignItems: 'center',
+      backgroundColor: currentTheme.colors.background + 'F0',
+      borderRadius: 16,
+      padding: 12,
+      minHeight: 80,
+    },
+    achievementStatNumber: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: '#FFD700',
+      marginBottom: 6,
+    },
+    achievementStatLabel: {
+      fontSize: 11,
+      color: currentTheme.colors.secondary,
+      textAlign: 'center',
+      lineHeight: 14,
+      fontWeight: '500',
+    },
+    achievementsProgress: {
+      marginTop: 8,
+    },
+    achievementsProgressText: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    achievementsProgressBar: {
+      height: 8,
+      backgroundColor: currentTheme.colors.border,
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    achievementsProgressFill: {
+      height: '100%',
+      backgroundColor: '#FFD700',
+      borderRadius: 4,
+    },
+    achievementsButton: {
+      backgroundColor: '#FFD700' + '15',
+      borderWidth: 1,
+      borderColor: '#FFD700' + '25',
+      borderRadius: 20,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+      marginTop: 12,
+    },
+    achievementsButtonText: {
+      fontSize: 14,
+      color: '#FFD700',
+      fontWeight: '600',
     },
     sectionTitle: {
       fontSize: 20,
@@ -1029,16 +1452,19 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     // Tasks Styles
     tasksCard: {
-      backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
-      marginBottom: 32,
-      borderRadius: 16,
-      padding: 18,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 3,
+      marginBottom: 80,
+      borderRadius: 20,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.18,
+      shadowRadius: 16,
+      elevation: 8,
+      transform: [{ translateY: -2 }],
+    },
+    tasksCardGradient: {
+      borderRadius: 20,
+      padding: 20,
     },
     tasksHeader: {
       flexDirection: 'row',
@@ -1055,7 +1481,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       flexDirection: 'row',
       justifyContent: 'space-around',
       marginBottom: 16,
-      paddingVertical: 12,
+      paddingVertical: 10,
       backgroundColor: currentTheme.colors.background,
       borderRadius: 12,
       borderWidth: 1,
@@ -1195,8 +1621,8 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     remindersCard: {
       backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
-      marginBottom: 32,
-      borderRadius: 16,
+      marginBottom: 20,
+      borderRadius: 20,
       padding: 18,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 2 },
@@ -1253,26 +1679,97 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       marginTop: 8,
       fontWeight: '500',
     },
-    // Gelişmiş Sağlık Skoru Stilleri
-    healthScoreCard: {
-      backgroundColor: currentTheme.colors.card,
+    // Şirin Baloncuk Hatırlatıcılar 🎈
+    remindersBubblesContainer: {
       marginHorizontal: 20,
-      marginBottom: 32,
+      marginBottom: 24,
+    },
+    remindersBubblesTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+    },
+    bubbleScrollContainer: {
+      paddingRight: 20,
+      gap: 12,
+    },
+    reminderBubble: {
+      width: 100,
+      height: 120,
       borderRadius: 20,
-      padding: 20,
+      padding: 12,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderWidth: 2,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.15,
-      shadowRadius: 12,
-      elevation: 6,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    bubbleTime: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      textAlign: 'center',
+    },
+    bubbleEmoji: {
+      fontSize: 36,
+      textAlign: 'center',
+    },
+    bubbleTitle: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      textAlign: 'center',
+    },
+    moreBubble: {
+      width: 100,
+      height: 120,
+      borderRadius: 20,
+      padding: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: currentTheme.colors.accent,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
+      borderStyle: 'dashed',
+      gap: 8,
+    },
+    moreBubbleNumber: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: currentTheme.colors.primary,
+    },
+    moreBubbleText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: currentTheme.colors.secondary,
+    },
+    // Gelişmiş Sağlık Skoru Stilleri
+    healthScoreCard: {
+      marginHorizontal: 20,
+      marginTop: 20,
+      marginBottom: 40,
+      borderRadius: 28,
+      shadowColor: '#F59E0B',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.22,
+      shadowRadius: 18,
+      elevation: 10,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
+      transform: [{ translateY: -3 }],
+    },
+    healthScoreCardGradient: {
+      borderRadius: 28,
+      padding: 24,
     },
     healthScoreHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 20,
+      marginBottom: 24,
     },
     healthScoreHeaderLeft: {
       flexDirection: 'row',
@@ -1291,7 +1788,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     healthScoreBadge: {
       backgroundColor: currentTheme.colors.primary,
-      borderRadius: 16,
+      borderRadius: 20,
       paddingHorizontal: 16,
       paddingVertical: 10,
       flexDirection: 'row',
@@ -1310,8 +1807,8 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     healthCategoriesContainer: {
       flexDirection: 'row',
-      gap: 12,
-      marginBottom: 16,
+      gap: 16,
+      marginBottom: 20,
     },
     healthCategoryItem: {
       flex: 1,
@@ -1423,7 +1920,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       height: 180,
       shadowColor: currentTheme.colors.shadow,
@@ -1462,7 +1959,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     modalCategoryCard: {
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       marginBottom: 12,
       shadowColor: currentTheme.colors.shadow,
@@ -1515,7 +2012,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     modalRecommendationCard: {
       flexDirection: 'row',
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       marginBottom: 12,
       borderLeftWidth: 4,
@@ -1551,7 +2048,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     modalAchievementCard: {
       flex: 1,
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       alignItems: 'center',
       shadowColor: currentTheme.colors.shadow,
@@ -1579,7 +2076,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     // Wellness Redirect Stilleri
     wellnessRedirectCard: {
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 20,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 2 },
@@ -1643,7 +2140,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     streakMessageCard: {
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 20,
       alignItems: 'center',
       shadowColor: currentTheme.colors.shadow,
@@ -1663,7 +2160,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       marginBottom: 12,
       shadowColor: currentTheme.colors.shadow,
@@ -1713,7 +2210,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     streakGoalCard: {
       backgroundColor: currentTheme.colors.card,
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 16,
       marginBottom: 12,
       shadowColor: currentTheme.colors.shadow,
@@ -2048,7 +2545,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 
     <ScrollView 
       style={dynamicStyles.container}
-      contentContainerStyle={{ paddingBottom: 120 }}
+      contentContainerStyle={{ paddingBottom: 100 }}
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
@@ -2066,39 +2563,37 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 
 
 
+
       {/* Today's Mood */}
       <Animated.View
         style={{
           opacity: fadeAnims.mood,
-          transform: [{
-            scale: fadeAnims.mood.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.95, 1],
-            })
-          }]
+          transform: [{ scale: Animated.multiply(scaleAnims.mood, pulseAnims.mood) }],
         }}
       >
-        <TouchableOpacity
-          style={[
-            dynamicStyles.moodCard,
-          (getTodayMood() as any)?.isDefault && { 
-            opacity: 0.9,
-            borderWidth: 2,
-            borderColor: currentTheme.colors.primary,
-            borderStyle: 'dashed'
-          }
-        ]}
-        onPress={() => {
-          if ((getTodayMood() as any)?.isDefault) {
-            navigation.navigate('WriteDiaryStep1' as never);
-          }
-        }}
-        activeOpacity={(getTodayMood() as any)?.isDefault ? 0.8 : 1}
-        disabled={!(getTodayMood() as any)?.isDefault}
-      >
+          <View style={dynamicStyles.moodCard}>
+          <LinearGradient
+            colors={[
+              currentTheme.colors.primary + '35',
+              currentTheme.colors.accent + '40',
+              currentTheme.colors.card,
+              currentTheme.name === 'dark' ? currentTheme.colors.accent + '45' : currentTheme.colors.accent + '35'
+            ]}
+            style={[
+              dynamicStyles.moodCardGradient,
+              (getTodayMood() as any)?.isDefault && { 
+                opacity: 0.9,
+                borderWidth: 2,
+                borderColor: currentTheme.colors.primary,
+                borderStyle: 'dashed'
+              }
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
-            {(getTodayMood() as any)?.isDefault ? '💭 Bugünkü Ruh Halin' : '🪄 Bugünkü Ruh Halin'}
+            {(getTodayMood() as any)?.isDefault ? '💭 Bugün Nasıl Hissediyorsun?' : '🪄 Bugünkü Ruh Halin'}
           </Text>
           {(getTodayMood() as any)?.isDefault && (
             <View style={dynamicStyles.moodBadge}>
@@ -2123,21 +2618,29 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={dynamicStyles.moodLabel}>{getTodayMood()?.label}</Text>
             {(getTodayMood() as any)?.isDefault && (
               <Text style={dynamicStyles.moodSubtitle}>
-                Günlük yazarak ruh halini belirt
+                Duygularını keşfet, kendini tanı
               </Text>
             )}
           </View>
         </View>
         
-        {(getTodayMood() as any)?.isDefault && (
-          <View style={dynamicStyles.moodActionContainer}>
+        <View style={dynamicStyles.moodActionContainer}>
+          <TouchableOpacity
+            style={dynamicStyles.moodActionButton}
+            onPress={() => {
+              animateCardPress('mood');
+              navigation.navigate('WriteDiaryStep1' as never);
+            }}
+            activeOpacity={0.8}
+          >
             <Text style={dynamicStyles.moodActionText}>
               <Ionicons name="arrow-forward" size={16} color={currentTheme.colors.primary} />
-              {' '}Günlük Yazmaya Başla
+              {' '}{(getTodayMood() as any)?.isDefault ? 'Ruh halini belirt' : 'Günlük yaz'}
             </Text>
-          </View>
-        )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+          </LinearGradient>
+        </View>
       </Animated.View>
 
       {/* Motivation Message */}
@@ -2145,23 +2648,111 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
         style={{
           opacity: fadeAnims.motivation,
           transform: [{
-            scale: fadeAnims.motivation.interpolate({
+            scale: Animated.multiply(
+              fadeAnims.motivation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.95, 1],
+              }),
+              pulseAnims.motivation
+            )
+          }]
+        }}
+      >
+        <View style={dynamicStyles.motivationCard}>
+          <LinearGradient
+            colors={[
+              currentTheme.colors.primary + '40',
+              currentTheme.colors.accent + '45',
+              currentTheme.colors.primary + '35',
+              currentTheme.colors.accent + '40',
+            ]}
+            style={{
+              borderRadius: 28,
+              padding: 24,
+              margin: -24,
+            }}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={dynamicStyles.motivationTitle}>✨ Bugünün Mesajı</Text>
+            <Text style={dynamicStyles.motivationMessage}>
+              {getMotivationMessage()}
+            </Text>
+          </LinearGradient>
+        </View>
+      </Animated.View>
+
+      {/* Achievements Card */}
+      <Animated.View
+        style={{
+          opacity: fadeAnims.insights,
+          transform: [{
+            scale: fadeAnims.insights.interpolate({
               inputRange: [0, 1],
               outputRange: [0.95, 1],
             })
           }]
         }}
       >
-        <View style={dynamicStyles.motivationCard}>
-          <Text style={dynamicStyles.motivationTitle}>✨ Günün İlhamı</Text>
-          <Text style={dynamicStyles.motivationMessage}>
-            {getMotivationMessage()}
-          </Text>
-        </View>
+        <TouchableOpacity
+          style={dynamicStyles.achievementsCard}
+          onPress={() => navigation.navigate('Achievements')}
+          activeOpacity={0.8}
+        >
+          <View style={dynamicStyles.achievementsHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <Text style={dynamicStyles.achievementsIcon}>🏆</Text>
+              <Text style={dynamicStyles.achievementsTitle}>Başarılarım</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={currentTheme.colors.secondary} />
+          </View>
+
+          <View style={dynamicStyles.achievementsStats}>
+            <View style={dynamicStyles.achievementStat}>
+              <Text style={dynamicStyles.achievementStatNumber}>
+                {getAchievementStats().unlocked}
+              </Text>
+              <Text style={dynamicStyles.achievementStatLabel}>Kazanılan</Text>
+            </View>
+            <View style={dynamicStyles.achievementStat}>
+              <Text style={dynamicStyles.achievementStatNumber}>
+                {getAchievementStats().total}
+              </Text>
+              <Text style={dynamicStyles.achievementStatLabel}>Toplam</Text>
+            </View>
+            <View style={dynamicStyles.achievementStat}>
+              <Text style={dynamicStyles.achievementStatNumber}>
+                {Math.round(getAchievementStats().completionRate)}%
+              </Text>
+              <Text style={dynamicStyles.achievementStatLabel}>Tamamlanma</Text>
+            </View>
+          </View>
+
+          <View style={dynamicStyles.achievementsProgress}>
+            <Text style={dynamicStyles.achievementsProgressText}>
+              {getAchievementStats().unlocked} / {getAchievementStats().total} rozet kazandın
+            </Text>
+            <View style={dynamicStyles.achievementsProgressBar}>
+              <View 
+                style={[
+                  dynamicStyles.achievementsProgressFill,
+                  { width: `${getAchievementStats().completionRate}%` }
+                ]} 
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={dynamicStyles.achievementsButton}
+            onPress={() => navigation.navigate('Achievements')}
+            activeOpacity={0.8}
+          >
+            <Text style={dynamicStyles.achievementsButtonText}>
+              Tüm Başarıları Gör 🏆
+            </Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Animated.View>
-
-
-
 
       {/* Insights Section */}
       {insights.length > 0 && (
@@ -2176,15 +2767,31 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             }]
           }}
         >
-          <View style={dynamicStyles.insightsSection}>
-          <Text style={dynamicStyles.sectionTitle}>💡 Senin İçin İçgörüler</Text>
+          <LinearGradient
+            colors={[
+              currentTheme.colors.card,
+              currentTheme.colors.accent + '30',
+              currentTheme.colors.primary + '25',
+            ]}
+            style={dynamicStyles.insightsSection}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+          <Text style={dynamicStyles.sectionTitle}>💡 Kişisel İçgörülerin</Text>
           {insights.map((insight, index) => (
-            <View 
-              key={index} 
+            <LinearGradient
+              key={index}
+              colors={[
+                insight.color + '35',
+                insight.color + '25',
+                currentTheme.colors.card,
+              ]}
               style={[
                 dynamicStyles.insightCard,
                 { borderLeftColor: insight.color }
               ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
             >
               <View style={dynamicStyles.insightHeader}>
                 <Text style={dynamicStyles.insightIcon}>{insight.icon}</Text>
@@ -2193,278 +2800,109 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               <Text style={dynamicStyles.insightDescription}>
                 {insight.description}
               </Text>
-            </View>
+            </LinearGradient>
           ))}
-          </View>
+          </LinearGradient>
         </Animated.View>
       )}
 
-      {/* Daily Tasks */}
+
+      {/* Today's Reminders - Şirin Baloncuklar */}
+      {todayReminders.length > 0 && (
       <Animated.View
         style={{
-          opacity: fadeAnims.tasks,
+          opacity: fadeAnims.reminders,
           transform: [{
-            scale: fadeAnims.tasks.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.95, 1],
-            })
-          }]
-        }}
-      >
-        <View style={dynamicStyles.tasksCard}>
-        <View style={dynamicStyles.tasksHeader}>
-          <Text style={dynamicStyles.tasksTitle}>📋 {t('dashboard.dailyTasks')}</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Tasks' as never)}>
-            <Ionicons name="add-circle" size={24} color={currentTheme.colors.primary} />
-          </TouchableOpacity>
-        </View>
-        
-        {/* Gelişmiş İstatistikler */}
-        <View style={dynamicStyles.tasksStatsContainer}>
-          <View style={dynamicStyles.tasksStatItem}>
-            <Text style={dynamicStyles.tasksStatNumber}>{todayTasks.length}</Text>
-            <Text style={dynamicStyles.tasksStatLabel}>{t('dashboard.totalTasks')}</Text>
-          </View>
-          <View style={dynamicStyles.tasksStatItem}>
-            <Text style={dynamicStyles.tasksStatNumber}>{todayCompletedCount}</Text>
-            <Text style={dynamicStyles.tasksStatLabel}>{t('dashboard.completedTasks')}</Text>
-          </View>
-          <View style={dynamicStyles.tasksStatItem}>
-            <Text style={dynamicStyles.tasksStatNumber}>{todayCompletionRate}%</Text>
-            <Text style={dynamicStyles.tasksStatLabel}>{t('dashboard.completionRate')}</Text>
-          </View>
-        </View>
-
-        <View style={dynamicStyles.tasksProgressContainer}>
-          <View style={dynamicStyles.tasksProgressBar}>
-            <View 
-              style={[
-                dynamicStyles.tasksProgressFill, 
-                { width: `${todayCompletionRate}%` }
-              ]} 
-            />
-          </View>
-          <Text style={dynamicStyles.tasksProgressText}>
-            {todayCompletionRate === 100 ? '🎉 Tüm görevler tamamlandı!' : 
-             todayCompletionRate >= 75 ? '🔥 Harika gidiyorsun!' :
-             todayCompletionRate >= 50 ? '💪 Devam et!' :
-             '🚀 Başlayalım!'}
-          </Text>
-        </View>
-
-        {todayTasks.length > 0 ? (
-          <View style={dynamicStyles.tasksList}>
-            {todayTasks.slice(0, 3).map((task) => {
-              const category = getCategoryById(task.category);
-              const isAnimating = animatingTasks.has(task.id);
-              const scaleAnim = scaleAnimations.current[task.id] || new Animated.Value(1);
-              const glowAnim = glowAnimations.current[task.id] || new Animated.Value(0);
-              
-              return (
-                <Animated.View
-                  key={task.id}
-                  style={[
-                    dynamicStyles.taskItem,
-                    {
-                      transform: [{ scale: scaleAnim }],
-                      shadowOpacity: glowAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.1, 0.6],
-                      }),
-                      shadowRadius: glowAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [4, 20],
-                      }),
-                    }
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={dynamicStyles.taskTouchable}
-                    onPress={async () => {
-                      await animateTaskCompletion(task.id);
-                      toggleTaskCompletion(task.id);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={dynamicStyles.taskLeft}>
-                      <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
-                      <Text style={[
-                        dynamicStyles.taskTitle,
-                        task.isCompleted && dynamicStyles.taskCompleted
-                      ]}>
-                        {task.title}
-                      </Text>
-                    </View>
-                    <View style={[
-                      dynamicStyles.taskCheckbox,
-                      task.isCompleted && dynamicStyles.taskCheckboxCompleted
-                    ]}>
-                      {task.isCompleted && (
-                        <Animated.View
-                          style={{
-                            transform: [{
-                              scale: checkmarkAnimations.current[task.id] || new Animated.Value(1)
-                            }]
-                          }}
-                        >
-                          <Ionicons name="checkmark" size={16} color="white" />
-                        </Animated.View>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                  
-                  {/* Glow Effect - DAHA GÖRÜNÜR! */}
-                  {isAnimating && (
-                    <Animated.View
-                      style={[
-                        dynamicStyles.taskGlow,
-                        {
-                          opacity: glowAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, 0.3],
-                          }),
-                          transform: [{
-                            scale: glowAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0.5, 1.5],
-                            })
-                          }]
-                        }
-                      ]}
-                    />
-                  )}
-                </Animated.View>
-              );
-            })}
-            {todayTasks.length > 3 && (
-              <Text style={dynamicStyles.tasksMoreText}>
-                +{todayTasks.length - 3} görev daha
-              </Text>
-            )}
-          </View>
-        ) : (
-          <View style={dynamicStyles.tasksEmpty}>
-            <Text style={dynamicStyles.tasksEmptyText}>
-              Henüz görev eklenmemiş
-            </Text>
-            <TouchableOpacity 
-              style={dynamicStyles.tasksAddButton}
-              onPress={() => navigation.navigate('Tasks' as never)}
-            >
-              <Text style={dynamicStyles.tasksAddButtonText}>İlk Görevi Ekle</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        </View>
-      </Animated.View>
-
-      {/* Today's Reminders */}
-      {todayReminders.length > 0 && (
-        <Animated.View
-          style={{
-            opacity: fadeAnims.reminders,
-            transform: [{
-              scale: fadeAnims.reminders.interpolate({
+            scale: Animated.multiply(
+              fadeAnims.reminders.interpolate({
                 inputRange: [0, 1],
                 outputRange: [0.95, 1],
-              })
-            }]
-          }}
-        >
-          <View style={dynamicStyles.remindersCard}>
-          <View style={dynamicStyles.remindersHeader}>
-            <Text style={dynamicStyles.remindersTitle}>⏰ Bugünkü Hatırlatıcılar</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Reminders' as never)}>
-              <Ionicons name="settings" size={20} color={currentTheme.colors.secondary} />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={dynamicStyles.remindersList}>
-            {todayReminders.slice(0, 3).map((reminder) => (
-              <View key={reminder.id} style={dynamicStyles.reminderItem}>
-                <Text style={dynamicStyles.reminderEmoji}>{reminder.emoji}</Text>
-                <View style={dynamicStyles.reminderContent}>
-                  <Text style={dynamicStyles.reminderTitle}>{reminder.title}</Text>
-                  <Text style={dynamicStyles.reminderTime}>{reminder.time}</Text>
-                </View>
-                <View style={[
-                  dynamicStyles.reminderPriority,
-                  { backgroundColor: reminder.priority === 'high' ? '#ef4444' : 
-                                     reminder.priority === 'medium' ? '#f59e0b' : '#10b981' }
-                ]} />
-              </View>
-            ))}
-            {todayReminders.length > 3 && (
-              <Text style={dynamicStyles.remindersMoreText}>
-                +{todayReminders.length - 3} hatırlatıcı daha
-              </Text>
-            )}
-          </View>
+              }),
+              pulseAnims.reminders
+            )
+          }]
+        }}
+      >
+          <View style={dynamicStyles.remindersBubblesContainer}>
+            <View style={dynamicStyles.remindersHeader}>
+              <Text style={dynamicStyles.remindersBubblesTitle}>⏰ Bugünün Planı</Text>
+            </View>
+            
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={dynamicStyles.bubbleScrollContainer}
+            >
+              {todayReminders.slice(0, 3).map((reminder, index) => (
+                <TouchableOpacity
+                  key={reminder.id}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    navigation.navigate('Reminders' as never);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <LinearGradient
+                    colors={reminder.priority === 'high' ? ['#fca5a5', '#f87171'] :
+                           reminder.priority === 'medium' ? ['#fcd34d', '#f59e0b'] :
+                           ['#6ee7b7', '#34d399']}
+                    style={[
+                      dynamicStyles.reminderBubble,
+                      { 
+                        borderColor: reminder.priority === 'high' ? '#ef4444' : 
+                                     reminder.priority === 'medium' ? '#f59e0b' : 
+                                     '#10b981'
+                      }
+                    ]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                  <Text style={dynamicStyles.bubbleTime}>
+                    {reminder.time}
+                  </Text>
+                  <Text style={dynamicStyles.bubbleEmoji}>
+                    {reminder.emoji}
+                  </Text>
+                  <Text style={dynamicStyles.bubbleTitle} numberOfLines={1}>
+                    {reminder.title.length > 10 ? reminder.title.substring(0, 10) + '...' : reminder.title}
+                  </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+              
+              {todayReminders.length > 3 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    navigation.navigate('Reminders' as never);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <LinearGradient
+                    colors={[currentTheme.colors.primary + '40', currentTheme.colors.accent + '35']}
+                    style={dynamicStyles.moreBubble}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={dynamicStyles.moreBubbleNumber}>
+                      +{todayReminders.length - 3}
+                    </Text>
+                    <Text style={dynamicStyles.moreBubbleText}>
+                      daha
+                    </Text>
+                    <Ionicons 
+                      name="arrow-forward-circle" 
+                      size={24} 
+                      color={currentTheme.colors.primary} 
+                    />
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+            </ScrollView>
           </View>
         </Animated.View>
       )}
 
-      {/* Gelişmiş Sağlık Skoru Card */}
-      <Animated.View
-        style={{
-          opacity: fadeAnims.health,
-          transform: [{
-            scale: fadeAnims.health.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.95, 1],
-            })
-          }]
-        }}
-      >
-        <TouchableOpacity 
-          style={dynamicStyles.healthScoreCard}
-          onPress={() => setShowHealthModal(true)}
-          activeOpacity={0.7}
-        >
-        <View style={dynamicStyles.healthScoreHeader}>
-          <View style={dynamicStyles.healthScoreHeaderLeft}>
-            <View>
-              <Text style={dynamicStyles.healthScoreTitle}>🌟 Yaşam Haritası</Text>
-              <Text style={dynamicStyles.healthScoreSubtitle}>Son 7 gün ortalaması</Text>
-            </View>
-          </View>
-          <View style={dynamicStyles.healthScoreBadge}>
-            <Text style={dynamicStyles.healthScoreBadgeNumber}>{getWellnessScore()}</Text>
-            <Text style={dynamicStyles.healthScoreBadgeLabel}>/100</Text>
-          </View>
-        </View>
-
-        <View style={dynamicStyles.healthCategoriesContainer}>
-          {getHealthCategories().map((cat, index) => (
-            <View key={index} style={dynamicStyles.healthCategoryItem}>
-              <View style={dynamicStyles.healthCategoryHeader}>
-                <Text style={dynamicStyles.healthCategoryEmoji}>{cat.emoji}</Text>
-                <Text style={dynamicStyles.healthCategoryScore}>{cat.score}</Text>
-              </View>
-              <View style={dynamicStyles.healthCategoryBar}>
-                <View 
-                  style={[
-                    dynamicStyles.healthCategoryBarFill, 
-                    { width: `${cat.score}%`, backgroundColor: cat.color }
-                  ]} 
-                />
-              </View>
-              <Text style={dynamicStyles.healthCategoryLabel}>{cat.label}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={dynamicStyles.healthScoreFooter}>
-          <Text style={dynamicStyles.healthScoreFooterText}>
-            {getWellnessScore() >= 80 ? '🎉 Harika gidiyorsun!' :
-             getWellnessScore() >= 60 ? '💪 İyi performans!' :
-             getWellnessScore() >= 40 ? '🌱 İyiye gidiyorsun!' :
-             '💫 Her gün yeni bir başlangıç!'}
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color={currentTheme.colors.primary} />
-        </View>
-        </TouchableOpacity>
-      </Animated.View>
 
     </ScrollView>
 
@@ -2509,7 +2947,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               color: currentTheme.colors.text,
               textAlign: 'center',
               lineHeight: 24,
-              marginBottom: 24,
+              marginBottom: 20,
             }}>
               Artık burası senin dünyan! 🌟{'\n\n'}
               Senin kuralların geçerli, senin hikayen burada yazılacak.{'\n\n'}
@@ -2536,7 +2974,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 backgroundColor: currentTheme.colors.primary,
                 paddingHorizontal: 32,
                 paddingVertical: 16,
-                borderRadius: 16,
+                borderRadius: 20,
                 shadowColor: currentTheme.colors.shadow,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.2,

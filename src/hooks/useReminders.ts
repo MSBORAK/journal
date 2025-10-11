@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Reminder } from '../types';
+import { 
+  scheduleReminderNotification, 
+  cancelReminderNotification 
+} from '../services/notificationService';
 
 const REMINDERS_STORAGE_KEY = '@daily_reminders';
 
@@ -44,6 +48,8 @@ export const useReminders = (userId?: string) => {
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      // Eğer reminderType belirtilmemişse varsayılan değer
+      reminderType: reminder.reminderType || 'today',
     };
     
     const newReminders = [...reminders, newReminder];
@@ -63,6 +69,13 @@ export const useReminders = (userId?: string) => {
 
   // Delete reminder
   const deleteReminder = async (reminderId: string) => {
+    // Önce bildirimi iptal et
+    try {
+      await cancelReminderNotification(reminderId);
+    } catch (error) {
+      console.error('Error cancelling reminder notification:', error);
+    }
+    
     const newReminders = reminders.filter(reminder => reminder.id !== reminderId);
     await saveReminders(newReminders);
   };
@@ -72,7 +85,28 @@ export const useReminders = (userId?: string) => {
     const reminder = reminders.find(r => r.id === reminderId);
     if (!reminder) return;
 
-    await updateReminder(reminderId, { isActive: !reminder.isActive });
+    const newActiveStatus = !reminder.isActive;
+    await updateReminder(reminderId, { isActive: newActiveStatus });
+
+    // Bildirim yönetimi
+    try {
+      if (newActiveStatus) {
+        // Hatırlatıcı aktif edildi - bildirim planla
+        await scheduleReminderNotification(
+          reminder.id,
+          reminder.emoji + ' ' + reminder.title,
+          reminder.description || 'Hatırlatıcı zamanı!',
+          reminder.time,
+          reminder.repeatType,
+          reminder.category
+        );
+      } else {
+        // Hatırlatıcı pasif edildi - bildirimi iptal et
+        await cancelReminderNotification(reminder.id);
+      }
+    } catch (error) {
+      console.error('Error managing reminder notification:', error);
+    }
   };
 
   // Get active reminders
@@ -93,20 +127,47 @@ export const useReminders = (userId?: string) => {
     return reminders.filter(reminder => {
       if (!reminder.isActive) return false;
       
-      const reminderTime = new Date();
-      const [hours, minutes] = reminder.time.split(':').map(Number);
-      reminderTime.setHours(hours, minutes, 0, 0);
+      let reminderDateTime = new Date();
+      
+      if (reminder.reminderType === 'scheduled' && reminder.date) {
+        // Planlı hatırlatıcı için belirtilen tarih ve saat
+        const [year, month, day] = reminder.date.split('-').map(Number);
+        const [hours, minutes] = reminder.time.split(':').map(Number);
+        reminderDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      } else {
+        // Bugün için hatırlatıcı
+        const [hours, minutes] = reminder.time.split(':').map(Number);
+        reminderDateTime.setHours(hours, minutes, 0, 0);
+        
+        // Eğer saat geçmişse yarına al
+        if (reminderDateTime < now) {
+          reminderDateTime.setDate(reminderDateTime.getDate() + 1);
+        }
+      }
       
       // Check if reminder is within next 24 hours
-      return reminderTime >= now && reminderTime <= tomorrow;
+      return reminderDateTime >= now && reminderDateTime <= tomorrow;
     }).sort((a, b) => {
-      const timeA = new Date();
-      const [hoursA, minutesA] = a.time.split(':').map(Number);
-      timeA.setHours(hoursA, minutesA, 0, 0);
+      let timeA = new Date();
+      let timeB = new Date();
       
-      const timeB = new Date();
-      const [hoursB, minutesB] = b.time.split(':').map(Number);
-      timeB.setHours(hoursB, minutesB, 0, 0);
+      if (a.reminderType === 'scheduled' && a.date) {
+        const [year, month, day] = a.date.split('-').map(Number);
+        const [hours, minutes] = a.time.split(':').map(Number);
+        timeA = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      } else {
+        const [hours, minutes] = a.time.split(':').map(Number);
+        timeA.setHours(hours, minutes, 0, 0);
+      }
+      
+      if (b.reminderType === 'scheduled' && b.date) {
+        const [year, month, day] = b.date.split('-').map(Number);
+        const [hours, minutes] = b.time.split(':').map(Number);
+        timeB = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      } else {
+        const [hours, minutes] = b.time.split(':').map(Number);
+        timeB.setHours(hours, minutes, 0, 0);
+      }
       
       return timeA.getTime() - timeB.getTime();
     });
@@ -119,6 +180,11 @@ export const useReminders = (userId?: string) => {
     
     return reminders.filter(reminder => {
       if (!reminder.isActive) return false;
+      
+      // Eğer planlı hatırlatıcı ise ve bugün için değilse dahil etme
+      if (reminder.reminderType === 'scheduled' && reminder.date) {
+        return reminder.date === today.toISOString().split('T')[0];
+      }
       
       switch (reminder.repeatType) {
         case 'daily':
@@ -135,6 +201,42 @@ export const useReminders = (userId?: string) => {
         default:
           return false;
       }
+    });
+  };
+
+  // Get all reminders sorted by date and time
+  const getSortedReminders = () => {
+    return [...reminders].sort((a, b) => {
+      let timeA = new Date();
+      let timeB = new Date();
+      
+      if (a.reminderType === 'scheduled' && a.date) {
+        const [year, month, day] = a.date.split('-').map(Number);
+        const [hours, minutes] = a.time.split(':').map(Number);
+        timeA = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      } else {
+        const [hours, minutes] = a.time.split(':').map(Number);
+        timeA.setHours(hours, minutes, 0, 0);
+        // Bugün için hatırlatıcılar en üstte
+        if (timeA < new Date()) {
+          timeA.setDate(timeA.getDate() + 1);
+        }
+      }
+      
+      if (b.reminderType === 'scheduled' && b.date) {
+        const [year, month, day] = b.date.split('-').map(Number);
+        const [hours, minutes] = b.time.split(':').map(Number);
+        timeB = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      } else {
+        const [hours, minutes] = b.time.split(':').map(Number);
+        timeB.setHours(hours, minutes, 0, 0);
+        // Bugün için hatırlatıcılar en üstte
+        if (timeB < new Date()) {
+          timeB.setDate(timeB.getDate() + 1);
+        }
+      }
+      
+      return timeA.getTime() - timeB.getTime();
     });
   };
 
@@ -205,6 +307,7 @@ export const useReminders = (userId?: string) => {
     getRemindersByCategory,
     getUpcomingReminders,
     getTodayReminders,
+    getSortedReminders,
     
     // Statistics
     getReminderStats,

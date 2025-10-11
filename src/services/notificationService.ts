@@ -421,6 +421,145 @@ export const sendStreakNotification = async (days: number): Promise<void> => {
 };
 
 /**
+ * Hatırlatıcı Bildirimi Planla
+ */
+export const scheduleReminderNotification = async (
+  reminderId: string,
+  title: string,
+  body: string,
+  time: string, // "HH:MM" formatında
+  repeatType: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly',
+  category: string = 'default',
+  date?: string // "YYYY-MM-DD" formatında - gelecek tarih için
+): Promise<string> => {
+  const [hour, minute] = time.split(':').map(Number);
+  let trigger: Notifications.CalendarTriggerInput;
+
+  // Tekrar türüne göre trigger oluştur
+  switch (repeatType) {
+    case 'once':
+      // Tek seferlik - belirtilen tarih ve saatte
+      let targetDate = new Date();
+      
+      if (date) {
+        // Gelecek tarih belirtilmişse
+        const [year, month, day] = date.split('-').map(Number);
+        targetDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+        
+        // Geçmiş bir tarih ise uyarı ver ama planla
+        if (targetDate < new Date()) {
+          console.warn('⚠️ Scheduling reminder for past date:', targetDate);
+        }
+      } else {
+        // Bugün belirtilen saatte
+        targetDate.setHours(hour, minute, 0, 0);
+        // Eğer saat geçmişse yarına al
+        if (targetDate < new Date()) {
+          targetDate.setDate(targetDate.getDate() + 1);
+        }
+      }
+      
+      trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: targetDate,
+      } as any;
+      break;
+    
+    case 'hourly':
+      // Her saat
+      trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        hour,
+        minute,
+        repeats: true,
+      };
+      break;
+    
+    case 'daily':
+      // Her gün
+      trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        hour,
+        minute,
+        repeats: true,
+      };
+      break;
+    
+    case 'weekly':
+      // Her hafta (Pazartesi)
+      trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        weekday: 1, // Pazartesi
+        hour,
+        minute,
+        repeats: true,
+      };
+      break;
+    
+    case 'monthly':
+      // Her ay (1. gün)
+      trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        day: 1,
+        hour,
+        minute,
+        repeats: true,
+      };
+      break;
+    
+    default:
+      trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        hour,
+        minute,
+        repeats: true,
+      };
+  }
+
+  const selectedSound = getSystemSound();
+  console.log('🎵 Scheduling reminder notification:', { 
+    reminderId, title, time, repeatType, channelId: category, sound: selectedSound 
+  });
+
+  return await Notifications.scheduleNotificationAsync({
+    identifier: `reminder-${reminderId}`,
+    content: {
+      title,
+      body,
+      sound: selectedSound,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+      data: { type: 'reminder', reminderId, category },
+      ...(Platform.OS === 'android' && { channelId: category }),
+    },
+    trigger,
+  });
+};
+
+/**
+ * Hatırlatıcı Bildirimini İptal Et
+ */
+export const cancelReminderNotification = async (reminderId: string): Promise<void> => {
+  await Notifications.cancelScheduledNotificationAsync(`reminder-${reminderId}`);
+  console.log(`Reminder notification cancelled: ${reminderId}`);
+};
+
+/**
+ * Tüm Hatırlatıcı Bildirimlerini İptal Et
+ */
+export const cancelAllReminderNotifications = async (): Promise<void> => {
+  const notifications = await Notifications.getAllScheduledNotificationsAsync();
+  const reminderNotifications = notifications.filter(n => 
+    n.identifier.startsWith('reminder-')
+  );
+  
+  for (const notification of reminderNotifications) {
+    await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+  }
+  
+  console.log(`Cancelled ${reminderNotifications.length} reminder notifications`);
+};
+
+/**
  * Planlı Bildirimleri Listele (Debug için)
  */
 export const listScheduledNotifications = async (): Promise<any[]> => {

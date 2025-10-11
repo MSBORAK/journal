@@ -8,12 +8,21 @@ import {
   TextInput,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useReminders } from '../hooks/useReminders';
 import { Ionicons } from '@expo/vector-icons';
 import { Reminder } from '../types';
+import { 
+  scheduleReminderNotification, 
+  cancelReminderNotification,
+  requestNotificationPermissions 
+} from '../services/notificationService';
+import PomodoroTimer from '../components/PomodoroTimer';
+import DatePicker from '../components/DatePicker';
 
 interface RemindersScreenProps {
   navigation: any;
@@ -29,7 +38,8 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
     updateReminder, 
     deleteReminder, 
     toggleReminder,
-    getReminderStats 
+    getReminderStats,
+    getSortedReminders
   } = useReminders(user?.uid);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -39,18 +49,27 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
     description: '',
     emoji: '⏰',
     time: '09:00',
+    date: undefined as string | undefined,
     category: 'task' as Reminder['category'],
     priority: 'medium' as Reminder['priority'],
     repeatType: 'daily' as Reminder['repeatType'],
+    reminderType: 'today' as Reminder['reminderType'],
     isActive: true,
   });
 
-  const emojiOptions = ['⏰', '💊', '🏥', '💧', '🏃‍♀️', '📚', '🍎', '😴', '🎯', '💝'];
+  const emojiOptions = ['⏰', '💊', '🏥', '💧', '🏃‍♀️', '📚', '🍎', '😴', '🎯', '💝', '📅', '🎂', '👥', '🍽️', '💼', '📱', '🚗', '✈️', '🎉', '💡'];
   const categoryOptions = [
-    { value: 'task', label: 'Görev', emoji: '📋' },
+    { value: 'general', label: 'Genel', emoji: '⏰' },
     { value: 'medicine', label: 'İlaç', emoji: '💊' },
+    { value: 'appointment', label: 'Randevu', emoji: '📅' },
+    { value: 'birthday', label: 'Doğum Günü', emoji: '🎂' },
+    { value: 'meeting', label: 'Toplantı', emoji: '👥' },
     { value: 'health', label: 'Sağlık', emoji: '🏥' },
+    { value: 'exercise', label: 'Egzersiz', emoji: '🏃‍♀️' },
+    { value: 'meal', label: 'Yemek', emoji: '🍽️' },
     { value: 'personal', label: 'Kişisel', emoji: '👤' },
+    { value: 'work', label: 'İş', emoji: '💼' },
+    { value: 'study', label: 'Ders', emoji: '📚' },
     { value: 'custom', label: 'Özel', emoji: '⭐' },
   ];
   const priorityOptions = [
@@ -60,9 +79,15 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
   ];
   const repeatOptions = [
     { value: 'once', label: 'Tek Seferlik' },
+    { value: 'hourly', label: 'Saatlik' },
     { value: 'daily', label: 'Günlük' },
     { value: 'weekly', label: 'Haftalık' },
     { value: 'monthly', label: 'Aylık' },
+  ];
+
+  const reminderTypeOptions = [
+    { value: 'today', label: 'Bugün İçin', emoji: '📅' },
+    { value: 'scheduled', label: 'Gelecek Tarih', emoji: '🗓️' },
   ];
 
   const stats = getReminderStats();
@@ -215,6 +240,149 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
       textAlign: 'center',
       lineHeight: 24,
     },
+    // Bölüm Stilleri
+    sectionContainer: {
+      marginHorizontal: 20,
+      marginBottom: 20,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+    },
+    // Görev Stilleri
+    tasksStatsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 16,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    tasksStatItem: {
+      alignItems: 'center',
+    },
+    tasksStatNumber: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: currentTheme.colors.primary,
+      marginBottom: 4,
+    },
+    tasksStatLabel: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      fontWeight: '500',
+    },
+    tasksProgressContainer: {
+      marginBottom: 16,
+    },
+    tasksProgressBar: {
+      height: 8,
+      backgroundColor: currentTheme.colors.border,
+      borderRadius: 4,
+      overflow: 'hidden',
+      marginBottom: 8,
+    },
+    tasksProgressFill: {
+      height: '100%',
+      backgroundColor: currentTheme.colors.primary,
+      borderRadius: 4,
+    },
+    tasksProgressText: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      textAlign: 'center',
+      fontWeight: '500',
+    },
+    tasksList: {
+      gap: 8,
+    },
+    taskItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 12,
+      padding: 16,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    taskCompleted: {
+      opacity: 0.6,
+    },
+    taskLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    taskEmoji: {
+      fontSize: 20,
+      marginRight: 12,
+    },
+    taskTitle: {
+      fontSize: 16,
+      color: currentTheme.colors.text,
+      fontWeight: '500',
+      flex: 1,
+    },
+    taskTitleCompleted: {
+      textDecorationLine: 'line-through',
+      color: currentTheme.colors.secondary,
+    },
+    taskCheckbox: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    taskCheckboxCompleted: {
+      backgroundColor: currentTheme.colors.primary,
+      borderColor: currentTheme.colors.primary,
+    },
+    tasksMoreText: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      textAlign: 'center',
+      marginTop: 8,
+      fontStyle: 'italic',
+    },
+    tasksEmpty: {
+      alignItems: 'center',
+      padding: 32,
+    },
+    tasksEmptyText: {
+      fontSize: 16,
+      color: currentTheme.colors.secondary,
+      marginBottom: 16,
+    },
+    tasksAddButton: {
+      backgroundColor: currentTheme.colors.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 20,
+    },
+    tasksAddButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
     // Modal Styles
     modalOverlay: {
       flex: 1,
@@ -356,9 +524,11 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
       description: '',
       emoji: '⏰',
       time: '09:00',
-      category: 'task',
+      date: undefined,
+      category: 'general',
       priority: 'medium',
       repeatType: 'daily',
+      reminderType: 'today',
       isActive: true,
     });
     setEditingReminder(null);
@@ -370,16 +540,47 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
       return;
     }
 
+    // Eğer gelecek tarih seçilmişse tarih kontrolü yap
+    if (formData.reminderType === 'scheduled' && !formData.date) {
+      Alert.alert('Hata', 'Gelecek tarih için bir tarih seçmelisiniz');
+      return;
+    }
+
     try {
+      // Bildirim izni iste
+      const hasPermission = await requestNotificationPermissions();
+      if (!hasPermission) {
+        Alert.alert('Bildirim İzni', 'Hatırlatıcılar için bildirim izni gerekli');
+        return;
+      }
+
+      let savedReminder: Reminder;
       if (editingReminder) {
+        // Önceki bildirimi iptal et
+        await cancelReminderNotification(editingReminder.id);
         await updateReminder(editingReminder.id, formData);
+        savedReminder = { ...editingReminder, ...formData };
       } else {
-        await addReminder(formData);
+        savedReminder = await addReminder(formData);
+      }
+
+      // Bildirim planla (sadece aktifse)
+      if (savedReminder.isActive) {
+        await scheduleReminderNotification(
+          savedReminder.id,
+          savedReminder.emoji + ' ' + savedReminder.title,
+          savedReminder.description || 'Hatırlatıcı zamanı!',
+          savedReminder.time,
+          savedReminder.repeatType,
+          savedReminder.category,
+          savedReminder.date
+        );
       }
       
       setShowAddModal(false);
       resetForm();
     } catch (error) {
+      console.error('Error saving reminder:', error);
       Alert.alert('Hata', 'Hatırlatıcı kaydedilemedi');
     }
   };
@@ -390,9 +591,11 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
       description: reminder.description || '',
       emoji: reminder.emoji,
       time: reminder.time,
+      date: reminder.date,
       category: reminder.category,
       priority: reminder.priority,
       repeatType: reminder.repeatType,
+      reminderType: reminder.reminderType,
       isActive: reminder.isActive,
     });
     setEditingReminder(reminder);
@@ -431,7 +634,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Hatırlatıcılar</Text>
+        <Text style={dynamicStyles.headerTitle}>⏰ Hatırlatıcılar</Text>
         <TouchableOpacity 
           style={dynamicStyles.addButton}
           onPress={() => {
@@ -459,7 +662,14 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
         </View>
       </View>
 
-      {/* Reminders List */}
+      {/* Pomodoro Timer */}
+      <PomodoroTimer 
+        onComplete={() => {
+          // Pomodoro completed callback
+          console.log('Pomodoro session completed!');
+        }}
+      />
+
       <ScrollView style={dynamicStyles.remindersList} showsVerticalScrollIndicator={false}>
         {reminders.length === 0 ? (
           <View style={dynamicStyles.emptyState}>
@@ -470,7 +680,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
             </Text>
           </View>
         ) : (
-          reminders.map((reminder) => (
+          getSortedReminders().map((reminder) => (
             <View key={reminder.id} style={dynamicStyles.reminderCard}>
               <View style={dynamicStyles.reminderHeader}>
                 <View style={dynamicStyles.reminderLeft}>
@@ -482,9 +692,25 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                         {reminder.description}
                       </Text>
                     )}
+                    {reminder.reminderType === 'scheduled' && reminder.date && (
+                      <Text style={[dynamicStyles.reminderDescription, { color: currentTheme.colors.primary, fontWeight: '500' }]}>
+                        📅 {new Date(reminder.date + 'T00:00:00').toLocaleDateString('tr-TR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                    )}
                   </View>
                 </View>
-                <Text style={dynamicStyles.reminderTime}>{reminder.time}</Text>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={dynamicStyles.reminderTime}>{reminder.time}</Text>
+                  {reminder.reminderType === 'scheduled' && (
+                    <Text style={[dynamicStyles.reminderDescription, { fontSize: 12, marginTop: 2 }]}>
+                      🗓️ Planlı
+                    </Text>
+                  )}
+                </View>
               </View>
 
               <View style={dynamicStyles.reminderMeta}>
@@ -538,11 +764,15 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
         animationType="fade"
         onRequestClose={() => setShowAddModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardAvoidingView 
+          style={dynamicStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={dynamicStyles.modalContent}>
             <View style={dynamicStyles.modalHeader}>
               <Text style={dynamicStyles.modalTitle}>
-                {editingReminder ? 'Hatırlatıcı Düzenle' : 'Yeni Hatırlatıcı'}
+                {editingReminder ? 'Hatırlatıcı Düzenle' : 'Yeni Alarm'}
               </Text>
               <TouchableOpacity
                 style={dynamicStyles.closeButton}
@@ -552,27 +782,31 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
               {/* Title */}
               <View style={dynamicStyles.formGroup}>
-                <Text style={dynamicStyles.formLabel}>Başlık *</Text>
+                <Text style={dynamicStyles.formLabel}>Ne Hatırlatacak? *</Text>
                 <TextInput
                   style={dynamicStyles.textInput}
                   value={formData.title}
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
-                  placeholder="Hatırlatıcı başlığı"
+                  placeholder="Örn: İlaç iç, doktor randevusu, doğum günü..."
                   placeholderTextColor={currentTheme.colors.secondary}
                 />
               </View>
 
               {/* Description */}
               <View style={dynamicStyles.formGroup}>
-                <Text style={dynamicStyles.formLabel}>Açıklama</Text>
+                <Text style={dynamicStyles.formLabel}>Detaylar (İsteğe bağlı)</Text>
                 <TextInput
                   style={[dynamicStyles.textInput, { height: 80, textAlignVertical: 'top' }]}
                   value={formData.description}
                   onChangeText={(text) => setFormData({ ...formData, description: text })}
-                  placeholder="İsteğe bağlı açıklama"
+                  placeholder="Ek bilgiler, notlar..."
                   placeholderTextColor={currentTheme.colors.secondary}
                   multiline
                 />
@@ -596,6 +830,40 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                   ))}
                 </View>
               </View>
+
+              {/* Reminder Type */}
+              <View style={dynamicStyles.formGroup}>
+                <Text style={dynamicStyles.formLabel}>Hatırlatıcı Türü</Text>
+                <View style={dynamicStyles.optionGrid}>
+                  {reminderTypeOptions.map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      style={[
+                        dynamicStyles.optionButton,
+                        formData.reminderType === option.value && dynamicStyles.selectedOptionButton
+                      ]}
+                      onPress={() => setFormData({ ...formData, reminderType: option.value as Reminder['reminderType'] })}
+                    >
+                      <Text style={[
+                        dynamicStyles.optionText,
+                        formData.reminderType === option.value && dynamicStyles.selectedOptionText
+                      ]}>
+                        {option.emoji} {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Date Picker - Only show for scheduled reminders */}
+              {formData.reminderType === 'scheduled' && (
+                <DatePicker
+                  selectedDate={formData.date}
+                  onDateSelect={(date) => setFormData({ ...formData, date })}
+                  label="Tarih"
+                  placeholder="Hatırlatıcı tarihini seç"
+                />
+              )}
 
               {/* Time */}
               <View style={dynamicStyles.formGroup}>
@@ -700,7 +968,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

@@ -39,18 +39,7 @@ export interface Settings {
   notificationsEnabled: boolean;
 }
 
-// Kişisel Gelişim Types
-export interface Goal {
-  id: string;
-  title: string;
-  description: string;
-  type: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  status: 'active' | 'completed' | 'paused';
-  targetDate?: string;
-  progress: number; // 0-100
-  createdAt: string;
-  updatedAt: string;
-}
+// Kişisel Gelişim Types - Goal artık Hayal & Hedef Panosu'nda tanımlı
 
 export interface Achievement {
   id: string;
@@ -59,6 +48,41 @@ export interface Achievement {
   icon: string;
   unlockedAt: string;
   category: 'streak' | 'mood' | 'writing' | 'goals';
+}
+
+// Habit Tracking Types
+export interface Habit {
+  id: string;
+  title: string;
+  description?: string;
+  icon: string;
+  color: string;
+  category: 'health' | 'productivity' | 'mindfulness' | 'learning' | 'social' | 'creative';
+  frequency: 'daily' | 'weekly' | 'custom';
+  target: number; // hedef sayı/süre
+  unit: 'times' | 'minutes' | 'glasses' | 'pages' | 'hours';
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HabitEntry {
+  id: string;
+  habitId: string;
+  date: string; // YYYY-MM-DD
+  completed: boolean;
+  value: number; // gerçekleşen miktar
+  notes?: string;
+  createdAt: string;
+}
+
+export interface HabitStreak {
+  habitId: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedDate?: string;
+  totalCompletions: number;
+  completionRate: number; // yüzde
 }
 
 export interface MotivationMessage {
@@ -80,6 +104,15 @@ export interface WellnessCheck {
   mood: number; // 1-5
   notes?: string;
   createdAt: string;
+}
+
+// Günlük Aktiviteler - Basit sağlık takibi
+export interface HealthData {
+  date: string; // YYYY-MM-DD format
+  water: number; // 0-12 bardak
+  exercise: number; // 0-120 dakika
+  sleep: number; // 0-12 saat
+  meditation: number; // 0-60 dakika
 }
 
 export interface WellnessInsight {
@@ -119,6 +152,9 @@ export interface DailyTask {
   updatedAt: string;
   priority: 'low' | 'medium' | 'high';
   estimatedTime?: number; // dakika
+  // Akıllı Entegrasyon
+  linkedReminderId?: string; // Bağlı hatırlatıcı ID'si
+  hasReminder?: boolean; // Hatırlatıcı var mı?
 }
 
 export interface Reminder {
@@ -127,14 +163,19 @@ export interface Reminder {
   description?: string;
   emoji: string;
   time: string; // HH:MM format
+  date?: string; // YYYY-MM-DD format for scheduled reminders
   isActive: boolean;
-  repeatType: 'daily' | 'weekly' | 'monthly' | 'once';
+  repeatType: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly';
   repeatDays?: number[]; // 0-6 (Pazartesi-Pazar) for weekly
-  category: 'task' | 'medicine' | 'health' | 'personal' | 'custom';
+  category: 'general' | 'medicine' | 'appointment' | 'birthday' | 'meeting' | 'health' | 'exercise' | 'meal' | 'personal' | 'work' | 'study' | 'custom';
   priority: 'low' | 'medium' | 'high';
+  reminderType: 'today' | 'scheduled'; // Bugün için mi yoksa gelecek tarih için mi
   createdAt: string;
   updatedAt: string;
   lastTriggered?: string;
+  // Akıllı Entegrasyon
+  linkedTaskId?: string; // Bağlı görev ID'si
+  isTaskReminder?: boolean; // Görev hatırlatıcısı mı?
 }
 
 export interface TaskCategory {
@@ -164,4 +205,60 @@ export interface TaskAchievement {
     value: number;
     period?: 'daily' | 'weekly' | 'monthly';
   };
+}
+
+// Hayal & Hedef Panosu Types 🌠
+export interface Dream {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  imageUrl?: string; // Opsiyonel fotoğraf
+  category: 'personal' | 'career' | 'health' | 'spiritual' | 'relationship' | 'travel' | 'learning' | 'creative' | 'financial' | 'custom';
+  notes?: string; // İlham notları
+  tags?: string[]; // Etiketler
+  createdAt: string;
+  updatedAt: string;
+  isArchived?: boolean; // Arşivlenen hayaller
+  isFavorite?: boolean; // Favori hayaller
+  isCompleted?: boolean; // Gerçekleşen hayaller
+  completedAt?: string; // Gerçekleşme tarihi
+}
+
+export interface Goal {
+  id: string;
+  dreamId?: string; // Hangi hayale bağlı (opsiyonel)
+  title: string;
+  description: string;
+  emoji: string;
+  type: 'short' | 'medium' | 'long'; // Kısa/Orta/Uzun vadeli
+  category: 'personal' | 'career' | 'health' | 'spiritual' | 'relationship' | 'travel' | 'learning' | 'creative' | 'financial' | 'custom';
+  targetDate?: string; // Hedef tarihi
+  progress: number; // 0-100
+  milestones: GoalMilestone[]; // Ara hedefler
+  status: 'active' | 'completed' | 'paused' | 'cancelled';
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  priority: 'low' | 'medium' | 'high';
+  notes?: string;
+  reminder?: boolean; // Hatırlatıcı var mı?
+}
+
+export interface GoalMilestone {
+  id: string;
+  title: string;
+  isCompleted: boolean;
+  completedAt?: string;
+  emoji?: string;
+}
+
+export interface Promise {
+  id: string;
+  text: string; // "Kendime söz veriyorum..."
+  emoji: string;
+  createdAt: string;
+  isActive: boolean;
+  isCompleted?: boolean; // Söz tutuldu mu
+  completedAt?: string; // Söz tutulma tarihi
 }

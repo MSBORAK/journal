@@ -8,6 +8,7 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useDiary } from '../hooks/useDiary';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -139,7 +140,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       backgroundColor: currentTheme.colors.card,
       paddingHorizontal: 8,
       paddingVertical: 6,
-      borderRadius: 16,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
       alignItems: 'center',
@@ -173,7 +174,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       backgroundColor: currentTheme.colors.card,
       paddingHorizontal: 12,
       paddingVertical: 6,
-      borderRadius: 16,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
     },
@@ -182,16 +183,19 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       color: currentTheme.colors.text,
     },
     entryCard: {
-      backgroundColor: currentTheme.colors.card,
       marginHorizontal: 20,
       marginBottom: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.18,
+      shadowRadius: 16,
+      elevation: 8,
+      transform: [{ translateY: -2 }],
+    },
+    entryCardGradient: {
+      borderRadius: 20,
       padding: 20,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
     },
     entryHeader: {
       flexDirection: 'row',
@@ -279,7 +283,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       backgroundColor: currentTheme.colors.accent,
       paddingHorizontal: 16,
       paddingVertical: 8,
-      borderRadius: 16,
+      borderRadius: 20,
       alignSelf: 'flex-start',
       marginTop: 8,
       flexDirection: 'row',
@@ -300,8 +304,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     const mood = moodOptions.find(m => m.value === item.mood);
     
     return (
-      <View
-      >
+      <View>
         <TouchableOpacity
           style={dynamicStyles.entryCard}
           onPress={() => navigation.navigate('WriteDiaryStep3', { 
@@ -311,6 +314,16 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
             freeWriting: item.content 
           })}
         >
+          <LinearGradient
+            colors={[
+              currentTheme.colors.card,
+              currentTheme.colors.card,
+              currentTheme.name === 'dark' ? currentTheme.colors.accent + '15' : currentTheme.colors.accent + '08'
+            ]}
+            style={dynamicStyles.entryCardGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
           <View style={dynamicStyles.entryHeader}>
             <Text style={dynamicStyles.entryTitle}>{item.title}</Text>
             <View style={dynamicStyles.moodContainer}>
@@ -340,6 +353,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
               </View>
             )}
           </View>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     );

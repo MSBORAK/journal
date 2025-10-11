@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -25,6 +26,49 @@ export default function AuthScreen() {
   const { signIn, signUp } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useTranslation();
+
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: currentTheme.colors.background,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: currentTheme.colors.secondary,
+      textAlign: 'center',
+      marginBottom: 32,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginBottom: 8,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 16,
+      backgroundColor: currentTheme.colors.background,
+      color: currentTheme.colors.text,
+    },
+    primaryButton: {
+      backgroundColor: currentTheme.colors.primary,
+    },
+    switchText: {
+      color: currentTheme.colors.primary,
+      fontSize: 14,
+      fontWeight: '500',
+    },
+  });
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -57,18 +101,25 @@ export default function AuthScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={dynamicStyles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View
-          style={styles.card}
+        <LinearGradient
+          colors={[
+            currentTheme.colors.card,
+            currentTheme.colors.card,
+            currentTheme.name === 'dark' ? currentTheme.colors.primary + '15' : currentTheme.colors.primary + '08'
+          ]}
+          style={styles.cardGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.title}>
+          <Text style={dynamicStyles.title}>
             {isLogin ? t('auth.signIn') : t('auth.signUp')}
           </Text>
           
-          <Text style={styles.subtitle}>
+          <Text style={dynamicStyles.subtitle}>
             {isLogin 
               ? 'Günlüğünüze devam edin' 
               : 'Günlük tutmaya başlayın'
@@ -77,9 +128,9 @@ export default function AuthScreen() {
 
           {!isLogin && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>{t('auth.displayName')}</Text>
+              <Text style={dynamicStyles.label}>{t('auth.displayName')}</Text>
               <TextInput
-                style={styles.input}
+                style={dynamicStyles.input}
                 value={displayName}
                 onChangeText={setDisplayName}
                 placeholder={t('auth.displayName')}
@@ -89,9 +140,9 @@ export default function AuthScreen() {
           )}
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>{t('auth.email')}</Text>
+            <Text style={dynamicStyles.label}>{t('auth.email')}</Text>
             <TextInput
-              style={styles.input}
+              style={dynamicStyles.input}
               value={email}
               onChangeText={setEmail}
               placeholder="email@example.com"
@@ -102,9 +153,9 @@ export default function AuthScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>{t('auth.password')}</Text>
+            <Text style={dynamicStyles.label}>{t('auth.password')}</Text>
             <TextInput
-              style={styles.input}
+              style={dynamicStyles.input}
               value={password}
               onChangeText={setPassword}
               placeholder={t('auth.password')}
@@ -114,7 +165,7 @@ export default function AuthScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
+            style={[styles.button, dynamicStyles.primaryButton]}
             onPress={handleSubmit}
             disabled={loading}
           >
@@ -131,40 +182,40 @@ export default function AuthScreen() {
               setDisplayName('');
             }}
           >
-            <Text style={styles.switchText}>
+            <Text style={dynamicStyles.switchText}>
               {isLogin 
                 ? t('auth.noAccount') 
                 : t('auth.hasAccount')
               }
             </Text>
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
   },
   card: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
+    borderRadius: 28,
+    shadowColor: '#3b82f6',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 16,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    elevation: 16,
+    transform: [{ translateY: -4 }],
+  },
+  cardGradient: {
+    borderRadius: 28,
+    padding: 24,
   },
   title: {
     fontSize: 28,

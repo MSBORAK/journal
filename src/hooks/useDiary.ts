@@ -56,6 +56,23 @@ export const useDiary = (userId?: string) => {
       await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
       console.log('Entry saved to AsyncStorage:', newEntry.id);
       
+      // Başarı kontrolü yap (dinamik import ile)
+      try {
+        const { useAchievements } = await import('./useAchievements');
+        const currentStreak = getStreak();
+        const newAchievements = await useAchievements(userId).checkDiaryAchievements(
+          updatedEntries.length,
+          currentStreak
+        );
+        
+        if (newAchievements.length > 0) {
+          console.log('New achievements unlocked:', newAchievements.map(a => a.title));
+        }
+      } catch (achievementError) {
+        console.error('Error checking achievements:', achievementError);
+        // Başarı kontrolü başarısız olsa bile günlük yazma devam etsin
+      }
+      
       return newEntry;
     } catch (err) {
       console.error('Error adding entry:', err);
