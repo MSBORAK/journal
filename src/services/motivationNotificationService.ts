@@ -386,16 +386,25 @@ export const sendTestNotification = async (): Promise<void> => {
     let testMessage = '';
     let testTitle = '';
     
-    // Saate göre mesaj seç
-    if (currentHour >= 5 && currentHour < 12) {
+    console.log(`🧪 Test notification - Current hour: ${currentHour}`);
+    
+    // Saate göre mesaj seç - daha net aralıklar
+    if (currentHour >= 5 && currentHour < 11) {
       testTitle = '🌅 Test - Günaydın!';
       testMessage = getRandomMessage(MORNING_MESSAGES);
-    } else if (currentHour >= 12 && currentHour < 18) {
+      console.log('🌅 Using morning message for test');
+    } else if (currentHour >= 11 && currentHour < 16) {
       testTitle = '☀️ Test - Öğle Molası!';
       testMessage = getRandomMessage(LUNCH_MESSAGES);
-    } else {
-      testTitle = '🌙 Test - İyi Akşamlar!';
+      console.log('☀️ Using lunch message for test');
+    } else if (currentHour >= 16 && currentHour < 21) {
+      testTitle = '🌆 Test - İyi Akşamlar!';
       testMessage = getRandomMessage(EVENING_MESSAGES);
+      console.log('🌆 Using evening message for test');
+    } else {
+      testTitle = '🌙 Test - İyi Geceler!';
+      testMessage = getRandomMessage(EVENING_MESSAGES); // Gece için akşam mesajları kullan
+      console.log('🌙 Using evening message for night test');
     }
     
     await Notifications.scheduleNotificationAsync({
@@ -409,7 +418,7 @@ export const sendTestNotification = async (): Promise<void> => {
         seconds: 2,
       },
     });
-    console.log(`✅ Test bildirimi gönderildi! (Saat: ${currentHour}:${now.getMinutes()})`);
+    console.log(`✅ Test bildirimi gönderildi! (Saat: ${currentHour}:${now.getMinutes()}) - Title: ${testTitle}`);
   } catch (error) {
     console.error('❌ Test bildirimi gönderilemedi:', error);
   }

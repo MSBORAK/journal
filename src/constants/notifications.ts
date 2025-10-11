@@ -404,16 +404,23 @@ export const getRandomMessage = (messages: NotificationMessage[]): NotificationM
 export const getMessageByTimeOfDay = (): NotificationMessage => {
   const hour = new Date().getHours();
   
-  if (hour >= 7 && hour < 11) {
+  console.log(`🕐 Current hour: ${hour}`);
+  
+  if (hour >= 5 && hour < 11) {
+    console.log('🌅 Using morning messages');
     return getRandomMessage(morningMessages);
   } else if (hour >= 11 && hour < 16) {
+    console.log('☀️ Using afternoon messages');
     return getRandomMessage(afternoonMessages);
   } else if (hour >= 16 && hour < 21) {
+    console.log('🌆 Using evening messages');
     return getRandomMessage(eveningMessages);
   } else if (hour >= 21 && hour < 23) {
+    console.log('🌙 Using night messages');
     return getRandomMessage(nightMessages);
   } else {
-    // Sessiz saatler (23:00 - 07:00) - mesaj gönderilmemeli
+    // Sessiz saatler (23:00 - 05:00) - mesaj gönderilmemeli
+    console.log('💤 Silent hours - no message');
     return {
       title: "Sessiz Saatler",
       body: "Rahat uyu 💤",
