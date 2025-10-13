@@ -225,12 +225,13 @@ export const useHabits = (userId?: string) => {
     
     // Başarı kontrolü yap
     try {
-      const { useAchievements } = await import('./useAchievements');
+      // const { useAchievements } = await import('./useAchievements');
       const streaks = getHabitStreaks();
       const totalCompletions = updatedEntries.filter(e => e.completed).length;
       const longestStreak = Math.max(...streaks.map(s => s.longestStreak), 0);
       
-      await useAchievements(userId).checkHabitAchievements(totalCompletions, longestStreak);
+      // TODO: Fix hook usage - achievements should be checked differently
+      // await useAchievements(userId).checkHabitAchievements(totalCompletions, longestStreak);
     } catch (error) {
       console.error('Error checking habit achievements:', error);
     }

@@ -2816,9 +2816,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           >
           <Text style={dynamicStyles.sectionTitle}>💡 Kişisel İçgörülerin</Text>
           {insights.map((insight, index) => (
-            <View 
-              key={`insight-${index}-${insight.title}`}
-              style={[
+            <View style={[
               dynamicStyles.insightCard,
               {
                 // Glassmorphism Effect

@@ -43,6 +43,7 @@ export interface NotificationSettings {
   eveningTime: string; // "21:00" formatında
   taskRemindersEnabled: boolean;
   achievementsEnabled: boolean;
+  timezone: string; // "Europe/Istanbul", "America/New_York", etc.
   // quietHoursEnabled: boolean; // Kaldırıldı
   // quietStartTime: string; // Kaldırıldı
   // quietEndTime: string; // Kaldırıldı
@@ -56,6 +57,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   eveningTime: '21:00',
   taskRemindersEnabled: true,
   achievementsEnabled: true,
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Otomatik kullanıcının zaman dilimi
   // quietHoursEnabled: true, // Kaldırıldı
   // quietStartTime: '23:00', // Kaldırıldı
   // quietEndTime: '07:00', // Kaldırıldı

@@ -148,6 +148,7 @@ export interface DailyTask {
   emoji: string;
   isCompleted: boolean;
   completedAt?: string;
+  date: string; // YYYY-MM-DD format
   createdAt: string;
   updatedAt: string;
   priority: 'low' | 'medium' | 'high';

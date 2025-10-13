@@ -28,6 +28,12 @@ export interface UserStats {
   // Genel istatistikler
   appUsageDays: number;
   firstAppUseDate?: string;
+  
+  // Wellness puanı sistemi
+  wellnessScore: number;
+  level: number;
+  experience: number;
+  nextLevelExp: number;
 }
 
 export interface AchievementDefinition {
@@ -47,6 +53,50 @@ export interface AchievementDefinition {
   };
 }
 
+// Wellness puanı hesaplama fonksiyonu
+const calculateWellnessScore = (stats: UserStats): number => {
+  let score = 0;
+  
+  // Günlük yazma puanı (0-30)
+  const diaryScore = Math.min(stats.currentStreak * 2, 30);
+  score += diaryScore;
+  
+  // Toplam günlük puanı (0-20)
+  const totalDiaryScore = Math.min(Math.floor(stats.totalDiaryEntries / 5), 20);
+  score += totalDiaryScore;
+  
+  // Görev tamamlama puanı (0-25)
+  const taskScore = Math.min(Math.floor(stats.totalTasksCompleted / 2), 25);
+  score += taskScore;
+  
+  // Sağlık takibi puanı (0-15)
+  const healthScore = Math.min(stats.healthTrackingDays, 15);
+  score += healthScore;
+  
+  // Uygulama kullanım puanı (0-10)
+  const usageScore = Math.min(Math.floor(stats.appUsageDays / 7), 10);
+  score += usageScore;
+  
+  return Math.min(score, 100); // Maksimum 100
+};
+
+// Seviye hesaplama fonksiyonu
+const calculateLevel = (wellnessScore: number): { level: number; experience: number; nextLevelExp: number } => {
+  if (wellnessScore < 10) {
+    return { level: 1, experience: wellnessScore, nextLevelExp: 10 };
+  } else if (wellnessScore < 25) {
+    return { level: 2, experience: wellnessScore - 10, nextLevelExp: 25 };
+  } else if (wellnessScore < 45) {
+    return { level: 3, experience: wellnessScore - 25, nextLevelExp: 45 };
+  } else if (wellnessScore < 70) {
+    return { level: 4, experience: wellnessScore - 45, nextLevelExp: 70 };
+  } else if (wellnessScore < 100) {
+    return { level: 5, experience: wellnessScore - 70, nextLevelExp: 100 };
+  } else {
+    return { level: 5, experience: 100, nextLevelExp: 100 };
+  }
+};
+
 export const useAchievements = (userId?: string) => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userStats, setUserStats] = useState<UserStats>({
@@ -59,6 +109,10 @@ export const useAchievements = (userId?: string) => {
     totalReminders: 0,
     activeReminders: 0,
     appUsageDays: 0,
+    wellnessScore: 0,
+    level: 1,
+    experience: 0,
+    nextLevelExp: 10,
   });
   const [loading, setLoading] = useState(true);
 
@@ -603,5 +657,24 @@ export const useAchievements = (userId?: string) => {
     getUnlockedAchievements,
     getAchievementProgress,
     getAchievementStats,
+    
+    // Wellness puanı fonksiyonları
+    getWellnessScore: () => calculateWellnessScore(userStats),
+    getLevelInfo: () => calculateLevel(calculateWellnessScore(userStats)),
+    updateWellnessScore: async () => {
+      const newWellnessScore = calculateWellnessScore(userStats);
+      const levelInfo = calculateLevel(newWellnessScore);
+      
+      const updatedStats = {
+        ...userStats,
+        wellnessScore: newWellnessScore,
+        level: levelInfo.level,
+        experience: levelInfo.experience,
+        nextLevelExp: levelInfo.nextLevelExp,
+      };
+      
+      setUserStats(updatedStats);
+      await AsyncStorage.setItem(USER_STATS_STORAGE_KEY, JSON.stringify(updatedStats));
+    },
   };
 };

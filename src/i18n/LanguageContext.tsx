@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform, NativeModules } from 'react-native';
 import trTranslations from './locales/tr.json';
 import enTranslations from './locales/en.json';
 
@@ -31,14 +32,53 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     loadLanguagePreference();
   }, []);
 
+  // Cihaz dilini otomatik tespit et
+  const detectDeviceLanguage = (): SupportedLanguage => {
+    try {
+      const deviceLanguage =
+        Platform.OS === 'ios'
+          ? NativeModules.SettingsManager?.settings?.AppleLocale ||
+            NativeModules.SettingsManager?.settings?.AppleLanguages?.[0] // iOS 13+
+          : NativeModules.I18nManager?.localeIdentifier; // Android
+
+      if (deviceLanguage) {
+        // Dil kodunu al (örn: "tr-TR" -> "tr", "en-US" -> "en")
+        const languageCode = deviceLanguage.split(/[-_]/)[0].toLowerCase();
+        
+        // Desteklenen diller arasında mı kontrol et
+        if (languageCode === 'tr' || languageCode === 'en') {
+          console.log(`🌍 Cihaz dili tespit edildi: ${languageCode}`);
+          return languageCode as SupportedLanguage;
+        }
+      }
+    } catch (error) {
+      console.error('Error detecting device language:', error);
+    }
+    
+    // Varsayılan: Türkçe
+    console.log('🌍 Varsayılan dil kullanılıyor: tr');
+    return 'tr';
+  };
+
   const loadLanguagePreference = async () => {
     try {
       const savedLanguage = await AsyncStorage.getItem('@language_preference');
+      
       if (savedLanguage && (savedLanguage === 'tr' || savedLanguage === 'en')) {
+        // Kullanıcı daha önce bir dil seçmiş
+        console.log(`💾 Kaydedilmiş dil yüklendi: ${savedLanguage}`);
         setLanguageState(savedLanguage as SupportedLanguage);
+      } else {
+        // İlk kez açılıyor, cihaz dilini tespit et
+        const deviceLang = detectDeviceLanguage();
+        setLanguageState(deviceLang);
+        // Otomatik tespit edilen dili kaydet
+        await AsyncStorage.setItem('@language_preference', deviceLang);
       }
     } catch (error) {
       console.error('Error loading language preference:', error);
+      // Hata durumunda varsayılan dili kullan
+      setLanguageState('tr');
     } finally {
       setIsLoading(false);
     }

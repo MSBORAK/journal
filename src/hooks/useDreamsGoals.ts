@@ -169,15 +169,25 @@ export const useDreamsGoals = (userId?: string) => {
   };
 
   const updateGoalProgress = async (goalId: string, progress: number) => {
-    await updateGoal(goalId, { progress });
+    const updatedGoals = goals.map(g =>
+      g.id === goalId
+        ? { 
+            ...g, 
+            progress,
+            updatedAt: new Date().toISOString(),
+            // Auto-complete if 100%
+            ...(progress >= 100 ? {
+              status: 'completed' as const,
+              completedAt: new Date().toISOString(),
+            } : {})
+          }
+        : g
+    );
     
-    // Auto-complete if 100%
-    if (progress >= 100) {
-      await updateGoal(goalId, {
-        status: 'completed',
-        completedAt: new Date().toISOString(),
-      });
-    }
+    setGoals(updatedGoals);
+    await saveGoals(updatedGoals);
+    
+    console.log(`Goal ${goalId} progress updated to ${progress}%`);
   };
 
   const toggleMilestone = async (goalId: string, milestoneId: string) => {

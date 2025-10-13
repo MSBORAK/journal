@@ -7,7 +7,99 @@ export interface NotificationMessage {
   title: string;
   body: string;
   emoji: string;
+  mood?: 'positive' | 'neutral' | 'low'; // Mood kategorisi
 }
+
+// MOOD BAZLI MESAJLAR
+// Pozitif ruh hali için mesajlar (mood >= 4)
+export const positiveMoodMessages: NotificationMessage[] = [
+  {
+    title: "Harikasın! 🌟",
+    body: "Bu enerjiyi koru! Bugün neler başardın?",
+    emoji: "🌟",
+    mood: 'positive'
+  },
+  {
+    title: "Muhteşem gidiyorsun! 🚀",
+    body: "Bu pozitif enerjiyi paylaş, başkalarına ilham ol!",
+    emoji: "🚀",
+    mood: 'positive'
+  },
+  {
+    title: "Bugün senin günün! ✨",
+    body: "Bu mutluluğu kal ıcı kılmak için yaz!",
+    emoji: "✨",
+    mood: 'positive'
+  },
+  {
+    title: "İnanılmazsın! 💪",
+    body: "Bu başarıyı kutlamak için bir şeyler yaz!",
+    emoji: "💪",
+    mood: 'positive'
+  },
+];
+
+// Nötr ruh hali için mesajlar (mood = 3)
+export const neutralMoodMessages: NotificationMessage[] = [
+  {
+    title: "Merhaba 🌿",
+    body: "Bugün nasıl hissediyorsun? Kendini dinle",
+    emoji: "🌿",
+    mood: 'neutral'
+  },
+  {
+    title: "Bir mola ver 🧘",
+    body: "Dinlenmek de bir ihtiyaç. Kendine zaman ayır",
+    emoji: "🧘",
+    mood: 'neutral'
+  },
+  {
+    title: "Sakin ol 🌊",
+    body: "Bugün sadece var olmak bile yeter",
+    emoji: "🌊",
+    mood: 'neutral'
+  },
+  {
+    title: "Kendini dinle 🎧",
+    body: "İhtiyacın olan şey ne? Yaz ve keşfet",
+    emoji: "🎧",
+    mood: 'neutral'
+  },
+];
+
+// Düşük ruh hali için mesajlar (mood <= 2)
+export const lowMoodMessages: NotificationMessage[] = [
+  {
+    title: "Yanındayım 💙",
+    body: "Zor zamanlar geçici. Sen kalıcısın",
+    emoji: "💙",
+    mood: 'low'
+  },
+  {
+    title: "Kendine şefkatli ol 🤗",
+    body: "Bugün küçük adımlar atsan da yeter",
+    emoji: "🤗",
+    mood: 'low'
+  },
+  {
+    title: "Sen değerlisin 💎",
+    body: "Modun nasıl olursa olsun, sen özelsin",
+    emoji: "💎",
+    mood: 'low'
+  },
+  {
+    title: "Nefes al 🌬️",
+    body: "Bugün sadece nefes almak bile bir başarı",
+    emoji: "🌬️",
+    mood: 'low'
+  },
+  {
+    title: "Yalnız değilsin 🫂",
+    body: "Duygularını yazmak seni rahatlatabilir",
+    emoji: "🫂",
+    mood: 'low'
+  },
+];
 
 // SABAH MESAJLARI (07:00 - 11:00)
 export const morningMessages: NotificationMessage[] = [
@@ -401,11 +493,36 @@ export const getRandomMessage = (messages: NotificationMessage[]): NotificationM
   return messages[Math.floor(Math.random() * messages.length)];
 };
 
-export const getMessageByTimeOfDay = (): NotificationMessage => {
+// Mood bazlı mesaj seç
+export const getMessageByMood = (moodValue: number): NotificationMessage => {
+  console.log(`😊 Mood value: ${moodValue}`);
+  
+  if (moodValue >= 4) {
+    // Pozitif ruh hali
+    console.log('✨ Using positive mood messages');
+    return getRandomMessage(positiveMoodMessages);
+  } else if (moodValue === 3) {
+    // Nötr ruh hali
+    console.log('🌿 Using neutral mood messages');
+    return getRandomMessage(neutralMoodMessages);
+  } else {
+    // Düşük ruh hali
+    console.log('💙 Using low mood messages');
+    return getRandomMessage(lowMoodMessages);
+  }
+};
+
+export const getMessageByTimeOfDay = (moodValue?: number): NotificationMessage => {
   const hour = new Date().getHours();
   
   console.log(`🕐 Current hour: ${hour}`);
   
+  // Eğer mood değeri verilmişse, mood bazlı mesaj seç
+  if (moodValue !== undefined && moodValue !== null) {
+    return getMessageByMood(moodValue);
+  }
+  
+  // Aksi halde zaman bazlı mesaj seç
   if (hour >= 5 && hour < 11) {
     console.log('🌅 Using morning messages');
     return getRandomMessage(morningMessages);
@@ -430,12 +547,18 @@ export const getMessageByTimeOfDay = (): NotificationMessage => {
 };
 
 export const getMessageByDayOfWeek = (): NotificationMessage => {
-  const day = new Date().getDay();
+  // Kullanıcının yerel zaman dilimini kullan
+  const now = new Date();
+  const day = now.getDay(); // Yerel günü al
+  
+  console.log(`Current local time: ${now.toLocaleString()}, Day: ${day} (0=Sunday, 6=Saturday)`);
   
   // 0 = Pazar, 6 = Cumartesi
   if (day === 0 || day === 6) {
+    console.log('Weekend detected, showing weekend message');
     return getRandomMessage(weekendMessages);
   } else {
+    console.log('Weekday detected, showing time-based message');
     return getMessageByTimeOfDay();
   }
 };

@@ -43,6 +43,7 @@ type RootStackParamList = {
   AppSettings: undefined;
   NotificationSettings: undefined;
   Achievements: undefined;
+  Mindfulness: undefined;
 };
 
 type TabParamList = {
@@ -78,6 +79,7 @@ import PrivacySecuritySettingsScreen from './src/screens/PrivacySecuritySettings
 import AppSettingsScreen from './src/screens/AppSettingsScreen';
 import NotificationSettingsScreen from './src/screens/NotificationSettingsScreen';
 import AchievementsScreen from './src/screens/AchievementsScreen';
+import MindfulnessScreen from './src/screens/MindfulnessScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -113,28 +115,30 @@ function MainTabs() {
           tabBarStyle: {
             backgroundColor: currentTheme.colors.card,
             borderTopWidth: 0,
-            borderTopColor: 'transparent',
+            elevation: 8,
+            shadowColor: currentTheme.colors.shadow,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            paddingBottom: 20,
             paddingTop: 12,
-            paddingBottom: 12,
-            height: 85,
-            shadowColor: currentTheme.colors.primary,
-            shadowOffset: { width: 0, height: -12 },
-            shadowOpacity: 0.3,
-            shadowRadius: 24,
-            elevation: 16,
-            borderRadius: 28,
-            marginHorizontal: 12,
-            marginBottom: 24,
-            position: 'absolute',
-            borderWidth: 1,
-            borderColor: currentTheme.colors.border + '40',
+            height: 90,
+            borderTopColor: 'transparent',
+          },
+          tabBarItemStyle: {
+            paddingVertical: 4,
+            paddingHorizontal: 2,
+          },
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '600',
+            marginTop: 2,
+            marginBottom: 2,
           },
           tabBarActiveTintColor: currentTheme.colors.primary,
           tabBarInactiveTintColor: currentTheme.colors.secondary,
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontWeight: '600',
-            marginTop: 4,
+          tabBarIconStyle: {
+            marginBottom: 4,
           },
         }}
       >
@@ -214,7 +218,39 @@ function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator 
+        screenOptions={{ 
+          headerShown: false,
+          cardStyleInterpolator: ({ current, layouts }) => {
+            return {
+              cardStyle: {
+                transform: [
+                  {
+                    translateX: current.progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [layouts.screen.width, 0],
+                    }),
+                  },
+                ],
+              },
+            };
+          },
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 300,
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 300,
+              },
+            },
+          },
+        }}
+      >
         {user ? (
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
@@ -247,7 +283,8 @@ function AppNavigator() {
         <Stack.Screen name="PrivacySecuritySettings" component={PrivacySecuritySettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AppSettings" component={AppSettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

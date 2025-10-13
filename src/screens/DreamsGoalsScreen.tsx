@@ -1048,6 +1048,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
             )}
 
             {/* Action Buttons */}
+            {selectedItem && (
             <View style={{ gap: 12 }}>
               {selectedItemType === 'dream' && (
                 <TouchableOpacity
@@ -1156,6 +1157,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                 </Text>
               </TouchableOpacity>
             </View>
+            )}
           </View>
         </View>
       </Modal>

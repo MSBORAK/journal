@@ -502,6 +502,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       const taskData = {
         ...formData,
         estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : undefined,
+        date: new Date().toISOString().split('T')[0],
       };
 
       if (editingTask) {

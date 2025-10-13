@@ -313,5 +313,12 @@ export const useTasks = (userId?: string) => {
     // Utility
     checkAchievements,
     updateDailyProgress,
+    
+    // Alias for compatibility
+    todayTasks: getTodayTasks(),
+    todayCompletedCount: getTodayCompletedCount(),
+    getTasksByDateRange: (startDate: string, endDate: string) => {
+      return tasks.filter(task => task.date >= startDate && task.date <= endDate);
+    },
   };
 };

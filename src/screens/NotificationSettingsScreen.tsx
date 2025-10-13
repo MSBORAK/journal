@@ -38,6 +38,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     eveningTime: '21:00',
     taskRemindersEnabled: true,
     achievementsEnabled: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
   const [loading, setLoading] = useState(true);
 
