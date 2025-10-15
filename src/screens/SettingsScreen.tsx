@@ -70,7 +70,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     {
       id: 'theme',
       title: 'Tema Seçimi',
-      subtitle: `Şu anki tema: ${currentTheme.label}`,
+      subtitle: `Şu anki tema: ${currentTheme.name}`,
       icon: 'color-palette-outline',
       screen: 'ThemeSelection',
       color: currentTheme.colors.primary,

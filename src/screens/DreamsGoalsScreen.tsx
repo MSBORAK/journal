@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { useDreamsGoals } from '../hooks/useDreamsGoals';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import CelebrationModal from '../components/CelebrationModal';
 import { Dream, Goal } from '../types';
 
 interface DreamsGoalsScreenProps {
@@ -36,8 +37,11 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
     addDream,
     addGoal,
     addPromise,
+    updateDream,
+    updateGoal,
     toggleFavoriteDream,
     updateGoalProgress,
+    toggleMilestone,
     getStats,
     getActivePromises,
     toggleDreamCompletion,
@@ -48,118 +52,397 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showCustomAlert, setShowCustomAlert] = useState(false);
-  const [alertConfig, setAlertConfig] = useState({
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationData, setCelebrationData] = useState({
     title: '',
     message: '',
-    type: 'info' as 'success' | 'warning' | 'error' | 'info',
-    onConfirm: () => {},
+    type: 'dream' as 'dream' | 'goal' | 'promise'
   });
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [selectedItemType, setSelectedItemType] = useState<'dream' | 'goal' | 'promise'>('dream');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    emoji: '',
-    category: 'personal' as Dream['category'],
-    notes: '',
-    tags: '',
-    goalType: 'short' as Goal['type'],
     promiseText: '',
   });
-  
-  const stats = getStats();
-
-  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info', onConfirm?: () => void) => {
-    setAlertConfig({
-      title,
-      message,
-      type,
-      onConfirm: onConfirm || (() => setShowCustomAlert(false)),
-    });
-    setShowCustomAlert(true);
-  };
 
   const handleTabChange = (tab: 'dreams' | 'goals' | 'promise') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setActiveTab(tab);
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      emoji: '',
-      category: 'personal' as Dream['category'],
-      notes: '',
-      tags: '',
-      goalType: 'short' as Goal['type'],
-      promiseText: '',
+  const triggerCelebration = (type: 'dream' | 'goal' | 'promise', title: string) => {
+    const messages = {
+      dream: 'Hayalini gerçekleştirdin! Bir adım daha ilerledin, harikasın! 🌟',
+      goal: 'Hedefini tamamladın! Bu başarıyı kutlamalısın! 🚀',
+      promise: 'Sözünü tuttuğun için tebrikler! Güvenilirliğin muhteşem! ✨'
+    };
+    
+    setCelebrationData({
+      title,
+      message: messages[type],
+      type
     });
+    setShowCelebration(true);
   };
 
-  const handleSave = async () => {
-    try {
-      if (activeTab === 'dreams') {
-        if (!formData.title.trim() || !formData.emoji) {
-          showAlert('Eksik Bilgi', 'Lütfen en azından bir başlık ve emoji ekleyin.', 'error');
-          return;
+  // Test verileri ekle (sadece ilk açılışta)
+  useEffect(() => {
+    const addTestData = async () => {
+      if (user?.uid && dreams.length === 0 && goals.length === 0 && promises.length === 0) {
+        try {
+          // Test Dreams
+          await addDream({
+            title: "CEO Olmak",
+            description: "Büyük bir şirketin CEO'su olmak ve dünyayı değiştirmek",
+            category: "career",
+            emoji: "👔",
+            isFavorite: true,
+            isCompleted: false,
+            isArchived: false,
+          });
+          
+          await addDream({
+            title: "Dünya Turu",
+            description: "Tüm dünyayı gezmek ve farklı kültürleri tanımak",
+            category: "travel",
+            emoji: "🌍",
+            isFavorite: false,
+            isCompleted: false,
+            isArchived: false,
+          });
+
+          // Test Goals
+          await addGoal({
+            title: "İngilizce Öğren",
+            description: "C1 seviyesinde İngilizce konuşabilmek",
+            progress: 60,
+            status: 'active',
+            dreamId: '',
+            type: 'medium',
+            category: 'learning',
+            emoji: '🎓',
+            priority: 'high',
+            milestones: [
+              { id: '1', title: 'A1 seviyesini tamamla', isCompleted: true },
+              { id: '2', title: 'B1 seviyesini tamamla', isCompleted: true },
+              { id: '3', title: 'B2 seviyesini tamamla', isCompleted: false },
+              { id: '4', title: 'C1 seviyesini tamamla', isCompleted: false },
+            ],
+          });
+
+          await addGoal({
+            title: "Fitness Hedefi",
+            description: "6 ayda 10 kg vermek",
+            progress: 30,
+            status: 'active',
+            dreamId: '',
+            type: 'short',
+            category: 'health',
+            emoji: '💪',
+            priority: 'medium',
+            milestones: [
+              { id: '1', title: 'İlk 2 kg ver', isCompleted: true },
+              { id: '2', title: '5 kg ver', isCompleted: false },
+              { id: '3', title: '10 kg ver', isCompleted: false },
+            ],
+          });
+
+          // Test Promises
+          await addPromise("Her gün 30 dakika kitap okuyacağım", "📚");
+          await addPromise("Haftada 3 gün spor yapacağım", "💪");
+          await addPromise("Daha az sosyal medya kullanacağım", "📱");
+
+          console.log('Test data added successfully!');
+        } catch (error) {
+          console.error('Error adding test data:', error);
         }
+      }
+    };
+
+    addTestData();
+  }, [user?.uid, dreams.length, goals.length, promises.length]);
+
+  const handleSave = async () => {
+    if (activeTab === 'promise') {
+      if (!formData.promiseText.trim()) {
+        Alert.alert('Hata', 'Lütfen bir söz yazın');
+        return;
+      }
+      await addPromise(formData.promiseText);
+    } else {
+      if (!formData.title.trim()) {
+        Alert.alert('Hata', 'Lütfen bir başlık yazın');
+        return;
+      }
+      if (activeTab === 'dreams') {
         await addDream({
           title: formData.title,
           description: formData.description,
-          emoji: formData.emoji,
-          category: formData.category as Dream['category'],
-          notes: formData.notes,
-          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+          category: "personal",
+          emoji: "🌟",
+          isFavorite: false,
+          isCompleted: false,
+          isArchived: false,
         });
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showAlert('✨ Harika!', 'Hayalin eklendi! Şimdi onu gerçeğe dönüştürme zamanı.', 'success', () => {
-          setShowCustomAlert(false);
-          setShowAddModal(false);
-          resetForm();
-        });
-      } else if (activeTab === 'goals') {
-        if (!formData.title.trim() || !formData.emoji) {
-          showAlert('Eksik Bilgi', 'Lütfen en azından bir başlık ve emoji ekleyin.', 'error');
-          return;
-        }
+      } else {
         await addGoal({
           title: formData.title,
           description: formData.description,
-          emoji: formData.emoji,
-          type: formData.goalType,
-          category: formData.category as Goal['category'],
           progress: 0,
-          milestones: [],
           status: 'active',
+          dreamId: '',
+          type: 'short',
+          category: 'personal',
+          emoji: '🎯',
           priority: 'medium',
-          notes: formData.notes,
-        });
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showAlert('🎯 Tebrikler!', 'Hedefin oluşturuldu! Her adım seni hedefe yaklaştırıyor.', 'success', () => {
-          setShowCustomAlert(false);
-          setShowAddModal(false);
-          resetForm();
-        });
-      } else if (activeTab === 'promise') {
-        if (!formData.promiseText.trim()) {
-          showAlert('Eksik Bilgi', 'Lütfen bir söz metni yazın.', 'error');
-          return;
-        }
-        await addPromise(formData.promiseText, formData.emoji || '💫');
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showAlert('💫 Harika!', 'Kendine verdiğin sözü unutma!', 'success', () => {
-          setShowCustomAlert(false);
-          setShowAddModal(false);
-          resetForm();
+          milestones: [],
         });
       }
-    } catch (err) {
-      console.error('Error saving:', err);
-      showAlert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+    }
+    
+    setFormData({ title: '', description: '', promiseText: '' });
+    setShowAddModal(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const renderEmptyState = () => (
+    <View style={dynamicStyles.emptyState}>
+      <Text style={dynamicStyles.emptyIcon}>
+        {activeTab === 'dreams' ? '🌟' : activeTab === 'goals' ? '🎯' : '🤝'}
+      </Text>
+      <Text style={dynamicStyles.emptyTitle}>
+        {activeTab === 'dreams' ? 'Hayallerini Keşfet' : 
+         activeTab === 'goals' ? 'Hedeflerini Belirle' : 
+         'Kendine Söz Ver'}
+      </Text>
+      <Text style={dynamicStyles.emptyMessage}>
+        {activeTab === 'dreams' ? 'Hayallerin gerçeğe dönüşsün' : 
+         activeTab === 'goals' ? 'Hedeflerine ulaş' : 
+         'Kendine verdiğin sözleri tut'}
+      </Text>
+    </View>
+  );
+
+  // Her tema için uyumlu favori rengi
+  const getFavoriteColor = () => {
+    switch (currentTheme.name) {
+      case 'light': return '#f59e0b'; // Altın sarısı
+      case 'dark': return '#8b5cf6'; // Mor
+      case 'ocean': return '#0ea5e9'; // Mavi
+      case 'forest': return '#16a34a'; // Yeşil
+      case 'lavender': return '#c084fc'; // Lavanta
+      case 'rose': return '#f43f5e'; // Pembe
+      case 'sunset': return '#f97316'; // Turuncu
+      case 'midnight': return '#1e40af'; // Koyu mavi
+      default: return currentTheme.colors.accent;
     }
   };
+
+  const renderDreamCard = (dream: Dream) => (
+    <TouchableOpacity
+      key={dream.id}
+      style={dynamicStyles.card}
+      onPress={() => {
+        setSelectedItem(dream);
+        setShowDetailModal(true);
+      }}
+      activeOpacity={0.8}
+    >
+      <View
+        style={[
+          dynamicStyles.cardGradient,
+          { borderColor: dream.isFavorite ? getFavoriteColor() : currentTheme.colors.border }
+        ]}
+      >
+        {/* Floating Elements */}
+        <View style={dynamicStyles.floatingElements}>
+          <Text style={dynamicStyles.floatingIcon1}>✨</Text>
+          <Text style={dynamicStyles.floatingIcon2}>🌟</Text>
+          <Text style={dynamicStyles.floatingIcon3}>💫</Text>
+        </View>
+
+        <View style={dynamicStyles.cardHeader}>
+          <View style={dynamicStyles.cardIconContainer}>
+            <Text style={dynamicStyles.cardIcon}>🌟</Text>
+          </View>
+          {/* Tamamla */}
+          <TouchableOpacity
+            onPress={() => {
+              toggleDreamCompletion(dream.id);
+              if (!dream.isCompleted) {
+                triggerCelebration('dream', dream.title);
+              }
+            }}
+            style={[
+              dynamicStyles.completeButton,
+              dream.isCompleted && {
+                backgroundColor: currentTheme.colors.primary,
+                borderColor: currentTheme.colors.primary,
+              }
+            ]}
+          >
+            <Ionicons 
+              name={dream.isCompleted ? "star" : "star-outline"} 
+              size={20} 
+              color={dream.isCompleted ? currentTheme.colors.card : currentTheme.colors.text} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={dynamicStyles.cardContent}>
+          <Text style={dynamicStyles.cardTitle}>{dream.title}</Text>
+          {dream.description && (
+            <Text style={dynamicStyles.cardDescription}>{dream.description}</Text>
+          )}
+        </View>
+
+        {/* Removed progress dots */}
+        {dream.isCompleted && (
+          <View style={dynamicStyles.completedPill}>
+            <Ionicons name="checkmark" size={12} color={currentTheme.colors.card} />
+            <Text style={dynamicStyles.completedText}>Tamamlandı</Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderGoalCard = (goal: Goal) => (
+    <TouchableOpacity
+      key={goal.id}
+      style={dynamicStyles.card}
+      onPress={() => {
+        setSelectedItem(goal);
+        setShowDetailModal(true);
+      }}
+      activeOpacity={0.8}
+    >
+      <View
+        style={[
+          dynamicStyles.cardGradient,
+          { borderColor: goal.progress === 100 ? '#10B981' : currentTheme.colors.border }
+        ]}
+      >
+        {/* Floating Elements */}
+        <View style={dynamicStyles.floatingElements}>
+          <Text style={dynamicStyles.floatingIcon1}>🎯</Text>
+          <Text style={dynamicStyles.floatingIcon2}>🚀</Text>
+          <Text style={dynamicStyles.floatingIcon3}>⭐</Text>
+        </View>
+
+        <View style={dynamicStyles.cardHeader}>
+          <View style={dynamicStyles.cardIconContainer}>
+            <Text style={dynamicStyles.cardIcon}>🎯</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              const newProgress = goal.progress === 100 ? 0 : 100;
+              updateGoalProgress(goal.id, newProgress);
+              if (newProgress === 100) {
+                triggerCelebration('goal', goal.title);
+              }
+            }}
+            style={[
+              dynamicStyles.progressButton,
+              goal.progress === 100 && {
+                backgroundColor: currentTheme.colors.primary,
+                borderColor: currentTheme.colors.primary,
+              }
+            ]}
+          >
+            <Ionicons 
+              name={goal.progress === 100 ? "checkmark-circle" : "ellipse-outline"} 
+              size={20} 
+              color={goal.progress === 100 ? currentTheme.colors.card : currentTheme.colors.text} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={dynamicStyles.cardContent}>
+          <Text style={dynamicStyles.cardTitle}>{goal.title}</Text>
+          {goal.description && (
+            <Text style={dynamicStyles.cardDescription}>{goal.description}</Text>
+          )}
+        </View>
+
+        {/* Animated Progress Bar */}
+        <View style={dynamicStyles.progressContainer}>
+          <View style={dynamicStyles.progressBar}>
+            <View style={[dynamicStyles.progressFill, { width: `${goal.progress}%` }]} />
+          </View>
+          <Text style={dynamicStyles.progressText}>{goal.progress}% tamamlandı</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderPromiseCard = (promise: any) => (
+    <TouchableOpacity
+      key={promise.id}
+      style={dynamicStyles.card}
+      onPress={() => {
+        setSelectedItem(promise);
+        setShowDetailModal(true);
+      }}
+      activeOpacity={0.8}
+    >
+      <View
+        style={[
+          dynamicStyles.cardGradient,
+          { borderColor: promise.isCompleted ? '#10B981' : currentTheme.colors.border }
+        ]}
+      >
+        {/* Floating Elements */}
+        <View style={dynamicStyles.floatingElements}>
+          <Text style={dynamicStyles.floatingIcon1}>🤝</Text>
+          <Text style={dynamicStyles.floatingIcon2}>💫</Text>
+          <Text style={dynamicStyles.floatingIcon3}>✨</Text>
+        </View>
+
+        <View style={dynamicStyles.cardHeader}>
+          <View style={dynamicStyles.cardIconContainer}>
+            <Text style={dynamicStyles.cardIcon}>🤝</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              togglePromiseCompletion(promise.id);
+              if (!promise.isCompleted) {
+                triggerCelebration('promise', promise.text);
+              }
+            }}
+            style={[
+              dynamicStyles.progressButton,
+              promise.isCompleted && {
+                backgroundColor: currentTheme.colors.primary,
+                borderColor: currentTheme.colors.primary,
+              }
+            ]}
+          >
+            <Ionicons 
+              name={promise.isCompleted ? "checkmark-circle" : "ellipse-outline"} 
+              size={20} 
+              color={promise.isCompleted ? currentTheme.colors.card : currentTheme.colors.text} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={dynamicStyles.cardContent}>
+          <Text style={dynamicStyles.cardTitle}>{promise.text}</Text>
+        </View>
+
+        {/* Status Indicator */}
+        <View style={dynamicStyles.statusIndicator}>
+          <View style={[
+            dynamicStyles.statusDot,
+            { backgroundColor: promise.isCompleted ? currentTheme.colors.card : currentTheme.colors.background }
+          ]} />
+          <Text style={dynamicStyles.statusText}>
+            {promise.isCompleted ? 'Tamamlandı' : 'Devam Ediyor'}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -170,30 +453,33 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       paddingHorizontal: 20,
       paddingTop: 60,
       paddingBottom: 20,
+      backgroundColor: currentTheme.colors.primary + '12',
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '25',
     },
     headerTitle: {
-      fontSize: 32,
+      fontSize: 28,
       fontWeight: 'bold',
       color: currentTheme.colors.text,
       marginBottom: 8,
+      textAlign: 'center',
     },
     headerSubtitle: {
       fontSize: 16,
-      color: currentTheme.colors.secondary,
-      lineHeight: 24,
+      color: currentTheme.colors.text,
+      opacity: 0.85,
+      textAlign: 'center',
     },
-    tabBar: {
+    tabContainer: {
       flexDirection: 'row',
+      backgroundColor: currentTheme.colors.background,
       marginHorizontal: 20,
-      marginBottom: 24,
-      backgroundColor: currentTheme.colors.card,
+      marginTop: 20,
       borderRadius: 16,
       padding: 4,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 3,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
     },
     tab: {
       flex: 1,
@@ -202,408 +488,277 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       borderRadius: 12,
     },
     activeTab: {
-      backgroundColor: currentTheme.colors.primary,
+      backgroundColor: currentTheme.colors.card,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary,
     },
     tabText: {
       fontSize: 14,
       fontWeight: '600',
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
     },
     activeTabText: {
-      color: 'white',
+      color: currentTheme.colors.primary,
     },
     content: {
       flex: 1,
-    },
-    cardsGrid: {
       paddingHorizontal: 20,
+      paddingTop: 20,
+    },
+    cardsList: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
+      gap: 16,
     },
-    cardsList: {
-      paddingHorizontal: 20,
-    },
-    // Dream Card Styles
-    dreamCard: {
-      width: '48%',
+    card: {
+      borderRadius: 16,
+      overflow: 'hidden',
       marginBottom: 16,
-      borderRadius: 24,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.25,
-      shadowRadius: 20,
-      elevation: 10,
-      borderWidth: 2,
-      borderColor: currentTheme.colors.primary + '20',
-    },
-    dreamCardGradient: {
-      borderRadius: 24,
-      padding: 20,
-      minHeight: 160,
-      alignItems: 'center',
-      borderWidth: 1,
-    },
-    dreamCardHeader: {
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    dreamEmoji: {
-      fontSize: 48,
-      marginBottom: 8,
-    },
-    dreamTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#FFFFFF',
-      textAlign: 'center',
-      marginBottom: 4,
-    },
-    dreamDescription: {
-      fontSize: 12,
-      color: '#FFFFFF',
-      textAlign: 'center',
-      opacity: 0.9,
-      lineHeight: 16,
-    },
-    // Goal Card Styles
-    goalCard: {
-      marginBottom: 16,
-      borderRadius: 20,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 12,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
       elevation: 6,
+      width: '48%',
+      aspectRatio: 1,
+      backgroundColor: currentTheme.colors.card,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
     },
-    goalCardGradient: {
-      borderRadius: 20,
-      padding: 20,
-      minHeight: 120,
-    },
-    goalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    goalIcon: {
-      fontSize: 32,
-      marginRight: 12,
-    },
-    goalContent: {
+    cardGradient: {
+      padding: 16,
+      paddingBottom: 56, // Completed pill için alan bırak
+      borderRadius: 16,
       flex: 1,
-    },
-    goalTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: currentTheme.colors.text,
-      marginBottom: 4,
-    },
-    goalDescription: {
-      fontSize: 14,
-      color: currentTheme.colors.secondary,
-      marginBottom: 8,
-    },
-    goalProgress: {
-      marginTop: 8,
-    },
-    goalProgressBar: {
-      height: 8,
-      backgroundColor: currentTheme.colors.border + '40',
-      borderRadius: 4,
-      overflow: 'hidden',
-      marginBottom: 6,
-    },
-    goalProgressFill: {
-      height: '100%',
-      borderRadius: 4,
-      backgroundColor: currentTheme.colors.primary,
-    },
-    goalProgressText: {
-      fontSize: 12,
-      color: currentTheme.colors.secondary,
-      textAlign: 'center',
-    },
-    // Promise Card
-    promiseCard: {
-      marginBottom: 16,
-      borderRadius: 24,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.25,
-      shadowRadius: 20,
-      elevation: 10,
-      borderWidth: 2,
-      borderColor: currentTheme.colors.primary + '20',
-    },
-    promiseCardGradient: {
-      borderRadius: 24,
-      padding: 24,
-      alignItems: 'center',
+      position: 'relative',
+      justifyContent: 'space-between',
+      backgroundColor: 'transparent',
       borderWidth: 1,
     },
-    promiseEmoji: {
-      fontSize: 48,
+    floatingElements: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1,
+    },
+    floatingIcon1: {
+      position: 'absolute',
+      top: 8,
+      right: 12,
+      fontSize: 14,
+      opacity: 0.5,
+      zIndex: 1,
+    },
+    floatingIcon2: {
+      position: 'absolute',
+      top: 40,
+      right: 25,
+      fontSize: 12,
+      opacity: 0.3,
+      zIndex: 1,
+    },
+    floatingIcon3: {
+      position: 'absolute',
+      bottom: 8,
+      left: 12,
+      fontSize: 12,
+      opacity: 0.4,
+      zIndex: 1,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       marginBottom: 16,
+      zIndex: 2,
     },
-    promiseText: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: '#FFFFFF',
-      textAlign: 'center',
-      lineHeight: 26,
-      textShadowColor: 'rgba(0, 0, 0, 0.6)',
-      textShadowOffset: { width: 0, height: 2 },
-      textShadowRadius: 4,
-      marginBottom: 12,
-    },
-    promiseDate: {
-      fontSize: 13,
-      color: '#FFFFFF',
-      fontStyle: 'italic',
-      textShadowColor: 'rgba(0, 0, 0, 0.5)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
-    },
-    // Add New Button
-    addNewButton: {
-      backgroundColor: currentTheme.colors.primary + '15',
+    cardIconContainer: {
+      width: 40,
+      height: 40,
       borderRadius: 20,
-      padding: 20,
+      backgroundColor: currentTheme.colors.card,
       alignItems: 'center',
       justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+    },
+    cardIcon: {
+      fontSize: 20,
+    },
+    favoriteButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(255,255,255,0.3)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.4)',
+    },
+    completeButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: currentTheme.colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      marginLeft: 8,
+    },
+    progressButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: currentTheme.colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+    },
+    cardContent: {
+      zIndex: 2,
+      marginBottom: 16,
+    },
+    cardTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      marginBottom: 8,
+    },
+    cardDescription: {
+      fontSize: 14,
+      color: currentTheme.colors.secondary,
+      lineHeight: 20,
+    },
+    progressContainer: {
+      zIndex: 2,
+    },
+    progressBar: {
+      height: 8,
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 4,
+      marginBottom: 8,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: currentTheme.colors.primary,
+      borderRadius: 4,
+    },
+    progressText: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      textAlign: 'right',
+      fontWeight: '600',
+    },
+    progressIndicator: {
       flexDirection: 'row',
-      gap: 12,
+      justifyContent: 'center',
+      gap: 6,
+      zIndex: 2,
+    },
+    completedPill: {
+      position: 'absolute',
+      bottom: 16,
+      left: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: currentTheme.colors.primary,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 12,
+    },
+    completedText: {
+      color: currentTheme.colors.card,
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    progressDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: currentTheme.colors.border,
+    },
+    statusIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      zIndex: 2,
+    },
+    statusDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    statusText: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      fontWeight: '600',
+    },
+    addNewButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 20,
+      padding: 24,
       marginTop: 20,
       borderWidth: 2,
       borderColor: currentTheme.colors.primary + '40',
+      borderStyle: 'dashed',
       shadowColor: currentTheme.colors.primary,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 12,
-      elevation: 6,
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
     },
     addNewButtonText: {
-      fontSize: 18,
-      fontWeight: 'bold',
+      fontSize: 16,
+      fontWeight: '600',
       color: currentTheme.colors.primary,
+      marginLeft: 8,
     },
-    // Empty State
     emptyState: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: 40,
       paddingVertical: 60,
     },
     emptyIcon: {
-      fontSize: 80,
-      marginBottom: 24,
+      fontSize: 64,
+      marginBottom: 20,
     },
     emptyTitle: {
-      fontSize: 24,
+      fontSize: 20,
       fontWeight: 'bold',
       color: currentTheme.colors.text,
-      marginBottom: 12,
+      marginBottom: 8,
       textAlign: 'center',
     },
     emptyMessage: {
-      fontSize: 16,
+      fontSize: 14,
       color: currentTheme.colors.secondary,
       textAlign: 'center',
-      lineHeight: 24,
-      marginBottom: 32,
-    },
-    addButton: {
-      backgroundColor: currentTheme.colors.primary,
-      paddingHorizontal: 32,
-      paddingVertical: 16,
-      borderRadius: 16,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      shadowColor: currentTheme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-      elevation: 6,
-    },
-    addButtonText: {
-      color: 'white',
-      fontSize: 18,
-      fontWeight: 'bold',
+      lineHeight: 20,
     },
   });
 
-  // Dream Card Renderer
-  const renderDreamCard = (dream: Dream) => {
-    const categoryColors: Record<string, string[]> = {
-      personal: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'CC', currentTheme.colors.card + 'FF'],
-      career: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'DD', currentTheme.colors.card + 'FF'],
-      health: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'BB', currentTheme.colors.card + 'FF'],
-      spiritual: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'DD', currentTheme.colors.card + 'FF'],
-      relationship: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'CC', currentTheme.colors.card + 'FF'],
-      travel: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'EE', currentTheme.colors.card + 'FF'],
-      learning: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'DD', currentTheme.colors.card + 'FF'],
-      creative: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'CC', currentTheme.colors.card + 'FF'],
-      financial: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'CC', currentTheme.colors.card + 'FF'],
-      custom: [currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'CC', currentTheme.colors.card + 'FF'],
-    };
-
-    const colors = categoryColors[dream.category] || categoryColors.custom;
-
-    return (
-      <TouchableOpacity
-        key={dream.id}
-        style={dynamicStyles.dreamCard}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          setSelectedItem(dream);
-          setSelectedItemType('dream');
-          setShowDetailModal(true);
-        }}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={colors as any}
-          style={dynamicStyles.dreamCardGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <View style={dynamicStyles.dreamCardHeader}>
-            <Text style={dynamicStyles.dreamEmoji}>{dream.emoji}</Text>
-            <Text style={dynamicStyles.dreamTitle}>{dream.title}</Text>
-            {dream.description && (
-              <Text style={dynamicStyles.dreamDescription}>{dream.description}</Text>
-            )}
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  };
-
-  // Goal Card Renderer
-  const renderGoalCard = (goal: Goal) => {
-    const progressPercentage = Math.min((goal.progress / 100) * 100, 100);
-    
-    return (
-      <TouchableOpacity
-        key={goal.id}
-        style={dynamicStyles.goalCard}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          setSelectedItem(goal);
-          setSelectedItemType('goal');
-          setShowDetailModal(true);
-        }}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={[currentTheme.colors.card + 'FF', currentTheme.colors.card + 'F8']}
-          style={dynamicStyles.goalCardGradient}
-        >
-          <View style={dynamicStyles.goalHeader}>
-            <Text style={dynamicStyles.goalIcon}>{goal.emoji}</Text>
-            <View style={dynamicStyles.goalContent}>
-              <Text style={dynamicStyles.goalTitle}>{goal.title}</Text>
-              {goal.description && (
-                <Text style={dynamicStyles.goalDescription}>{goal.description}</Text>
-              )}
-            </View>
-          </View>
-          
-          <View style={dynamicStyles.goalProgress}>
-            <View style={dynamicStyles.goalProgressBar}>
-              <View 
-                style={[
-                  dynamicStyles.goalProgressFill,
-                  { width: `${progressPercentage}%` }
-                ]} 
-              />
-            </View>
-            <Text style={dynamicStyles.goalProgressText}>
-              {goal.progress}% tamamlandı
-            </Text>
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  };
-
-  // Promise Card Renderer
-  const renderPromiseCard = (promise: typeof promises[0]) => {
-    return (
-      <TouchableOpacity 
-        key={promise.id} 
-        style={dynamicStyles.promiseCard}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          setSelectedItem(promise);
-          setSelectedItemType('promise');
-          setShowDetailModal(true);
-        }}
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={[currentTheme.colors.primary + 'FF', currentTheme.colors.accent + 'CC', currentTheme.colors.card + 'FF']}
-          style={dynamicStyles.promiseCardGradient}
-        >
-          <Text style={dynamicStyles.promiseEmoji}>{promise.emoji}</Text>
-          <Text style={dynamicStyles.promiseText}>{promise.text}</Text>
-          <Text style={dynamicStyles.promiseDate}>
-            {new Date(promise.createdAt).toLocaleDateString('tr-TR')}
-          </Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderEmptyState = () => {
-    const content = {
-      dreams: {
-        emoji: '🌠',
-        title: 'Hayallerine Hayat Ver',
-        message: 'Hayallerini buraya ekle ve onları gerçeğe dönüştür. Her hayal, bir yolculuğun başlangıcıdır.',
-        buttonText: 'İlk Hayalini Ekle',
-      },
-      goals: {
-        emoji: '🎯',
-        title: 'Hedeflerini Belirle',
-        message: 'Kısa, orta ve uzun vadeli hedeflerini oluştur. Her hedef, hayallerine bir adım daha yaklaştırır.',
-        buttonText: 'İlk Hedefini Ekle',
-      },
-      promise: {
-        emoji: '💫',
-        title: 'Kendine Söz Ver',
-        message: 'Kendine verdiğin sözler, en değerli taahhütlerdir. İç sesinle bağlantı kur.',
-        buttonText: 'Söz Ver',
-      },
-    };
-
-    const current = content[activeTab];
-
-    return (
-      <View style={dynamicStyles.emptyState}>
-        <Text style={dynamicStyles.emptyIcon}>{current.emoji}</Text>
-        <Text style={dynamicStyles.emptyTitle}>{current.title}</Text>
-        <Text style={dynamicStyles.emptyMessage}>{current.message}</Text>
-        <TouchableOpacity
-          style={dynamicStyles.addButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setShowAddModal(true);
-          }}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add-circle" size={24} color="white" />
-          <Text style={dynamicStyles.addButtonText}>{current.buttonText}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={dynamicStyles.container}>
+      {/* Celebration Modal */}
+      <CelebrationModal
+        visible={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        title={celebrationData.title}
+        message={celebrationData.message}
+        type={celebrationData.type}
+        themeName={currentTheme.name}
+      />
       {/* Header */}
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.headerTitle}>✨ Hayaller & Hedefler</Text>
@@ -612,62 +767,58 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
         </Text>
       </View>
 
-      {/* Tab Bar */}
-      <View style={dynamicStyles.tabBar}>
+      {/* Tabs */}
+      <View style={dynamicStyles.tabContainer}>
         <TouchableOpacity
           style={[dynamicStyles.tab, activeTab === 'dreams' && dynamicStyles.activeTab]}
           onPress={() => handleTabChange('dreams')}
-          activeOpacity={0.7}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'dreams' && dynamicStyles.activeTabText]}>
-            🌠 Hayaller
+            🌟 Hayaller
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={[dynamicStyles.tab, activeTab === 'goals' && dynamicStyles.activeTab]}
           onPress={() => handleTabChange('goals')}
-          activeOpacity={0.7}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'goals' && dynamicStyles.activeTabText]}>
             🎯 Hedefler
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={[dynamicStyles.tab, activeTab === 'promise' && dynamicStyles.activeTab]}
           onPress={() => handleTabChange('promise')}
-          activeOpacity={0.7}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'promise' && dynamicStyles.activeTabText]}>
-            💫 Söz
+            🤝 Söz
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
-      <ScrollView
-        style={dynamicStyles.content}
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
-      >
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ fontSize: 16, color: currentTheme.colors.secondary }}>
+            Yükleniyor...
+          </Text>
+        </View>
+      ) : (
+        <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
         {activeTab === 'dreams' && (
           <>
             {dreams.length === 0 ? (
               renderEmptyState()
             ) : (
               <>
-                <View style={dynamicStyles.cardsGrid}>
-                  {dreams.filter(d => !d.isArchived).map(renderDreamCard)}
+                <View style={dynamicStyles.cardsList}>
+                  {dreams.map(renderDreamCard)}
                 </View>
-                {/* Add New Button */}
                 <TouchableOpacity
                   style={dynamicStyles.addNewButton}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setShowAddModal(true);
                   }}
-                  activeOpacity={0.8}
                 >
                   <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
                   <Text style={dynamicStyles.addNewButtonText}>Yeni Hayal Ekle</Text>
@@ -684,16 +835,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
             ) : (
               <>
                 <View style={dynamicStyles.cardsList}>
-                  {goals.filter(g => g.status !== 'cancelled').map(renderGoalCard)}
+                  {goals.map(renderGoalCard)}
                 </View>
-                {/* Add New Button */}
                 <TouchableOpacity
                   style={dynamicStyles.addNewButton}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setShowAddModal(true);
                   }}
-                  activeOpacity={0.8}
                 >
                   <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
                   <Text style={dynamicStyles.addNewButtonText}>Yeni Hedef Ekle</Text>
@@ -712,14 +861,12 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                 <View style={dynamicStyles.cardsList}>
                   {getActivePromises().map(renderPromiseCard)}
                 </View>
-                {/* Add New Button */}
                 <TouchableOpacity
                   style={dynamicStyles.addNewButton}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setShowAddModal(true);
                   }}
-                  activeOpacity={0.8}
                 >
                   <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
                   <Text style={dynamicStyles.addNewButtonText}>Yeni Söz Ver</Text>
@@ -728,13 +875,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
             )}
           </>
         )}
-      </ScrollView>
+        </ScrollView>
+      )}
 
-      {/* Modern Add Modal */}
+      {/* Simple Add Modal */}
       <Modal
         visible={showAddModal}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setShowAddModal(false)}
       >
         <KeyboardAvoidingView
@@ -743,264 +891,198 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
         >
           <View style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            justifyContent: 'flex-end',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
           }}>
-            <LinearGradient
-              colors={[
-                currentTheme.colors.primary + 'FF',
-                currentTheme.colors.accent + 'F0',
-                currentTheme.colors.card + 'FF'
-              ]}
-              style={{
-                borderTopLeftRadius: 32,
-                borderTopRightRadius: 32,
-                paddingTop: 20,
-                maxHeight: '80%',
-                shadowColor: currentTheme.colors.primary,
-                shadowOffset: { width: 0, height: -10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 20,
-                elevation: 20,
-                borderWidth: 2,
-                borderColor: currentTheme.colors.primary + '20',
-              }}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
+            <View style={{
+              backgroundColor: currentTheme.colors.card,
+              borderRadius: 16,
+              width: '100%',
+              maxHeight: '60%',
+              shadowColor: currentTheme.colors.shadow,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 8,
+            }}>
               {/* Modal Header */}
               <View style={{
+                backgroundColor: currentTheme.colors.primary,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                padding: 20,
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingHorizontal: 28,
-                paddingBottom: 24,
-                backgroundColor: currentTheme.colors.primary + '20',
-                borderTopLeftRadius: 32,
-                borderTopRightRadius: 32,
-                borderBottomWidth: 1,
-                borderBottomColor: currentTheme.colors.primary + '30',
               }}>
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                  <Text style={{
-                    fontSize: 22,
-                    fontWeight: 'bold',
-                    color: '#FFFFFF',
-                    textAlign: 'center',
-                    textShadowColor: 'rgba(0,0,0,0.3)',
-                    textShadowOffset: { width: 0, height: 1 },
-                    textShadowRadius: 2,
-                  }}>
-                    {activeTab === 'dreams' ? '🌟 Hayalini Hayata Geçir' : 
-                     activeTab === 'goals' ? '🎯 Hedefini Gerçekleştir' : 
-                     '💫 İç Sesinle Bağlantı Kur'}
-                  </Text>
-                  <Text style={{
-                    fontSize: 14,
-                    color: '#FFFFFF',
-                    textAlign: 'center',
-                    marginTop: 4,
-                    opacity: 0.9,
-                  }}>
-                    {activeTab === 'dreams' ? 'Hayallerin gerçeğe dönüşsün' : 
-                     activeTab === 'goals' ? 'Hedeflerine ulaş' : 
-                     'Kendine verdiğin sözleri tut'}
-                  </Text>
-                </View>
+                <Text style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: currentTheme.colors.card,
+                  flex: 1,
+                  textAlign: 'center',
+                }}>
+                  {activeTab === 'dreams' ? '✨ Yeni Hayal' : 
+                   activeTab === 'goals' ? '🎯 Yeni Hedef' : 
+                   '🤝 Yeni Söz'}
+                </Text>
                 <TouchableOpacity
                   onPress={() => setShowAddModal(false)}
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    width: 30,
+                    height: 30,
+                    borderRadius: 15,
+                    backgroundColor: currentTheme.colors.card + '33',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginLeft: 16,
                   }}
                 >
-                  <Ionicons name="close" size={20} color="#FFFFFF" />
+                  <Ionicons name="close" size={16} color={currentTheme.colors.card} />
                 </TouchableOpacity>
               </View>
 
               {/* Modal Content */}
-              <View style={{ padding: 32, backgroundColor: 'rgba(255,255,255,0.95)' }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {activeTab === 'promise' ? (
-                    // Promise Form
-                    <View style={{ gap: 20 }}>
-                      <View style={{
-                        backgroundColor: 'rgba(255,255,255,0.8)',
-                        borderRadius: 24,
-                        padding: 24,
-                        borderWidth: 2,
-                        borderColor: currentTheme.colors.primary + '25',
-                        shadowColor: currentTheme.colors.primary,
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.15,
-                        shadowRadius: 16,
-                        elevation: 8,
+              <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+                {activeTab === 'promise' ? (
+                  // Promise Form
+                  <View style={{ gap: 16 }}>
+                    <Text style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: currentTheme.colors.text,
+                      marginBottom: 8,
+                    }}>
+                      Kendine bir söz ver
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: currentTheme.colors.background,
+                        borderRadius: 12,
+                        padding: 16,
+                        fontSize: 16,
+                        color: currentTheme.colors.text,
+                        minHeight: 100,
+                        textAlignVertical: 'top',
+                        borderWidth: 1,
+                        borderColor: currentTheme.colors.border,
+                      }}
+                      placeholder="Örnek: Her gün 10 dakika meditasyon yapacağım..."
+                      placeholderTextColor={currentTheme.colors.secondary}
+                      value={formData.promiseText}
+                      onChangeText={(text) => setFormData({ ...formData, promiseText: text })}
+                      multiline
+                    />
+                  </View>
+                ) : (
+                  // Dreams & Goals Form
+                  <View style={{ gap: 16 }}>
+                    <View>
+                      <Text style={{
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: currentTheme.colors.text,
+                        marginBottom: 8,
                       }}>
-                        <Text style={{ fontSize: 16, fontWeight: '700', color: currentTheme.colors.text, marginBottom: 12, textAlign: 'center' }}>
-                          Kendine bir söz ver
-                        </Text>
-                        <TextInput
-                          style={{
-                            backgroundColor: currentTheme.colors.background,
-                            borderRadius: 16,
-                            padding: 16,
-                            fontSize: 16,
-                            color: currentTheme.colors.text,
-                            minHeight: 120,
-                            textAlignVertical: 'top',
-                            borderWidth: 1,
-                            borderColor: currentTheme.colors.border,
-                          }}
-                          placeholder="Örnek: Her gün 10 dakika meditasyon yapacağım..."
-                          placeholderTextColor={currentTheme.colors.secondary}
-                          value={formData.promiseText}
-                          onChangeText={(text) => setFormData({ ...formData, promiseText: text })}
-                          multiline
-                        />
-                      </View>
+                        Başlık *
+                      </Text>
+                      <TextInput
+                        style={{
+                          backgroundColor: currentTheme.colors.background,
+                          borderRadius: 12,
+                          padding: 16,
+                          fontSize: 16,
+                          color: currentTheme.colors.text,
+                          borderWidth: 1,
+                          borderColor: currentTheme.colors.border,
+                        }}
+                        placeholder={activeTab === 'dreams' ? "Hayalim..." : "Hedefim..."}
+                        placeholderTextColor={currentTheme.colors.secondary}
+                        value={formData.title}
+                        onChangeText={(text) => setFormData({ ...formData, title: text })}
+                      />
                     </View>
-                  ) : (
-                    // Dreams & Goals Form
-                    <View style={{ gap: 20 }}>
-                      <View style={{
-                        backgroundColor: 'rgba(255,255,255,0.8)',
-                        borderRadius: 24,
-                        padding: 24,
-                        borderWidth: 2,
-                        borderColor: currentTheme.colors.primary + '25',
-                        shadowColor: currentTheme.colors.primary,
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.15,
-                        shadowRadius: 16,
-                        elevation: 8,
+                    
+                    <View>
+                      <Text style={{
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: currentTheme.colors.text,
+                        marginBottom: 8,
                       }}>
-                        <Text style={{ fontSize: 16, fontWeight: '700', color: currentTheme.colors.text, marginBottom: 12 }}>
-                          Başlık *
-                        </Text>
-                        <TextInput
-                          style={{
-                            backgroundColor: currentTheme.colors.background,
-                            borderRadius: 16,
-                            padding: 16,
-                            fontSize: 16,
-                            color: currentTheme.colors.text,
-                            borderWidth: 1,
-                            borderColor: currentTheme.colors.border,
-                          }}
-                          placeholder={activeTab === 'dreams' ? "Hayalim..." : "Hedefim..."}
-                          placeholderTextColor={currentTheme.colors.secondary}
-                          value={formData.title}
-                          onChangeText={(text) => setFormData({ ...formData, title: text })}
-                        />
-                      </View>
-
-                      <View style={{
-                        backgroundColor: 'rgba(255,255,255,0.8)',
-                        borderRadius: 24,
-                        padding: 24,
-                        borderWidth: 2,
-                        borderColor: currentTheme.colors.primary + '25',
-                        shadowColor: currentTheme.colors.primary,
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.15,
-                        shadowRadius: 16,
-                        elevation: 8,
-                      }}>
-                        <Text style={{ fontSize: 16, fontWeight: '700', color: currentTheme.colors.text, marginBottom: 12 }}>
-                          Açıklama
-                        </Text>
-                        <TextInput
-                          style={{
-                            backgroundColor: currentTheme.colors.background,
-                            borderRadius: 16,
-                            padding: 16,
-                            fontSize: 16,
-                            color: currentTheme.colors.text,
-                            minHeight: 100,
-                            textAlignVertical: 'top',
-                            borderWidth: 1,
-                            borderColor: currentTheme.colors.border,
-                          }}
-                          placeholder={activeTab === 'dreams' ? "Hayalini detaylandır..." : "Hedefini detaylandır..."}
-                          placeholderTextColor={currentTheme.colors.secondary}
-                          value={formData.description}
-                          onChangeText={(text) => setFormData({ ...formData, description: text })}
-                          multiline
-                        />
-                      </View>
+                        Açıklama
+                      </Text>
+                      <TextInput
+                        style={{
+                          backgroundColor: currentTheme.colors.background,
+                          borderRadius: 12,
+                          padding: 16,
+                          fontSize: 16,
+                          color: currentTheme.colors.text,
+                          minHeight: 100,
+                          textAlignVertical: 'top',
+                          borderWidth: 1,
+                          borderColor: currentTheme.colors.border,
+                        }}
+                        placeholder="Hayalini detaylandır..."
+                        placeholderTextColor={currentTheme.colors.secondary}
+                        value={formData.description}
+                        onChangeText={(text) => setFormData({ ...formData, description: text })}
+                        multiline
+                      />
                     </View>
-                  )}
-                </ScrollView>
-              </View>
+                  </View>
+                )}
 
-              {/* Modal Footer */}
-              <View style={{
-                flexDirection: 'row',
-                gap: 16,
-                paddingHorizontal: 32,
-                paddingBottom: 32,
-                backgroundColor: 'rgba(255,255,255,0.95)',
-              }}>
-                <TouchableOpacity
-                  onPress={() => setShowAddModal(false)}
-                  style={{
-                    flex: 1,
-                    backgroundColor: 'rgba(255,255,255,0.8)',
-                    borderRadius: 20,
-                    paddingVertical: 18,
-                    alignItems: 'center',
-                    borderWidth: 2,
-                    borderColor: currentTheme.colors.primary + '25',
-                    shadowColor: currentTheme.colors.primary,
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 8,
-                    elevation: 4,
-                  }}
-                >
-                  <Text style={{
-                    color: currentTheme.colors.primary,
-                    fontSize: 16,
-                    fontWeight: '700',
-                  }}>
-                    ❌ İptal
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleSave}
-                  style={{
-                    flex: 1,
-                    backgroundColor: currentTheme.colors.primary,
-                    borderRadius: 20,
-                    paddingVertical: 18,
-                    alignItems: 'center',
-                    shadowColor: currentTheme.colors.primary,
-                    shadowOffset: { width: 0, height: 8 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 16,
-                    elevation: 8,
-                    borderWidth: 2,
-                    borderColor: currentTheme.colors.accent,
-                  }}
-                >
-                  <Text style={{
-                    color: 'white',
-                    fontSize: 16,
-                    fontWeight: '700',
-                    textShadowColor: 'rgba(0,0,0,0.3)',
-                    textShadowOffset: { width: 0, height: 1 },
-                    textShadowRadius: 2,
-                  }}>
-                    ✨ Kaydet
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
+                {/* Action Buttons */}
+                <View style={{
+                  flexDirection: 'row',
+                  gap: 12,
+                  marginTop: 20,
+                }}>
+                  <TouchableOpacity
+                    onPress={() => setShowAddModal(false)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: currentTheme.colors.background,
+                      borderRadius: 12,
+                      padding: 16,
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: currentTheme.colors.border,
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: currentTheme.colors.secondary,
+                    }}>
+                      İptal
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={handleSave}
+                    style={{
+                      flex: 1,
+                      backgroundColor: currentTheme.colors.primary,
+                      borderRadius: 12,
+                      padding: 16,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: '#FFFFFF',
+                    }}>
+                      Kaydet
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -1021,13 +1103,13 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
         }}>
           <View style={{
             backgroundColor: currentTheme.colors.card,
-            borderRadius: 24,
-            padding: 24,
+            borderRadius: 16,
+            padding: 20,
             width: '100%',
-            maxHeight: '80%',
+            maxHeight: '70%',
           }}>
             <Text style={{
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: 'bold',
               color: currentTheme.colors.text,
               marginBottom: 16,
@@ -1047,224 +1129,340 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
               </Text>
             )}
 
-            {/* Action Buttons */}
-            {selectedItem && (
-            <View style={{ gap: 12 }}>
-              {selectedItemType === 'dream' && (
-                <TouchableOpacity
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    toggleDreamCompletion(selectedItem.id);
-                    setShowDetailModal(false);
-                  }}
-                  style={{
-                    backgroundColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
-                    borderRadius: 16,
-                    paddingVertical: 14,
-                    alignItems: 'center',
-                    shadowColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 8,
-                    elevation: 6,
-                  }}
-                >
-                  <Text style={{
-                    color: 'white',
-                    fontSize: 16,
-                    fontWeight: '700',
-                  }}>
-                    {selectedItem.isCompleted ? '🔄 Gerçekleşmedi İşaretle' : '⭐ Gerçekleşti İşaretle'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+            {/* Milestones - only for goals */}
+            {activeTab === 'goals' && Array.isArray(selectedItem?.milestones) && selectedItem?.milestones.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
+                <Text style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: currentTheme.colors.text,
+                  marginBottom: 12,
+                }}>
+                  Alt Görevler
+                </Text>
+                <View style={{ gap: 10 }}>
+                  {selectedItem.milestones.map((m: any) => (
+                    <TouchableOpacity
+                      key={m.id}
+                      onPress={async () => {
+                        const total = selectedItem.milestones.length;
+                        const completedBefore = selectedItem.milestones.filter((x: any) => x.isCompleted).length;
+                        const willComplete = !m.isCompleted;
+                        const completedAfter = willComplete ? completedBefore + 1 : completedBefore - 1;
+                        const newProgress = Math.round((completedAfter / total) * 100);
 
-              {selectedItemType === 'goal' && (
-                <TouchableOpacity
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    // TODO: Toggle goal completion
-                    setShowDetailModal(false);
-                  }}
-                  style={{
-                    backgroundColor: selectedItem.status === 'completed' ? '#F59E0B' : '#FFD700',
-                    borderRadius: 16,
-                    paddingVertical: 14,
-                    alignItems: 'center',
-                    shadowColor: selectedItem.status === 'completed' ? '#F59E0B' : '#FFD700',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 8,
-                    elevation: 6,
-                  }}
-                >
-                  <Text style={{
-                    color: 'white',
-                    fontSize: 16,
-                    fontWeight: '700',
-                  }}>
-                    {selectedItem.status === 'completed' ? '🔄 Aktif Yap' : '⭐ Tamamla'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+                        // UI'yı anında güncelle
+                        setSelectedItem({
+                          ...selectedItem,
+                          milestones: selectedItem.milestones.map((x: any) => x.id === m.id ? { ...x, isCompleted: !x.isCompleted } : x),
+                          progress: newProgress,
+                        });
 
-              {selectedItemType === 'promise' && (
-                <TouchableOpacity
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    togglePromiseCompletion(selectedItem.id);
-                    setShowDetailModal(false);
-                  }}
-                  style={{
-                    backgroundColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
-                    borderRadius: 16,
-                    paddingVertical: 14,
-                    alignItems: 'center',
-                    shadowColor: selectedItem.isCompleted ? '#F59E0B' : '#FFD700',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 8,
-                    elevation: 6,
-                  }}
-                >
-                  <Text style={{
-                    color: 'white',
-                    fontSize: 16,
-                    fontWeight: '700',
-                  }}>
-                    {selectedItem.isCompleted ? '🔄 Söz Tutulmadı İşaretle' : '⭐ Söz Tutuldu İşaretle'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+                        await toggleMilestone(selectedItem.id, m.id);
 
+                        if (willComplete && completedAfter === total) {
+                          triggerCelebration('goal', selectedItem.title);
+                        }
+                      }}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: currentTheme.colors.background,
+                        borderRadius: 12,
+                        paddingVertical: 10,
+                        paddingHorizontal: 12,
+                        borderWidth: 1,
+                        borderColor: currentTheme.colors.border,
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 11,
+                        marginRight: 10,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 2,
+                        borderColor: m.isCompleted ? currentTheme.colors.primary : currentTheme.colors.border,
+                        backgroundColor: m.isCompleted ? currentTheme.colors.primary : 'transparent',
+                      }}>
+                        {m.isCompleted && (
+                          <Ionicons name="checkmark" size={14} color={currentTheme.colors.card} />
+                        )}
+                      </View>
+                      <Text style={{
+                        flex: 1,
+                        fontSize: 14,
+                        color: currentTheme.colors.text,
+                      }}>
+                        {m.title}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            <View style={{
+              flexDirection: 'row',
+              gap: 12,
+            }}>
               <TouchableOpacity
                 onPress={() => setShowDetailModal(false)}
                 style={{
-                  backgroundColor: currentTheme.colors.primary + '15',
-                  borderRadius: 16,
-                  paddingVertical: 14,
+                  flex: 1,
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: 12,
+                  padding: 16,
                   alignItems: 'center',
                   borderWidth: 1,
-                  borderColor: currentTheme.colors.primary + '30',
+                  borderColor: currentTheme.colors.border,
                 }}
               >
                 <Text style={{
-                  color: currentTheme.colors.primary,
                   fontSize: 16,
                   fontWeight: '600',
+                  color: currentTheme.colors.secondary,
                 }}>
-                  ✨ Tamam
+                  Kapat
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDetailModal(false);
+                  setShowEditModal(true);
+                }}
+                style={{
+                  flex: 1,
+                  backgroundColor: currentTheme.colors.primary,
+                  borderRadius: 12,
+                  padding: 16,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: '#FFFFFF',
+                }}>
+                  Düzenle
                 </Text>
               </TouchableOpacity>
             </View>
-            )}
           </View>
         </View>
       </Modal>
 
-      {/* Custom Alert Modal */}
+      {/* Edit Modal */}
       <Modal
-        visible={showCustomAlert}
+        visible={showEditModal}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowCustomAlert(false)}
+        onRequestClose={() => setShowEditModal(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingHorizontal: 20,
-        }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <View style={{
-            backgroundColor: currentTheme.colors.card,
-            borderRadius: 28,
-            padding: 28,
-            width: '100%',
-            maxWidth: 350,
-            shadowColor: currentTheme.colors.primary,
-            shadowOffset: { width: 0, height: 20 },
-            shadowOpacity: 0.3,
-            shadowRadius: 30,
-            elevation: 20,
-            borderWidth: 2,
-            borderColor: currentTheme.colors.primary + '20',
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
           }}>
-            {/* Header */}
             <View style={{
-              alignItems: 'center',
-              marginBottom: 20,
+              backgroundColor: currentTheme.colors.card,
+              borderRadius: 16,
+              width: '100%',
+              maxHeight: '60%',
+              shadowColor: currentTheme.colors.shadow,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 8,
             }}>
+              {/* Modal Header */}
               <View style={{
-                width: 60,
-                height: 60,
-                borderRadius: 30,
-                backgroundColor: alertConfig.type === 'error' ? '#FF6B6B' + '20' :
-                               alertConfig.type === 'success' ? '#4ECDC4' + '20' :
-                               alertConfig.type === 'warning' ? '#FFD93D' + '20' :
-                               currentTheme.colors.primary + '20',
+                backgroundColor: currentTheme.colors.primary,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                padding: 20,
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 16,
+                justifyContent: 'space-between',
               }}>
-                <Text style={{ fontSize: 32 }}>
-                  {alertConfig.type === 'error' ? '❌' :
-                   alertConfig.type === 'success' ? '✅' :
-                   alertConfig.type === 'warning' ? '⚠️' : 'ℹ️'}
+                <Text style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: '#FFFFFF',
+                  flex: 1,
+                  textAlign: 'center',
+                }}>
+                  ✏️ Düzenle
                 </Text>
+                <TouchableOpacity
+                  onPress={() => setShowEditModal(false)}
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 15,
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Ionicons name="close" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
               </View>
-              
-              <Text style={{
-                fontSize: 20,
-                fontWeight: 'bold',
-                color: currentTheme.colors.text,
-                textAlign: 'center',
-                marginBottom: 8,
-              }}>
-                {alertConfig.title}
-              </Text>
-              
-              <Text style={{
-                fontSize: 16,
-                color: currentTheme.colors.secondary,
-                textAlign: 'center',
-                lineHeight: 24,
-              }}>
-                {alertConfig.message}
-              </Text>
-            </View>
 
-            {/* Action Button */}
-            <TouchableOpacity
-              onPress={alertConfig.onConfirm}
-              style={{
-                backgroundColor: alertConfig.type === 'error' ? '#FF6B6B' :
-                               alertConfig.type === 'success' ? '#4ECDC4' :
-                               alertConfig.type === 'warning' ? '#FFD93D' :
-                               currentTheme.colors.primary,
-                borderRadius: 16,
-                paddingVertical: 16,
-                alignItems: 'center',
-                shadowColor: alertConfig.type === 'error' ? '#FF6B6B' :
-                            alertConfig.type === 'success' ? '#4ECDC4' :
-                            alertConfig.type === 'warning' ? '#FFD93D' :
-                            currentTheme.colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 6,
-              }}
-            >
-              <Text style={{
-                color: 'white',
-                fontSize: 16,
-                fontWeight: '700',
-              }}>
-                Tamam
-              </Text>
-            </TouchableOpacity>
+              {/* Modal Content */}
+              <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+                <View style={{ gap: 16 }}>
+                  <View>
+                    <Text style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: currentTheme.colors.text,
+                      marginBottom: 8,
+                    }}>
+                      Başlık *
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: currentTheme.colors.background,
+                        borderRadius: 12,
+                        padding: 16,
+                        fontSize: 16,
+                        color: currentTheme.colors.text,
+                        borderWidth: 1,
+                        borderColor: currentTheme.colors.border,
+                      }}
+                      placeholder="Başlık..."
+                      placeholderTextColor={currentTheme.colors.secondary}
+                      value={selectedItem?.title || selectedItem?.text || ''}
+                      onChangeText={(text) => {
+                        setSelectedItem({
+                          ...selectedItem,
+                          title: text,
+                          text: text
+                        });
+                      }}
+                    />
+                  </View>
+                  
+                  {selectedItem?.description && (
+                    <View>
+                      <Text style={{
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: currentTheme.colors.text,
+                        marginBottom: 8,
+                      }}>
+                        Açıklama
+                      </Text>
+                      <TextInput
+                        style={{
+                          backgroundColor: currentTheme.colors.background,
+                          borderRadius: 12,
+                          padding: 16,
+                          fontSize: 16,
+                          color: currentTheme.colors.text,
+                          minHeight: 100,
+                          textAlignVertical: 'top',
+                          borderWidth: 1,
+                          borderColor: currentTheme.colors.border,
+                        }}
+                        placeholder="Açıklama..."
+                        placeholderTextColor={currentTheme.colors.secondary}
+                        value={selectedItem.description}
+                        onChangeText={(text) => {
+                          setSelectedItem({
+                            ...selectedItem,
+                            description: text
+                          });
+                        }}
+                        multiline
+                      />
+                    </View>
+                  )}
+                </View>
+
+                {/* Action Buttons */}
+                <View style={{
+                  flexDirection: 'row',
+                  gap: 12,
+                  marginTop: 20,
+                }}>
+                  <TouchableOpacity
+                    onPress={() => setShowEditModal(false)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: currentTheme.colors.background,
+                      borderRadius: 12,
+                      padding: 16,
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: currentTheme.colors.border,
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: currentTheme.colors.secondary,
+                    }}>
+                      İptal
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    onPress={async () => {
+                      try {
+                        if (activeTab === 'dreams' && selectedItem) {
+                          await updateDream(selectedItem.id, {
+                            title: selectedItem.title,
+                            description: selectedItem.description,
+                          });
+                        } else if (activeTab === 'goals' && selectedItem) {
+                          await updateGoal(selectedItem.id, {
+                            title: selectedItem.title,
+                            description: selectedItem.description,
+                          });
+                        } else if (activeTab === 'promise' && selectedItem) {
+                          // Promise için text güncelleme - basit state update
+                          console.log('Promise update not implemented yet');
+                        }
+                        
+                        setShowEditModal(false);
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      } catch (error) {
+                        console.error('Error updating item:', error);
+                        Alert.alert('Hata', 'Güncelleme sırasında bir hata oluştu');
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      backgroundColor: currentTheme.colors.primary,
+                      borderRadius: 12,
+                      padding: 16,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: '#FFFFFF',
+                    }}>
+                      Kaydet
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

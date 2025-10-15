@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,7 @@ const themeDescriptions: { [key: string]: string } = {
 
 export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScreenProps) {
   const { currentTheme, setTheme, themes } = useTheme();
+  const [filter, setFilter] = useState<'cozy' | 'luxury'>('cozy');
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -92,6 +93,7 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
       shadowOpacity: 0.1,
       shadowRadius: 8,
       elevation: 3,
+      borderWidth: 1,
     },
     themeCardInner: {
       padding: 16,
@@ -101,8 +103,19 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
       height: 80,
       borderRadius: 12,
       marginBottom: 12,
+      padding: 12,
+      backgroundColor: currentTheme.colors.background,
+    },
+    swatchRow: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
+    },
+    swatch: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 1,
     },
     themeLabel: {
       fontSize: 15,
@@ -125,7 +138,7 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
       backgroundColor: 'white',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#000',
+      shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,
@@ -170,6 +183,46 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
           Uygulamanızın görünümünü kişiselleştirin
         </Text>
 
+        {/* Style (Cozy / Luxury) quick selector */}
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+          <TouchableOpacity
+            onPress={() => {
+              setFilter('cozy');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+            style={{ flex: 1, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: currentTheme.colors.border }}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={[ currentTheme.colors.card, currentTheme.colors.primary ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ padding: 14, alignItems: 'center', opacity: filter === 'cozy' ? 1 : 0.8 }}
+            >
+              <Text style={{ fontWeight: '700', color: currentTheme.colors.text }}>🌿 Cozy</Text>
+              <Text style={{ color: currentTheme.colors.secondary, marginTop: 4, fontSize: 12 }}>Warm & soft</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setFilter('luxury');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+            style={{ flex: 1, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: currentTheme.colors.border }}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={[ currentTheme.colors.card, currentTheme.colors.secondary ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ padding: 14, alignItems: 'center', opacity: filter === 'luxury' ? 1 : 0.8 }}
+            >
+              <Text style={{ fontWeight: '700', color: currentTheme.colors.text }}>💎 Luxury</Text>
+              <Text style={{ color: currentTheme.colors.secondary, marginTop: 4, fontSize: 12 }}>Bold & elegant</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
             💡 İpucu: Seçtiğiniz tema tüm uygulamada anında uygulanır. 
@@ -177,41 +230,44 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
           </Text>
         </View>
 
-        <View style={dynamicStyles.themeGrid}>
-          {themes.map((theme) => {
+        {/* Grouped lists */}
+        {(() => {
+          const cozyKeys = [
+            'cozy', 'alabaster', 'columbia', 'cherry', 'cambridge', 'peach',
+            'linen', 'khaki', 'oldRose', 'ocean', 'weldonBlue', 'silverPink', 'buttermilk', 'softMinimal'
+          ];
+          const luxuryKeys = [
+            'luxury', 'softMinimalDark', 'darkSlate', 'oldBurgundy', 'garnet',
+            'policeBlue', 'rackley', 'chineseBlack'
+          ];
+
+          const renderCard = (key: string) => {
+            const theme = (themes as any)[key];
+            if (!theme) return null;
             const isSelected = currentTheme.name === theme.name;
             return (
               <TouchableOpacity
-                key={theme.name}
-                style={dynamicStyles.themeCard}
-                onPress={() => handleThemeSelect(theme.name)}
+                key={key}
+                style={[
+                  dynamicStyles.themeCard,
+                  {
+                    backgroundColor: currentTheme.colors.card,
+                    borderColor: isSelected ? theme.colors.primary : currentTheme.colors.primary + '20',
+                  },
+                ]}
+                onPress={() => handleThemeSelect(key)}
                 activeOpacity={0.7}
               >
-                <LinearGradient
-                  colors={
-                    isSelected
-                      ? [theme.colors.primary + '30', theme.colors.primary + '10']
-                      : [currentTheme.colors.card, currentTheme.colors.card]
-                  }
-                  style={dynamicStyles.themeCardInner}
-                >
-                  <View 
-                    style={[
-                      dynamicStyles.themePreview, 
-                      { 
-                        backgroundColor: theme.colors.primary,
-                      }
-                    ]}
-                  >
-                    <Ionicons 
-                      name={isSelected ? "checkmark-circle" : "color-palette-outline"} 
-                      size={32} 
-                      color="white" 
-                    />
+                <View style={dynamicStyles.themeCardInner}>
+                  <View style={dynamicStyles.themePreview}>
+                    <View style={dynamicStyles.swatchRow}>
+                      <View style={[dynamicStyles.swatch, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]} />
+                      <View style={[dynamicStyles.swatch, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} />
+                      <View style={[dynamicStyles.swatch, { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]} />
+                      <View style={[dynamicStyles.swatch, { backgroundColor: theme.colors.secondary, borderColor: theme.colors.secondary }]} />
+                    </View>
                   </View>
-                  <Text style={dynamicStyles.themeLabel}>
-                    {theme.label}
-                  </Text>
+                  <Text style={dynamicStyles.themeLabel}>{theme.name}</Text>
                   <Text style={dynamicStyles.themeDescription}>
                     {themeDescriptions[theme.name] || 'Özel tema'}
                   </Text>
@@ -220,11 +276,26 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
                       <Ionicons name="checkmark" size={20} color={theme.colors.primary} />
                     </View>
                   )}
-                </LinearGradient>
+                </View>
               </TouchableOpacity>
             );
-          })}
-        </View>
+          };
+
+          if (filter === 'cozy') {
+            return (
+              <>
+                <Text style={[dynamicStyles.title, { fontSize: 20, marginTop: 8 }]}>🌿 Cozy (Light)</Text>
+                <View style={dynamicStyles.themeGrid}>{cozyKeys.map(renderCard)}</View>
+              </>
+            );
+          }
+          return (
+            <>
+              <Text style={[dynamicStyles.title, { fontSize: 20, marginTop: 8 }]}>💎 Luxury (Dark)</Text>
+              <View style={dynamicStyles.themeGrid}>{luxuryKeys.map(renderCard)}</View>
+            </>
+          );
+        })()}
       </ScrollView>
     </SafeAreaView>
   );

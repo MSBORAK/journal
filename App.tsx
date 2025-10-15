@@ -123,7 +123,7 @@ function MainTabs() {
             paddingBottom: 20,
             paddingTop: 12,
             height: 90,
-            borderTopColor: 'transparent',
+            borderTopColor: currentTheme.colors.border + '33',
           },
           tabBarItemStyle: {
             paddingVertical: 4,
@@ -135,8 +135,8 @@ function MainTabs() {
             marginTop: 2,
             marginBottom: 2,
           },
-          tabBarActiveTintColor: currentTheme.colors.primary,
-          tabBarInactiveTintColor: currentTheme.colors.secondary,
+          tabBarActiveTintColor: currentTheme.colors.text,
+          tabBarInactiveTintColor: currentTheme.colors.text + '99',
           tabBarIconStyle: {
             marginBottom: 4,
           },

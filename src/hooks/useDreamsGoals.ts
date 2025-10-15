@@ -77,33 +77,32 @@ export const useDreamsGoals = (userId?: string) => {
   };
 
   const saveDreams = async (newDreams: Dream[]) => {
-    if (!userId) return;
-    
     try {
-      await AsyncStorage.setItem(`${DREAMS_KEY}_${userId}`, JSON.stringify(newDreams));
+      // Always update state
       setDreams(newDreams);
+      // Persist with user scope if available, otherwise fallback to global key
+      const key = userId ? `${DREAMS_KEY}_${userId}` : DREAMS_KEY;
+      await AsyncStorage.setItem(key, JSON.stringify(newDreams));
     } catch (error) {
       console.error('Error saving dreams:', error);
     }
   };
 
   const saveGoals = async (newGoals: Goal[]) => {
-    if (!userId) return;
-    
     try {
-      await AsyncStorage.setItem(`${GOALS_KEY}_${userId}`, JSON.stringify(newGoals));
       setGoals(newGoals);
+      const key = userId ? `${GOALS_KEY}_${userId}` : GOALS_KEY;
+      await AsyncStorage.setItem(key, JSON.stringify(newGoals));
     } catch (error) {
       console.error('Error saving goals:', error);
     }
   };
 
   const savePromises = async (newPromises: Promise[]) => {
-    if (!userId) return;
-    
     try {
-      await AsyncStorage.setItem(`${PROMISES_KEY}_${userId}`, JSON.stringify(newPromises));
       setPromises(newPromises);
+      const key = userId ? `${PROMISES_KEY}_${userId}` : PROMISES_KEY;
+      await AsyncStorage.setItem(key, JSON.stringify(newPromises));
     } catch (error) {
       console.error('Error saving promises:', error);
     }
@@ -184,7 +183,6 @@ export const useDreamsGoals = (userId?: string) => {
         : g
     );
     
-    setGoals(updatedGoals);
     await saveGoals(updatedGoals);
     
     console.log(`Goal ${goalId} progress updated to ${progress}%`);
@@ -272,8 +270,6 @@ export const useDreamsGoals = (userId?: string) => {
 
   // Completion functions
   const toggleDreamCompletion = async (dreamId: string) => {
-    if (!userId) return;
-    
     const updatedDreams = dreams.map(dream => 
       dream.id === dreamId 
         ? { 
@@ -284,14 +280,10 @@ export const useDreamsGoals = (userId?: string) => {
           }
         : dream
     );
-    
-    setDreams(updatedDreams);
-    await AsyncStorage.setItem(`${DREAMS_KEY}_${userId}`, JSON.stringify(updatedDreams));
+    await saveDreams(updatedDreams);
   };
 
   const togglePromiseCompletion = async (promiseId: string) => {
-    if (!userId) return;
-    
     const updatedPromises = promises.map(promise => 
       promise.id === promiseId 
         ? { 
@@ -301,9 +293,7 @@ export const useDreamsGoals = (userId?: string) => {
           }
         : promise
     );
-    
-    setPromises(updatedPromises);
-    await AsyncStorage.setItem(`${PROMISES_KEY}_${userId}`, JSON.stringify(updatedPromises));
+    await savePromises(updatedPromises);
   };
 
   return {

@@ -168,7 +168,8 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     resultsText: {
       fontSize: 14,
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
+      opacity: 0.85,
     },
     viewModeButton: {
       backgroundColor: currentTheme.colors.card,
@@ -217,7 +218,8 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     entryContent: {
       fontSize: 14,
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
+      opacity: 0.9,
       lineHeight: 20,
       marginBottom: 12,
     },
@@ -229,7 +231,8 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     entryDate: {
       fontSize: 12,
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
+      opacity: 0.7,
     },
     tagsContainer: {
       flexDirection: 'row',
@@ -253,7 +256,8 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     moreTags: {
       fontSize: 12,
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
+      opacity: 0.8,
       alignSelf: 'center',
     },
     emptyState: {
@@ -275,7 +279,8 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     emptyMessage: {
       fontSize: 16,
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
+      opacity: 0.8,
       textAlign: 'center',
       lineHeight: 24,
     },

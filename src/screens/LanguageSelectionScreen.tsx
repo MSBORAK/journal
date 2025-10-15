@@ -197,10 +197,16 @@ export default function LanguageSelectionScreen({ navigation }: LanguageSelectio
                     {lang.flag}
                   </Text>
                   <View style={dynamicStyles.languageInfo}>
-                    <Text style={dynamicStyles.languageLabel}>
+                    <Text style={[
+                      dynamicStyles.languageLabel,
+                      isSelected && { color: currentTheme.colors.primary }
+                    ]}>
                       {lang.label}
                     </Text>
-                    <Text style={dynamicStyles.languageDescription}>
+                    <Text style={[
+                      dynamicStyles.languageDescription,
+                      isSelected && { color: currentTheme.colors.text, opacity: 0.9 }
+                    ]}>
                       {lang.description}
                     </Text>
                   </View>

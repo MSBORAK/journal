@@ -12,7 +12,6 @@ import {
   TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Slider from '@react-native-community/slider';
 import { useDiary } from '../hooks/useDiary';
 import { useHealth } from '../hooks/useHealth';
 import { useHabits } from '../hooks/useHabits';
@@ -45,15 +44,60 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
 
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('week');
   const [activeTab, setActiveTab] = useState<'habits' | 'progress' | 'stats'>('stats');
+  
+  // Tab animation values
+  const tabFadeAnim = useRef(new Animated.Value(1)).current;
+  const tabSlideAnim = useRef(new Animated.Value(0)).current;
 
   const handleTabChange = (tab: 'habits' | 'progress' | 'stats') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // Tab change animation
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(tabFadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(tabSlideAnim, {
+          toValue: -20,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(tabFadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(tabSlideAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+    
     setActiveTab(tab);
   };
 
   // Habit Card Renderer
-  const renderHabitCard = (habit: any, streak: any) => {
+  const renderHabitCard = (habit: any, streak: any, index: number = 0) => {
     return (
+      <Animated.View
+        key={habit.id}
+        style={{
+          opacity: fadeAnims.mood,
+          transform: [{
+            translateY: fadeAnims.mood.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0],
+            })
+          }]
+        }}
+      >
       <TouchableOpacity 
         key={habit.id} 
         style={[
@@ -109,7 +153,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             
             <View style={dynamicStyles.habitProgress}>
               <View style={dynamicStyles.habitProgressBar}>
-                <View 
+                <Animated.View 
                   style={[
                     dynamicStyles.habitProgressFill,
                     { 
@@ -143,6 +187,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
           </View>
         </LinearGradient>
       </TouchableOpacity>
+      </Animated.View>
     );
   };
 
@@ -206,12 +251,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     );
   };
   
-  // Health Modal States
-  const [healthModalVisible, setHealthModalVisible] = useState(false);
-  const [water, setWater] = useState(0);
-  const [exercise, setExercise] = useState(0);
-  const [sleep, setSleep] = useState(0);
-  const [meditation, setMeditation] = useState(0);
 
   // Animation values
   const fadeAnims = useRef({
@@ -306,93 +345,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     ]).start();
   };
 
-  // Health Modal Functions
-  const openHealthModal = () => {
-    const todayData = getTodayHealthData();
-    console.log('Opening health modal, todayData:', todayData);
-    if (todayData) {
-      console.log('Setting values from saved data:', todayData);
-      setWater(todayData.water);
-      setExercise(todayData.exercise);
-      setSleep(todayData.sleep);
-      setMeditation(todayData.meditation);
-    } else {
-      console.log('No saved data, setting to 0');
-      setWater(0);
-      setExercise(0);
-      setSleep(0);
-      setMeditation(0);
-    }
-    setHealthModalVisible(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
-
-  const handleSaveHealthData = async () => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      console.log('Saving health data for today:', today, {
-        water,
-        exercise,
-        sleep,
-        meditation,
-      });
-      await saveHealthData(today, {
-        water,
-        exercise,
-        sleep,
-        meditation,
-      });
-      console.log('Health data saved successfully');
-      setHealthModalVisible(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      console.error('Error saving health data:', error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  };
 
   const getWellnessScore = () => {
     return getTodayWellnessScore();
   };
 
-  const getHealthCategories = () => {
-    const todayData = getTodayHealthData();
-    if (!todayData) {
-      return [
-        { emoji: '💧', label: 'Su', score: 0, color: '#3B82F6' },
-        { emoji: '🏃', label: 'Egzersiz', score: 0, color: '#10B981' },
-        { emoji: '😴', label: 'Uyku', score: 0, color: '#8B5CF6' },
-        { emoji: '🧘', label: 'Meditasyon', score: 0, color: '#F59E0B' },
-      ];
-    }
-    
-    return [
-      {
-        emoji: '💧',
-        label: 'Su',
-        score: Math.round(Math.min((todayData.water / 12) * 100, 100)),
-        color: '#3B82F6',
-      },
-      {
-        emoji: '🏃',
-        label: 'Egzersiz',
-        score: Math.round(Math.min((todayData.exercise / 120) * 100, 100)),
-        color: '#10B981',
-      },
-      {
-        emoji: '😴',
-        label: 'Uyku',
-        score: Math.round(Math.min((todayData.sleep / 12) * 100, 100)),
-        color: '#8B5CF6',
-      },
-      {
-        emoji: '🧘',
-        label: 'Meditasyon',
-        score: Math.round(Math.min((todayData.meditation / 60) * 100, 100)),
-        color: '#F59E0B',
-      },
-    ];
-  };
 
   // Mood data calculation
   const moodData = useMemo(() => {
@@ -401,10 +358,10 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     // Eğer entries boşsa, örnek veri göster
     if (entries.length === 0) {
       return [
-        { mood: '4', count: 8, percentage: 40, emoji: '😎', color: '#10B981' },  // Mutlu
-        { mood: '3', count: 6, percentage: 30, emoji: '🫠', color: '#F59E0B' },  // Yorgun
-        { mood: '2', count: 4, percentage: 20, emoji: '😐', color: '#9CA3AF' },  // Normal
-        { mood: '1', count: 2, percentage: 10, emoji: '😔', color: '#6B7280' },  // Üzgün
+        { mood: '4', count: 8, percentage: 40, emoji: '😎', color: currentTheme.colors.success },
+        { mood: '3', count: 6, percentage: 30, emoji: '🫠', color: currentTheme.colors.secondary },
+        { mood: '2', count: 4, percentage: 20, emoji: '😐', color: currentTheme.colors.muted },
+        { mood: '1', count: 2, percentage: 10, emoji: '😔', color: currentTheme.colors.border },
       ];
     }
 
@@ -420,30 +377,30 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     // Eğer hiç mood verisi yoksa, örnek veri göster
     if (totalMoods === 0) {
       return [
-        { mood: '4', count: 5, percentage: 35, emoji: '😎', color: '#10B981' },  // Mutlu
-        { mood: '3', count: 4, percentage: 28, emoji: '🫠', color: '#F59E0B' },  // Yorgun
-        { mood: '2', count: 3, percentage: 21, emoji: '😐', color: '#9CA3AF' },  // Normal
-        { mood: '1', count: 2, percentage: 16, emoji: '😔', color: '#6B7280' },  // Üzgün
+        { mood: '4', count: 5, percentage: 35, emoji: '😎', color: currentTheme.colors.success },
+        { mood: '3', count: 4, percentage: 28, emoji: '🫠', color: currentTheme.colors.secondary },
+        { mood: '2', count: 3, percentage: 21, emoji: '😐', color: currentTheme.colors.muted },
+        { mood: '1', count: 2, percentage: 16, emoji: '😔', color: currentTheme.colors.border },
       ];
     }
     
     const moodConfig = {
-      1: { emoji: '😔', color: '#6B7280' },  // Üzgün
-      2: { emoji: '😐', color: '#9CA3AF' },  // Normal
-      3: { emoji: '🫠', color: '#F59E0B' },  // Yorgun
-      4: { emoji: '😎', color: '#10B981' },  // Mutlu
-      5: { emoji: '🤩', color: '#EF4444' },  // Harika
+      1: { emoji: '😔', color: currentTheme.colors.border },
+      2: { emoji: '😐', color: currentTheme.colors.muted },
+      3: { emoji: '🫠', color: currentTheme.colors.secondary },
+      4: { emoji: '😎', color: currentTheme.colors.success },
+      5: { emoji: '🤩', color: currentTheme.colors.primary },
       // Eski sistem için backward compatibility
-      happy: { emoji: '😊', color: '#F59E0B' },
-      excited: { emoji: '🤩', color: '#EF4444' },
-      peaceful: { emoji: '😌', color: '#10B981' },
-      grateful: { emoji: '🙏', color: '#8B5CF6' },
-      sad: { emoji: '😢', color: '#6B7280' },
-      anxious: { emoji: '😰', color: '#F59E0B' },
-      angry: { emoji: '😠', color: '#EF4444' },
-      tired: { emoji: '😴', color: '#6B7280' },
-      neutral: { emoji: '😐', color: '#9CA3AF' },
-      peace: { emoji: '🕊️', color: '#8B5CF6' },
+      happy: { emoji: '😊', color: currentTheme.colors.secondary },
+      excited: { emoji: '🤩', color: currentTheme.colors.primary },
+      peaceful: { emoji: '😌', color: currentTheme.colors.success },
+      grateful: { emoji: '🙏', color: currentTheme.colors.primary },
+      sad: { emoji: '😢', color: currentTheme.colors.border },
+      anxious: { emoji: '😰', color: currentTheme.colors.secondary },
+      angry: { emoji: '😠', color: currentTheme.colors.primary },
+      tired: { emoji: '😴', color: currentTheme.colors.border },
+      neutral: { emoji: '😐', color: currentTheme.colors.muted },
+      peace: { emoji: '🕊️', color: currentTheme.colors.primary },
     };
 
     return Object.entries(moodCounts)
@@ -566,51 +523,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       fontSize: 14,
       color: 'white',
       marginLeft: 4,
-    },
-    healthCategoriesContainer: {
-      marginBottom: 16,
-    },
-    healthCategoryItem: {
-      backgroundColor: currentTheme.colors.background,
-      borderRadius: 16,
-      padding: 16,
-      marginBottom: 12,
-      shadowColor: currentTheme.colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 3,
-      borderWidth: 1,
-      borderColor: currentTheme.colors.border,
-    },
-    healthCategoryHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    healthCategoryEmoji: {
-      fontSize: 20,
-    },
-    healthCategoryScore: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: currentTheme.colors.text,
-    },
-    healthCategoryBar: {
-      height: 8,
-      backgroundColor: currentTheme.colors.border,
-      borderRadius: 4,
-      overflow: 'hidden',
-    },
-    healthCategoryBarFill: {
-      height: '100%',
-      borderRadius: 4,
-    },
-    healthCategoryLabel: {
-      fontSize: 14,
-      color: currentTheme.colors.secondary,
-      marginTop: 8,
     },
     title: {
       fontSize: 32,
@@ -1889,7 +1801,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
           <TouchableOpacity
             onPress={() => {
               animateCardPress('lifeMap');
-              openHealthModal();
+              // Health modal removed
             }}
             activeOpacity={0.9}
           >
@@ -1943,34 +1855,165 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </View>
 
               {/* Tab Content */}
+              <Animated.View
+                style={{
+                  opacity: tabFadeAnim,
+                  transform: [{ translateY: tabSlideAnim }],
+                }}
+              >
               {activeTab === 'stats' && (
-                <>
+                <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                   <View style={dynamicStyles.healthInfoContainer}>
                     <Text style={dynamicStyles.healthInfoText}>
-                      📊 Günlük aktivitelerini takip et ve genel sağlık skorunu gör.
+                      📊 Ruh hali dağılımı ve mood trendlerin
+                    </Text>
+                    <Text style={{
+                      fontSize: 14,
+                      color: currentTheme.colors.secondary,
+                      marginTop: 8,
+                      fontStyle: 'italic',
+                      textAlign: 'center',
+                    }}>
+                      {moodData.length > 0 && moodData[0].percentage > 50 
+                        ? "💫 Harika bir gün geçiriyorsun! Bu enerjiyi koru!"
+                        : "🌱 Her gün farklı olabilir, bu normal! Kendini dinle."
+                      }
                     </Text>
                   </View>
 
-                  <View style={dynamicStyles.healthCategoriesContainer}>
-                    {getHealthCategories().map((cat, index) => (
-                      <View key={index} style={dynamicStyles.healthCategoryItem}>
-                        <View style={dynamicStyles.healthCategoryHeader}>
-                          <Text style={dynamicStyles.healthCategoryEmoji}>{cat.emoji}</Text>
-                          <Text style={dynamicStyles.healthCategoryScore}>~{cat.score}/100</Text>
+                  {/* Simple Mood Distribution */}
+                  <View style={{
+                    backgroundColor: currentTheme.colors.card,
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    shadowColor: currentTheme.colors.shadow,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}>
+                    <Text style={dynamicStyles.chartTitle}>📊 Mood Dağılımı</Text>
+                    <View style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      marginTop: 20,
+                    }}>
+                      {moodData.map((mood, index) => (
+                        <View key={index} style={{
+                          alignItems: 'center',
+                          flex: 1,
+                        }}>
+                          <View style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 25,
+                            backgroundColor: mood.color,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginBottom: 8,
+                          }}>
+                            <Text style={{ fontSize: 24 }}>{mood.emoji}</Text>
+                          </View>
+                          <Text style={{
+                            fontSize: 12,
+                            color: currentTheme.colors.text,
+                            fontWeight: 'bold',
+                          }}>{mood.percentage}%</Text>
                         </View>
-                        <View style={dynamicStyles.healthCategoryBar}>
-                          <View 
-                            style={[
-                              dynamicStyles.healthCategoryBarFill, 
-                              { width: `${cat.score}%`, backgroundColor: cat.color }
-                            ]} 
-                          />
-                        </View>
-                        <Text style={dynamicStyles.healthCategoryLabel}>{cat.label}</Text>
-                      </View>
-                    ))}
+                      ))}
+                    </View>
                   </View>
-                </>
+
+                  {/* Simple Mood Progress Bar */}
+                  <View style={{
+                    backgroundColor: currentTheme.colors.card,
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    shadowColor: currentTheme.colors.shadow,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}>
+                    <Text style={dynamicStyles.chartTitle}>📈 Mood Trendi</Text>
+                    <View style={{
+                      marginTop: 20,
+                    }}>
+                      <View style={{
+                        height: 8,
+                        backgroundColor: currentTheme.colors.background,
+                        borderRadius: 4,
+                        marginBottom: 16,
+                      }}>
+                        {moodData.map((mood, index) => (
+                          <View 
+                            key={index}
+                            style={{
+                              position: 'absolute',
+                              left: index === 0 ? 0 : `${(index * 33.33)}%`,
+                              width: `${mood.percentage}%`,
+                              height: 8,
+                              backgroundColor: mood.color,
+                              borderRadius: 4,
+                            }}
+                          />
+                        ))}
+                      </View>
+                      <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                        {moodData.map((mood, index) => (
+                          <Text key={index} style={{
+                            fontSize: 16,
+                            color: currentTheme.colors.text,
+                          }}>{mood.emoji}</Text>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Mood Summary */}
+                  <View style={{
+                    backgroundColor: currentTheme.colors.card,
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    shadowColor: currentTheme.colors.shadow,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}>
+                    <Text style={dynamicStyles.chartTitle}>📋 Mood Özeti</Text>
+                    <View style={{
+                      marginTop: 20,
+                    }}>
+                      {moodData.map((mood, index) => (
+                        <View key={index} style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginBottom: 12,
+                        }}>
+                          <View style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: 6,
+                            backgroundColor: mood.color,
+                            marginRight: 12,
+                          }} />
+                          <Text style={{
+                            fontSize: 16,
+                            color: currentTheme.colors.text,
+                            flex: 1,
+                          }}>{mood.emoji} {mood.percentage}%</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </ScrollView>
               )}
 
               {activeTab === 'habits' && (
@@ -1984,9 +2027,9 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                       </Text>
                     </View>
                   ) : (
-                    getTodayHabits().map(habit => {
+                    getTodayHabits().map((habit, index) => {
                       const streak = getHabitStreaks().find(s => s.habitId === habit.id);
-                      return renderHabitCard(habit, streak);
+                      return renderHabitCard(habit, streak, index);
                     })
                   )}
                 </ScrollView>
@@ -2007,6 +2050,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   )}
                 </ScrollView>
               )}
+              </Animated.View>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
@@ -2188,32 +2232,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     </View>
                   </View>
                   
-                  {/* Pie Chart Simulation */}
-                  <Text style={dynamicStyles.moodChartTitle}>🥧 Mood Oranları</Text>
-                  <View style={dynamicStyles.pieChartContainer}>
-                    <View style={dynamicStyles.pieChart}>
-                      {moodData.map((mood, index) => (
-                        <View 
-                          key={index} 
-                          style={[
-                            dynamicStyles.pieSlice,
-                            { 
-                              backgroundColor: mood.color,
-                              flex: mood.percentage / 100 
-                            }
-                          ]} 
-                        />
-                      ))}
-                    </View>
-                    <View style={dynamicStyles.pieLegend}>
-                      {moodData.map((mood, index) => (
-                        <View key={index} style={dynamicStyles.moodLegendItem}>
-                          <View style={[dynamicStyles.legendColor, { backgroundColor: mood.color }]} />
-                          <Text style={dynamicStyles.moodLegendText}>{mood.emoji} {mood.percentage}%</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
+                  {/* Pie chart removed per request to avoid duplication */}
                 </View>
               )}
             </LinearGradient>
@@ -2223,311 +2242,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
 
       </ScrollView>
 
-      {/* Health Data Modal */}
-      <Modal
-        visible={healthModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setHealthModalVisible(false)}
-      >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContent}>
-            <LinearGradient
-              colors={[
-                currentTheme.colors.primary + '15',
-                currentTheme.colors.accent + '20',
-                currentTheme.colors.card,
-              ]}
-              style={dynamicStyles.modalGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              {/* Modal Header */}
-              <View style={dynamicStyles.modalHeader}>
-                <Text style={dynamicStyles.modalTitle}>💪 Günlük Aktiviteler</Text>
-                <TouchableOpacity
-                  onPress={() => setHealthModalVisible(false)}
-                  style={dynamicStyles.modalCloseButton}
-                >
-                  <Ionicons name="close" size={28} color={currentTheme.colors.text} />
-                </TouchableOpacity>
-              </View>
-
-              <Text style={dynamicStyles.modalSubtitle}>
-                Bugünkü aktivitelerini kaydet
-              </Text>
-
-              <ScrollView style={dynamicStyles.modalScroll}>
-                {/* Water */}
-                <View style={dynamicStyles.sliderContainer}>
-                  <LinearGradient
-                    colors={[
-                      '#3B82F6' + '15',
-                      '#60A5FA' + '20',
-                      currentTheme.colors.background,
-                    ]}
-                    style={dynamicStyles.sliderGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View style={dynamicStyles.sliderHeader}>
-                      <Text style={dynamicStyles.sliderEmoji}>💧</Text>
-                      <Text style={dynamicStyles.sliderLabel}>Su</Text>
-                      <View style={dynamicStyles.sliderValueContainer}>
-                        <Text style={dynamicStyles.sliderValue}>{water}</Text>
-                        <Text style={dynamicStyles.sliderUnit}>bardak</Text>
-                      </View>
-                    </View>
-                    
-                    <Slider
-                      style={dynamicStyles.slider}
-                      minimumValue={0}
-                      maximumValue={12}
-                      step={1}
-                      value={water}
-                      onValueChange={setWater}
-                      minimumTrackTintColor="#3B82F6"
-                      maximumTrackTintColor={currentTheme.colors.border}
-                      thumbTintColor="#3B82F6"
-                    />
-                    
-                    {/* Progress Bar */}
-                    <View style={dynamicStyles.progressContainer}>
-                      <View style={dynamicStyles.progressTrack}>
-                        <LinearGradient
-                          colors={['#3B82F6', '#60A5FA', '#93C5FD']}
-                          style={[
-                            dynamicStyles.progressFill,
-                            { width: `${(water / 12) * 100}%` }
-                          ]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                        />
-                      </View>
-                      <View style={dynamicStyles.progressDots}>
-                        {Array.from({ length: 12 }, (_, i) => (
-                          <View
-                            key={i}
-                            style={[
-                              dynamicStyles.progressDot,
-                              water >= (i + 1) && dynamicStyles.progressDotActive
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </View>
-
-                {/* Exercise */}
-                <View style={dynamicStyles.sliderContainer}>
-                  <LinearGradient
-                    colors={[
-                      '#10B981' + '15',
-                      '#34D399' + '20',
-                      currentTheme.colors.background,
-                    ]}
-                    style={dynamicStyles.sliderGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View style={dynamicStyles.sliderHeader}>
-                      <Text style={dynamicStyles.sliderEmoji}>🏃</Text>
-                      <Text style={dynamicStyles.sliderLabel}>Egzersiz</Text>
-                      <View style={dynamicStyles.sliderValueContainer}>
-                        <Text style={dynamicStyles.sliderValue}>{exercise}</Text>
-                        <Text style={dynamicStyles.sliderUnit}>dakika</Text>
-                      </View>
-                    </View>
-                    
-                    <Slider
-                      style={dynamicStyles.slider}
-                      minimumValue={0}
-                      maximumValue={120}
-                      step={5}
-                      value={exercise}
-                      onValueChange={setExercise}
-                      minimumTrackTintColor="#10B981"
-                      maximumTrackTintColor={currentTheme.colors.border}
-                      thumbTintColor="#10B981"
-                    />
-                    
-                    {/* Progress Bar */}
-                    <View style={dynamicStyles.progressContainer}>
-                      <View style={dynamicStyles.progressTrack}>
-                        <LinearGradient
-                          colors={['#10B981', '#34D399', '#6EE7B7']}
-                          style={[
-                            dynamicStyles.progressFill,
-                            { width: `${(exercise / 120) * 100}%` }
-                          ]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                        />
-                      </View>
-                      <View style={dynamicStyles.progressDots}>
-                        {Array.from({ length: 6 }, (_, i) => (
-                          <View
-                            key={i}
-                            style={[
-                              dynamicStyles.progressDot,
-                              exercise >= ((i + 1) * 20) && dynamicStyles.progressDotActive
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </View>
-
-                {/* Sleep */}
-                <View style={dynamicStyles.sliderContainer}>
-                  <LinearGradient
-                    colors={[
-                      '#8B5CF6' + '15',
-                      '#A78BFA' + '20',
-                      currentTheme.colors.background,
-                    ]}
-                    style={dynamicStyles.sliderGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View style={dynamicStyles.sliderHeader}>
-                      <Text style={dynamicStyles.sliderEmoji}>😴</Text>
-                      <Text style={dynamicStyles.sliderLabel}>Uyku</Text>
-                      <View style={dynamicStyles.sliderValueContainer}>
-                        <Text style={dynamicStyles.sliderValue}>{sleep}</Text>
-                        <Text style={dynamicStyles.sliderUnit}>saat</Text>
-                      </View>
-                    </View>
-                    
-                    <Slider
-                      style={dynamicStyles.slider}
-                      minimumValue={0}
-                      maximumValue={12}
-                      step={0.5}
-                      value={sleep}
-                      onValueChange={setSleep}
-                      minimumTrackTintColor="#8B5CF6"
-                      maximumTrackTintColor={currentTheme.colors.border}
-                      thumbTintColor="#8B5CF6"
-                    />
-                    
-                    {/* Progress Bar */}
-                    <View style={dynamicStyles.progressContainer}>
-                      <View style={dynamicStyles.progressTrack}>
-                        <LinearGradient
-                          colors={['#8B5CF6', '#A78BFA', '#C4B5FD']}
-                          style={[
-                            dynamicStyles.progressFill,
-                            { width: `${(sleep / 12) * 100}%` }
-                          ]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                        />
-                      </View>
-                      <View style={dynamicStyles.progressDots}>
-                        {Array.from({ length: 6 }, (_, i) => (
-                          <View
-                            key={i}
-                            style={[
-                              dynamicStyles.progressDot,
-                              sleep >= ((i + 1) * 2) && dynamicStyles.progressDotActive
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </View>
-
-                {/* Meditation */}
-                <View style={dynamicStyles.sliderContainer}>
-                  <LinearGradient
-                    colors={[
-                      '#F59E0B' + '15',
-                      '#FBBF24' + '20',
-                      currentTheme.colors.background,
-                    ]}
-                    style={dynamicStyles.sliderGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View style={dynamicStyles.sliderHeader}>
-                      <Text style={dynamicStyles.sliderEmoji}>🧘</Text>
-                      <Text style={dynamicStyles.sliderLabel}>Meditasyon</Text>
-                      <View style={dynamicStyles.sliderValueContainer}>
-                        <Text style={dynamicStyles.sliderValue}>{meditation}</Text>
-                        <Text style={dynamicStyles.sliderUnit}>dakika</Text>
-                      </View>
-                    </View>
-                    
-                    <Slider
-                      style={dynamicStyles.slider}
-                      minimumValue={0}
-                      maximumValue={60}
-                      step={5}
-                      value={meditation}
-                      onValueChange={setMeditation}
-                      minimumTrackTintColor="#F59E0B"
-                      maximumTrackTintColor={currentTheme.colors.border}
-                      thumbTintColor="#F59E0B"
-                    />
-                    
-                    {/* Progress Bar */}
-                    <View style={dynamicStyles.progressContainer}>
-                      <View style={dynamicStyles.progressTrack}>
-                        <LinearGradient
-                          colors={['#F59E0B', '#FBBF24', '#FCD34D']}
-                          style={[
-                            dynamicStyles.progressFill,
-                            { width: `${(meditation / 60) * 100}%` }
-                          ]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                        />
-                      </View>
-                      <View style={dynamicStyles.progressDots}>
-                        {Array.from({ length: 6 }, (_, i) => (
-                          <View
-                            key={i}
-                            style={[
-                              dynamicStyles.progressDot,
-                              meditation >= ((i + 1) * 10) && dynamicStyles.progressDotActive
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </View>
-              </ScrollView>
-
-              {/* Save Button */}
-              <TouchableOpacity
-                style={dynamicStyles.modalSaveButton}
-                onPress={handleSaveHealthData}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={[
-                    currentTheme.colors.primary,
-                    currentTheme.colors.accent,
-                    currentTheme.colors.primary,
-                  ]}
-                  style={dynamicStyles.modalSaveButtonGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                >
-                  <Text style={dynamicStyles.modalSaveButtonText}>
-                    ✨ Kaydet
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </LinearGradient>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }

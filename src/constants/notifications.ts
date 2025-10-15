@@ -512,10 +512,16 @@ export const getMessageByMood = (moodValue: number): NotificationMessage => {
   }
 };
 
-export const getMessageByTimeOfDay = (moodValue?: number): NotificationMessage => {
-  const hour = new Date().getHours();
+export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): NotificationMessage => {
+  const userTimezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const now = new Date();
+  const hour = parseInt(now.toLocaleString('en-US', {
+    timeZone: userTimezone,
+    hour: 'numeric',
+    hour12: false
+  }));
   
-  console.log(`🕐 Current hour: ${hour}`);
+  console.log(`🕐 Current hour in ${userTimezone}: ${hour}`);
   
   // Eğer mood değeri verilmişse, mood bazlı mesaj seç
   if (moodValue !== undefined && moodValue !== null) {
@@ -546,20 +552,28 @@ export const getMessageByTimeOfDay = (moodValue?: number): NotificationMessage =
   }
 };
 
-export const getMessageByDayOfWeek = (): NotificationMessage => {
-  // Kullanıcının yerel zaman dilimini kullan
+export const getMessageByDayOfWeek = (timezone?: string): NotificationMessage => {
+  const userTimezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const now = new Date();
-  const day = now.getDay(); // Yerel günü al
   
-  console.log(`Current local time: ${now.toLocaleString()}, Day: ${day} (0=Sunday, 6=Saturday)`);
+  // Belirtilen timezone'a göre günü al
+  const day = parseInt(now.toLocaleDateString('en-US', {
+    timeZone: userTimezone,
+    weekday: 'long' // Monday, Tuesday, etc.
+  }));
   
-  // 0 = Pazar, 6 = Cumartesi
-  if (day === 0 || day === 6) {
+  // Günü sayıya çevir
+  const dayNumber = now.getDay(); // 0=Sunday, 6=Saturday
+  
+  console.log(`Current time in ${userTimezone}: ${now.toLocaleString()}, Day: ${day} (1=Monday, 7=Sunday)`);
+  
+  // 6 = Cumartesi, 0 = Pazar
+  if (dayNumber === 6 || dayNumber === 0) {
     console.log('Weekend detected, showing weekend message');
     return getRandomMessage(weekendMessages);
   } else {
     console.log('Weekday detected, showing time-based message');
-    return getMessageByTimeOfDay();
+    return getMessageByTimeOfDay(undefined, userTimezone);
   }
 };
 

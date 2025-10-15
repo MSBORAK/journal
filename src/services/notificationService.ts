@@ -15,6 +15,14 @@ import {
   missingYouMessages,
   motivationalMessages
 } from '../constants/notifications';
+import { 
+  getUserTimezone, 
+  getLocalDateISO, 
+  getLocalDayOfWeek, 
+  isWeekendLocal, 
+  getGreetingMessage, 
+  getWeekendMessage 
+} from '../utils/dateTimeUtils';
 
 // Sadece sistem sesi kullan - özel ses dosyaları kaldırıldı
 const getSystemSound = () => {
@@ -44,9 +52,12 @@ export interface NotificationSettings {
   taskRemindersEnabled: boolean;
   achievementsEnabled: boolean;
   timezone: string; // "Europe/Istanbul", "America/New_York", etc.
-  // quietHoursEnabled: boolean; // Kaldırıldı
-  // quietStartTime: string; // Kaldırıldı
-  // quietEndTime: string; // Kaldırıldı
+  quietHoursEnabled?: boolean;
+  quietStartTime?: string;
+  quietEndTime?: string;
+  weeklyMotivationEnabled?: boolean; // Hafta içi motivasyon tonu
+  weekendMotivationEnabled?: boolean; // Hafta sonu motivasyon tonu
+  dailySummaryEnabled?: boolean; // Günlük özet bildirimi
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
@@ -57,10 +68,13 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   eveningTime: '21:00',
   taskRemindersEnabled: true,
   achievementsEnabled: true,
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Otomatik kullanıcının zaman dilimi
-  // quietHoursEnabled: true, // Kaldırıldı
-  // quietStartTime: '23:00', // Kaldırıldı
-  // quietEndTime: '07:00', // Kaldırıldı
+  timezone: getUserTimezone(), // Kullanıcının saat dilimi
+  quietHoursEnabled: false,
+  quietStartTime: '23:00',
+  quietEndTime: '07:00',
+  weeklyMotivationEnabled: true,
+  weekendMotivationEnabled: true,
+  dailySummaryEnabled: true,
 };
 
 /**
@@ -109,7 +123,10 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
 export const loadNotificationSettings = async (): Promise<NotificationSettings> => {
   try {
     const settings = await AsyncStorage.getItem('notificationSettings');
-    return settings ? JSON.parse(settings) : DEFAULT_SETTINGS;
+    if (!settings) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(settings);
+    // Eski kayıtlarla uyum: eksik alanları varsayılanlarla doldur
+    return { ...DEFAULT_SETTINGS, ...parsed } as NotificationSettings;
   } catch (error) {
     console.error('Error loading notification settings:', error);
     return DEFAULT_SETTINGS;
@@ -138,13 +155,33 @@ export const sendLocalNotification = async (
   title: string,
   body: string,
   data?: any,
-  channelId: string = 'default'
+  channelId: string = 'default',
+  skipChecks: boolean = false // Test bildirimleri için kontrolleri atla
 ): Promise<void> => {
   const settings = await loadNotificationSettings();
 
-  if (!settings.enabled) {
-    console.log('Notifications disabled');
-    return;
+  // Test bildirimi değilse normal kontrolleri yap
+  if (!skipChecks) {
+    if (!settings.enabled) {
+      console.log('Notifications disabled');
+      return;
+    }
+
+    // Quiet hours check
+    if (settings.quietHoursEnabled) {
+      try {
+        const now = new Date();
+        const [qsH, qsM] = (settings.quietStartTime || '23:00').split(':').map(Number);
+        const [qeH, qeM] = (settings.quietEndTime || '07:00').split(':').map(Number);
+        const start = new Date(now); start.setHours(qsH, qsM, 0, 0);
+        const end = new Date(now); end.setHours(qeH, qeM, 0, 0);
+        const inQuiet = start <= end ? (now >= start && now <= end) : (now >= start || now <= end);
+        if (inQuiet) {
+          console.log('🔕 Quiet hours active: suppressing local notification');
+          return;
+        }
+      } catch {}
+    }
   }
 
   // Sadece sistem sesi kullan
@@ -218,7 +255,19 @@ export const scheduleMorningNotification = async (): Promise<void> => {
   if (!settings.enabled || !settings.morningEnabled) return;
 
   const [hour, minute] = settings.morningTime.split(':').map(Number);
-  const message = getMessageByDayOfWeek();
+  
+  // Hafta içi/sonu kontrolü
+  const isWeekend = isWeekendLocal(settings.timezone);
+  if (isWeekend && !settings.weekendMotivationEnabled) {
+    console.log('Weekend motivation disabled, skipping morning notification');
+    return;
+  }
+  if (!isWeekend && !settings.weeklyMotivationEnabled) {
+    console.log('Weekly motivation disabled, skipping morning notification');
+    return;
+  }
+
+  const message = getMessageByDayOfWeek(settings.timezone);
 
   await Notifications.cancelScheduledNotificationAsync('morning-reminder');
   await scheduleNotification(
@@ -243,7 +292,19 @@ export const scheduleEveningNotification = async (): Promise<void> => {
   if (!settings.enabled || !settings.eveningEnabled) return;
 
   const [hour, minute] = settings.eveningTime.split(':').map(Number);
-  const message = getMessageByTimeOfDay();
+  
+  // Hafta içi/sonu kontrolü
+  const isWeekend = isWeekendLocal(settings.timezone);
+  if (isWeekend && !settings.weekendMotivationEnabled) {
+    console.log('Weekend motivation disabled, skipping evening notification');
+    return;
+  }
+  if (!isWeekend && !settings.weeklyMotivationEnabled) {
+    console.log('Weekly motivation disabled, skipping evening notification');
+    return;
+  }
+
+  const message = getMessageByTimeOfDay(undefined, settings.timezone);
 
   await Notifications.cancelScheduledNotificationAsync('evening-reminder');
   await scheduleNotification(
@@ -260,6 +321,32 @@ export const scheduleEveningNotification = async (): Promise<void> => {
 };
 
 /**
+ * Günlük Özet Bildirimi Planla
+ */
+export const scheduleDailySummaryNotification = async (): Promise<void> => {
+  const settings = await loadNotificationSettings();
+
+  if (!settings.enabled || !settings.dailySummaryEnabled) return;
+
+  // Gün sonu özeti için saat 22:00
+  const hour = 22;
+  const minute = 0;
+
+  await Notifications.cancelScheduledNotificationAsync('daily-summary');
+  await scheduleNotification(
+    'daily-summary',
+    '📊 Günlük Özet',
+    'Bugünün özetine göz at! Hedeflerine ne kadar yaklaştın?',
+    hour,
+    minute,
+    true,
+    'default'
+  );
+
+  console.log(`Daily summary notification scheduled for ${hour}:${minute}`);
+};
+
+/**
  * Tüm Bildirimleri Planla
  */
 export const scheduleAllNotifications = async (): Promise<void> => {
@@ -269,6 +356,7 @@ export const scheduleAllNotifications = async (): Promise<void> => {
   // Yeni bildirimleri planla
   await scheduleMorningNotification();
   await scheduleEveningNotification();
+  await scheduleDailySummaryNotification();
 
   console.log('All notifications scheduled');
 };

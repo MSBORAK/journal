@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { themes as newThemes, Theme as BaseTheme, ThemeName } from '../themes';
 
-export interface Theme {
-  name: string;
-  label: string;
+export interface Theme extends BaseTheme {
+  // Eski interface için backward compatibility: colors artık ZORUNLU
   colors: {
     primary: string;
     background: string;
@@ -13,111 +13,56 @@ export interface Theme {
     secondary: string;
     border: string;
     shadow: string;
+    muted?: string;
+    success?: string;
+    danger?: string;
   };
 }
 
 interface ThemeContextType {
   currentTheme: Theme;
   setTheme: (themeName: string) => Promise<void>;
-  themes: Theme[];
+  themes: { [key: string]: Theme };
 }
 
-const themes: Theme[] = [
-  {
-    name: 'light',
-    label: '✨ Gün Işığı',
-    colors: {
-      primary: '#f59e0b',
-      background: '#fefefe',
-      card: '#ffffff',
-      text: '#111827',
-      accent: '#fef3c7',
-      secondary: '#374151',
-      border: '#e2e8f0',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'dark',
-    label: '🌙 Gece Işıltısı',
-    colors: {
-      primary: '#8b5cf6',
-      background: '#0f172a',
-      card: '#1e293b',
-      text: '#f8fafc',
-      accent: '#4c1d95',
-      secondary: '#94a3b8',
-      border: '#475569',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'ocean',
-    label: '🌊 Okyanus Esintisi',
-    colors: {
-      primary: '#0ea5e9',
-      background: '#f0f9ff',
-      card: '#ffffff',
-      text: '#0c4a6e',
-      accent: '#e0f2fe',
-      secondary: '#0369a1',
-      border: '#7dd3fc',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'forest',
-    label: '🌲 Orman Derinlikleri',
-    colors: {
-      primary: '#16a34a',
-      background: '#f0fdf4',
-      card: '#ffffff',
-      text: '#14532d',
-      accent: '#dcfce7',
-      secondary: '#15803d',
-      border: '#86efac',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'lavender',
-    label: '💜 Lavanta Rüyası',
-    colors: {
-      primary: '#c084fc',
-      background: '#faf5ff',
-      card: '#ffffff',
-      text: '#581c87',
-      accent: '#f3e8ff',
-      secondary: '#7c3aed',
-      border: '#c4b5fd',
-      shadow: '#000000',
-    },
-  },
-  {
-    name: 'rose',
-    label: '🌹 Gül Bahçesi',
-    colors: {
-      primary: '#e11d48',
-      background: '#fdf2f8',
-      card: '#ffffff',
-      text: '#831843',
-      accent: '#fce7f3',
-      secondary: '#be185d',
-      border: '#f472b6',
-      shadow: '#000000',
-    },
-  },
-];
-
+// Yeni pastel tema sistemi kullan
+const themes: Record<ThemeName, BaseTheme> = newThemes;
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+};
 
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>(themes[0]);
+  // Eski colors yapısını da ekle (backward compatibility)
+  const addColorsCompat = (theme: BaseTheme): Theme => ({
+    ...theme,
+    colors: {
+      primary: theme.primary,
+      background: theme.background,
+      card: theme.card,
+      text: theme.text,
+      accent: theme.muted, // muted -> accent
+      secondary: theme.secondary,
+      border: theme.muted, // muted -> border
+      shadow: theme.text, // text -> shadow
+      muted: theme.muted,
+      success: theme.success,
+      danger: theme.danger,
+    }
+  });
+
+  const defaultKey = (('alabaster' as ThemeName) in themes ? ('alabaster' as ThemeName) : (Object.keys(themes)[0] as ThemeName));
+  const [currentTheme, setCurrentTheme] = useState<Theme>(addColorsCompat(themes[defaultKey]));
 
   useEffect(() => {
     loadTheme();
@@ -125,12 +70,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const loadTheme = async () => {
     try {
-      const storedTheme = await AsyncStorage.getItem('selectedTheme');
-      if (storedTheme) {
-        const theme = themes.find(t => t.name === storedTheme);
-        if (theme) {
-          setCurrentTheme(theme);
-        }
+      const savedTheme = await AsyncStorage.getItem('selectedTheme');
+      if (savedTheme) {
+        const key = (savedTheme as ThemeName) in themes ? (savedTheme as ThemeName) : ('alabaster' as ThemeName);
+        setCurrentTheme(addColorsCompat(themes[key]));
+      } else {
+        const key = ('alabaster' as ThemeName) in themes ? ('alabaster' as ThemeName) : (Object.keys(themes)[0] as ThemeName);
+        setCurrentTheme(addColorsCompat(themes[key]));
       }
     } catch (error) {
       console.error('Error loading theme:', error);
@@ -139,32 +85,25 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const setTheme = async (themeName: string) => {
     try {
-      const theme = themes.find(t => t.name === themeName);
-      if (theme) {
-        setCurrentTheme(theme);
-        await AsyncStorage.setItem('selectedTheme', themeName);
-      }
+      const key = (themeName as ThemeName) in themes ? (themeName as ThemeName) : (('alabaster' as ThemeName) in themes ? ('alabaster' as ThemeName) : (Object.keys(themes)[0] as ThemeName));
+      setCurrentTheme(addColorsCompat(themes[key]));
+      await AsyncStorage.setItem('selectedTheme', key);
     } catch (error) {
       console.error('Error saving theme:', error);
     }
   };
 
+  const value: ThemeContextType = {
+    currentTheme,
+    setTheme,
+    themes: Object.fromEntries(
+      (Object.keys(themes) as ThemeName[]).map((k) => [k, addColorsCompat(themes[k])])
+    ),
+  };
 
   return (
-    <ThemeContext.Provider value={{ 
-      currentTheme, 
-      setTheme, 
-      themes
-    }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
 };

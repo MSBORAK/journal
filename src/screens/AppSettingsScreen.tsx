@@ -14,13 +14,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ModernToggle from '../components/ModernToggle';
-import {
-  requestNotificationPermission,
-  saveNotificationSettings,
-  scheduleMotivationNotifications,
-  cancelMotivationNotifications,
-} from '../services/motivationNotificationService';
 
 interface AppSettingsScreenProps {
   navigation: any;
@@ -28,52 +21,6 @@ interface AppSettingsScreenProps {
 
 export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps) {
   const { currentTheme } = useTheme();
-  
-  // Bildirim Ayarları
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [motivationSettings, setMotivationSettings] = useState({
-    morningEnabled: true,
-    lunchEnabled: true,
-    eveningEnabled: true,
-    morningTime: '08:00',
-    lunchTime: '12:00',
-    eveningTime: '18:00',
-  });
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      const notifEnabled = await AsyncStorage.getItem('notificationsEnabled');
-      const motivationStr = await AsyncStorage.getItem('motivationSettings');
-      
-      if (notifEnabled !== null) setNotificationsEnabled(JSON.parse(notifEnabled));
-      if (motivationStr) setMotivationSettings(JSON.parse(motivationStr));
-    } catch (error) {
-      console.error('Ayarlar yüklenirken hata:', error);
-    }
-  };
-
-  const saveNotificationsEnabled = async (value: boolean) => {
-    setNotificationsEnabled(value);
-    await AsyncStorage.setItem('notificationsEnabled', JSON.stringify(value));
-    if (value) {
-      await requestNotificationPermission();
-    }
-  };
-
-  const saveMotivationSettings = async (settings: typeof motivationSettings) => {
-    setMotivationSettings(settings);
-    await AsyncStorage.setItem('motivationSettings', JSON.stringify(settings));
-    await saveNotificationSettings(settings);
-    if (settings.morningEnabled || settings.lunchEnabled || settings.eveningEnabled) {
-      await scheduleMotivationNotifications();
-    } else {
-      await cancelMotivationNotifications();
-    }
-  };
 
   const showAbout = () => {
     Alert.alert(
@@ -311,78 +258,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
           </View>
         </View>
 
-        {/* Bildirimler */}
-        <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Bildirimler</Text>
-          
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="notifications" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>Günlük Hatırlatma</Text>
-              <ModernToggle
-                value={notificationsEnabled}
-                onValueChange={saveNotificationsEnabled}
-                type="day"
-              />
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Her gün günlük yazmanızı hatırlatır
-            </Text>
-          </View>
-
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="sunny" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>Sabah Motivasyonu</Text>
-              <ModernToggle
-                value={motivationSettings.morningEnabled}
-                onValueChange={(value) => saveMotivationSettings({...motivationSettings, morningEnabled: value})}
-                type="day"
-              />
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              {motivationSettings.morningTime} - Güne pozitif başlangıç
-            </Text>
-          </View>
-
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="restaurant" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>Öğle Motivasyonu</Text>
-              <ModernToggle
-                value={motivationSettings.lunchEnabled}
-                onValueChange={(value) => saveMotivationSettings({...motivationSettings, lunchEnabled: value})}
-                type="day"
-              />
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              {motivationSettings.lunchTime} - Gün ortası enerjisi
-            </Text>
-          </View>
-
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="moon" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>Akşam Motivasyonu</Text>
-              <ModernToggle
-                value={motivationSettings.eveningEnabled}
-                onValueChange={(value) => saveMotivationSettings({...motivationSettings, eveningEnabled: value})}
-                type="day"
-              />
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              {motivationSettings.eveningTime} - Günü değerlendirme zamanı
-            </Text>
-          </View>
-        </View>
+        {/* Bildirimler bölümü kaldırıldı; tüm bildirim ayarları Bildirimler ekranında yönetilir */}
 
         {/* Uygulama Bilgileri */}
         <View style={dynamicStyles.section}>

@@ -15,6 +15,7 @@ import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
+import { themes } from '../themes';
 // import { useFont } from '../contexts/FontContext'; // Kaldırıldı
 import { useDiary } from '../hooks/useDiary';
 import { useProfile } from '../hooks/useProfile';
@@ -23,6 +24,7 @@ import { useReminders } from '../hooks/useReminders';
 import { useAchievements } from '../hooks/useAchievements';
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
+import { PersonalityCard } from '../components/PersonalityCard';
 import { getAllInsights, Insight } from '../utils/insightsEngine';
 import { 
   requestNotificationPermissions, 
@@ -557,9 +559,9 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     const regularityScore = todayCompletionRate;
     
     return [
-      { emoji: '😊', label: 'Ruh Hali', score: moodScore, color: '#8B5CF6' },
-      { emoji: '✍️', label: 'Günlük', score: diaryScore, color: '#F59E0B' },
-      { emoji: '⚡', label: 'Düzenlilik', score: regularityScore, color: '#EF4444' },
+      { emoji: '😊', label: 'Ruh Hali', score: moodScore, color: currentTheme.colors.primary },
+      { emoji: '✍️', label: 'Günlük', score: diaryScore, color: currentTheme.colors.secondary },
+      { emoji: '⚡', label: 'Düzenlilik', score: regularityScore, color: currentTheme.colors.success },
     ];
   };
 
@@ -985,10 +987,13 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   };
 
 
+  // Premium minimalist tema sistemi - artık direkt kullanabiliriz
+  const currentThemeColors = currentTheme;
+  
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: currentTheme.colors.background,
+      backgroundColor: currentThemeColors.background, // Pastel taban
     },
     header: {
       paddingHorizontal: 20,
@@ -998,23 +1003,23 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     headerTitle: {
       fontSize: 28,
       fontWeight: 'bold',
-      color: currentTheme.colors.text,
+      color: currentThemeColors.text, // Yüksek kontrast
       marginBottom: 8,
     },
     headerSubtitle: {
       fontSize: 16,
-      color: currentTheme.colors.secondary,
+      color: currentThemeColors.muted, // Soft renk
       lineHeight: 24,
       marginBottom: 16,
     },
     userGreeting: {
       fontSize: 18,
-      color: currentTheme.colors.text,
+      color: currentThemeColors.text,
       marginBottom: 4,
     },
     userEmail: {
       fontSize: 14,
-      color: currentTheme.colors.secondary,
+      color: currentThemeColors.muted, // Soft renk
     },
     statsContainer: {
       flexDirection: 'row',
@@ -1025,35 +1030,35 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     statCard: {
       flex: 1,
-      backgroundColor: currentTheme.colors.card,
+      backgroundColor: currentThemeColors.card, // Beyaz kartlar
       borderRadius: 20,
       padding: 16,
       alignItems: 'center',
-      shadowColor: currentTheme.colors.shadow,
+      shadowColor: currentThemeColors.text,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.08,
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 0.5,
-      borderColor: currentTheme.colors.border,
+      borderColor: currentThemeColors.muted, // Soft border
       minHeight: 80,
     },
     statNumber: {
       fontSize: 28,
       fontWeight: '800',
-      color: currentTheme.colors.primary,
+      color: currentThemeColors.primary, // Canlı accent
       marginBottom: 4,
     },
     statLabel: {
       fontSize: 11,
-      color: currentTheme.colors.secondary,
+      color: currentThemeColors.muted, // Soft renk
       fontWeight: '500',
       textAlign: 'center',
     },
     miniProgressBar: {
       width: '100%',
       height: 4,
-      backgroundColor: currentTheme.colors.border,
+      backgroundColor: currentThemeColors.muted, // Soft progress bar
       borderRadius: 2,
       marginTop: 8,
       overflow: 'hidden',
@@ -1204,7 +1209,8 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     moodSubtitle: {
       fontSize: 12,
       fontFamily: 'Poppins_400Regular',
-      color: currentTheme.colors.secondary,
+      color: currentTheme.colors.text,
+      opacity: 0.8,
       textAlign: 'center',
       marginTop: 8,
     },
@@ -1415,16 +1421,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     sectionTitle: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: currentTheme.colors.text,
+      color: currentThemeColors.text, // Yüksek kontrast
       marginBottom: 16,
     },
     insightCard: {
-      backgroundColor: currentTheme.colors.card,
+      backgroundColor: currentThemeColors.card, // Beyaz kartlar
       borderRadius: 12,
       padding: 14,
       marginBottom: 12,
+      borderWidth: 0.5,
+      borderColor: currentThemeColors.muted, // Soft border
       borderLeftWidth: 3,
-      shadowColor: currentTheme.colors.shadow,
+      shadowColor: currentThemeColors.text,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.06,
       shadowRadius: 4,
@@ -2581,34 +2589,21 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           <View style={[
             dynamicStyles.moodCard,
             {
-              // Glassmorphism Effect
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: currentTheme.colors.card,
               borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-            }
+              borderColor: currentTheme.colors.border,
+            },
           ]}>
-          <LinearGradient
-            colors={[
-              currentTheme.colors.primary + '25',
-              currentTheme.colors.accent + '30',
-              'rgba(255, 255, 255, 0.1)',
-              currentTheme.name === 'dark' ? currentTheme.colors.accent + '35' : currentTheme.colors.accent + '25'
-            ]}
+          <View
             style={[
               dynamicStyles.moodCardGradient,
-              {
-                // Enhanced Glassmorphism
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              },
               (getTodayMood() as any)?.isDefault && { 
-                opacity: 0.9,
+                opacity: 0.95,
                 borderWidth: 2,
                 borderColor: currentTheme.colors.primary,
                 borderStyle: 'dashed'
               }
             ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
           >
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
@@ -2647,7 +2642,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </Text>
           </TouchableOpacity>
         </View>
-          </LinearGradient>
+          </View>
         </View>
       </Animated.View>
 
@@ -2669,35 +2664,20 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
         <View style={[
           dynamicStyles.motivationCard,
           {
-            // Glassmorphism Effect
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: currentTheme.colors.card,
             borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderColor: currentTheme.colors.border,
           }
         ]}>
-          <LinearGradient
-            colors={[
-              currentTheme.colors.primary + '30',
-              currentTheme.colors.accent + '35',
-              'rgba(255, 255, 255, 0.1)',
-              currentTheme.colors.primary + '25',
-              currentTheme.colors.accent + '40',
-            ]}
-            style={{
-              borderRadius: 28,
-              padding: 24,
-              margin: -24,
-            }}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
             <Text style={dynamicStyles.motivationTitle}>{t('dashboard.dailyReflection')}</Text>
             <Text style={dynamicStyles.motivationMessage}>
               {getMotivationMessage()}
             </Text>
-          </LinearGradient>
         </View>
       </Animated.View>
+
+      {/* Personality Card */}
+      <PersonalityCard />
 
       {/* Achievements Card */}
       <Animated.View
@@ -2793,56 +2773,23 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           <View style={[
             dynamicStyles.insightsSection,
             {
-              // Glassmorphism Effect
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: currentTheme.colors.card,
               borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.2)',
+              borderColor: currentTheme.colors.border,
             }
           ]}>
-          <LinearGradient
-            colors={[
-              'rgba(255, 255, 255, 0.1)',
-              currentTheme.colors.accent + '25',
-              currentTheme.colors.primary + '20',
-            ]}
-            style={{
-              borderRadius: 28,
-              padding: 24,
-              // Enhanced Glassmorphism
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            }}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
           <Text style={dynamicStyles.sectionTitle}>💡 Kişisel İçgörülerin</Text>
           {insights.map((insight, index) => (
-            <View style={[
+            <View key={`${insight.type}-${index}`} style={[
               dynamicStyles.insightCard,
               {
-                // Glassmorphism Effect
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backgroundColor: currentTheme.colors.card,
                 borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.15)',
+                borderColor: currentTheme.colors.border,
                 borderLeftColor: insight.color,
                 borderLeftWidth: 4,
               }
             ]}>
-            <LinearGradient
-              colors={[
-                insight.color + '20',
-                insight.color + '15',
-                'rgba(255, 255, 255, 0.05)',
-                currentTheme.colors.card + '80',
-              ]}
-              style={{
-                borderRadius: 20,
-                padding: 20,
-                // Enhanced Glassmorphism
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              }}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
               <View style={dynamicStyles.insightHeader}>
                 <Text style={dynamicStyles.insightIcon}>{insight.icon}</Text>
                 <Text style={dynamicStyles.insightTitle}>{insight.title}</Text>
@@ -2850,147 +2797,13 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               <Text style={dynamicStyles.insightDescription}>
                 {insight.description}
               </Text>
-            </LinearGradient>
             </View>
           ))}
-          </LinearGradient>
           </View>
         </Animated.View>
       )}
 
 
-      {/* Today's Reminders - Şirin Baloncuklar */}
-      {todayReminders.length > 0 && (
-      <Animated.View
-        style={{
-          opacity: fadeAnims.reminders,
-          transform: [{
-            scale: Animated.multiply(
-              fadeAnims.reminders.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.95, 1],
-              }),
-              pulseAnims.reminders
-            )
-          }]
-        }}
-      >
-          <View style={[
-            dynamicStyles.remindersBubblesContainer,
-            {
-              // Glassmorphism Effect
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-            }
-          ]}>
-            <View style={dynamicStyles.remindersHeader}>
-              <Text style={dynamicStyles.remindersBubblesTitle}>⏰ Bugünün Planı</Text>
-            </View>
-            
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={dynamicStyles.bubbleScrollContainer}
-            >
-              {todayReminders.slice(0, 3).map((reminder, index) => (
-                <TouchableOpacity
-                  key={reminder.id}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    navigation.navigate('Reminders' as never);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[
-                    dynamicStyles.reminderBubble,
-                    {
-                      // Glassmorphism Effect
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      borderWidth: 2,
-                      borderColor: reminder.priority === 'high' ? 'rgba(239, 68, 68, 0.3)' : 
-                                   reminder.priority === 'medium' ? 'rgba(245, 158, 11, 0.3)' : 
-                                   'rgba(16, 185, 129, 0.3)',
-                    }
-                  ]}>
-                  <LinearGradient
-                    colors={reminder.priority === 'high' ? ['rgba(252, 165, 165, 0.8)', 'rgba(248, 113, 113, 0.8)'] :
-                           reminder.priority === 'medium' ? ['rgba(252, 211, 77, 0.8)', 'rgba(245, 158, 11, 0.8)'] :
-                           ['rgba(110, 231, 183, 0.8)', 'rgba(52, 211, 153, 0.8)']}
-                    style={{
-                      borderRadius: 20,
-                      padding: 16,
-                      minWidth: 120,
-                      alignItems: 'center',
-                      // Enhanced Glassmorphism
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    }}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                  <Text style={dynamicStyles.bubbleTime}>
-                    {reminder.time}
-                  </Text>
-                  <Text style={dynamicStyles.bubbleEmoji}>
-                    {reminder.emoji}
-                  </Text>
-                  <Text style={dynamicStyles.bubbleTitle} numberOfLines={1}>
-                    {reminder.title.length > 10 ? reminder.title.substring(0, 10) + '...' : reminder.title}
-                  </Text>
-                  </LinearGradient>
-                  </View>
-                </TouchableOpacity>
-              ))}
-              
-              {todayReminders.length > 3 && (
-                <TouchableOpacity
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    navigation.navigate('Reminders' as never);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[
-                    dynamicStyles.moreBubble,
-                    {
-                      // Glassmorphism Effect
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      borderWidth: 2,
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
-                    }
-                  ]}>
-                  <LinearGradient
-                    colors={[currentTheme.colors.primary + '30', currentTheme.colors.accent + '25', 'rgba(255, 255, 255, 0.1)']}
-                    style={{
-                      borderRadius: 20,
-                      padding: 16,
-                      minWidth: 120,
-                      alignItems: 'center',
-                      // Enhanced Glassmorphism
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    }}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Text style={dynamicStyles.moreBubbleNumber}>
-                      +{todayReminders.length - 3}
-                    </Text>
-                    <Text style={dynamicStyles.moreBubbleText}>
-                      daha
-                    </Text>
-                    <Ionicons 
-                      name="arrow-forward-circle" 
-                      size={24} 
-                      color={currentTheme.colors.primary} 
-                    />
-                  </LinearGradient>
-                  </View>
-                </TouchableOpacity>
-              )}
-            </ScrollView>
-          </View>
-        </Animated.View>
-      )}
 
 
     </ScrollView>

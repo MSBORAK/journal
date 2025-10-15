@@ -9,6 +9,7 @@ import {
   Switch,
   Alert,
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +31,7 @@ interface NotificationSettingsScreenProps {
 export default function NotificationSettingsScreen({ navigation }: NotificationSettingsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: true,
     morningEnabled: true,
@@ -39,12 +41,28 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     taskRemindersEnabled: true,
     achievementsEnabled: true,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    quietHoursEnabled: false,
+    quietStartTime: '23:00',
+    quietEndTime: '07:00',
+    weeklyMotivationEnabled: true,
+    weekendMotivationEnabled: true,
+    dailySummaryEnabled: true,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadSettings();
+    checkPermission();
   }, []);
+
+  const checkPermission = async () => {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      setPermissionGranted(status === 'granted');
+    } catch (e) {
+      setPermissionGranted(false);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -58,14 +76,27 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
   };
 
   const updateSetting = async (key: keyof NotificationSettings, value: any) => {
+    console.log('🔄 START - Updating setting:', key, '=', value);
+    console.log('📋 Current settings before update:', settings);
+    
+    // Önce state'i hemen güncelle (UI responsive olsun)
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    
     try {
+      // Haptic feedback
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      const newSettings = { ...settings, [key]: value };
-      setSettings(newSettings);
+      console.log('✅ Haptic done');
+      
+      // AsyncStorage'a kaydet (arka planda)
       await saveNotificationSettings(newSettings);
+      console.log('✅ Settings saved to storage successfully');
     } catch (error) {
-      console.error('Error updating notification settings:', error);
-      Alert.alert('Hata', 'Ayarlar kaydedilemedi');
+      console.error('❌ Error saving notification settings:', error);
+      console.error('❌ Error details:', JSON.stringify(error));
+      // Hata olursa eski ayarlara geri dön
+      setSettings(settings);
+      Alert.alert('Hata', 'Ayarlar kaydedilemedi: ' + String(error));
     }
   };
 
@@ -89,6 +120,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         );
       } else {
         Alert.alert('Başarılı', 'Bildirim izni verildi!');
+        setPermissionGranted(true);
       }
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
@@ -98,16 +130,30 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
 
   const testNotification = async () => {
     try {
+      console.log('🔔 Attempting to send test notification...');
+      console.log('📋 Current settings:', settings);
+      
+      // Önce izin kontrolü yap
+      const hasPermission = await requestNotificationPermissions();
+      if (!hasPermission) {
+        Alert.alert('Hata', 'Bildirim izni verilmedi. Lütfen önce izin verin.');
+        return;
+      }
+      
       const { sendLocalNotification } = await import('../services/notificationService');
+      // Test bildirimi için kontrolleri atla (skipChecks: true)
       await sendLocalNotification(
         '🔔 Test Bildirimi',
         'Bildirimler düzgün çalışıyor!',
-        { type: 'test' }
+        { type: 'test' },
+        'default',
+        true // skipChecks
       );
-      Alert.alert('Başarılı', 'Test bildirimi gönderildi!');
+      console.log('✅ Test notification sent successfully');
+      Alert.alert('Başarılı', 'Test bildirimi gönderildi! Birkaç saniye içinde gelecek.');
     } catch (error) {
-      console.error('Error sending test notification:', error);
-      Alert.alert('Hata', 'Test bildirimi gönderilemedi');
+      console.error('❌ Error sending test notification:', error);
+      Alert.alert('Hata', 'Test bildirimi gönderilemedi: ' + error);
     }
   };
 
@@ -339,7 +385,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
 
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
         {/* Permission Card */}
-        <View style={dynamicStyles.permissionCard}>
+          <View style={dynamicStyles.permissionCard}>
           <Text style={dynamicStyles.permissionIcon}>🔔</Text>
           <Text style={dynamicStyles.permissionTitle}>Bildirim İzni</Text>
           <Text style={dynamicStyles.permissionDescription}>
@@ -348,10 +394,10 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.statusIndicator}>
             <View style={[
               dynamicStyles.statusDot,
-              { backgroundColor: settings.enabled ? '#10B981' : '#EF4444' }
+                { backgroundColor: permissionGranted ? '#10B981' : '#EF4444' }
             ]} />
             <Text style={dynamicStyles.statusText}>
-              {settings.enabled ? 'İzin Verildi' : 'İzin Gerekli'}
+              {permissionGranted ? 'İzin Verildi' : 'İzin Gerekli'}
             </Text>
           </View>
           <TouchableOpacity
@@ -392,7 +438,17 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Sabah Bildirimi</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {settings.morningEnabled && (
+                    <Ionicons 
+                      name="sunny-outline" 
+                      size={20} 
+                      color={currentTheme.colors.primary} 
+                      style={{ marginRight: 8 }}
+                    />
+                  )}
+                  <Text style={dynamicStyles.settingTitle}>Sabah Bildirimi</Text>
+                </View>
                 <Text style={dynamicStyles.settingDescription}>
                   Motivasyon mesajları ve günlük hatırlatıcılar
                 </Text>
@@ -403,7 +459,6 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                 trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
                 thumbColor={settings.morningEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
                 style={dynamicStyles.switch}
-                disabled={!settings.enabled}
               />
             </View>
             
@@ -438,7 +493,17 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Akşam Bildirimi</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {settings.eveningEnabled && (
+                    <Ionicons 
+                      name="moon-outline" 
+                      size={20} 
+                      color={currentTheme.colors.primary} 
+                      style={{ marginRight: 8 }}
+                    />
+                  )}
+                  <Text style={dynamicStyles.settingTitle}>Akşam Bildirimi</Text>
+                </View>
                 <Text style={dynamicStyles.settingDescription}>
                   Günlük özet ve akşam hatırlatıcıları
                 </Text>
@@ -449,7 +514,6 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                 trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
                 thumbColor={settings.eveningEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
                 style={dynamicStyles.switch}
-                disabled={!settings.enabled}
               />
             </View>
             
@@ -500,7 +564,6 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                 trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
                 thumbColor={settings.taskRemindersEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
                 style={dynamicStyles.switch}
-                disabled={!settings.enabled}
               />
             </View>
           </View>
@@ -519,9 +582,104 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                 trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
                 thumbColor={settings.achievementsEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
                 style={dynamicStyles.switch}
-                disabled={!settings.enabled}
               />
             </View>
+          </View>
+        </View>
+
+        {/* Akıllı Bildirimler */}
+        <View style={dynamicStyles.section}>
+          <Text style={dynamicStyles.sectionTitle}>🧠 Akıllı Bildirimler</Text>
+          
+          <View style={dynamicStyles.settingCard}>
+            <View style={dynamicStyles.settingRow}>
+              <View style={dynamicStyles.settingLeft}>
+                <Text style={dynamicStyles.settingTitle}>Hafta İçi Motivasyon</Text>
+                <Text style={dynamicStyles.settingDescription}>
+                  Pazartesi-Cuma arası motivasyon mesajları
+                </Text>
+              </View>
+              <Switch
+                value={settings.weeklyMotivationEnabled}
+                onValueChange={(value) => updateSetting('weeklyMotivationEnabled', value)}
+                trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
+                thumbColor={settings.weeklyMotivationEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
+                style={dynamicStyles.switch}
+              />
+            </View>
+          </View>
+
+          <View style={dynamicStyles.settingCard}>
+            <View style={dynamicStyles.settingRow}>
+              <View style={dynamicStyles.settingLeft}>
+                <Text style={dynamicStyles.settingTitle}>Hafta Sonu Motivasyonu</Text>
+                <Text style={dynamicStyles.settingDescription}>
+                  Cumartesi-Pazar rahatlatıcı mesajlar
+                </Text>
+              </View>
+              <Switch
+                value={settings.weekendMotivationEnabled}
+                onValueChange={(value) => updateSetting('weekendMotivationEnabled', value)}
+                trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
+                thumbColor={settings.weekendMotivationEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
+                style={dynamicStyles.switch}
+              />
+            </View>
+          </View>
+
+          <View style={dynamicStyles.settingCard}>
+            <View style={dynamicStyles.settingRow}>
+              <View style={dynamicStyles.settingLeft}>
+                <Text style={dynamicStyles.settingTitle}>Günlük Özet Bildirimi</Text>
+                <Text style={dynamicStyles.settingDescription}>
+                  Gün sonu özet ve istatistikler (22:00)
+                </Text>
+              </View>
+              <Switch
+                value={settings.dailySummaryEnabled}
+                onValueChange={(value) => updateSetting('dailySummaryEnabled', value)}
+                trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
+                thumbColor={settings.dailySummaryEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
+                style={dynamicStyles.switch}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Sessiz Saatler (DND) */}
+        <View style={dynamicStyles.section}>
+          <Text style={dynamicStyles.sectionTitle}>🔕 Sessiz Saatler</Text>
+          <View style={dynamicStyles.settingCard}>
+            <View style={dynamicStyles.settingRow}>
+              <View style={dynamicStyles.settingLeft}>
+                <Text style={dynamicStyles.settingTitle}>Sessiz saatleri etkinleştir</Text>
+                <Text style={dynamicStyles.settingDescription}>Bu aralıkta bildirim gönderilmez</Text>
+              </View>
+              <Switch
+                value={settings.quietHoursEnabled}
+                onValueChange={(v) => updateSetting('quietHoursEnabled', v)}
+                trackColor={{ false: currentTheme.colors.border, true: currentTheme.colors.primary + '40' }}
+                thumbColor={settings.quietHoursEnabled ? currentTheme.colors.primary : currentTheme.colors.secondary}
+                style={dynamicStyles.switch}
+              />
+            </View>
+
+            {settings.quietHoursEnabled && (
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={dynamicStyles.settingTitle}>Başlangıç</Text>
+                  <View style={dynamicStyles.timeContainer}>
+                    <Text style={dynamicStyles.timeText}>{settings.quietStartTime}</Text>
+                  </View>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={dynamicStyles.settingTitle}>Bitiş</Text>
+                  <View style={dynamicStyles.timeContainer}>
+                    <Text style={dynamicStyles.timeText}>{settings.quietEndTime}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         </View>
 
