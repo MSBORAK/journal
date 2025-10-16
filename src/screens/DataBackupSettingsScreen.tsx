@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { CustomAlert } from '../components/CustomAlert';
 import * as Haptics from 'expo-haptics';
 import { backupToCloud, restoreFromCloud, clearAllData, downloadUserData } from '../services/backupService';
 
@@ -21,6 +22,26 @@ interface DataBackupSettingsScreenProps {
 
 export default function DataBackupSettingsScreen({ navigation }: DataBackupSettingsScreenProps) {
   const { currentTheme } = useTheme();
+  
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -31,9 +52,9 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await backupToCloud(user.uid);
-      Alert.alert('✅ Başarılı', 'Verileriniz başarıyla yedeklendi!');
+      showAlert('✅ Başarılı', 'Verileriniz başarıyla yedeklendi!');
     } catch (error) {
-      Alert.alert('❌ Hata', 'Yedekleme sırasında hata oluştu: ' + error);
+      showAlert('❌ Hata', 'Yedekleme sırasında hata oluştu: ' + error);
     } finally {
       setLoading(false);
     }
@@ -46,9 +67,9 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await restoreFromCloud(user.uid);
-      Alert.alert('✅ Başarılı', 'Verileriniz başarıyla geri yüklendi!');
+      showAlert('✅ Başarılı', 'Verileriniz başarıyla geri yüklendi!');
     } catch (error) {
-      Alert.alert('❌ Hata', 'Geri yükleme sırasında hata oluştu: ' + error);
+      showAlert('❌ Hata', 'Geri yükleme sırasında hata oluştu: ' + error);
     } finally {
       setLoading(false);
     }
@@ -61,39 +82,19 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await downloadUserData(user.uid);
-      Alert.alert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
+      showAlert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
     } catch (error) {
-      Alert.alert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);
+      showAlert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleClearData = () => {
-    Alert.alert(
+    showAlert(
       '⚠️ Veri Temizleme',
       'Tüm verileriniz silinecek! Bu işlem geri alınamaz. Devam etmek istiyor musunuz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user?.uid) return;
-            
-            setLoading(true);
-            try {
-              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              await clearAllData(user.uid);
-              Alert.alert('✅ Silindi', 'Tüm verileriniz başarıyla silindi!');
-            } catch (error) {
-              Alert.alert('❌ Hata', 'Veriler silinirken hata oluştu: ' + error);
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
+      'warning'
     );
   };
 
@@ -345,6 +346,20 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
           </View>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

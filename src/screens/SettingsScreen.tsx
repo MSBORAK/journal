@@ -16,6 +16,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { resetOnboarding } from '../services/onboardingService';
 import { resetAllTooltips } from '../services/tooltipService';
+import { soundService } from '../services/soundService';
+import { motivationService } from '../services/motivationService';
+import { CustomAlert } from '../components/CustomAlert';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -31,10 +34,30 @@ interface MenuItem {
   color: string;
 }
 
-export default function SettingsScreen({ navigation }: SettingsScreenProps) {
+const SettingsScreen = React.memo(function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { user, signOut } = useAuth();
   const { currentTheme } = useTheme();
   const { t, language } = useLanguage();
+  const [soundEnabled, setSoundEnabled] = useState(soundService.isSoundEnabled());
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   // Avatar renk fonksiyonu
   const getAvatarColor = (name: string) => {
@@ -48,65 +71,44 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   };
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Çıkış Yap',
+    showAlert(
+      '🚪 Çıkış Yap',
       'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Çıkış Yap',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-            } catch (error) {
-              Alert.alert('Hata', 'Çıkış yapılırken bir hata oluştu.');
-            }
-          },
-        },
-      ]
+      'warning'
     );
   };
 
   const handleResetOnboarding = async () => {
-    Alert.alert(
-      'Onboarding\'i Yeniden Göster',
+    showAlert(
+      '🎯 Onboarding\'i Yeniden Göster',
       'İlk kullanım rehberini tekrar görmek istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Evet',
-          onPress: async () => {
-            try {
-              await resetOnboarding(user?.uid);
-              Alert.alert('Başarılı', 'Uygulamayı yeniden başlatın ve onboarding\'i göreceksiniz.');
-            } catch (error) {
-              Alert.alert('Hata', 'Onboarding sıfırlanırken bir hata oluştu.');
-            }
-          },
-        },
-      ]
+      'warning'
     );
   };
 
   const handleResetTooltips = async () => {
-    Alert.alert(
-      'Tooltipleri Yeniden Göster',
+    showAlert(
+      '💡 Tooltipleri Yeniden Göster',
       'Tüm ipuçlarını tekrar görmek istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Evet',
-          onPress: async () => {
-            try {
-              await resetAllTooltips(user?.uid);
-              Alert.alert('Başarılı', 'Tooltipler sıfırlandı. Uygulamayı yeniden başlatın.');
-            } catch (error) {
-              Alert.alert('Hata', 'Tooltipler sıfırlanırken bir hata oluştu.');
-            }
-          },
-        },
-      ]
+      'warning'
+    );
+  };
+
+  const handleToggleSound = async () => {
+    const newSoundEnabled = !soundEnabled;
+    setSoundEnabled(newSoundEnabled);
+    await soundService.setEnabled(newSoundEnabled);
+    
+    if (newSoundEnabled) {
+      await soundService.playSuccess();
+    }
+  };
+
+  const handleResetMotivation = async () => {
+    showAlert(
+      '🎯 Motivasyon Geçmişini Sıfırla',
+      'Tüm motivasyon mesajlarının geçmişini sıfırlamak istediğinizden emin misiniz?',
+      'warning'
     );
   };
 
@@ -118,6 +120,14 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       icon: 'color-palette-outline',
       screen: 'ThemeSelection',
       color: currentTheme.colors.primary,
+    },
+    {
+      id: 'sound',
+      title: 'Ses Efektleri',
+      subtitle: soundEnabled ? 'Ses efektleri açık' : 'Ses efektleri kapalı',
+      icon: soundEnabled ? 'volume-high-outline' : 'volume-mute-outline',
+      action: handleToggleSound,
+      color: soundEnabled ? '#10b981' : '#6b7280',
     },
     {
       id: 'language',
@@ -198,6 +208,14 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       icon: 'help-circle-outline',
       action: handleResetTooltips,
       color: '#10b981',
+    },
+    {
+      id: 'motivation',
+      title: 'Motivasyon Geçmişini Sıfırla',
+      subtitle: 'Motivasyon mesajlarını tekrar göster',
+      icon: 'refresh-circle-outline',
+      action: handleResetMotivation,
+      color: '#f59e0b',
     },
     {
       id: 'logout',
@@ -287,7 +305,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     menuItem: {
       backgroundColor: currentTheme.colors.card,
       borderRadius: 16,
-      marginBottom: 12,
+      marginBottom: 16,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
@@ -296,11 +314,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       borderWidth: 1,
       borderColor: currentTheme.colors.border + '20',
       overflow: 'hidden',
+      minHeight: 80,
     },
     menuItemContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 18,
+      padding: 20,
+      minHeight: 80,
       gap: 16,
     },
     menuIconContainer: {
@@ -313,17 +333,20 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     },
     menuItemText: {
       flex: 1,
+      justifyContent: 'center',
     },
     menuItemTitle: {
       fontSize: 16,
       fontWeight: '600',
       color: currentTheme.colors.text,
-      marginBottom: 4,
+      marginBottom: 6,
+      lineHeight: 20,
     },
     menuItemSubtitle: {
       fontSize: 13,
       color: currentTheme.colors.secondary,
       lineHeight: 18,
+      flexWrap: 'wrap',
     },
     chevron: {
       opacity: 0.5,
@@ -418,6 +441,22 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <Text style={dynamicStyles.versionText}>Günlük v1.0.0</Text>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
-}
+});
+
+export default SettingsScreen;

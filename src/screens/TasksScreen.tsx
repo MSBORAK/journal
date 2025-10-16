@@ -18,6 +18,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { DailyTask } from '../types';
 import { recordUserActivity } from '../services/userActivityService';
 import { scheduleTaskReminder } from '../services/motivationNotificationService';
+import { CustomAlert } from '../components/CustomAlert';
+import PomodoroTimer from '../components/PomodoroTimer';
 
 interface TasksScreenProps {
   navigation: any;
@@ -41,9 +43,30 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
     getCategoryById
   } = useTasks(user?.uid);
 
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<DailyTask | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'monthly' | 'future'>('daily');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -51,13 +74,17 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
     category: 'personal' as DailyTask['category'],
     priority: 'medium' as DailyTask['priority'],
     estimatedTime: '',
+    taskType: 'daily' as 'daily' | 'weekly' | 'monthly' | 'future',
+    selectedDate: '',
+    selectedWeek: '',
+    selectedMonth: '',
   });
 
   const emojiOptions = ['📝', '🏥', '💧', '🏃‍♀️', '📚', '🍎', '😴', '🎯', '💝', '⚡', '🌱', '💼'];
   const priorityOptions = [
-    { value: 'low', label: 'Düşük', color: '#10b981' },
-    { value: 'medium', label: 'Orta', color: '#f59e0b' },
-    { value: 'high', label: 'Yüksek', color: '#ef4444' },
+    { value: 'low', label: 'Düşük', color: currentTheme.colors.success },
+    { value: 'medium', label: 'Orta', color: currentTheme.colors.primary },
+    { value: 'high', label: 'Yüksek', color: currentTheme.colors.danger },
   ];
 
   const todayTasks = getTodayTasks();
@@ -104,6 +131,34 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       borderRadius: 22,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    tabContainer: {
+      flexDirection: 'row',
+      backgroundColor: currentTheme.colors.card,
+      marginHorizontal: 20,
+      marginVertical: 10,
+      borderRadius: 12,
+      padding: 4,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+      borderRadius: 8,
+    },
+    activeTab: {
+      backgroundColor: currentTheme.colors.primary,
+    },
+    tabText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: currentTheme.colors.muted,
+      textAlign: 'center',
+    },
+    activeTabText: {
+      color: 'white',
+      fontWeight: '600',
     },
     statsContainer: {
       flexDirection: 'row',
@@ -488,13 +543,17 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       category: 'personal',
       priority: 'medium',
       estimatedTime: '',
+      taskType: 'daily',
+      selectedDate: '',
+      selectedWeek: '',
+      selectedMonth: '',
     });
     setEditingTask(null);
   };
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      Alert.alert('Hata', 'Başlık boş olamaz');
+      showAlert('❌ Hata', 'Başlık boş olamaz', 'error');
       return;
     }
 
@@ -518,7 +577,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       setShowAddModal(false);
       resetForm();
     } catch (error) {
-      Alert.alert('Hata', 'Görev kaydedilemedi');
+      showAlert('❌ Hata', 'Görev kaydedilemedi', 'error');
     }
   };
 
@@ -530,23 +589,20 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       category: task.category,
       priority: task.priority,
       estimatedTime: task.estimatedTime?.toString() || '',
+      taskType: 'daily',
+      selectedDate: '',
+      selectedWeek: '',
+      selectedMonth: '',
     });
     setEditingTask(task);
     setShowAddModal(true);
   };
 
   const handleDelete = (taskId: string) => {
-    Alert.alert(
-      'Görevi Sil',
+    showAlert(
+      '🗑️ Görevi Sil',
       'Bu görevi silmek istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        { 
-          text: 'Sil', 
-          style: 'destructive',
-          onPress: () => deleteTask(taskId)
-        },
-      ]
+      'warning'
     );
   };
 
@@ -562,18 +618,18 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
 
   const getPriorityColor = (priority: DailyTask['priority']) => {
     const option = priorityOptions.find(opt => opt.value === priority);
-    return option ? option.color : '#6b7280';
+    return option ? option.color : currentTheme.colors.muted;
   };
 
 
   return (
-    <View style={dynamicStyles.container}>
+    <ScrollView style={dynamicStyles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={dynamicStyles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Günlük Görevler</Text>
+        <Text style={dynamicStyles.headerTitle}>Görevler</Text>
         <TouchableOpacity 
           style={dynamicStyles.addButton}
           onPress={() => {
@@ -582,6 +638,43 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
           }}
         >
           <Ionicons name="add" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+
+
+      {/* Tab Navigation */}
+      <View style={dynamicStyles.tabContainer}>
+        <TouchableOpacity
+          style={[dynamicStyles.tab, activeTab === 'daily' && dynamicStyles.activeTab]}
+          onPress={() => setActiveTab('daily')}
+        >
+          <Text style={[dynamicStyles.tabText, activeTab === 'daily' && dynamicStyles.activeTabText]}>
+            📅 Günlük
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[dynamicStyles.tab, activeTab === 'weekly' && dynamicStyles.activeTab]}
+          onPress={() => setActiveTab('weekly')}
+        >
+          <Text style={[dynamicStyles.tabText, activeTab === 'weekly' && dynamicStyles.activeTabText]}>
+            📆 Haftalık
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[dynamicStyles.tab, activeTab === 'monthly' && dynamicStyles.activeTab]}
+          onPress={() => setActiveTab('monthly')}
+        >
+          <Text style={[dynamicStyles.tabText, activeTab === 'monthly' && dynamicStyles.activeTabText]}>
+            🗓️ Aylık
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[dynamicStyles.tab, activeTab === 'future' && dynamicStyles.activeTab]}
+          onPress={() => setActiveTab('future')}
+        >
+          <Text style={[dynamicStyles.tabText, activeTab === 'future' && dynamicStyles.activeTabText]}>
+            🎯 Gelecek
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -601,91 +694,10 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
         </View>
       </View>
 
-      {/* Progress Card */}
-      <View style={dynamicStyles.progressCard}>
-        <View style={dynamicStyles.progressHeader}>
-          <Text style={dynamicStyles.progressTitle}>📊 Bugünkü İlerleme</Text>
-          <Text style={dynamicStyles.progressText}>
-            {completedCount}/{todayTasks.length}
-          </Text>
-        </View>
-        
-        <View style={dynamicStyles.progressBar}>
-          <View 
-            style={[
-              dynamicStyles.progressFill, 
-              { width: `${completionRate}%` }
-            ]} 
-          />
-        </View>
-        
-        {streak > 0 && (
-          <View style={dynamicStyles.streakContainer}>
-            <Text style={dynamicStyles.streakIcon}>🔥</Text>
-            <Text style={dynamicStyles.streakText}>
-              {streak} gün üst üste tamamlama
-            </Text>
-          </View>
-        )}
-      </View>
 
-      {/* Category Filter */}
-      <View style={dynamicStyles.categoryFilter}>
-        <View style={dynamicStyles.categoryGrid}>
-          <TouchableOpacity
-            style={[
-              dynamicStyles.categoryCard,
-              selectedCategory === 'all' && dynamicStyles.selectedCategoryCard
-            ]}
-            onPress={() => setSelectedCategory('all')}
-          >
-            <Text style={dynamicStyles.categoryIcon}>📋</Text>
-            <Text style={[
-              dynamicStyles.categoryName,
-              selectedCategory === 'all' && dynamicStyles.selectedCategoryName
-            ]}>
-              Tümü
-            </Text>
-            <Text style={[
-              dynamicStyles.categoryCount,
-              selectedCategory === 'all' && dynamicStyles.selectedCategoryCount
-            ]}>
-              {tasks.length}
-            </Text>
-          </TouchableOpacity>
-          
-          {categories.map((category) => {
-            const categoryTasks = tasks.filter(task => task.category === category.id);
-            return (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  dynamicStyles.categoryCard,
-                  selectedCategory === category.id && dynamicStyles.selectedCategoryCard
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
-              >
-                <Text style={dynamicStyles.categoryIcon}>{category.emoji}</Text>
-                <Text style={[
-                  dynamicStyles.categoryName,
-                  selectedCategory === category.id && dynamicStyles.selectedCategoryName
-                ]}>
-                  {category.name}
-                </Text>
-                <Text style={[
-                  dynamicStyles.categoryCount,
-                  selectedCategory === category.id && dynamicStyles.selectedCategoryCount
-                ]}>
-                  {categoryTasks.length}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
 
       {/* Tasks List */}
-      <ScrollView style={dynamicStyles.tasksList} showsVerticalScrollIndicator={false}>
+      <View style={dynamicStyles.tasksList}>
         {filteredTasks.length === 0 ? (
           <View style={dynamicStyles.emptyState}>
             <Text style={dynamicStyles.emptyIcon}>📝</Text>
@@ -767,14 +779,14 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                     style={dynamicStyles.actionButton}
                     onPress={() => handleDelete(task.id)}
                   >
-                    <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                    <Ionicons name="trash-outline" size={20} color={currentTheme.colors.danger} />
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
           ))
         )}
-      </ScrollView>
+      </View>
 
       {/* Add/Edit Modal */}
       <Modal
@@ -814,7 +826,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   value={formData.title}
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
                   placeholder="Görev başlığı"
-                  placeholderTextColor={currentTheme.colors.secondary}
+                  placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
 
@@ -826,7 +838,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   value={formData.description}
                   onChangeText={(text) => setFormData({ ...formData, description: text })}
                   placeholder="İsteğe bağlı açıklama"
-                  placeholderTextColor={currentTheme.colors.secondary}
+                  placeholderTextColor={currentTheme.colors.muted}
                   multiline
                 />
               </View>
@@ -906,7 +918,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   value={formData.estimatedTime}
                   onChangeText={(text) => setFormData({ ...formData, estimatedTime: text })}
                   placeholder="30"
-                  placeholderTextColor={currentTheme.colors.secondary}
+                  placeholderTextColor={currentTheme.colors.muted}
                   keyboardType="numeric"
                 />
               </View>
@@ -932,6 +944,20 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </View>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
+    </ScrollView>
   );
 }

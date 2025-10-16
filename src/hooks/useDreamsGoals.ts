@@ -238,6 +238,13 @@ export const useDreamsGoals = (userId?: string) => {
     await savePromises(updatedPromises);
   };
 
+  const updatePromise = async (promiseId: string, updates: Partial<Promise>) => {
+    const updatedPromises = promises.map(p =>
+      p.id === promiseId ? { ...p, ...updates } : p
+    );
+    await savePromises(updatedPromises);
+  };
+
   // Statistics
   const getStats = () => {
     const activeDreams = dreams.filter(d => !d.isArchived).length;
@@ -313,6 +320,7 @@ export const useDreamsGoals = (userId?: string) => {
     addPromise,
     deletePromise,
     togglePromiseActive,
+    updatePromise,
     getStats,
     getGoalsByDream,
     getActivePromises,

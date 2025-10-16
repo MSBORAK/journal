@@ -556,24 +556,34 @@ export const getMessageByDayOfWeek = (timezone?: string): NotificationMessage =>
   const userTimezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const now = new Date();
   
-  // Belirtilen timezone'a göre günü al
-  const day = parseInt(now.toLocaleDateString('en-US', {
-    timeZone: userTimezone,
-    weekday: 'long' // Monday, Tuesday, etc.
-  }));
-  
-  // Günü sayıya çevir
-  const dayNumber = now.getDay(); // 0=Sunday, 6=Saturday
-  
-  console.log(`Current time in ${userTimezone}: ${now.toLocaleString()}, Day: ${day} (1=Monday, 7=Sunday)`);
-  
-  // 6 = Cumartesi, 0 = Pazar
-  if (dayNumber === 6 || dayNumber === 0) {
-    console.log('Weekend detected, showing weekend message');
-    return getRandomMessage(weekendMessages);
-  } else {
-    console.log('Weekday detected, showing time-based message');
-    return getMessageByTimeOfDay(undefined, userTimezone);
+  try {
+    // Belirtilen timezone'a göre günü al
+    const dayOfWeek = now.toLocaleDateString('en-US', {
+      timeZone: userTimezone,
+      weekday: 'long' // Monday, Tuesday, etc.
+    });
+    
+    console.log(`Current time in ${userTimezone}: ${now.toLocaleString()}, Day: ${dayOfWeek}`);
+    
+    // Hafta sonu kontrolü
+    if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
+      console.log('Weekend detected, showing weekend message');
+      return getRandomMessage(weekendMessages);
+    } else {
+      console.log('Weekday detected, showing time-based message');
+      return getMessageByTimeOfDay(undefined, userTimezone);
+    }
+  } catch (error) {
+    console.error('Error in getMessageByDayOfWeek:', error);
+    // Fallback: UTC tabanlı kontrol
+    const dayNumber = now.getUTCDay(); // 0=Sunday, 6=Saturday
+    if (dayNumber === 6 || dayNumber === 0) {
+      console.log('Weekend detected (UTC fallback), showing weekend message');
+      return getRandomMessage(weekendMessages);
+    } else {
+      console.log('Weekday detected (UTC fallback), showing time-based message');
+      return getMessageByTimeOfDay(undefined, userTimezone);
+    }
   }
 };
 

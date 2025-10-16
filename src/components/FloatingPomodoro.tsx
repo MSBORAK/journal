@@ -118,13 +118,13 @@ export default function FloatingPomodoro({
   const getSessionInfo = () => {
     switch (sessionType) {
       case 'work':
-        return { emoji: '🍅', color: '#EF4444' };
+        return { emoji: '🍅', color: currentTheme.colors.danger };
       case 'break':
-        return { emoji: '☕', color: '#10B981' };
+        return { emoji: '☕', color: currentTheme.colors.success };
       case 'longBreak':
-        return { emoji: '🌅', color: '#8B5CF6' };
+        return { emoji: '🌅', color: currentTheme.colors.primary };
       default:
-        return { emoji: '🍅', color: '#EF4444' };
+        return { emoji: '🍅', color: currentTheme.colors.danger };
     }
   };
 
@@ -172,7 +172,7 @@ export default function FloatingPomodoro({
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: isActive ? '#10B981' : '#6B7280',
+      backgroundColor: isActive ? currentTheme.colors.success : currentTheme.colors.muted,
       position: 'absolute',
       top: 4,
       right: 4,
@@ -217,7 +217,7 @@ export default function FloatingPomodoro({
         activeOpacity={0.8}
       >
         <LinearGradient
-          colors={[sessionInfo.color, sessionInfo.color + 'DD']}
+          colors={[sessionInfo.color || currentTheme.colors.primary, (sessionInfo.color || currentTheme.colors.primary) + 'DD']}
           style={dynamicStyles.bubbleContent}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

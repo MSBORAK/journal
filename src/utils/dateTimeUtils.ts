@@ -104,11 +104,24 @@ export const getLocalISOString = (timezone?: string): string => {
 export const isWeekendLocal = (timezone?: string): boolean => {
   const now = new Date();
   const userTimezone = timezone || getUserTimezone();
-  const dayOfWeek = now.toLocaleDateString('en-US', {
-    timeZone: userTimezone,
-    weekday: 'long'
-  });
-  return dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday';
+  
+  try {
+    // Saat dilimi güvenli hafta sonu kontrolü
+    const dayOfWeek = now.toLocaleDateString('en-US', {
+      timeZone: userTimezone,
+      weekday: 'long'
+    });
+    
+  // Debug için log ekleyelim
+  // console.log('Current day of week:', dayOfWeek, 'Timezone:', userTimezone);
+    
+    return dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday';
+  } catch (error) {
+    console.error('Error in isWeekendLocal:', error);
+    // Fallback: UTC tabanlı kontrol
+    const utcDay = now.getUTCDay(); // 0 = Sunday, 6 = Saturday
+    return utcDay === 0 || utcDay === 6;
+  }
 };
 
 /**

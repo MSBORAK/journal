@@ -377,7 +377,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Günlük ara..."
-            placeholderTextColor={currentTheme.colors.secondary}
+            placeholderTextColor={currentTheme.colors.muted}
           />
         </View>
       </View>

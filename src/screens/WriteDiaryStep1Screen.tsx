@@ -215,7 +215,7 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
             value={title}
             onChangeText={setTitle}
             placeholder="Bugün nasıl geçti?"
-            placeholderTextColor={currentTheme.colors.secondary}
+            placeholderTextColor={currentTheme.colors.muted}
           />
         </View>
 

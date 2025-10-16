@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CustomAlert } from '../components/CustomAlert';
 
 interface AppSettingsScreenProps {
   navigation: any;
@@ -21,41 +22,47 @@ interface AppSettingsScreenProps {
 
 export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps) {
   const { currentTheme } = useTheme();
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   const showAbout = () => {
-    Alert.alert(
+    showAlert(
       'ℹ️ Hakkında',
       'Daily Diary App v1.0.0\n\nGünlük yazma alışkanlığı kazanmanız için tasarlanmış modern bir uygulamadır.\n\nGeliştirici: Merve Sude Borak\n© 2025\n\nİletişim: support@dailydiary.app',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
   const showHelp = () => {
-    Alert.alert(
+    showAlert(
       '❓ Yardım & Destek',
       'Sık Sorulan Sorular:\n\n❓ Nasıl günlük yazabilirim?\n• Ana sayfadaki "Günlük Yaz" butonuna basın\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Tema nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: support@dailydiary.app',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
   const rateApp = () => {
-    Alert.alert(
+    showAlert(
       '⭐ Uygulamayı Değerlendir',
       'Uygulamamızı beğendiyseniz, App Store\'da 5 yıldız vererek bize destek olabilirsiniz!\n\nDeğerlendirmeniz bizim için çok değerli! 🌟',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Değerlendir',
-          style: 'default',
-          onPress: () => {
-            // App Store linkini aç
-            const appStoreUrl = 'https://apps.apple.com/app/daily-diary-app/id1234567890';
-            Linking.openURL(appStoreUrl).catch(() => {
-              Alert.alert('Hata', 'App Store açılamadı');
-            });
-          }
-        }
-      ]
+      'info'
     );
   };
 
@@ -66,42 +73,31 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         title: 'Daily Diary App',
       });
     } catch (error) {
-      Alert.alert('Hata', 'Paylaşım sırasında hata oluştu');
+      showAlert('❌ Hata', 'Paylaşım sırasında hata oluştu', 'error');
     }
   };
 
   const contactSupport = () => {
-    Alert.alert(
+    showAlert(
       '📞 İletişim',
       'Bizimle iletişime geçin:\n\n📧 Email: support@dailydiary.app\n💬 Telegram: @dailydiaryapp\n🐦 Twitter: @dailydiaryapp\n\nSorularınız için 7/24 destek sağlıyoruz!',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Email Gönder',
-          style: 'default',
-          onPress: () => {
-            Linking.openURL('mailto:support@dailydiary.app?subject=Daily Diary App - Destek').catch(() => {
-              Alert.alert('Hata', 'Email uygulaması açılamadı');
-            });
-          }
-        }
-      ]
+      'info'
     );
   };
 
   const showChangelog = () => {
-    Alert.alert(
+    showAlert(
       '📝 Değişiklik Günlüğü',
       'Versiyon 1.0.0 (2025):\n\n✨ Yeni Özellikler:\n• Günlük yazma sistemi\n• Mood takibi\n• İstatistikler ve analizler\n• Hayaller & Hedefler panosu\n• Pomodoro timer\n• Tema sistemi\n\n🐛 Düzeltmeler:\n• Performans iyileştirmeleri\n• UI/UX geliştirmeleri\n• Bug düzeltmeleri\n\n🔮 Gelecek Güncellemeler:\n• Cloud senkronizasyon\n• Daha fazla tema\n• Sosyal özellikler',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
   const showSystemInfo = () => {
-    Alert.alert(
+    showAlert(
       '🔧 Sistem Bilgileri',
       'Uygulama Bilgileri:\n\n📱 Versiyon: 1.0.0\n🏗️ Build: 2025.01\n💾 Boyut: ~25 MB\n🔧 Platform: React Native\n📊 Framework: Expo\n\nCihaz Bilgileri:\n• React Native ile geliştirilmiştir\n• iOS ve Android desteklenir\n• Offline çalışır\n• Minimal depolama kullanır',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
@@ -424,6 +420,20 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
           </View>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

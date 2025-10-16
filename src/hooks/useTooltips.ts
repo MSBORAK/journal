@@ -41,7 +41,7 @@ export function useTooltips(screenName: string): TooltipManager {
         // Show first tooltip after a short delay
         setTimeout(() => {
           showTooltip(unshownTooltips[0]);
-        }, 1000);
+        }, 1500);
       }
     };
 
@@ -63,8 +63,16 @@ export function useTooltips(screenName: string): TooltipManager {
     setTargetPosition(undefined);
   };
 
-  const nextTooltip = () => {
-    hideTooltip();
+  const nextTooltip = async () => {
+    // Mark current tooltip as shown first
+    if (currentTooltip) {
+      await markTooltipAsShown(currentTooltip.id, user?.uid);
+    }
+    
+    // Hide current tooltip
+    setIsVisible(false);
+    setCurrentTooltip(null);
+    setTargetPosition(undefined);
     
     // Show next tooltip after a short delay
     setTimeout(() => {
@@ -76,7 +84,7 @@ export function useTooltips(screenName: string): TooltipManager {
         setPendingTooltips([]);
         currentIndex.current = 0;
       }
-    }, 500);
+    }, 300);
   };
 
   return {

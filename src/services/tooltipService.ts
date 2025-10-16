@@ -85,8 +85,10 @@ export const markTooltipAsShown = async (tooltipId: string, userId?: string): Pr
   try {
     const key = userId ? `${TOOLTIP_KEY_PREFIX}${userId}_${tooltipId}` : `${TOOLTIP_KEY_PREFIX}${tooltipId}`;
     await AsyncStorage.setItem(key, 'true');
+    console.log(`Tooltip ${tooltipId} marked as shown for user ${userId || 'anonymous'}`);
   } catch (error) {
     console.error('Error marking tooltip as shown:', error);
+    // Don't throw, just log the error
   }
 };
 

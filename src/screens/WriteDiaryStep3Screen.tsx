@@ -375,7 +375,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
             value={newTag}
             onChangeText={setNewTag}
             placeholder="Etiket ekle (örn: #heyecan, #proje)"
-            placeholderTextColor={currentTheme.colors.secondary}
+            placeholderTextColor={currentTheme.colors.muted}
             onSubmitEditing={addTag}
             returnKeyType="done"
           />

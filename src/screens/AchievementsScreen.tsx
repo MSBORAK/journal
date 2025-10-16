@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Animated,
   Modal,
+  Dimensions,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,6 +21,8 @@ import { Achievement } from '../types';
 interface AchievementsScreenProps {
   navigation: any;
 }
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function AchievementsScreen({ navigation }: AchievementsScreenProps) {
   const { user } = useAuth();
@@ -219,11 +222,11 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
-      gap: 16,
+      paddingBottom: 20,
     },
     achievementCard: {
-      width: '48%',
-      marginBottom: 20,
+      width: (screenWidth - 60) / 2,
+      marginBottom: 16,
       borderRadius: 24,
       shadowColor: currentTheme.colors.primary,
       shadowOffset: { width: 0, height: 4 },
@@ -233,15 +236,15 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
     },
     achievementGradient: {
       borderRadius: 24,
-      padding: 24,
-      minHeight: 200,
+      padding: 20,
+      minHeight: 180,
       alignItems: 'center',
       justifyContent: 'center',
     },
     unlockedGradient: {
       borderRadius: 24,
-      padding: 24,
-      minHeight: 200,
+      padding: 20,
+      minHeight: 180,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 2,
@@ -254,55 +257,55 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
     },
     lockedGradient: {
       borderRadius: 24,
-      padding: 24,
-      minHeight: 200,
+      padding: 20,
+      minHeight: 180,
       alignItems: 'center',
       justifyContent: 'center',
       opacity: 0.85,
     },
     achievementIcon: {
-      fontSize: 56,
-      marginBottom: 16,
+      fontSize: 48,
+      marginBottom: 12,
       textShadowColor: 'rgba(0,0,0,0.1)',
       textShadowOffset: { width: 0, height: 2 },
       textShadowRadius: 4,
     },
     lockedIcon: {
-      fontSize: 56,
-      marginBottom: 16,
+      fontSize: 48,
+      marginBottom: 12,
       opacity: 0.5,
     },
     achievementTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '800',
       color: currentTheme.colors.text,
       textAlign: 'center',
-      marginBottom: 10,
+      marginBottom: 8,
       letterSpacing: 0.5,
     },
     lockedTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '800',
       color: currentTheme.colors.secondary,
       textAlign: 'center',
-      marginBottom: 10,
+      marginBottom: 8,
       letterSpacing: 0.5,
     },
     achievementDescription: {
-      fontSize: 13,
+      fontSize: 12,
       color: currentTheme.colors.secondary,
       textAlign: 'center',
-      lineHeight: 18,
-      marginBottom: 16,
+      lineHeight: 16,
+      marginBottom: 12,
       letterSpacing: 0.2,
     },
     progressContainer: {
       width: '100%',
-      height: 8,
+      height: 6,
       backgroundColor: currentTheme.colors.border + '40',
-      borderRadius: 4,
+      borderRadius: 3,
       overflow: 'hidden',
-      marginBottom: 10,
+      marginBottom: 8,
     },
     progressFill: {
       height: '100%',

@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { CustomAlert } from '../components/CustomAlert';
 import * as Haptics from 'expo-haptics';
 import { downloadUserData } from '../services/backupService';
 
@@ -21,6 +22,26 @@ interface PrivacySecuritySettingsScreenProps {
 
 export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySecuritySettingsScreenProps) {
   const { currentTheme } = useTheme();
+  
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -31,43 +52,43 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await downloadUserData(user.uid);
-      Alert.alert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
+      showAlert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
     } catch (error) {
-      Alert.alert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);
+      showAlert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);
     } finally {
       setLoading(false);
     }
   };
 
   const showPrivacyPolicy = () => {
-    Alert.alert(
+    showAlert(
       '🔒 Gizlilik Politikası',
       'Gizlilik Politikamız:\n\n• Günlük verileriniz sadece sizin cihazınızda ve Supabase bulutunda saklanır\n• Verileriniz üçüncü taraflarla paylaşılmaz\n• Tüm verileriniz şifrelenir\n• İstediğiniz zaman verilerinizi silebilirsiniz\n• Anonim istatistikler için verileriniz anonimleştirilir\n\nDetaylı bilgi için: privacy@dailydiary.app',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
   const showDataTransparency = () => {
-    Alert.alert(
+    showAlert(
       '👁️ Veri Şeffaflığı',
       'Verileriniz nasıl kullanılıyor:\n\n📝 Günlük Yazıları:\n• Sadece sizin erişiminizde\n• İstatistikler için analiz edilir\n• Anonimleştirilmiş içgörüler oluşturulur\n\n📊 Kullanım İstatistikleri:\n• Giriş yapma zamanları\n• Yazma alışkanlıkları\n• Genel uygulama kullanımı\n\n🔐 Güvenlik:\n• Tüm veriler şifrelenir\n• Supabase RLS ile korunur\n• Sadece siz erişebilirsiniz',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
   const showTermsOfService = () => {
-    Alert.alert(
+    showAlert(
       '📋 Kullanım Koşulları',
       'Kullanım Koşulları:\n\n• Uygulamayı yasal amaçlarla kullanın\n• Başkalarının haklarını ihlal etmeyin\n• Spam veya kötüye kullanım yapmayın\n• Verilerinizi güvenli tutun\n• Yasal sorumluluğunuz bulunmaktadır\n\nDetaylı bilgi için: terms@dailydiary.app',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
   const showSecurityInfo = () => {
-    Alert.alert(
+    showAlert(
       '🛡️ Güvenlik Bilgileri',
       'Güvenlik Özelliklerimiz:\n\n🔐 Şifreleme:\n• End-to-end şifreleme\n• AES-256 güvenlik\n• SSL/TLS bağlantılar\n\n🔑 Kimlik Doğrulama:\n• Email doğrulama\n• Güvenli giriş\n• Oturum yönetimi\n\n📱 Cihaz Güvenliği:\n• Biyometrik giriş\n• Güvenli depolama\n• Otomatik çıkış',
-      [{ text: 'Tamam', style: 'default' }]
+      'info'
     );
   };
 
@@ -393,6 +414,20 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
           </View>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

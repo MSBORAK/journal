@@ -69,9 +69,14 @@ export default function DatePicker({
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     
-    if (date.toDateString() === today.toDateString()) {
+    // UTC bazlı tarih karşılaştırması (saat dilimi sorunlarını önler)
+    const todayUTC = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tomorrowUTC = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+    const dateUTC = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    if (dateUTC.getTime() === todayUTC.getTime()) {
       return 'Bugün';
-    } else if (date.toDateString() === tomorrow.toDateString()) {
+    } else if (dateUTC.getTime() === tomorrowUTC.getTime()) {
       return 'Yarın';
     } else {
       return date.toLocaleDateString('tr-TR', {
@@ -86,13 +91,17 @@ export default function DatePicker({
   const getDateDisplayText = () => {
     if (!selectedDate) return placeholder;
     
-    const date = new Date(selectedDate + 'T00:00:00');
+    // YYYY-MM-DD formatını parse et (saat dilimi sorunlarını önler)
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month 0-indexed
     return formatDate(date);
   };
 
   const isDateSelected = (date: Date) => {
     if (!selectedDate) return false;
-    return date.toISOString().split('T')[0] === selectedDate;
+    // UTC bazlı tarih karşılaştırması
+    const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return dateString === selectedDate;
   };
 
   const isDateDisabled = (date: Date) => {
@@ -108,18 +117,23 @@ export default function DatePicker({
 
   const isToday = (date: Date) => {
     const today = new Date();
-    return date.toDateString() === today.toDateString();
+    const todayUTC = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dateUTC = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return dateUTC.getTime() === todayUTC.getTime();
   };
 
   const isTomorrow = (date: Date) => {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    return date.toDateString() === tomorrow.toDateString();
+    const tomorrowUTC = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+    const dateUTC = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return dateUTC.getTime() === tomorrowUTC.getTime();
   };
 
   const handleDateSelect = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0];
+    // UTC bazlı tarih string'i oluştur
+    const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     onDateSelect(dateString);
     setShowModal(false);
   };

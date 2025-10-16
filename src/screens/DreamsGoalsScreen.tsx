@@ -11,7 +11,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,13 +19,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import CelebrationModal from '../components/CelebrationModal';
+import { CustomAlert } from '../components/CustomAlert';
 import { Dream, Goal } from '../types';
 
 interface DreamsGoalsScreenProps {
   navigation: any;
 }
 
-export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps) {
+const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const {
@@ -39,6 +39,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
     addPromise,
     updateDream,
     updateGoal,
+    updatePromise,
     toggleFavoriteDream,
     updateGoalProgress,
     toggleMilestone,
@@ -58,6 +59,12 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
     title: '',
     message: '',
     type: 'dream' as 'dream' | 'goal' | 'promise'
+  });
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error' as 'success' | 'warning' | 'error' | 'info',
   });
   const [formData, setFormData] = useState({
     title: '',
@@ -85,6 +92,19 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
     setShowCelebration(true);
   };
 
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'error') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
+
   const formatDate = (dateIso?: string) => {
     if (!dateIso) return '';
     try {
@@ -98,7 +118,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
   // Test verileri ekle (sadece ilk açılışta)
   useEffect(() => {
     const addTestData = async () => {
-      if (user?.uid && dreams.length === 0 && goals.length === 0 && promises.length === 0) {
+      if (user?.uid && dreams.length === 0 && goals.length === 0 && promises.length === 0 && !loading) {
         try {
           // Test Dreams
           await addDream({
@@ -175,13 +195,13 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
   const handleSave = async () => {
     if (activeTab === 'promise') {
       if (!formData.promiseText.trim()) {
-        Alert.alert('Hata', 'Lütfen bir söz yazın');
+        showAlert('Hata', 'Lütfen bir söz yazın', 'error');
         return;
       }
       await addPromise(formData.promiseText);
     } else {
       if (!formData.title.trim()) {
-        Alert.alert('Hata', 'Lütfen bir başlık yazın');
+        showAlert('Hata', 'Lütfen bir başlık yazın', 'error');
         return;
       }
       if (activeTab === 'dreams') {
@@ -264,12 +284,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           { borderColor: dream.isFavorite ? getFavoriteColor() : currentTheme.colors.border }
         ]}
       >
-        {/* Floating Elements */}
-        <View style={dynamicStyles.floatingElements}>
-          <Text style={dynamicStyles.floatingIcon1}>✨</Text>
-          <Text style={dynamicStyles.floatingIcon2}>🌟</Text>
-          <Text style={dynamicStyles.floatingIcon3}>💫</Text>
-        </View>
 
         <View style={dynamicStyles.cardHeader}>
           <View style={dynamicStyles.cardIconContainer}>
@@ -332,12 +346,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           { borderColor: goal.progress === 100 ? '#10B981' : currentTheme.colors.border }
         ]}
       >
-        {/* Floating Elements */}
-        <View style={dynamicStyles.floatingElements}>
-          <Text style={dynamicStyles.floatingIcon1}>🎯</Text>
-          <Text style={dynamicStyles.floatingIcon2}>🚀</Text>
-          <Text style={dynamicStyles.floatingIcon3}>⭐</Text>
-        </View>
 
         <View style={dynamicStyles.cardHeader}>
           <View style={dynamicStyles.cardIconContainer}>
@@ -405,12 +413,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           { borderColor: promise.isCompleted ? '#10B981' : currentTheme.colors.border }
         ]}
       >
-        {/* Floating Elements */}
-        <View style={dynamicStyles.floatingElements}>
-          <Text style={dynamicStyles.floatingIcon1}>🤝</Text>
-          <Text style={dynamicStyles.floatingIcon2}>💫</Text>
-          <Text style={dynamicStyles.floatingIcon3}>✨</Text>
-        </View>
 
         <View style={dynamicStyles.cardHeader}>
           <View style={dynamicStyles.cardIconContainer}>
@@ -559,44 +561,11 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       backgroundColor: 'transparent',
       borderWidth: 1,
     },
-    floatingElements: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 1,
-    },
-    floatingIcon1: {
-      position: 'absolute',
-      top: 8,
-      right: 12,
-      fontSize: 14,
-      opacity: 0.5,
-      zIndex: 1,
-    },
-    floatingIcon2: {
-      position: 'absolute',
-      top: 40,
-      right: 25,
-      fontSize: 12,
-      opacity: 0.3,
-      zIndex: 1,
-    },
-    floatingIcon3: {
-      position: 'absolute',
-      bottom: 8,
-      left: 12,
-      fontSize: 12,
-      opacity: 0.4,
-      zIndex: 1,
-    },
     cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 16,
-      zIndex: 2,
     },
     cardIconContainer: {
       width: 40,
@@ -643,7 +612,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       borderColor: currentTheme.colors.border,
     },
     cardContent: {
-      zIndex: 2,
       marginBottom: 8,
     },
     cardTitle: {
@@ -663,7 +631,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       marginTop: 6,
     },
     progressContainer: {
-      zIndex: 2,
       marginTop: 8,
     },
     progressBar: {
@@ -688,7 +655,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       flexDirection: 'row',
       justifyContent: 'center',
       gap: 6,
-      zIndex: 2,
     },
     completedPill: {
       position: 'absolute',
@@ -717,7 +683,6 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      zIndex: 2,
     },
     statusDot: {
       width: 8,
@@ -998,7 +963,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                         borderColor: currentTheme.colors.border,
                       }}
                       placeholder="Örnek: Her gün 10 dakika meditasyon yapacağım..."
-                      placeholderTextColor={currentTheme.colors.secondary}
+                      placeholderTextColor={currentTheme.colors.muted}
                       value={formData.promiseText}
                       onChangeText={(text) => setFormData({ ...formData, promiseText: text })}
                       multiline
@@ -1027,7 +992,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                           borderColor: currentTheme.colors.border,
                         }}
                         placeholder={activeTab === 'dreams' ? "Hayalim..." : "Hedefim..."}
-                        placeholderTextColor={currentTheme.colors.secondary}
+                        placeholderTextColor={currentTheme.colors.muted}
                         value={formData.title}
                         onChangeText={(text) => setFormData({ ...formData, title: text })}
                       />
@@ -1055,7 +1020,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                           borderColor: currentTheme.colors.border,
                         }}
                         placeholder="Hayalini detaylandır..."
-                        placeholderTextColor={currentTheme.colors.secondary}
+                        placeholderTextColor={currentTheme.colors.muted}
                         value={formData.description}
                         onChangeText={(text) => setFormData({ ...formData, description: text })}
                         multiline
@@ -1261,6 +1226,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
               <TouchableOpacity
                 onPress={() => {
                   setShowDetailModal(false);
+                  // Edit modal açılmadan önce form data'yı set et
+                  if (selectedItem) {
+                    setFormData({
+                      title: selectedItem.title || selectedItem.text || '',
+                      description: selectedItem.description || '',
+                      promiseText: selectedItem.text || '',
+                    });
+                  }
                   setShowEditModal(true);
                 }}
                 style={{
@@ -1350,39 +1323,8 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
               {/* Modal Content */}
               <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false}>
                 <View style={{ gap: 16 }}>
-                  <View>
-                    <Text style={{
-                      fontSize: 14,
-                      fontWeight: '600',
-                      color: currentTheme.colors.text,
-                      marginBottom: 8,
-                    }}>
-                      Başlık *
-                    </Text>
-                    <TextInput
-                      style={{
-                        backgroundColor: currentTheme.colors.background,
-                        borderRadius: 12,
-                        padding: 16,
-                        fontSize: 16,
-                        color: currentTheme.colors.text,
-                        borderWidth: 1,
-                        borderColor: currentTheme.colors.border,
-                      }}
-                      placeholder="Başlık..."
-                      placeholderTextColor={currentTheme.colors.secondary}
-                      value={selectedItem?.title || selectedItem?.text || ''}
-                      onChangeText={(text) => {
-                        setSelectedItem({
-                          ...selectedItem,
-                          title: text,
-                          text: text
-                        });
-                      }}
-                    />
-                  </View>
-                  
-                  {selectedItem?.description && (
+                  {activeTab === 'promise' ? (
+                    // Promise Form
                     <View>
                       <Text style={{
                         fontSize: 14,
@@ -1390,7 +1332,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                         color: currentTheme.colors.text,
                         marginBottom: 8,
                       }}>
-                        Açıklama
+                        Sözün *
                       </Text>
                       <TextInput
                         style={{
@@ -1404,18 +1346,91 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                           borderWidth: 1,
                           borderColor: currentTheme.colors.border,
                         }}
-                        placeholder="Açıklama..."
-                        placeholderTextColor={currentTheme.colors.secondary}
-                        value={selectedItem.description}
+                        placeholder="Sözünü yaz..."
+                        placeholderTextColor={currentTheme.colors.muted}
+                        value={formData.promiseText}
                         onChangeText={(text) => {
+                          setFormData({ ...formData, promiseText: text });
                           setSelectedItem({
                             ...selectedItem,
-                            description: text
+                            text: text
                           });
                         }}
                         multiline
                       />
                     </View>
+                  ) : (
+                    // Dreams & Goals Form
+                    <>
+                      <View>
+                        <Text style={{
+                          fontSize: 14,
+                          fontWeight: '600',
+                          color: currentTheme.colors.text,
+                          marginBottom: 8,
+                        }}>
+                          Başlık *
+                        </Text>
+                        <TextInput
+                          style={{
+                            backgroundColor: currentTheme.colors.background,
+                            borderRadius: 12,
+                            padding: 16,
+                            fontSize: 16,
+                            color: currentTheme.colors.text,
+                            borderWidth: 1,
+                            borderColor: currentTheme.colors.border,
+                          }}
+                          placeholder="Başlık..."
+                          placeholderTextColor={currentTheme.colors.muted}
+                          value={formData.title}
+                          onChangeText={(text) => {
+                            setFormData({ ...formData, title: text });
+                            setSelectedItem({
+                              ...selectedItem,
+                              title: text
+                            });
+                          }}
+                        />
+                      </View>
+                      
+                      {selectedItem?.description !== undefined && (
+                        <View>
+                          <Text style={{
+                            fontSize: 14,
+                            fontWeight: '600',
+                            color: currentTheme.colors.text,
+                            marginBottom: 8,
+                          }}>
+                            Açıklama
+                          </Text>
+                          <TextInput
+                            style={{
+                              backgroundColor: currentTheme.colors.background,
+                              borderRadius: 12,
+                              padding: 16,
+                              fontSize: 16,
+                              color: currentTheme.colors.text,
+                              minHeight: 100,
+                              textAlignVertical: 'top',
+                              borderWidth: 1,
+                              borderColor: currentTheme.colors.border,
+                            }}
+                            placeholder="Açıklama..."
+                            placeholderTextColor={currentTheme.colors.muted}
+                            value={formData.description}
+                            onChangeText={(text) => {
+                              setFormData({ ...formData, description: text });
+                              setSelectedItem({
+                                ...selectedItem,
+                                description: text
+                              });
+                            }}
+                            multiline
+                          />
+                        </View>
+                      )}
+                    </>
                   )}
                 </View>
 
@@ -1451,24 +1466,25 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
                       try {
                         if (activeTab === 'dreams' && selectedItem) {
                           await updateDream(selectedItem.id, {
-                            title: selectedItem.title,
-                            description: selectedItem.description,
+                            title: formData.title,
+                            description: formData.description,
                           });
                         } else if (activeTab === 'goals' && selectedItem) {
                           await updateGoal(selectedItem.id, {
-                            title: selectedItem.title,
-                            description: selectedItem.description,
+                            title: formData.title,
+                            description: formData.description,
                           });
                         } else if (activeTab === 'promise' && selectedItem) {
-                          // Promise için text güncelleme - basit state update
-                          console.log('Promise update not implemented yet');
+                          await updatePromise(selectedItem.id, {
+                            text: formData.promiseText,
+                          });
                         }
                         
                         setShowEditModal(false);
                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                       } catch (error) {
                         console.error('Error updating item:', error);
-                        Alert.alert('Hata', 'Güncelleme sırasında bir hata oluştu');
+                        showAlert('Hata', 'Güncelleme sırasında bir hata oluştu', 'error');
                       }
                     }}
                     style={{
@@ -1493,6 +1509,22 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
-}
+});
+
+export default DreamsGoalsScreen;

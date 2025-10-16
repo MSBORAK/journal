@@ -176,6 +176,8 @@ export const useReminders = (userId?: string) => {
   // Get reminders for today
   const getTodayReminders = () => {
     const today = new Date();
+    const todayUTC = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayString = `${todayUTC.getFullYear()}-${String(todayUTC.getMonth() + 1).padStart(2, '0')}-${String(todayUTC.getDate()).padStart(2, '0')}`;
     const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
     
     return reminders.filter(reminder => {
@@ -183,7 +185,7 @@ export const useReminders = (userId?: string) => {
       
       // Eğer planlı hatırlatıcı ise ve bugün için değilse dahil etme
       if (reminder.reminderType === 'scheduled' && reminder.date) {
-        return reminder.date === today.toISOString().split('T')[0];
+        return reminder.date === todayString;
       }
       
       switch (reminder.repeatType) {
@@ -197,7 +199,9 @@ export const useReminders = (userId?: string) => {
         case 'once':
           // Check if it's today and not yet triggered
           const reminderDate = new Date(reminder.createdAt);
-          return reminderDate.toDateString() === today.toDateString() && !reminder.lastTriggered;
+          const reminderDateUTC = new Date(reminderDate.getFullYear(), reminderDate.getMonth(), reminderDate.getDate());
+          const todayDateUTC = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          return reminderDateUTC.getTime() === todayDateUTC.getTime() && !reminder.lastTriggered;
         default:
           return false;
       }

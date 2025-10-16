@@ -82,8 +82,8 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
     switch (buttonStyle) {
       case 'danger':
         return {
-          backgroundColor: '#ef4444',
-          borderColor: '#ef4444',
+          backgroundColor: currentTheme.colors.danger,
+          borderColor: currentTheme.colors.danger,
         };
       case 'secondary':
         return {

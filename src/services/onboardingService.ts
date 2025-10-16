@@ -38,8 +38,14 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
 ];
 
 export const setOnboardingCompleted = async (userId?: string): Promise<void> => {
-  const key = userId ? `${ONBOARDING_KEY}_${userId}` : ONBOARDING_KEY;
-  await AsyncStorage.setItem(key, 'true');
+  try {
+    const key = userId ? `${ONBOARDING_KEY}_${userId}` : ONBOARDING_KEY;
+    await AsyncStorage.setItem(key, 'true');
+    console.log(`Onboarding completed for user ${userId || 'anonymous'}`);
+  } catch (error) {
+    console.error('Error setting onboarding completed:', error);
+    // Don't throw, just log the error
+  }
 };
 
 export const isOnboardingCompleted = async (userId?: string): Promise<boolean> => {

@@ -262,7 +262,7 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
               value={answers[question.id as keyof typeof answers]}
               onChangeText={(text) => handleAnswerChange(question.id, text)}
               placeholder={question.placeholder}
-              placeholderTextColor={currentTheme.colors.secondary}
+              placeholderTextColor={currentTheme.colors.muted}
               multiline
             />
           </View>
@@ -282,7 +282,7 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
             value={freeWriting}
             onChangeText={setFreeWriting}
             placeholder="Bugün neler yaşadın? Nasıl hissettin? Ne düşünüyorsun? Buraya her şeyi yazabilirsin..."
-            placeholderTextColor={currentTheme.colors.secondary}
+            placeholderTextColor={currentTheme.colors.muted}
             multiline
           />
         </View>

@@ -23,6 +23,7 @@ import {
   cancelAllNotifications,
   NotificationSettings
 } from '../services/notificationService';
+import { CustomAlert } from '../components/CustomAlert';
 
 interface NotificationSettingsScreenProps {
   navigation: any;
@@ -31,7 +32,7 @@ interface NotificationSettingsScreenProps {
 export default function NotificationSettingsScreen({ navigation }: NotificationSettingsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
+  const [systemPermissionGranted, setSystemPermissionGranted] = useState<boolean>(false);
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: true,
     morningEnabled: true,
@@ -49,6 +50,28 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     dailySummaryEnabled: true,
   });
   const [loading, setLoading] = useState(true);
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  // Bildirim izni = sistem izni + uygulama ayarları
+  const permissionGranted = systemPermissionGranted && settings.enabled;
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'success') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   useEffect(() => {
     loadSettings();
@@ -58,9 +81,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
   const checkPermission = async () => {
     try {
       const { status } = await Notifications.getPermissionsAsync();
-      setPermissionGranted(status === 'granted');
+      setSystemPermissionGranted(status === 'granted');
     } catch (e) {
-      setPermissionGranted(false);
+      setSystemPermissionGranted(false);
     }
   };
 
@@ -96,35 +119,42 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       console.error('❌ Error details:', JSON.stringify(error));
       // Hata olursa eski ayarlara geri dön
       setSettings(settings);
-      Alert.alert('Hata', 'Ayarlar kaydedilemedi: ' + String(error));
+      showAlert('❌ Hata', 'Ayarlar kaydedilemedi. Lütfen tekrar deneyin.', 'error');
     }
   };
 
   const handlePermissionRequest = async () => {
     try {
+      // Eğer uygulama ayarları kapalıysa, önce onları aç
+      if (!settings.enabled) {
+        await updateSetting('enabled', true);
+        showAlert(
+          '🔔 Bildirimler Açıldı',
+          'Uygulama bildirim ayarları etkinleştirildi. Artık bildirimler alabileceksin!',
+          'success'
+        );
+        return;
+      }
+
+      // Sistem izni kontrolü
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
-        Alert.alert(
-          'Bildirim İzni',
-          'Bildirimler için izin gerekli. Lütfen ayarlardan bildirim iznini etkinleştirin.',
-          [
-            { text: 'Tamam', style: 'default' },
-            { 
-              text: 'Ayarlar', 
-              style: 'default',
-              onPress: () => {
-                // TODO: Açık ayarlara yönlendirme
-              }
-            }
-          ]
+        showAlert(
+          '⚠️ İzin Gerekli',
+          'Bildirimler için sistem izni gerekli. Lütfen ayarlardan bildirim iznini etkinleştirin.',
+          'warning'
         );
       } else {
-        Alert.alert('Başarılı', 'Bildirim izni verildi!');
-        setPermissionGranted(true);
+        showAlert(
+          '🎉 Başarılı!',
+          'Bildirim izni başarıyla verildi! Artık günlük hatırlatıcılar ve motivasyon mesajları alabileceksin.',
+          'success'
+        );
+        await checkPermission();
       }
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
-      Alert.alert('Hata', 'Bildirim izni alınamadı');
+      showAlert('❌ Hata', 'Bildirim izni alınamadı. Lütfen tekrar deneyin.', 'error');
     }
   };
 
@@ -136,7 +166,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       // Önce izin kontrolü yap
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
-        Alert.alert('Hata', 'Bildirim izni verilmedi. Lütfen önce izin verin.');
+        showAlert('⚠️ İzin Gerekli', 'Bildirim izni verilmedi. Lütfen önce izin verin.', 'warning');
         return;
       }
       
@@ -150,10 +180,10 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         true // skipChecks
       );
       console.log('✅ Test notification sent successfully');
-      Alert.alert('Başarılı', 'Test bildirimi gönderildi! Birkaç saniye içinde gelecek.');
+      showAlert('🎉 Başarılı!', 'Test bildirimi gönderildi! Birkaç saniye içinde gelecek.', 'success');
     } catch (error) {
       console.error('❌ Error sending test notification:', error);
-      Alert.alert('Hata', 'Test bildirimi gönderilemedi: ' + error);
+      showAlert('❌ Hata', 'Test bildirimi gönderilemedi. Lütfen tekrar deneyin.', 'error');
     }
   };
 
@@ -394,17 +424,24 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.statusIndicator}>
             <View style={[
               dynamicStyles.statusDot,
-                { backgroundColor: permissionGranted ? '#10B981' : '#EF4444' }
+                { backgroundColor: permissionGranted ? currentTheme.colors.success : currentTheme.colors.danger }
             ]} />
             <Text style={dynamicStyles.statusText}>
-              {permissionGranted ? 'İzin Verildi' : 'İzin Gerekli'}
+              {permissionGranted 
+                ? 'İzin Verildi' 
+                : !systemPermissionGranted 
+                  ? 'Sistem İzni Gerekli' 
+                  : 'Uygulama Ayarları Kapalı'
+              }
             </Text>
           </View>
           <TouchableOpacity
             style={dynamicStyles.actionButton}
             onPress={handlePermissionRequest}
           >
-            <Text style={dynamicStyles.actionButtonText}>İzin Ver</Text>
+            <Text style={dynamicStyles.actionButtonText}>
+              {!settings.enabled ? 'Bildirimleri Aç' : 'İzin Ver'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -701,9 +738,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
             onPress={async () => {
               try {
                 await scheduleAllNotifications();
-                Alert.alert('Başarılı', 'Bildirimler yeniden planlandı');
+                showAlert('✅ Başarılı', 'Bildirimler başarıyla yeniden planlandı!', 'success');
               } catch (error) {
-                Alert.alert('Hata', 'Bildirimler yeniden planlanamadı');
+                showAlert('❌ Hata', 'Bildirimler yeniden planlanamadı. Lütfen tekrar deneyin.', 'error');
               }
             }}
           >
@@ -713,6 +750,20 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

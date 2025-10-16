@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { updateEmail, updatePassword } from '../lib/supabase';
 import { getProfile, updateProfile, createProfile } from '../services/profileService';
 import { clearAllData } from '../services/backupService';
+import { CustomAlert } from '../components/CustomAlert';
 
 interface AccountSettingsScreenProps {
   navigation: any;
@@ -28,6 +29,26 @@ interface AccountSettingsScreenProps {
 export default function AccountSettingsScreen({ navigation }: AccountSettingsScreenProps) {
   const { currentTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
+
   const [loading, setLoading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -64,9 +85,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updateProfile(user.uid, profileData);
       setShowProfileModal(false);
-      Alert.alert('✅ Başarılı', 'Profil bilgileriniz güncellendi!');
+      showAlert('✅ Başarılı', 'Profil bilgileriniz güncellendi!', 'success');
     } catch (error) {
-      Alert.alert('❌ Hata', 'Profil güncellenirken hata oluştu: ' + error);
+      showAlert('❌ Hata', 'Profil güncellenirken hata oluştu.', 'error');
     } finally {
       setLoading(false);
     }
@@ -74,7 +95,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
 
   const handleEmailUpdate = async () => {
     if (!newEmail || newEmail === user?.email) {
-      Alert.alert('⚠️ Uyarı', 'Yeni email adresi giriniz!');
+      showAlert('⚠️ Uyarı', 'Yeni email adresi giriniz!', 'warning');
       return;
     }
     
@@ -83,9 +104,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updateEmail(newEmail);
       setShowEmailModal(false);
-      Alert.alert('✅ Başarılı', 'Email adresiniz güncellendi!');
+      showAlert('✅ Başarılı', 'Email adresiniz güncellendi!', 'success');
     } catch (error) {
-      Alert.alert('❌ Hata', 'Email güncellenirken hata oluştu: ' + error);
+      showAlert('❌ Hata', 'Email güncellenirken hata oluştu.', 'error');
     } finally {
       setLoading(false);
     }
@@ -93,12 +114,12 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
 
   const handlePasswordUpdate = async () => {
     if (!newPassword || newPassword.length < 6) {
-      Alert.alert('⚠️ Uyarı', 'Şifre en az 6 karakter olmalıdır!');
+      showAlert('⚠️ Uyarı', 'Şifre en az 6 karakter olmalıdır!', 'warning');
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      Alert.alert('⚠️ Uyarı', 'Şifreler eşleşmiyor!');
+      showAlert('⚠️ Uyarı', 'Şifreler eşleşmiyor!', 'warning');
       return;
     }
     
@@ -109,55 +130,27 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       setShowPasswordModal(false);
       setNewPassword('');
       setConfirmPassword('');
-      Alert.alert('✅ Başarılı', 'Şifreniz güncellendi!');
+      showAlert('✅ Başarılı', 'Şifreniz güncellendi!', 'success');
     } catch (error) {
-      Alert.alert('❌ Hata', 'Şifre güncellenirken hata oluştu: ' + error);
+      showAlert('❌ Hata', 'Şifre güncellenirken hata oluştu.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
+    showAlert(
       '⚠️ Hesap Silme',
       'Bu işlem GERİ ALINAMAZ!\n\nSilinecek veriler:\n• Tüm günlük yazıları\n• Profil bilgileri\n• İstatistikler ve içgörüler\n• Kullanım geçmişi\n\nEmin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'SİL',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user?.uid) return;
-            
-            try {
-              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              await clearAllData(user.uid);
-              await signOut();
-              Alert.alert('✅ Silindi!', 'Hesabınız kalıcı olarak silindi.');
-            } catch (error) {
-              Alert.alert('❌ Hata', 'Hesap silinirken hata oluştu: ' + error);
-            }
-          }
-        }
-      ]
+      'error'
     );
   };
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Çıkış Yap',
+    showAlert(
+      '🚪 Çıkış Yap',
       'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Çıkış Yap',
-          style: 'destructive',
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            signOut();
-          }
-        }
-      ]
+      'warning'
     );
   };
 
@@ -506,7 +499,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               value={profileData.full_name}
               onChangeText={(text) => setProfileData({...profileData, full_name: text})}
               placeholder="Adınızı girin"
-              placeholderTextColor={currentTheme.colors.secondary}
+              placeholderTextColor={currentTheme.colors.muted}
             />
             
             <Text style={dynamicStyles.inputLabel}>Bio</Text>
@@ -515,7 +508,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               value={profileData.bio}
               onChangeText={(text) => setProfileData({...profileData, bio: text})}
               placeholder="Kendinizden bahsedin..."
-              placeholderTextColor={currentTheme.colors.secondary}
+              placeholderTextColor={currentTheme.colors.muted}
               multiline
             />
             
@@ -559,7 +552,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               value={newEmail}
               onChangeText={setNewEmail}
               placeholder="yeni@email.com"
-              placeholderTextColor={currentTheme.colors.secondary}
+              placeholderTextColor={currentTheme.colors.muted}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -604,7 +597,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               value={newPassword}
               onChangeText={setNewPassword}
               placeholder="Yeni şifrenizi girin"
-              placeholderTextColor={currentTheme.colors.secondary}
+              placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
             />
             
@@ -614,7 +607,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Şifrenizi tekrar girin"
-              placeholderTextColor={currentTheme.colors.secondary}
+              placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
             />
             
@@ -642,6 +635,20 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

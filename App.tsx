@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -54,7 +54,7 @@ type TabParamList = {
   DreamsGoals: undefined;
   History: undefined;
   Statistics: undefined;
-  Reminders: undefined;
+  Tasks: undefined;
   Settings: undefined;
 };
 
@@ -67,13 +67,13 @@ import StatisticsScreen from './src/screens/StatisticsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ThemeSelectionScreen from './src/screens/ThemeSelectionScreen';
 import LanguageSelectionScreen from './src/screens/LanguageSelectionScreen';
-// import FontSelectionScreen from './src/screens/FontSelectionScreen'; // Kaldırıldı
 import WriteDiaryStep1Screen from './src/screens/WriteDiaryStep1Screen';
 import WriteDiaryStep2Screen from './src/screens/WriteDiaryStep2Screen';
 import WriteDiaryStep3Screen from './src/screens/WriteDiaryStep3Screen';
 import WellnessTrackingScreen from './src/screens/WellnessTrackingScreen';
 import ArchiveScreen from './src/screens/ArchiveScreen';
 import TasksScreen from './src/screens/TasksScreen';
+import TasksAndRemindersScreen from './src/screens/TasksAndRemindersScreen';
 import RemindersScreen from './src/screens/RemindersScreen';
 import DreamsGoalsScreen from './src/screens/DreamsGoalsScreen';
 import DataBackupSettingsScreen from './src/screens/DataBackupSettingsScreen';
@@ -92,6 +92,27 @@ const Tab = createBottomTabNavigator<TabParamList>();
 function MainTabs() {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+  
+  // Tab icon'larını memoize et
+  const renderTabIcon = useCallback((name: string, focused: boolean, color: string, size: number) => {
+    const iconProps = { color, size: size + 4 };
+    switch (name) {
+      case 'Dashboard':
+        return <Ionicons name={focused ? "home" : "home-outline"} {...iconProps} />;
+      case 'DreamsGoals':
+        return <Ionicons name={focused ? "star" : "star-outline"} {...iconProps} />;
+      case 'Statistics':
+        return <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} {...iconProps} />;
+      case 'History':
+        return <Ionicons name={focused ? "calendar" : "calendar-outline"} {...iconProps} />;
+      case 'Tasks':
+        return <Ionicons name={focused ? "checkmark-circle" : "checkmark-circle-outline"} {...iconProps} />;
+      case 'Settings':
+        return <Ionicons name={focused ? "settings" : "settings-outline"} {...iconProps} />;
+      default:
+        return <Ionicons name="help-outline" {...iconProps} />;
+    }
+  }, []);
   
   // Bildirimleri başlat
   useEffect(() => {
@@ -152,9 +173,7 @@ function MainTabs() {
         component={DashboardScreen}
         options={{
           title: t('dashboard.title'),
-          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={size + 4} color={color} />
-          ),
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Dashboard', focused, color, size),
         }}
       />
       <Tab.Screen
@@ -162,9 +181,7 @@ function MainTabs() {
         component={DreamsGoalsScreen}
         options={{
           title: 'Hayaller',
-          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-            <Ionicons name={focused ? "star" : "star-outline"} size={size + 4} color={color} />
-          ),
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('DreamsGoals', focused, color, size),
         }}
       />
       <Tab.Screen
@@ -172,9 +189,7 @@ function MainTabs() {
         component={StatisticsScreen}
         options={{
           title: 'İstatistikler',
-          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-            <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} size={size + 4} color={color} />
-          ),
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Statistics', focused, color, size),
         }}
       />
       <Tab.Screen
@@ -182,19 +197,15 @@ function MainTabs() {
         component={HistoryScreen}
         options={{
           title: t('history.title'),
-          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-            <Ionicons name={focused ? "calendar" : "calendar-outline"} size={size + 4} color={color} />
-          ),
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('History', focused, color, size),
         }}
       />
       <Tab.Screen
-        name="Reminders"
-        component={RemindersScreen}
+        name="Tasks"
+        component={TasksAndRemindersScreen}
         options={{
-          title: 'Alarmlar',
-          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-            <Ionicons name={focused ? "alarm" : "alarm-outline"} size={size + 4} color={color} />
-          ),
+          title: 'Görevler',
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Tasks', focused, color, size),
         }}
       />
       <Tab.Screen
@@ -202,9 +213,7 @@ function MainTabs() {
         component={SettingsScreen}
         options={{
           title: t('settings.title'),
-          tabBarIcon: ({ color, size, focused }: { color: string; size: number; focused: boolean }) => (
-            <Ionicons name={focused ? "settings" : "settings-outline"} size={size + 4} color={color} />
-          ),
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Settings', focused, color, size),
         }}
       />
       </Tab.Navigator>
@@ -244,31 +253,23 @@ function AppNavigator() {
       <Stack.Navigator 
         screenOptions={{ 
           headerShown: false,
-          cardStyleInterpolator: ({ current, layouts }) => {
-            return {
-              cardStyle: {
-                transform: [
-                  {
-                    translateX: current.progress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [layouts.screen.width, 0],
-                    }),
-                  },
-                ],
-              },
-            };
-          },
+          // Performans için animasyonları basitleştir
+          cardStyleInterpolator: ({ current }) => ({
+            cardStyle: {
+              opacity: current.progress,
+            },
+          }),
           transitionSpec: {
             open: {
               animation: 'timing',
               config: {
-                duration: 300,
+                duration: 200, // Daha hızlı geçiş
               },
             },
             close: {
               animation: 'timing',
               config: {
-                duration: 300,
+                duration: 150, // Daha hızlı geçiş
               },
             },
           },
@@ -304,15 +305,14 @@ function AppNavigator() {
         <Stack.Screen name="WellnessTracking" component={WellnessTrackingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Archive" component={ArchiveScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Tasks" component={TasksScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Reminders" component={RemindersScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DataBackupSettings" component={DataBackupSettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="PrivacySecuritySettings" component={PrivacySecuritySettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AppSettings" component={AppSettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

@@ -13,6 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { TooltipData } from '../services/tooltipService';
+import { soundService } from '../services/soundService';
+import * as Haptics from 'expo-haptics';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -216,11 +218,34 @@ export default function Tooltip({ tooltip, visible, onClose, onNext, targetPosit
             <Text style={styles.description}>{tooltip.description}</Text>
             
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.skipButton} onPress={onClose}>
+              <TouchableOpacity 
+                style={styles.skipButton} 
+                onPress={async () => {
+                  await soundService.playTap();
+                  try {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  } catch (error) {
+                    console.log('Haptic feedback error:', error);
+                  }
+                  onClose();
+                }}
+              >
                 <Text style={styles.skipButtonText}>Atla</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.nextButton} onPress={onNext || onClose}>
+              <TouchableOpacity 
+                style={styles.nextButton} 
+                onPress={async () => {
+                  await soundService.playSuccess();
+                  try {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  } catch (error) {
+                    console.log('Haptic feedback error:', error);
+                  }
+                  if (onNext) onNext();
+                  else onClose();
+                }}
+              >
                 <Text style={styles.nextButtonText}>Anladım</Text>
                 <Ionicons name="checkmark" size={16} color={currentTheme.colors.background} />
               </TouchableOpacity>

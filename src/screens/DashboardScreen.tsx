@@ -34,6 +34,7 @@ import { getInspirationByMood, InspirationMessage } from '../data/inspirationMes
 import { getGreetingMessage, getUserTimezone } from '../utils/dateTimeUtils';
 import { useTooltips } from '../hooks/useTooltips';
 import Tooltip from '../components/Tooltip';
+import MotivationCard from '../components/MotivationCard';
 
 const { width } = Dimensions.get('window');
 
@@ -49,7 +50,7 @@ interface DashboardScreenProps {
   navigation: any;
 }
 
-export default function DashboardScreen({ navigation }: DashboardScreenProps) {
+const DashboardScreen = React.memo(function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useTranslation();
@@ -2643,20 +2644,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               animateCardPress('mood');
               navigation.navigate('WriteDiaryStep1' as never);
             }}
-            onLayout={(event) => {
-              const { x, y, width, height } = event.nativeEvent.layout;
-              tooltipManager.showTooltip(
-                {
-                  id: 'dashboard_mood',
-                  title: 'Ruh Halini Kaydet',
-                  description: 'Buraya tıklayarak günlük ruh halinizi kaydedebilirsiniz',
-                  position: 'bottom',
-                  targetElement: 'mood_selector',
-                  screen: 'Dashboard',
-                },
-                { x, y, width, height }
-              );
-            }}
             activeOpacity={0.8}
           >
             <Text style={dynamicStyles.moodActionText}>
@@ -2934,6 +2921,15 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       />
     )}
 
+    {/* Motivation Card */}
+    <MotivationCard 
+      userId={user?.uid}
+      autoShow={true}
+      delay={3000}
+    />
+
     </>
   );
-}
+});
+
+export default DashboardScreen;

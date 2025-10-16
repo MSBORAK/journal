@@ -18,10 +18,10 @@ export const themes = {
     name: "Cozy Mode",
     background: "#EEEFE8",
     card: "#FFF9E5", // daha soft yüzey (parlaklığı azaltır)
-    primary: "#8FBC93",
-    secondary: "#D68EA3", // yumuşatılmış cherry blossom
-    text: "#2D423B",
-    muted: "#94A9A1",
+    primary: "#000000", // siyah for maximum contrast
+    secondary: "#000000", // siyah for unselected elements
+    text: "#000000", // siyah for maximum readability
+    muted: "#1A1A1A", // neredeyse siyah muted text
     success: "#FCEBBF",
     danger: "#BA7878",
   },
@@ -53,11 +53,11 @@ export const themes = {
   softMinimal: {
     name: "Soft Minimal Mind",
     background: "#EDE3DE", // Linen - yumuşak arka plan
-    card: "#C6AA96", // Khaki - kart yüzeyleri (hafif gölge ile)
-    primary: "#7A948B", // Cambridge Blue - birincil butonlar/aktif alanlar
-    secondary: "#C6AA96", // Khaki - ikincil vurgular
-    text: "#2D423B", // Dark Slate Gray - okunabilir metin
-    muted: "#BFB3AD", // Nötr alt metin/çerçeveler
+    card: "#E5D5C8", // Çok daha koyu beige - maksimum kontrast
+    primary: "#000000", // siyah for maximum contrast
+    secondary: "#000000", // siyah for unselected elements
+    text: "#000000", // siyah for maximum readability
+    muted: "#1A1A1A", // neredeyse siyah muted text
     success: "#6C857E", // Primary'in bir ton koyusu (hover/aktif)
     danger: "#BA7878", // Old Rose - duygusal/uyarı vurguları
   },
@@ -80,10 +80,10 @@ export const themes = {
     name: "Alabaster",
     background: "#EEEFE8",
     card: "#FFFFFF",
-    primary: "#8FBC93", // Kontrast için Cambridge Blue
-    secondary: "#C9B297",
-    text: "#2D423B",
-    muted: "#BFB3AD",
+    primary: "#000000", // siyah for maximum contrast
+    secondary: "#000000", // siyah for unselected elements
+    text: "#000000", // siyah for maximum readability
+    muted: "#1A1A1A", // neredeyse siyah muted text
     success: "#83A59A",
     danger: "#E9ACBB",
   },
@@ -93,10 +93,10 @@ export const themes = {
     name: "Columbia Blue",
     background: "#E6EEF3", // bir tık koyu
     card: "#FAFBFC",
-    primary: "#BFA892",
-    secondary: "#7EAE88",
-    text: "#2D423B",
-    muted: "#B1C0C8",
+    primary: "#000000", // siyah for maximum contrast
+    secondary: "#000000", // siyah for unselected elements
+    text: "#000000", // siyah for maximum readability
+    muted: "#1A1A1A", // neredeyse siyah muted text
     success: "#9CB4C6",
     danger: "#E9ACBB",
   },
@@ -104,10 +104,10 @@ export const themes = {
     name: "Cherry Blossom",
     background: "#F4DDE5", // bir tık koyu
     card: "#FFFFFF",
-    primary: "#CC6F85", // bir tık koyu
-    secondary: "#B8918B", // bir tık koyu
-    text: "#2D423B",
-    muted: "#CFAFBA",
+    primary: "#000000", // siyah for maximum contrast
+    secondary: "#000000", // siyah for unselected elements
+    text: "#000000", // siyah for maximum readability
+    muted: "#1A1A1A", // neredeyse siyah muted text
     success: "#F6CCD7",
     danger: "#BA7878",
   },
@@ -142,10 +142,10 @@ export const themes = {
     name: "Weldon Blue",
     background: "#8197AC",
     card: "#FFFFFF",
-    primary: "#607EA2",
+    primary: "#2D423B", // darker for better contrast
     secondary: "#314B6E",
-    text: "#2D423B",
-    muted: "#C9D2DB",
+    text: "#1A1A1A", // darker for better readability
+    muted: "#666666", // darker muted text
     success: "#83A59A",
     danger: "#BA7878",
   },
@@ -182,10 +182,10 @@ export const themes = {
     name: "Buttermilk",
     background: "#F7E9A6",
     card: "#FFF9E5",
-    primary: "#C1DBE8", // pastel blue for actions
-    secondary: "#7A948B", // calm green accent
-    text: "#2D423B",
-    muted: "#E5DBB9",
+    primary: "#000000", // siyah for maximum contrast
+    secondary: "#000000", // siyah for unselected elements
+    text: "#000000", // siyah for maximum readability
+    muted: "#1A1A1A", // neredeyse siyah muted text
     success: "#83A59A",
     danger: "#BA7878",
   },

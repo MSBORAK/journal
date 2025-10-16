@@ -683,7 +683,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Başlık, içerik veya etiket ara..."
-            placeholderTextColor={currentTheme.colors.secondary}
+            placeholderTextColor={currentTheme.colors.muted}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity

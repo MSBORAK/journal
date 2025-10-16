@@ -13,7 +13,9 @@ import { Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
 import { ONBOARDING_STEPS, setOnboardingCompleted, setSelectedTheme } from '../services/onboardingService';
+import { soundService } from '../services/soundService';
 import { Ionicons } from '@expo/vector-icons';
+import { CustomAlert } from '../components/CustomAlert';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -25,6 +27,26 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [currentStep, setCurrentStep] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const { user } = useAuth();
+  
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
   
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
@@ -43,19 +65,19 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       fontWeight: '700',
       textAlign: 'center',
       marginBottom: 20,
-      color: '#2D423B',
+      color: '#000000',
       fontFamily: 'Poppins_700Bold',
     },
     description: {
       fontSize: 18,
       textAlign: 'center',
-      color: '#2D423B',
+      color: '#000000',
       marginBottom: 40,
       lineHeight: 28,
       fontFamily: 'Poppins_400Regular',
     },
     nextButton: {
-      backgroundColor: '#2D423B',
+      backgroundColor: '#000000',
       paddingHorizontal: 40,
       paddingVertical: 16,
       borderRadius: 30,
@@ -78,10 +100,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 20,
-      backgroundColor: 'rgba(45, 66, 59, 0.1)',
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     skipButtonText: {
-      color: '#2D423B',
+      color: '#000000',
       fontSize: 16,
       fontWeight: '500',
       fontFamily: 'Poppins_500Medium',
@@ -122,10 +144,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       height: 10,
       borderRadius: 5,
       marginHorizontal: 6,
-      backgroundColor: 'rgba(45, 66, 59, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
     paginationDotActive: {
-      backgroundColor: '#2D423B',
+      backgroundColor: '#000000',
       width: 30,
       height: 10,
       borderRadius: 5,
@@ -142,6 +164,14 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
   const handleNext = async () => {
     if (currentStep < ONBOARDING_STEPS.length - 1) {
+      // Play sound and haptic
+      await soundService.playTap();
+      try {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (error) {
+        console.log('Haptic feedback error:', error);
+      }
+      
       // Fade out animation
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -157,38 +187,40 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           useNativeDriver: true,
         }).start();
       });
-      
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } else {
       await handleComplete();
     }
   };
 
   const handleSkip = async () => {
+    await soundService.playTap();
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.log('Haptic feedback error:', error);
+    }
     await handleComplete();
   };
 
   const handleThemeSelect = async (theme: 'cozy' | 'luxury') => {
     try {
       await setSelectedTheme(theme);
-      setShowConfetti(true);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
-      Alert.alert(
+      // Play success sound
+      await soundService.playSuccess();
+      setShowConfetti(true);
+      try {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (error) {
+        console.log('Haptic feedback error:', error);
+      }
+      
+      showAlert(
         '🎉 Harika seçim!', 
         theme === 'cozy' 
           ? 'Sıcak, huzurlu tonlar seni bekliyor.' 
           : 'Zarif ve modern bir atmosfer seni bekliyor!',
-        [
-          {
-            text: 'Başlayalım!',
-            onPress: async () => {
-              setTimeout(() => {
-                handleComplete();
-              }, 500);
-            }
-          }
-        ]
+        'success'
       );
     } catch (error) {
       console.error('Error selecting theme:', error);
@@ -282,6 +314,25 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           />
         </View>
       )}
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Başlayalım!',
+          onPress: () => {
+            hideAlert();
+            setTimeout(() => {
+              handleComplete();
+            }, 500);
+          },
+          style: 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </LinearGradient>
   );
 }

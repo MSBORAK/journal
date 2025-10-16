@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
+import { CustomAlert } from '../components/CustomAlert';
 // import { MotiView } from 'moti'; // Removed for now
 
 export default function AuthScreen() {
@@ -22,6 +23,26 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'warning' | 'error' | 'info',
+  });
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   const { signIn, signUp } = useAuth();
   const { currentTheme } = useTheme();
@@ -31,6 +52,27 @@ export default function AuthScreen() {
     container: {
       flex: 1,
       backgroundColor: currentTheme.colors.background,
+    },
+    scrollContainer: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      padding: 20,
+    },
+    card: {
+      borderRadius: 28,
+      shadowColor: currentTheme.colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 16,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 24,
+      elevation: 16,
+      transform: [{ translateY: -4 }],
+    },
+    cardGradient: {
+      borderRadius: 28,
+      padding: 24,
     },
     title: {
       fontSize: 28,
@@ -45,6 +87,9 @@ export default function AuthScreen() {
       textAlign: 'center',
       marginBottom: 32,
     },
+    inputContainer: {
+      marginBottom: 20,
+    },
     label: {
       fontSize: 14,
       fontWeight: '600',
@@ -57,11 +102,26 @@ export default function AuthScreen() {
       borderRadius: 12,
       padding: 16,
       fontSize: 16,
-      backgroundColor: currentTheme.colors.background,
+      backgroundColor: currentTheme.colors.card,
       color: currentTheme.colors.text,
+    },
+    button: {
+      borderRadius: 12,
+      padding: 16,
+      alignItems: 'center',
+      marginBottom: 16,
     },
     primaryButton: {
       backgroundColor: currentTheme.colors.primary,
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    switchButton: {
+      alignItems: 'center',
+      marginTop: 8,
     },
     switchText: {
       color: currentTheme.colors.primary,
@@ -72,12 +132,12 @@ export default function AuthScreen() {
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      Alert.alert(t('common.error'), t('auth.emailRequired') + ' & ' + t('auth.passwordRequired'));
+      showAlert('❌ ' + t('common.error'), t('auth.emailRequired') + ' & ' + t('auth.passwordRequired'), 'error');
       return;
     }
 
     if (!isLogin && !displayName) {
-      Alert.alert(t('common.error'), t('auth.displayNameRequired'));
+      showAlert('❌ ' + t('common.error'), t('auth.displayNameRequired'), 'error');
       return;
     }
 
@@ -87,12 +147,12 @@ export default function AuthScreen() {
         await signIn(email, password);
       } else {
         await signUp(email, password, displayName);
-        Alert.alert(t('common.success'), 'Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.');
+        showAlert('✅ ' + t('common.success'), 'Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.', 'success');
         setIsLogin(true);
         setDisplayName('');
       }
     } catch (error) {
-      Alert.alert(t('common.error'), error instanceof Error ? error.message : 'Bir hata oluştu');
+      showAlert('❌ ' + t('common.error'), error instanceof Error ? error.message : 'Bir hata oluştu', 'error');
     } finally {
       setLoading(false);
     }
@@ -104,14 +164,14 @@ export default function AuthScreen() {
       style={dynamicStyles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={dynamicStyles.scrollContainer}>
         <LinearGradient
           colors={[
             currentTheme.colors.card,
             currentTheme.colors.card,
             currentTheme.name === 'dark' ? currentTheme.colors.primary + '15' : currentTheme.colors.primary + '08'
           ]}
-          style={styles.cardGradient}
+          style={dynamicStyles.cardGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
@@ -127,7 +187,7 @@ export default function AuthScreen() {
           </Text>
 
           {!isLogin && (
-            <View style={styles.inputContainer}>
+            <View style={dynamicStyles.inputContainer}>
               <Text style={dynamicStyles.label}>{t('auth.displayName')}</Text>
               <TextInput
                 style={dynamicStyles.input}
@@ -139,7 +199,7 @@ export default function AuthScreen() {
             </View>
           )}
 
-          <View style={styles.inputContainer}>
+          <View style={dynamicStyles.inputContainer}>
             <Text style={dynamicStyles.label}>{t('auth.email')}</Text>
             <TextInput
               style={dynamicStyles.input}
@@ -152,7 +212,7 @@ export default function AuthScreen() {
             />
           </View>
 
-          <View style={styles.inputContainer}>
+          <View style={dynamicStyles.inputContainer}>
             <Text style={dynamicStyles.label}>{t('auth.password')}</Text>
             <TextInput
               style={dynamicStyles.input}
@@ -165,18 +225,18 @@ export default function AuthScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.button, dynamicStyles.primaryButton]}
+            style={[dynamicStyles.button, dynamicStyles.primaryButton]}
             onPress={handleSubmit}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
+            <Text style={dynamicStyles.buttonText}>
               {loading ? t('common.loading') : (isLogin ? t('auth.signIn') : t('auth.signUp'))}
             </Text>
           </TouchableOpacity>
 
 
           <TouchableOpacity
-            style={styles.switchButton}
+            style={dynamicStyles.switchButton}
             onPress={() => {
               setIsLogin(!isLogin);
               setDisplayName('');
@@ -191,83 +251,21 @@ export default function AuthScreen() {
           </TouchableOpacity>
         </LinearGradient>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={{
+          text: 'Tamam',
+          onPress: hideAlert,
+          style: alertConfig.type === 'error' ? 'danger' : 'primary',
+        }}
+        onClose={hideAlert}
+      />
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  card: {
-    borderRadius: 28,
-    shadowColor: '#3b82f6',
-    shadowOffset: {
-      width: 0,
-      height: 16,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 24,
-    elevation: 16,
-    transform: [{ translateY: -4 }],
-  },
-  cardGradient: {
-    borderRadius: 28,
-    padding: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#f9fafb',
-  },
-  button: {
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  primaryButton: {
-    backgroundColor: '#a855f7',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  switchButton: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  switchText: {
-    color: '#a855f7',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

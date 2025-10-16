@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  Alert,
   Modal,
   KeyboardAvoidingView,
   Platform,
@@ -21,14 +20,14 @@ import {
   cancelReminderNotification,
   requestNotificationPermissions 
 } from '../services/notificationService';
-import PomodoroTimer from '../components/PomodoroTimer';
 import DatePicker from '../components/DatePicker';
+import { CustomAlert } from '../components/CustomAlert';
 
 interface RemindersScreenProps {
   navigation: any;
 }
 
-export default function RemindersScreen({ navigation }: RemindersScreenProps) {
+const RemindersScreen = React.memo(function RemindersScreen({ navigation }: RemindersScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { 
@@ -44,6 +43,13 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error' as 'success' | 'warning' | 'error' | 'info',
+  });
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -73,9 +79,9 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
     { value: 'custom', label: 'Özel', emoji: '⭐' },
   ];
   const priorityOptions = [
-    { value: 'low', label: 'Düşük', color: '#10b981' },
-    { value: 'medium', label: 'Orta', color: '#f59e0b' },
-    { value: 'high', label: 'Yüksek', color: '#ef4444' },
+    { value: 'low', label: 'Düşük', color: currentTheme.colors.success },
+    { value: 'medium', label: 'Orta', color: currentTheme.colors.primary },
+    { value: 'high', label: 'Yüksek', color: currentTheme.colors.danger },
   ];
   const repeatOptions = [
     { value: 'once', label: 'Tek Seferlik' },
@@ -91,6 +97,19 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
   ];
 
   const stats = getReminderStats();
+
+  const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'error') => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -536,13 +555,13 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      Alert.alert('Hata', 'Başlık boş olamaz');
+      showAlert('Hata', 'Başlık boş olamaz', 'error');
       return;
     }
 
     // Eğer gelecek tarih seçilmişse tarih kontrolü yap
     if (formData.reminderType === 'scheduled' && !formData.date) {
-      Alert.alert('Hata', 'Gelecek tarih için bir tarih seçmelisiniz');
+      showAlert('Hata', 'Gelecek tarih için bir tarih seçmelisiniz', 'error');
       return;
     }
 
@@ -550,7 +569,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
       // Bildirim izni iste
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
-        Alert.alert('Bildirim İzni', 'Hatırlatıcılar için bildirim izni gerekli');
+        showAlert('Bildirim İzni', 'Hatırlatıcılar için bildirim izni gerekli', 'warning');
         return;
       }
 
@@ -581,7 +600,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
       resetForm();
     } catch (error) {
       console.error('Error saving reminder:', error);
-      Alert.alert('Hata', 'Hatırlatıcı kaydedilemedi');
+      showAlert('Hata', 'Hatırlatıcı kaydedilemedi', 'error');
     }
   };
 
@@ -603,18 +622,13 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
   };
 
   const handleDelete = (reminderId: string) => {
-    Alert.alert(
-      'Hatırlatıcıyı Sil',
-      'Bu hatırlatıcıyı silmek istediğinizden emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        { 
-          text: 'Sil', 
-          style: 'destructive',
-          onPress: () => deleteReminder(reminderId)
-        },
-      ]
-    );
+    setPendingDeleteId(reminderId);
+    setAlertConfig({
+      visible: true,
+      title: 'Hatırlatıcıyı Sil',
+      message: 'Bu hatırlatıcıyı silmek istediğinizden emin misiniz?',
+      type: 'warning',
+    });
   };
 
   const getCategoryLabel = (category: Reminder['category']) => {
@@ -624,7 +638,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
 
   const getPriorityColor = (priority: Reminder['priority']) => {
     const option = priorityOptions.find(opt => opt.value === priority);
-    return option ? option.color : '#6b7280';
+    return option ? option.color : currentTheme.colors.muted;
   };
 
   return (
@@ -662,13 +676,6 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
         </View>
       </View>
 
-      {/* Pomodoro Timer */}
-      <PomodoroTimer 
-        onComplete={() => {
-          // Pomodoro completed callback
-          console.log('Pomodoro session completed!');
-        }}
-      />
 
       <ScrollView style={dynamicStyles.remindersList} showsVerticalScrollIndicator={false}>
         {reminders.length === 0 ? (
@@ -694,11 +701,15 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                     )}
                     {reminder.reminderType === 'scheduled' && reminder.date && (
                       <Text style={[dynamicStyles.reminderDescription, { color: currentTheme.colors.primary, fontWeight: '500' }]}>
-                        📅 {new Date(reminder.date + 'T00:00:00').toLocaleDateString('tr-TR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
+                        📅 {(() => {
+                          const [year, month, day] = reminder.date.split('-').map(Number);
+                          const date = new Date(year, month - 1, day);
+                          return date.toLocaleDateString('tr-TR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          });
+                        })()}
                       </Text>
                     )}
                   </View>
@@ -748,7 +759,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                     style={dynamicStyles.actionButton}
                     onPress={() => handleDelete(reminder.id)}
                   >
-                    <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                    <Ionicons name="trash-outline" size={20} color={currentTheme.colors.danger} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -795,7 +806,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                   value={formData.title}
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
                   placeholder="Örn: İlaç iç, doktor randevusu, doğum günü..."
-                  placeholderTextColor={currentTheme.colors.secondary}
+                  placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
 
@@ -807,7 +818,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                   value={formData.description}
                   onChangeText={(text) => setFormData({ ...formData, description: text })}
                   placeholder="Ek bilgiler, notlar..."
-                  placeholderTextColor={currentTheme.colors.secondary}
+                  placeholderTextColor={currentTheme.colors.muted}
                   multiline
                 />
               </View>
@@ -873,7 +884,7 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
                   value={formData.time}
                   onChangeText={(text) => setFormData({ ...formData, time: text })}
                   placeholder="HH:MM"
-                  placeholderTextColor={currentTheme.colors.secondary}
+                  placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
 
@@ -970,6 +981,48 @@ export default function RemindersScreen({ navigation }: RemindersScreenProps) {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        primaryButton={
+          alertConfig.type === 'warning' && pendingDeleteId
+            ? {
+                text: 'Sil',
+                onPress: () => {
+                  if (pendingDeleteId) {
+                    deleteReminder(pendingDeleteId);
+                    setPendingDeleteId(null);
+                  }
+                  hideAlert();
+                },
+                style: 'danger',
+              }
+            : {
+                text: 'Tamam',
+                onPress: hideAlert,
+                style: alertConfig.type === 'error' ? 'danger' : 'primary',
+              }
+        }
+        secondaryButton={
+          alertConfig.type === 'warning' && pendingDeleteId
+            ? {
+                text: 'İptal',
+                onPress: () => {
+                  setPendingDeleteId(null);
+                  hideAlert();
+                },
+                style: 'secondary',
+              }
+            : undefined
+        }
+        onClose={hideAlert}
+      />
     </View>
   );
-}
+});
+
+export default RemindersScreen;
