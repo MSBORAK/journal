@@ -85,6 +85,16 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
     setShowCelebration(true);
   };
 
+  const formatDate = (dateIso?: string) => {
+    if (!dateIso) return '';
+    try {
+      const d = new Date(dateIso);
+      return d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return '';
+    }
+  };
+
   // Test verileri ekle (sadece ilk açılışta)
   useEffect(() => {
     const addTestData = async () => {
@@ -294,15 +304,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           {dream.description && (
             <Text style={dynamicStyles.cardDescription}>{dream.description}</Text>
           )}
+          <Text style={dynamicStyles.cardMeta}>
+            Yazıldı: {formatDate(dream.createdAt)}
+            {dream.completedAt ? `  •  Tamamlandı: ${formatDate(dream.completedAt)}` : ''}
+          </Text>
         </View>
 
         {/* Removed progress dots */}
-        {dream.isCompleted && (
-          <View style={dynamicStyles.completedPill}>
-            <Ionicons name="checkmark" size={12} color={currentTheme.colors.card} />
-            <Text style={dynamicStyles.completedText}>Tamamlandı</Text>
-          </View>
-        )}
+        {/* Tamamlandı pill kaldırıldı - yıldız rengi yeterli gösterge */}
       </View>
     </TouchableOpacity>
   );
@@ -363,6 +372,10 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
           {goal.description && (
             <Text style={dynamicStyles.cardDescription}>{goal.description}</Text>
           )}
+          <Text style={dynamicStyles.cardMeta}>
+            Yazıldı: {formatDate(goal.createdAt)}
+            {goal.completedAt ? `  •  Tamamlandı: ${formatDate(goal.completedAt)}` : ''}
+          </Text>
         </View>
 
         {/* Animated Progress Bar */}
@@ -427,11 +440,21 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
         </View>
 
         <View style={dynamicStyles.cardContent}>
-          <Text style={dynamicStyles.cardTitle}>{promise.text}</Text>
+          <Text
+            style={dynamicStyles.cardTitle}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {promise.text}
+          </Text>
+          <Text style={dynamicStyles.cardMeta}>
+            Yazıldı: {formatDate(promise.createdAt)}
+            {promise.completedAt ? `  •  Tamamlandı: ${formatDate(promise.completedAt)}` : ''}
+          </Text>
         </View>
 
         {/* Status Indicator */}
-        <View style={dynamicStyles.statusIndicator}>
+        <View style={[dynamicStyles.statusIndicator, { marginTop: 8 }]}>
           <View style={[
             dynamicStyles.statusDot,
             { backgroundColor: promise.isCompleted ? currentTheme.colors.card : currentTheme.colors.background }
@@ -521,14 +544,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       shadowRadius: 8,
       elevation: 6,
       width: '48%',
-      aspectRatio: 1,
+      aspectRatio: 0.9,
       backgroundColor: currentTheme.colors.card,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
     },
     cardGradient: {
       padding: 16,
-      paddingBottom: 56, // Completed pill için alan bırak
+      paddingBottom: 20,
       borderRadius: 16,
       flex: 1,
       position: 'relative',
@@ -621,7 +644,7 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
     },
     cardContent: {
       zIndex: 2,
-      marginBottom: 16,
+      marginBottom: 8,
     },
     cardTitle: {
       fontSize: 20,
@@ -634,8 +657,14 @@ export default function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps
       color: currentTheme.colors.secondary,
       lineHeight: 20,
     },
+    cardMeta: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      marginTop: 6,
+    },
     progressContainer: {
       zIndex: 2,
+      marginTop: 8,
     },
     progressBar: {
       height: 8,

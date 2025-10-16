@@ -16,6 +16,7 @@ import BackgroundWrapper from './src/components/BackgroundWrapper';
 import { Ionicons } from '@expo/vector-icons';
 import { scheduleMotivationNotifications, requestNotificationPermission, scheduleSmartNotifications } from './src/services/motivationNotificationService';
 import { recordUserActivity } from './src/services/userActivityService';
+import { isOnboardingCompleted } from './src/services/onboardingService';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import * as SplashScreen from 'expo-splash-screen';
 // import './global.css'; // Disabled for now
@@ -26,6 +27,7 @@ SplashScreen.preventAutoHideAsync();
 // Type definitions for navigation
 type RootStackParamList = {
   Auth: undefined;
+  Onboarding: undefined;
   MainTabs: undefined;
   WriteDiary: { entry?: any } | undefined;
   WriteDiaryStep1: undefined;
@@ -44,6 +46,7 @@ type RootStackParamList = {
   NotificationSettings: undefined;
   Achievements: undefined;
   Mindfulness: undefined;
+  HelpGuide: undefined;
 };
 
 type TabParamList = {
@@ -80,6 +83,8 @@ import AppSettingsScreen from './src/screens/AppSettingsScreen';
 import NotificationSettingsScreen from './src/screens/NotificationSettingsScreen';
 import AchievementsScreen from './src/screens/AchievementsScreen';
 import MindfulnessScreen from './src/screens/MindfulnessScreen';
+import HelpGuideScreen from './src/screens/HelpGuideScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -211,10 +216,28 @@ function AppNavigator() {
   const { user, loading } = useAuth();
   const { t } = useLanguage();
   const { currentTheme } = useTheme();
+  const [showOnboarding, setShowOnboarding] = React.useState<boolean | null>(null);
 
-  if (loading) {
+  React.useEffect(() => {
+    const checkOnboarding = async () => {
+      if (user && !loading) {
+        const completed = await isOnboardingCompleted(user.uid);
+        setShowOnboarding(!completed);
+      } else if (!user && !loading) {
+        setShowOnboarding(false);
+      }
+    };
+    
+    checkOnboarding();
+  }, [user, loading]);
+
+  if (loading || showOnboarding === null) {
     return null; // Loading screen can be added here
   }
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
 
   return (
     <NavigationContainer>
@@ -251,7 +274,11 @@ function AppNavigator() {
           },
         }}
       >
-        {user ? (
+        {showOnboarding ? (
+          <Stack.Screen name="Onboarding">
+            {() => <OnboardingScreen onComplete={handleOnboardingComplete} />}
+          </Stack.Screen>
+        ) : user ? (
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen
@@ -285,6 +312,7 @@ function AppNavigator() {
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

@@ -31,6 +31,9 @@ import {
   scheduleAllNotifications 
 } from '../services/notificationService';
 import { getInspirationByMood, InspirationMessage } from '../data/inspirationMessages';
+import { getGreetingMessage, getUserTimezone } from '../utils/dateTimeUtils';
+import { useTooltips } from '../hooks/useTooltips';
+import Tooltip from '../components/Tooltip';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +53,9 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useTranslation();
+  
+  // Tooltips
+  const tooltipManager = useTooltips('Dashboard');
 
   // Animation values
   const fadeAnims = useRef({
@@ -2263,6 +2269,9 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const healthRecommendations = getHealthRecommendations();
   const streakBadges = getStreakBadges();
 
+  const displayName = profile?.full_name || user?.displayName || user?.email || 'Sude';
+  const greeting = getGreetingMessage(getUserTimezone(), 'tr');
+
   return (
     <>
       {/* Streak Modal */}
@@ -2571,7 +2580,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           Her kelime, her hissiyat burada değerli. Seni bekleyen hikayeler var.
         </Text>
         <Text style={dynamicStyles.userGreeting}>
-          {t('dashboard.greeting', { name: profile?.full_name || user?.displayName || user?.email || 'User' })}
+          {greeting} {displayName}
         </Text>
         <Text style={dynamicStyles.userEmail}>{t('dashboard.howAreYou')}</Text>
       </View>
@@ -2633,6 +2642,20 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               animateCardPress('mood');
               navigation.navigate('WriteDiaryStep1' as never);
+            }}
+            onLayout={(event) => {
+              const { x, y, width, height } = event.nativeEvent.layout;
+              tooltipManager.showTooltip(
+                {
+                  id: 'dashboard_mood',
+                  title: 'Ruh Halini Kaydet',
+                  description: 'Buraya tıklayarak günlük ruh halinizi kaydedebilirsiniz',
+                  position: 'bottom',
+                  targetElement: 'mood_selector',
+                  screen: 'Dashboard',
+                },
+                { x, y, width, height }
+              );
             }}
             activeOpacity={0.8}
           >
@@ -2898,6 +2921,17 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           </View>
         </Animated.View>
       </View>
+    )}
+
+    {/* Tooltip */}
+    {tooltipManager.currentTooltip && (
+      <Tooltip
+        tooltip={tooltipManager.currentTooltip}
+        visible={tooltipManager.isVisible}
+        onClose={tooltipManager.hideTooltip}
+        onNext={tooltipManager.nextTooltip}
+        targetPosition={tooltipManager.targetPosition}
+      />
     )}
 
     </>

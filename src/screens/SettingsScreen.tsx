@@ -14,6 +14,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { resetOnboarding } from '../services/onboardingService';
+import { resetAllTooltips } from '../services/tooltipService';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -59,6 +61,48 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               await signOut();
             } catch (error) {
               Alert.alert('Hata', 'Çıkış yapılırken bir hata oluştu.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleResetOnboarding = async () => {
+    Alert.alert(
+      'Onboarding\'i Yeniden Göster',
+      'İlk kullanım rehberini tekrar görmek istediğinizden emin misiniz?',
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Evet',
+          onPress: async () => {
+            try {
+              await resetOnboarding(user?.uid);
+              Alert.alert('Başarılı', 'Uygulamayı yeniden başlatın ve onboarding\'i göreceksiniz.');
+            } catch (error) {
+              Alert.alert('Hata', 'Onboarding sıfırlanırken bir hata oluştu.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleResetTooltips = async () => {
+    Alert.alert(
+      'Tooltipleri Yeniden Göster',
+      'Tüm ipuçlarını tekrar görmek istediğinizden emin misiniz?',
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Evet',
+          onPress: async () => {
+            try {
+              await resetAllTooltips(user?.uid);
+              Alert.alert('Başarılı', 'Tooltipler sıfırlandı. Uygulamayı yeniden başlatın.');
+            } catch (error) {
+              Alert.alert('Hata', 'Tooltipler sıfırlanırken bir hata oluştu.');
             }
           },
         },
@@ -130,6 +174,30 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       icon: 'cloud-upload-outline',
       screen: 'DataBackupSettings',
       color: '#06b6d4',
+    },
+    {
+      id: 'help',
+      title: 'Yardım & Kılavuz',
+      subtitle: 'Hızlı başlangıç ve SSS',
+      icon: 'help-buoy-outline',
+      screen: 'HelpGuide',
+      color: currentTheme.colors.primary,
+    },
+    {
+      id: 'onboarding',
+      title: 'Onboarding\'i Yeniden Göster',
+      subtitle: 'İlk kullanım rehberini tekrar göster',
+      icon: 'refresh-outline',
+      action: handleResetOnboarding,
+      color: '#8b5cf6',
+    },
+    {
+      id: 'tooltips',
+      title: 'Tooltipleri Yeniden Göster',
+      subtitle: 'Tüm ipuçlarını tekrar göster',
+      icon: 'help-circle-outline',
+      action: handleResetTooltips,
+      color: '#10b981',
     },
     {
       id: 'logout',
