@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Linking } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { CustomAlert } from '../components/CustomAlert';
 
 export default function AuthCallbackScreen() {
   const { currentTheme } = useTheme();
+  const { refreshUser } = useAuth();
   const navigation = useNavigation();
   const route = useRoute();
   const [alertConfig, setAlertConfig] = useState({
@@ -63,6 +65,10 @@ export default function AuthCallbackScreen() {
 
             if (data.session) {
               console.log('✅ Email confirmed and session updated');
+              
+              // UI state'ini güncelle
+              await refreshUser();
+              
               showAlert(
                 '✅ Başarılı', 
                 'Email adresiniz başarıyla onaylandı ve güncellendi!',
@@ -89,6 +95,10 @@ export default function AuthCallbackScreen() {
 
         if (session) {
           console.log('✅ Session found');
+          
+          // UI state'ini güncelle
+          await refreshUser();
+          
           showAlert(
             '✅ Başarılı', 
             'Email adresiniz başarıyla onaylandı!',

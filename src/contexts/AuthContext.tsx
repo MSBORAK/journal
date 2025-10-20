@@ -9,6 +9,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -226,6 +227,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Kullanıcı bilgilerini yenile - email güncelleme sonrası UI state'ini güncellemek için
+  const refreshUser = async (): Promise<void> => {
+    try {
+      console.log('🔄 Refreshing user data...');
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        const updatedUser: User = {
+          uid: currentUser.id,
+          email: currentUser.email || '',
+          displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || '',
+          photoURL: currentUser.user_metadata?.avatar_url || undefined,
+        };
+        setUser(updatedUser);
+        console.log('✅ User data refreshed:', updatedUser);
+      } else {
+        console.warn('⚠️ No user found during refresh');
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing user:', error);
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -233,6 +256,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signUp,
     signOut,
     refreshSession,
+    refreshUser,
   };
 
   return (

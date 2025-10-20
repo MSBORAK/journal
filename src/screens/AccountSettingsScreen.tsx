@@ -28,7 +28,7 @@ interface AccountSettingsScreenProps {
 
 export default function AccountSettingsScreen({ navigation }: AccountSettingsScreenProps) {
   const { currentTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshUser } = useAuth();
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',
@@ -118,6 +118,11 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await updateEmail(newEmail);
       setShowEmailModal(false);
       showAlert('✅ E-posta doğrulama gönderildi', 'Yeni e-posta adresinize doğrulama maili gönderildi. Lütfen email kutunuzu kontrol edin ve linke tıklayarak onaylayın.', 'success');
+      
+      // Email güncelleme sonrası UI state'ini yenile
+      setTimeout(async () => {
+        await refreshUser();
+      }, 1000);
     } catch (error: any) {
       showAlert('❌ Hata', error.message || 'Email güncellenirken hata oluştu.', 'error');
     } finally {
