@@ -104,7 +104,10 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updateEmail(newEmail);
       setShowEmailModal(false);
-      showAlert('✅ Başarılı', 'Email adresiniz güncellendi!', 'success');
+      showAlert('✅ E-posta doğrulama gönderildi', 'Yeni e-posta adresinize doğrulama maili gönderildi. Onayladıktan sonra uygulamada yenileme ile güncellenecektir.', 'success');
+      // UI'da güncel e-postayı göstermek için geçici olarak alanı güncelle
+      // fakat gerçek güncelleme onaydan sonra Supabase tarafından yapılır
+      // useAuth tarafında onAuthStateChange ile yakalanır
     } catch (error) {
       showAlert('❌ Hata', 'Email güncellenirken hata oluştu.', 'error');
     } finally {

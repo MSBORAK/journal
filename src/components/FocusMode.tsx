@@ -144,7 +144,9 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
           onPress: () => {
             setAlertConfig({ ...alertConfig, visible: false });
             resetTimer();
-            onClose();
+            setTimeout(() => {
+              onClose();
+            }, 100);
           },
           style: 'danger',
         },
@@ -155,7 +157,10 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
         },
       });
     } else {
-      onClose();
+      resetTimer();
+      setTimeout(() => {
+        onClose();
+      }, 100);
     }
   };
 
@@ -403,16 +408,6 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
   });
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={() => {
-        // Sayfadan çıkınca direkt kapanmasın, sadece X butonundan kapansın
-        // onRequestClose'u boş bırakıyoruz
-      }}
-      statusBarTranslucent={false}
-    >
       <View style={dynamicStyles.container}>
         <LinearGradient
           colors={getGradientColors()}
@@ -598,6 +593,5 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
           secondaryButton={alertConfig.secondaryButton}
         />
       </View>
-    </Modal>
   );
 }

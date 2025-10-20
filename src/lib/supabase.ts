@@ -52,7 +52,8 @@ export const updateEmail = async (newEmail: string) => {
     }
 
     const { data, error } = await supabase.auth.updateUser({
-      email: newEmail
+      email: newEmail.toLowerCase().trim(),
+      emailRedirectTo: 'daily://auth/callback?type=email_confirm',
     });
     
     if (error) throw error;

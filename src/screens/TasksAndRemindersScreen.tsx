@@ -1182,10 +1182,18 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       </TouchableOpacity>
 
       {/* Focus Mode Modal */}
-      <FocusMode
+      <Modal
+        animationType="slide"
+        transparent={true}
         visible={showFocusMode}
-        onClose={() => setShowFocusMode(false)}
-      />
+        onRequestClose={() => setShowFocusMode(false)}
+        presentationStyle="overFullScreen"
+      >
+        <FocusMode
+          visible={showFocusMode}
+          onClose={() => setShowFocusMode(false)}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }
