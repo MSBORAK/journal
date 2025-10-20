@@ -78,6 +78,14 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     );
   };
 
+  const confirmSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      showAlert('❌ Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+    }
+  };
+
   const handleResetOnboarding = async () => {
     showAlert(
       '🎯 Onboarding\'i Yeniden Göster',
@@ -449,10 +457,15 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
-          onPress: hideAlert,
+          text: alertConfig.title.includes('Çıkış Yap') ? 'Evet, Çıkış Yap' : 'Tamam',
+          onPress: alertConfig.title.includes('Çıkış Yap') ? confirmSignOut : hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}
+        secondaryButton={alertConfig.title.includes('Çıkış Yap') ? {
+          text: 'İptal',
+          onPress: hideAlert,
+          style: 'secondary',
+        } : undefined}
         onClose={hideAlert}
       />
     </SafeAreaView>
