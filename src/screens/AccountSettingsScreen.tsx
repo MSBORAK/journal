@@ -162,10 +162,16 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updatePassword(newPassword, oldPassword);
+      
+      // Form temizle
       setShowPasswordModal(false);
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      
+      // UI state'ini güncelle (ChatGPT'nin önerdiği gibi)
+      await refreshUser();
+      
       showAlert('✅ Başarılı', 'Şifreniz başarıyla güncellendi!', 'success');
     } catch (error: any) {
       showAlert('❌ Hata', error.message || 'Şifre güncellenirken hata oluştu.', 'error');
