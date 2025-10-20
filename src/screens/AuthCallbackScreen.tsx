@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Linking } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { CustomAlert } from '../components/CustomAlert';
 
 export default function AuthCallbackScreen() {
   const { currentTheme } = useTheme();
   const navigation = useNavigation();
+  const route = useRoute();
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',
@@ -25,35 +26,84 @@ export default function AuthCallbackScreen() {
   };
 
   useEffect(() => {
-    // Handle email confirmation - ChatGPT'nin önerisi doğrultusunda
     const handleEmailConfirmation = async () => {
       try {
-        // Deep link'ten gelen token'ları kontrol et
+        console.log('🔗 AuthCallback started');
+        
+        // Deep link'ten gelen URL'i al
+        const url = await Linking.getInitialURL();
+        console.log('📱 Initial URL:', url);
+        
+        if (url) {
+          // URL'den hash parametrelerini çıkar
+          const urlObj = new URL(url);
+          const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+          const type = hashParams.get('type');
+          
+          console.log('🔑 Token info:', { 
+            hasAccessToken: !!accessToken, 
+            hasRefreshToken: !!refreshToken,
+            type 
+          });
+
+          if (accessToken && refreshToken) {
+            // Token'ları kullanarak session oluştur
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (error) {
+              console.error('❌ Session set error:', error);
+              showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
+              return;
+            }
+
+            if (data.session) {
+              console.log('✅ Email confirmed and session updated');
+              showAlert(
+                '✅ Başarılı', 
+                'Email adresiniz başarıyla onaylandı ve güncellendi!',
+                'success'
+              );
+              
+              // Navigate back to settings after 2 seconds
+              setTimeout(() => {
+                navigation.navigate('AccountSettings' as never);
+              }, 2000);
+              return;
+            }
+          }
+        }
+
+        // Eğer URL'den token alamazsak, mevcut session'ı kontrol et
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Auth callback error:', error);
+          console.error('❌ Get session error:', error);
           showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
           return;
         }
 
         if (session) {
-          console.log('Email confirmed successfully');
+          console.log('✅ Session found');
           showAlert(
             '✅ Başarılı', 
-            'Email adresiniz başarıyla onaylandı ve güncellendi.',
+            'Email adresiniz başarıyla onaylandı!',
             'success'
           );
           
-          // Navigate back to settings after 2 seconds
           setTimeout(() => {
             navigation.navigate('AccountSettings' as never);
           }, 2000);
         } else {
-          showAlert('⚠️ Uyarı', 'Oturum bulunamadı. Email linkini tekrar kullanın.', 'warning');
+          console.warn('⚠️ No session found');
+          showAlert('⚠️ Uyarı', 'Email onayı tamamlanamadı. Lütfen linki tekrar kullanın.', 'warning');
         }
       } catch (error) {
-        console.error('Auth callback error:', error);
+        console.error('❌ Auth callback error:', error);
         showAlert('❌ Hata', 'Email onayında beklenmeyen bir hata oluştu.', 'error');
       }
     };
