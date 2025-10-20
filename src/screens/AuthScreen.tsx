@@ -24,6 +24,8 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -129,17 +131,82 @@ export default function AuthScreen() {
       fontSize: 14,
       fontWeight: '500',
     },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    },
+    modalContent: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 20,
+      padding: 24,
+      width: '100%',
+      maxWidth: 350,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
+      elevation: 10,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+    modalInput: {
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      fontSize: 16,
+      color: currentTheme.colors.text,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '20',
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    modalButtonPrimary: {
+      backgroundColor: currentTheme.colors.primary,
+    },
+    modalButtonSecondary: {
+      backgroundColor: currentTheme.colors.primary + '15',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '30',
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    modalButtonTextPrimary: {
+      color: currentTheme.colors.background,
+    },
+    modalButtonTextSecondary: {
+      color: currentTheme.colors.primary,
+    },
   });
 
   const handleForgotPassword = async () => {
-    if (!email) {
+    if (!forgotPasswordEmail) {
       showAlert('⚠️ Uyarı', 'Şifre sıfırlama linki için email adresinizi giriniz.', 'warning');
       return;
     }
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
         redirectTo: 'daily://auth/callback?type=password_reset',
       });
 
@@ -147,6 +214,8 @@ export default function AuthScreen() {
         throw error;
       }
 
+      setShowForgotPasswordModal(false);
+      setForgotPasswordEmail('');
       showAlert(
         '✅ E-posta Gönderildi', 
         'Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.',
@@ -158,6 +227,8 @@ export default function AuthScreen() {
         showAlert('⚠️ Uyarı', 'Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.', 'warning');
       } else if (errorMessage.toLowerCase().includes('invalid email')) {
         showAlert('❌ Hata', 'Geçersiz email adresi.', 'error');
+      } else if (errorMessage.toLowerCase().includes('user not found')) {
+        showAlert('❌ Hata', 'Bu email adresi ile kayıtlı kullanıcı bulunamadı.', 'error');
       } else {
         showAlert('❌ Hata', 'Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.', 'error');
       }
@@ -273,7 +344,10 @@ export default function AuthScreen() {
           {isLogin && (
             <TouchableOpacity
               style={[dynamicStyles.switchButton, { marginBottom: 16 }]}
-              onPress={handleForgotPassword}
+              onPress={() => {
+                setForgotPasswordEmail(email); // Mevcut email'i otomatik doldur
+                setShowForgotPasswordModal(true);
+              }}
               disabled={loading}
             >
               <Text style={[dynamicStyles.switchText, { fontSize: 13, opacity: 0.8 }]}>
@@ -298,6 +372,53 @@ export default function AuthScreen() {
           </TouchableOpacity>
         </LinearGradient>
       </ScrollView>
+
+      {/* Forgot Password Modal */}
+      <Modal visible={showForgotPasswordModal} transparent animationType="fade" onRequestClose={() => setShowForgotPasswordModal(false)}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={dynamicStyles.modalOverlay}
+        >
+          <View style={dynamicStyles.modalContent}>
+            <Text style={dynamicStyles.modalTitle}>🔑 Şifremi Unuttum</Text>
+            
+            <TextInput
+              style={dynamicStyles.modalInput}
+              value={forgotPasswordEmail}
+              onChangeText={setForgotPasswordEmail}
+              placeholder="Email adresinizi girin"
+              placeholderTextColor={currentTheme.colors.muted}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => {
+                  setShowForgotPasswordModal(false);
+                  setForgotPasswordEmail('');
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  İptal
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={handleForgotPassword}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  {loading ? 'Gönderiliyor...' : 'Gönder'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Custom Alert */}
       <CustomAlert
