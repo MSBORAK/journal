@@ -63,7 +63,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
   const showPrivacyPolicy = () => {
     showAlert(
       '🔒 Gizlilik Politikası',
-      'Gizlilik Politikamız:\n\n• Günlük verileriniz sadece sizin cihazınızda ve Supabase bulutunda saklanır\n• Verileriniz üçüncü taraflarla paylaşılmaz\n• Tüm verileriniz şifrelenir\n• İstediğiniz zaman verilerinizi silebilirsiniz\n• Anonim istatistikler için verileriniz anonimleştirilir\n\nDetaylı bilgi için: privacy@dailydiary.app',
+      'Gizlilik Politikamız:\n\n• Günlük verileriniz sadece sizin cihazınızda ve Supabase bulutunda saklanır\n• Verileriniz üçüncü taraflarla paylaşılmaz\n• Tüm verileriniz şifrelenir\n• İstediğiniz zaman verilerinizi silebilirsiniz\n• Anonim istatistikler için verileriniz anonimleştirilir\n\nDetaylı bilgi için: msesoftware1425@gmail.com',
       'info'
     );
   };
@@ -407,9 +407,9 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
           <View style={dynamicStyles.infoCard}>
             <Text style={dynamicStyles.infoText}>
               🔐 Gizlilik veya güvenlik konularında sorularınız varsa bizimle iletişime geçin:{'\n\n'}
-              📧 Email: privacy@dailydiary.app{'\n'}
-              🛡️ Güvenlik: security@dailydiary.app{'\n'}
-              📞 Destek: support@dailydiary.app
+              📧 Email: msesoftware1425@gmail.com{'\n'}
+              🛡️ Güvenlik: msesoftware1425@gmail.com{'\n'}
+              📞 Destek: msesoftware1425@gmail.com
             </Text>
           </View>
         </View>

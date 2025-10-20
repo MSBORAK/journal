@@ -34,11 +34,12 @@ export const backupToCloud = async (userId: string): Promise<boolean> => {
       timestamp: new Date().toISOString(),
     };
 
-    // 4. Supabase Storage'a yedekle
+    // 4. Supabase Storage'a yedekle (kullanıcı klasörü altında)
     const fileName = `backup_${userId}_${Date.now()}.json`;
+    const filePath = `${userId}/${fileName}`;
     const { error } = await supabase.storage
       .from('backups')
-      .upload(fileName, JSON.stringify(backupData), {
+      .upload(filePath, JSON.stringify(backupData), {
         contentType: 'application/json',
       });
 
@@ -47,7 +48,7 @@ export const backupToCloud = async (userId: string): Promise<boolean> => {
       return false;
     }
 
-    console.log('Backup successful:', fileName);
+    console.log('Backup successful:', filePath);
     return true;
   } catch (error) {
     console.error('Backup error:', error);
@@ -69,10 +70,12 @@ export const restoreFromCloud = async (userId: string): Promise<boolean> => {
       throw new Error('No backup found');
     }
 
-    // Yedek dosyasını indir
+    // Yedek dosyasını indir (kullanıcı klasörü altından)
+    const latestFileName = files[0].name; // list(userId) sadece dosya adını döndürür
+    const downloadPath = `${userId}/${latestFileName}`;
     const { data, error } = await supabase.storage
       .from('backups')
-      .download(files[0].name);
+      .download(downloadPath);
 
     if (error) {
       throw error;

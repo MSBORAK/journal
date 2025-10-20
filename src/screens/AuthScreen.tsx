@@ -209,6 +209,9 @@ export default function AuthScreen() {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
         redirectTo: 'daily://auth/callback?type=password_reset',
+        options: {
+          emailRedirectTo: 'daily://auth/callback?type=password_reset',
+        }
       });
 
       if (error) {

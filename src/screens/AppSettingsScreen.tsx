@@ -45,7 +45,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const showAbout = () => {
     showAlert(
       'ℹ️ Hakkında',
-      'Daily Diary App v1.0.0\n\nGünlük yazma alışkanlığı kazanmanız için tasarlanmış modern bir uygulamadır.\n\nGeliştirici: Merve Sude Borak\n© 2025\n\nİletişim: support@dailydiary.app',
+      'Daily Diary App v1.0.0\n\n📱 Kapsamlı günlük yazma uygulaması:\n• Günlük yazma sistemi\n• Mood takibi ve analizi\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro timer ve odak modu\n• İstatistikler ve gelişim takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Offline çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com',
       'info'
     );
   };
@@ -53,7 +53,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const showHelp = () => {
     showAlert(
       '❓ Yardım & Destek',
-      'Sık Sorulan Sorular:\n\n❓ Nasıl günlük yazabilirim?\n• Ana sayfadaki "Günlük Yaz" butonuna basın\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Tema nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: support@dailydiary.app',
+      'Sık Sorulan Sorular:\n\n❓ Nasıl günlük yazabilirim?\n• Ana sayfadaki "Günlük Yaz" butonuna basın\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Tema nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: msesoftware1425@gmail.com',
       'info'
     );
   };
@@ -80,7 +80,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const contactSupport = () => {
     showAlert(
       '📞 İletişim',
-      'Bizimle iletişime geçin:\n\n📧 Email: support@dailydiary.app\n💬 Telegram: @dailydiaryapp\n🐦 Twitter: @dailydiaryapp\n\nSorularınız için 7/24 destek sağlıyoruz!',
+      'Bizimle iletişime geçin:\n\n📧 Email: msesoftware1425@gmail.com\n💬 İnstagram: @msesoft\nSorularınız için 7/24 destek sağlıyoruz!',
       'info'
     );
   };
@@ -247,7 +247,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            🔔 Bildirim tercihlerinizi, uygulama bilgilerini ve destek kaynaklarını buradan yönetin.
+            📱 Uygulama bilgilerini ve destek kaynaklarını buradan yönetin.
           </Text>
           <View style={dynamicStyles.versionBadge}>
             <Text style={dynamicStyles.versionBadgeText}>v1.0.0</Text>
@@ -410,11 +410,11 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
           
           <View style={dynamicStyles.infoCard}>
             <Text style={dynamicStyles.infoText}>
-              👨‍💻 <Text style={{ fontWeight: '600' }}>Geliştirici:</Text> Merve Sude Borak{'\n'}
-              📧 <Text style={{ fontWeight: '600' }}>Email:</Text> merve@dailydiary.app{'\n'}
-              🌐 <Text style={{ fontWeight: '600' }}>Website:</Text> dailydiary.app{'\n'}
+              👨‍💻 <Text style={{ fontWeight: '600' }}>Geliştirici:</Text> MSESOFT{'\n'}
+              📧 <Text style={{ fontWeight: '600' }}>Email:</Text> msesoftware1425@gmail.com{'\n'}
+              🌐 <Text style={{ fontWeight: '600' }}>Website:</Text> www.msesoftware.com{'\n'}
               📅 <Text style={{ fontWeight: '600' }}>Tarih:</Text> 2025{'\n\n'}
-              Bu uygulama React Native ve Expo ile geliştirilmiştir. 
+              
               Tüm hakları saklıdır.
             </Text>
           </View>
