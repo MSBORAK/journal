@@ -318,48 +318,6 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
           </View>
         </View>
 
-        {/* Yardım & Destek */}
-        <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Yardım & Destek</Text>
-          
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="help-circle" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>Yardım & SSS</Text>
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Sık sorulan sorular ve kullanım rehberi.
-            </Text>
-            <TouchableOpacity
-              style={dynamicStyles.actionButton}
-              onPress={showHelp}
-              activeOpacity={0.8}
-            >
-              <Text style={dynamicStyles.actionButtonText}>❓ Yardım</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="mail" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>İletişim</Text>
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Sorularınız için bizimle iletişime geçin.
-            </Text>
-            <TouchableOpacity
-              style={dynamicStyles.actionButton}
-              onPress={contactSupport}
-              activeOpacity={0.8}
-            >
-              <Text style={dynamicStyles.actionButtonText}>📞 İletişim</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Değerlendirme & Paylaşım */}
         <View style={dynamicStyles.section}>

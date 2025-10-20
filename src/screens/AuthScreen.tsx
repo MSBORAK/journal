@@ -16,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
 import { CustomAlert } from '../components/CustomAlert';
+import { Toast } from '../components/Toast';
 import { supabase } from '../lib/supabase';
 // import { MotiView } from 'moti'; // Removed for now
 
@@ -35,6 +36,13 @@ export default function AuthScreen() {
     type: 'info' as 'success' | 'warning' | 'error' | 'info',
   });
 
+  // Toast state
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    message: '',
+    type: 'info' as 'success' | 'error' | 'warning' | 'info',
+  });
+
   const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
     setAlertConfig({
       visible: true,
@@ -44,8 +52,20 @@ export default function AuthScreen() {
     });
   };
 
+  const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    setToastConfig({
+      visible: true,
+      message,
+      type,
+    });
+  };
+
   const hideAlert = () => {
     setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
+
+  const hideToast = () => {
+    setToastConfig(prev => ({ ...prev, visible: false }));
   };
 
   const { signIn, signUp } = useAuth();
@@ -138,6 +158,8 @@ export default function AuthScreen() {
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,
+      paddingTop: 60,
+      paddingBottom: 60,
     },
     modalContent: {
       backgroundColor: currentTheme.colors.card,
@@ -209,9 +231,6 @@ export default function AuthScreen() {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
         redirectTo: 'daily://auth/callback?type=password_reset',
-        options: {
-          emailRedirectTo: 'daily://auth/callback?type=password_reset',
-        }
       });
 
       if (error) {
@@ -243,12 +262,12 @@ export default function AuthScreen() {
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      showAlert('❌ ' + t('common.error'), t('auth.emailRequired') + ' & ' + t('auth.passwordRequired'), 'error');
+      showToast('Email ve şifre gereklidir', 'error');
       return;
     }
 
     if (!isLogin && !displayName) {
-      showAlert('❌ ' + t('common.error'), t('auth.displayNameRequired'), 'error');
+      showToast('Ad soyad gereklidir', 'error');
       return;
     }
 
@@ -258,12 +277,21 @@ export default function AuthScreen() {
         await signIn(email, password);
       } else {
         await signUp(email, password, displayName);
-        showAlert('✅ ' + t('common.success'), 'Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.', 'success');
+        showToast('Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.', 'success');
         setIsLogin(true);
         setDisplayName('');
       }
     } catch (error) {
-      showAlert('❌ ' + t('common.error'), error instanceof Error ? error.message : 'Bir hata oluştu', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Bir hata oluştu';
+      if (errorMessage.toLowerCase().includes('invalid login credentials')) {
+        showToast('Email veya şifre hatalı', 'error');
+      } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
+        showToast('Email adresinizi doğrulayın', 'error');
+      } else if (errorMessage.toLowerCase().includes('too many requests')) {
+        showToast('Çok fazla deneme. Lütfen bekleyin', 'error');
+      } else {
+        showToast(errorMessage, 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -306,6 +334,9 @@ export default function AuthScreen() {
                 onChangeText={setDisplayName}
                 placeholder={t('auth.displayName')}
                 placeholderTextColor="#9ca3af"
+                autoCorrect={false}
+                autoCapitalize="words"
+                textContentType="name"
               />
             </View>
           )}
@@ -320,6 +351,9 @@ export default function AuthScreen() {
               placeholderTextColor="#9ca3af"
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="emailAddress"
+              autoComplete="email"
             />
           </View>
 
@@ -332,6 +366,9 @@ export default function AuthScreen() {
               placeholder={t('auth.password')}
               placeholderTextColor="#9ca3af"
               secureTextEntry
+              autoCorrect={false}
+              textContentType={isLogin ? "password" : "newPassword"}
+              autoComplete={isLogin ? "current-password" : "new-password"}
             />
           </View>
 
@@ -383,7 +420,12 @@ export default function AuthScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}
         >
-          <View style={dynamicStyles.modalContent}>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>🔑 Şifremi Unuttum</Text>
             
             <TextInput
@@ -394,6 +436,9 @@ export default function AuthScreen() {
               placeholderTextColor={currentTheme.colors.muted}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="emailAddress"
+              autoComplete="email"
             />
             
             <View style={dynamicStyles.modalButtons}>
@@ -420,7 +465,8 @@ export default function AuthScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -436,6 +482,14 @@ export default function AuthScreen() {
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}
         onClose={hideAlert}
+      />
+
+      {/* Toast */}
+      <Toast
+        visible={toastConfig.visible}
+        message={toastConfig.message}
+        type={toastConfig.type}
+        onHide={hideToast}
       />
     </KeyboardAvoidingView>
   );

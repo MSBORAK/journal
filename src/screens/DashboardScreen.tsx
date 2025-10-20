@@ -725,16 +725,37 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   };
 
   const getMotivationMessage = () => {
+    // Basit pozitif mesajlar - rastgele seç
     const messages = [
-      // Genel motivasyon
-      'Bugün de harika bir gün geçireceğini biliyorum! 🌟',
-      'Her yeni gün yeni fırsatlar demek! Sen hazırsın! 🚀',
-      'Bugün de kendini dinlemeye zaman ayır! 🎧',
-      'Güne pozitif başla, güzel bitecek! ☀️',
-      'Bugün kendin için bir şeyler yap! Sen değerlisin! 💎',
-      'Bugünün en güzel anını yakalamaya hazır mısın? 📸',
-      'Her gün bir hediye! Bugün nasıl kullanacaksın? 🎁',
-      'Bugün de kendini sevmeye devam et! 💕',
+      // Pozitif ve motive edici mesajlar
+      'İçindeki ışık parıyor! ✨',
+      'Sen çok değerlisin! 💎',
+      'Her gün daha güçlüsün! 🌱',
+      'Kendine nazik ol! 🌸',
+      'Sen harikasın! 🌟',
+      'Nefes al, rahatla! 🌬️',
+      'Bugün gülümse! 😊',
+      'Kendini sev! 💕',
+      'İçsel huzurun var! 🕊️',
+      'Sen bir yıldızsın! ⭐',
+      
+      // Daha fazla pozitif mesaj
+      'Sen muhteşemsin! 🌈',
+      'Hayat sana gülüyor! 🌻',
+      'Sen özelsin! ✨',
+      'Kendinle barışık ol! 🕊️',
+      'Sen bir ışıksın! 💡',
+      'Bugün güzel olacak! 🌅',
+      'Sen değerlisin! 💖',
+      'İçindeki güzellik parıyor! 🌸',
+      'Sen bir mucizesin! 🌟',
+      'Kendini kabul et! 🤲',
+      'Sen güzelsin! 🌺',
+      'İçindeki sevgi büyük! 💝',
+      'Sen cesursun! 🦁',
+      'Her gün bir hediye! 🎁',
+      'Sen başarılısın! 🏆',
+      'Sen bir lider! 👑',
       
       // Kişisel gelişim
       'Kendini keşfetmek en büyük macera! Sen bu maceradasın! 🗺️',

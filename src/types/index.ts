@@ -14,6 +14,19 @@ export interface DiaryEntry {
   date: string;
   createdAt: string;
   updatedAt: string;
+  answers?: {
+    happiness?: string;
+    lesson?: string;
+    communication?: string;
+    challenge?: string;
+    gratitude?: string;
+    energy?: string;
+    accomplishment?: string;
+    emotion?: string;
+    growth?: string;
+    tomorrow?: string;
+  };
+  freeWriting?: string;
 }
 
 export interface MoodOption {

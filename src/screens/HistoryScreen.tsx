@@ -260,6 +260,22 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       opacity: 0.8,
       alignSelf: 'center',
     },
+    entryMetaLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    questionsCount: {
+      backgroundColor: currentTheme.colors.accent,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    questionsCountText: {
+      fontSize: 11,
+      color: currentTheme.colors.primary,
+      fontWeight: '600',
+    },
     emptyState: {
       flex: 1,
       justifyContent: 'center',
@@ -312,11 +328,8 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       <View>
         <TouchableOpacity
           style={dynamicStyles.entryCard}
-          onPress={() => navigation.navigate('WriteDiaryStep3', { 
-            title: item.title, 
-            mood: item.mood, 
-            answers: {}, 
-            freeWriting: item.content 
+          onPress={() => navigation.navigate('DiaryDetail', { 
+            entry: item
           })}
         >
           <LinearGradient
@@ -341,9 +354,18 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
           </Text>
           
           <View style={dynamicStyles.entryMeta}>
-            <Text style={dynamicStyles.entryDate}>
-              {new Date(item.date).toLocaleDateString('tr-TR')}
-            </Text>
+            <View style={dynamicStyles.entryMetaLeft}>
+              <Text style={dynamicStyles.entryDate}>
+                {new Date(item.date).toLocaleDateString('tr-TR')}
+              </Text>
+              {item.answers && (
+                <View style={dynamicStyles.questionsCount}>
+                  <Text style={dynamicStyles.questionsCountText}>
+                    {Object.values(item.answers).filter(answer => answer && answer.trim() !== '').length} soru
+                  </Text>
+                </View>
+              )}
+            </View>
             
             {item.tags.length > 0 && (
               <View style={dynamicStyles.tagsContainer}>

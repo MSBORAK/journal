@@ -20,27 +20,63 @@ interface WriteDiaryStep2ScreenProps {
 const questions = [
   {
     id: 'happiness',
-    title: 'Bugün seni en çok mutlu eden şey neydi?',
-    placeholder: 'Bugün yaşadığın en güzel anı paylaş...',
+    title: '✨ Bugün seni gülümseten an neydi?',
+    placeholder: 'Bugün kalbini ısıtan o özel anı anlat...',
     icon: '😊',
   },
   {
+    id: 'gratitude',
+    title: '🌟 Bugün için şükrettiğin 3 şey?',
+    placeholder: 'Hayatındaki güzellikleri hatırla ve yaz...',
+    icon: '🙏',
+  },
+  {
+    id: 'accomplishment',
+    title: '🎉 Bugün gurur duyduğun başarın ne?',
+    placeholder: 'Küçük de olsa, kendini kutla! Ne yaptın?',
+    icon: '🎯',
+  },
+  {
     id: 'lesson',
-    title: 'Sence bugün hayattan ne dersler çıkardın?',
-    placeholder: 'Bugün öğrendiğin şeyleri yaz...',
+    title: '💎 Bugün keşfettiğin güzel bir şey?',
+    placeholder: 'Yeni öğrendiğin, seni heyecanlandıran neydi?',
     icon: '💡',
   },
   {
     id: 'communication',
-    title: 'İnsanlarla iletişimin nasıldı?',
-    placeholder: 'Bugün kimlerle konuştun, nasıl geçti?',
+    title: '💝 Bugün kimle güzel vakit geçirdin?',
+    placeholder: 'Bugün paylaştığın sevgi dolu anları yaz...',
     icon: '👥',
   },
   {
+    id: 'energy',
+    title: '⚡ Bugün seni canlı hissettiren şey?',
+    placeholder: 'Sana güç veren, canlandıran anlar...',
+    icon: '🔋',
+  },
+  {
+    id: 'growth',
+    title: '🌱 Bugün kendine verdiğin hediye ne?',
+    placeholder: 'Kendine nasıl değer verdin bugün?',
+    icon: '🌸',
+  },
+  {
+    id: 'emotion',
+    title: '🎨 Bugün hayatına renk katan şey ne?',
+    placeholder: 'Seni mutlu eden renkli anları paylaş...',
+    icon: '🌈',
+  },
+  {
+    id: 'tomorrow',
+    title: '🚀 Yarın için heyecanlandığın şey?',
+    placeholder: 'Yarına umutla bakmak için bir neden...',
+    icon: '✨',
+  },
+  {
     id: 'challenge',
-    title: 'Bugün karşılaştığın zorluklar nelerdi?',
-    placeholder: 'Bugün zorlandığın anları anlat...',
-    icon: '💪',
+    title: '💪 Bugün kendini güçlü hissettiğin an?',
+    placeholder: 'Bugün ne zaman "ben yapabilirim" dedin?',
+    icon: '🏆',
   },
 ];
 
@@ -269,6 +305,9 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
               placeholder={question.placeholder}
               placeholderTextColor={currentTheme.colors.muted}
               multiline
+              autoCorrect={false}
+              autoCapitalize="sentences"
+              textContentType="none"
             />
           </View>
         ))}
@@ -289,6 +328,9 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
             placeholder="Bugün neler yaşadın? Nasıl hissettin? Ne düşünüyorsun? Buraya her şeyi yazabilirsin..."
             placeholderTextColor={currentTheme.colors.muted}
             multiline
+            autoCorrect={false}
+            autoCapitalize="sentences"
+            textContentType="none"
           />
         </View>
 

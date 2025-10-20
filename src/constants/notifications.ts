@@ -567,10 +567,10 @@ export const getMessageByDayOfWeek = (timezone?: string): NotificationMessage =>
     
     // Hafta sonu kontrolü
     if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
-      console.log('Weekend detected, showing weekend message');
+      console.log('📅 Weekend detected, showing weekend message');
       return getRandomMessage(weekendMessages);
     } else {
-      console.log('Weekday detected, showing time-based message');
+      console.log('📅 Weekday detected, showing time-based message');
       return getMessageByTimeOfDay(undefined, userTimezone);
     }
   } catch (error) {

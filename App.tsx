@@ -46,6 +46,7 @@ type RootStackParamList = {
   Achievements: undefined;
   Mindfulness: undefined;
   HelpGuide: undefined;
+  DiaryDetail: { entry: any };
 };
 
 type TabParamList = {
@@ -62,6 +63,7 @@ import AuthScreen from './src/screens/AuthScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import WriteDiaryScreen from './src/screens/WriteDiaryScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
+import DiaryDetailScreen from './src/screens/DiaryDetailScreen';
 import StatisticsScreen from './src/screens/StatisticsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ThemeSelectionScreen from './src/screens/ThemeSelectionScreen';
@@ -312,6 +314,7 @@ function AppNavigator() {
         <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
         <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="DiaryDetail" component={DiaryDetailScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

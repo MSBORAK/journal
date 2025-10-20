@@ -12,6 +12,7 @@ export interface MotivationData {
     minMoodTrend?: number;
     maxMoodTrend?: number;
     minGoalProgress?: number;
+    maxGoalProgress?: number;
     streakDays?: number;
     lastShown?: number; // timestamp
     cooldownHours?: number;
@@ -23,8 +24,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'mood_excellent_week',
     type: 'mood_trend',
-    title: 'Harika Hafta! 🌟',
-    message: 'Bu hafta çok pozitif bir enerjin var! Bu güzel ruh halini korumaya devam et.',
+    title: 'Işıl Işıl Parlıyorsun! ✨',
+    message: 'Bu hafta içindeki ışık öyle güçlü ki, etrafına pozitif enerji saçıyorsun. Kendini hissettiğin gibi yaşamaya devam et!',
     emoji: '🌟',
     priority: 'high',
     conditions: {
@@ -35,8 +36,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'mood_good_week',
     type: 'mood_trend',
-    title: 'Güzel Günler! 😊',
-    message: 'Son günlerde ruh halin oldukça iyi. Bu pozitif enerjiyi sürdürmeye devam et!',
+    title: 'Ruhun Huzurlu! 🌸',
+    message: 'İçindeki o güzel enerji çok değerli. Hayatın sana sunduğu bu güzel anları doya doya yaşa!',
     emoji: '😊',
     priority: 'medium',
     conditions: {
@@ -48,8 +49,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'mood_encouragement',
     type: 'mood_trend',
-    title: 'Sen Güçlüsün! 💪',
-    message: 'Zor günler geçiriyorsun ama unutma, her zorluk seni daha güçlü yapar. Pes etme!',
+    title: 'Her Gün Yeni Bir Başlangıç! 🌅',
+    message: 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!',
     emoji: '💪',
     priority: 'high',
     conditions: {
@@ -62,8 +63,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'goal_almost_there',
     type: 'goal_progress',
-    title: 'Neredeyse Bitti! 🎯',
-    message: 'Hedefine çok yaklaştın! Son spurtla bitirebilirsin, hadi!',
+    title: 'Hayallerine Çok Yakınsın! ✨',
+    message: 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!',
     emoji: '🎯',
     priority: 'high',
     conditions: {
@@ -74,8 +75,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'goal_good_progress',
     type: 'goal_progress',
-    title: 'İyi Gidiyor! 📈',
-    message: 'Hedeflerinde güzel ilerleme kaydediyorsun. Bu tempoyu koru!',
+    title: 'Yolun Yarısını Geçtin! 🌈',
+    message: 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!',
     emoji: '📈',
     priority: 'medium',
     conditions: {
@@ -89,8 +90,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'streak_amazing',
     type: 'streak',
-    title: 'Muhteşem Streak! 🔥',
-    message: 'Günlük yazma serin inanılmaz! Bu disiplini korumaya devam et!',
+    title: 'Sen Bir Efsanesin! 🔥',
+    message: 'Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!',
     emoji: '🔥',
     priority: 'high',
     conditions: {
@@ -101,8 +102,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'streak_good',
     type: 'streak',
-    title: 'Güzel Alışkanlık! ⭐',
-    message: 'Düzenli günlük yazma alışkanlığın gelişiyor. Harika!',
+    title: 'Harika Bir Ritm! ⭐',
+    message: 'Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!',
     emoji: '⭐',
     priority: 'medium',
     conditions: {
@@ -111,12 +112,12 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
     },
   },
 
-  // General Encouragement
+  // General Encouragement - Pozitif & İlham Verici
   {
     id: 'general_encouragement_1',
     type: 'encouragement',
-    title: 'Sen Harikasın! ✨',
-    message: 'Kendine zaman ayırdığın için teşekkürler. Bu öz bakımın çok değerli!',
+    title: 'İçindeki Işık Parlıyor! ✨',
+    message: 'Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!',
     emoji: '✨',
     priority: 'low',
     conditions: {
@@ -126,12 +127,177 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'general_encouragement_2',
     type: 'encouragement',
-    title: 'Büyüme Zamanı! 🌱',
-    message: 'Her gün biraz daha iyi versiyonun oluyorsun. Bu yolculuk çok güzel!',
+    title: 'Her Gün Daha Güçlüsün! 🌱',
+    message: 'Bazen fark etmesen de her gün biraz daha güçleniyorsun. Kendine inan, sen muhteşemsin!',
     emoji: '🌱',
     priority: 'low',
     conditions: {
       cooldownHours: 36,
+    },
+  },
+  {
+    id: 'reflection_insight',
+    type: 'encouragement',
+    title: 'Duygularını Dinlemek Güzel! 🎵',
+    message: 'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!',
+    emoji: '🤔',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 24,
+    },
+  },
+  {
+    id: 'gratitude_practice',
+    type: 'encouragement',
+    title: 'Hayat Sana Gülüyor! 🌻',
+    message: 'Şükretmek kalbi ferahlatır. İşte şu an sahip olduğun her şey bir nimet. Hayattan keyif al!',
+    emoji: '🙏',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 18,
+    },
+  },
+  {
+    id: 'emotional_awareness',
+    type: 'encouragement',
+    title: 'Duygularına Değer Ver! 💖',
+    message: 'Her duygun seni sen yapan şeylerden biri. Onları kabul et, onlarla barış. Çok güzelsin!',
+    emoji: '💭',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 20,
+    },
+  },
+  {
+    id: 'growth_mindset',
+    type: 'encouragement',
+    title: 'Büyüyen Bir Ruh! 🦋',
+    message: 'Her yeni gün, yeni bir sen olmak için bir fırsat. Sen sürekli dönüşüyorsun ve bu çok güzel!',
+    emoji: '🧠',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 16,
+    },
+  },
+  {
+    id: 'self_compassion',
+    type: 'encouragement',
+    title: 'Kendine Nazik Ol! 🌸',
+    message: 'En sevdiğin insana davrandığın gibi kendine de davran. Sen de şefkat hak ediyorsun!',
+    emoji: '💝',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 14,
+    },
+  },
+  {
+    id: 'future_planning',
+    type: 'encouragement',
+    title: 'Yarınların Parlak! 🌅',
+    message: 'Her yeni gün yeni umutlar, yeni başlangıçlar demek. Hayallerine adım adım yaklaşıyorsun!',
+    emoji: '🎯',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 22,
+    },
+  },
+  {
+    id: 'energy_awareness',
+    type: 'encouragement',
+    title: 'Enerjin Çok Değerli! 💫',
+    message: 'Kendini yorma, dinlenmeyi bil. Enerjini korumak seni daha mutlu yapar. Kendine iyi bak!',
+    emoji: '⚡',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 26,
+    },
+  },
+  {
+    id: 'communication_skills',
+    type: 'encouragement',
+    title: 'Bağlar Seni Güçlendirir! 🤝',
+    message: 'İnsanlarla kurduğun güzel bağlar hayatını zenginleştiriyor. Sevgiyle paylaş!',
+    emoji: '🗣️',
+    priority: 'low',
+    conditions: {
+      cooldownHours: 30,
+    },
+  },
+  {
+    id: 'accomplishment_celebration',
+    type: 'encouragement',
+    title: 'Her Başarı Kutlanmalı! 🎊',
+    message: 'Küçük de olsa her adımın önemli! Kendini kutlamayı unutma, sen harikasın!',
+    emoji: '🎉',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 12,
+    },
+  },
+  {
+    id: 'mindful_living',
+    type: 'encouragement',
+    title: 'Anı Yaşa! 🌺',
+    message: 'Şu an burada olmak ne güzel değil mi? Her anın tadını çıkar, yaşamın güzelliğini hisset!',
+    emoji: '🌸',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 28,
+    },
+  },
+  {
+    id: 'peace_within',
+    type: 'encouragement',
+    title: 'İçsel Huzur! 🕊️',
+    message: 'Huzur dışarıda değil, içinde. Kendine zaman ayırarak içindeki huzuru büyütüyorsun. Ne güzel!',
+    emoji: '🕊️',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 20,
+    },
+  },
+  {
+    id: 'self_love',
+    type: 'encouragement',
+    title: 'Kendini Sev! 💕',
+    message: 'Sen bu dünyada bir tanesin. Kendini olduğun gibi kabul et ve sev. Çok değerlisin!',
+    emoji: '💕',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 16,
+    },
+  },
+  {
+    id: 'beautiful_soul',
+    type: 'encouragement',
+    title: 'Güzel Bir Ruhsun! 🌟',
+    message: 'İçindeki güzellik her geçen gün daha çok parlıyor. Kendini olduğun gibi yaşa!',
+    emoji: '💎',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 24,
+    },
+  },
+  {
+    id: 'breathe_relax',
+    type: 'encouragement',
+    title: 'Nefes Al, Rahatla! 🌬️',
+    message: 'Derin bir nefes al. Omuzlarını gevşet. Her şey yoluna girecek. Sen harikasın!',
+    emoji: '🧘',
+    priority: 'low',
+    conditions: {
+      cooldownHours: 32,
+    },
+  },
+  {
+    id: 'smile_today',
+    type: 'encouragement',
+    title: 'Gülümse! 😊',
+    message: 'Bugün mutlu olman için sana bir neden: Sen varsın! Hayatın güzel sürprizlerle dolu!',
+    emoji: '😄',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 18,
     },
   },
 ];
@@ -187,9 +353,116 @@ export class MotivationService {
     }
   }
 
+  public async getReflectionInsights(userId?: string): Promise<{
+    gratitudeLevel: number;
+    emotionalDepth: number;
+    selfAwareness: number;
+    futureOrientation: number;
+    energyTracking: number;
+  }> {
+    try {
+      const diaryEntries = await this.getDiaryEntries(userId);
+      const recentEntries = diaryEntries.slice(-7);
+      
+      if (recentEntries.length === 0) {
+        return {
+          gratitudeLevel: 0,
+          emotionalDepth: 0,
+          selfAwareness: 0,
+          futureOrientation: 0,
+          energyTracking: 0,
+        };
+      }
+
+      // Minnettarlık seviyesi (gratitude cevaplarına göre)
+      const gratitudeLevel = this.calculateGratitudeLevel(recentEntries);
+      
+      // Duygusal derinlik (emotion cevaplarına göre)
+      const emotionalDepth = this.calculateEmotionalDepth(recentEntries);
+      
+      // Öz-farkındalık (growth ve self-reflection cevaplarına göre)
+      const selfAwareness = this.calculateSelfAwareness(recentEntries);
+      
+      // Gelecek odaklılık (tomorrow cevaplarına göre)
+      const futureOrientation = this.calculateFutureOrientation(recentEntries);
+      
+      // Enerji takibi (energy cevaplarına göre)
+      const energyTracking = this.calculateEnergyTracking(recentEntries);
+      
+      return {
+        gratitudeLevel,
+        emotionalDepth,
+        selfAwareness,
+        futureOrientation,
+        energyTracking,
+      };
+    } catch (error) {
+      console.error('Error getting reflection insights:', error);
+      return {
+        gratitudeLevel: 0,
+        emotionalDepth: 0,
+        selfAwareness: 0,
+        futureOrientation: 0,
+        energyTracking: 0,
+      };
+    }
+  }
+
+  private calculateGratitudeLevel(entries: DiaryEntry[]): number {
+    let gratitudeCount = 0;
+    entries.forEach(entry => {
+      if (entry.answers?.gratitude && entry.answers.gratitude.trim().length > 10) {
+        gratitudeCount++;
+      }
+    });
+    return (gratitudeCount / entries.length) * 100;
+  }
+
+  private calculateEmotionalDepth(entries: DiaryEntry[]): number {
+    let emotionalCount = 0;
+    entries.forEach(entry => {
+      if (entry.answers?.emotion && entry.answers.emotion.trim().length > 15) {
+        emotionalCount++;
+      }
+    });
+    return (emotionalCount / entries.length) * 100;
+  }
+
+  private calculateSelfAwareness(entries: DiaryEntry[]): number {
+    let awarenessCount = 0;
+    entries.forEach(entry => {
+      if ((entry.answers?.growth && entry.answers.growth.trim().length > 10) ||
+          (entry.answers?.lesson && entry.answers.lesson.trim().length > 10)) {
+        awarenessCount++;
+      }
+    });
+    return (awarenessCount / entries.length) * 100;
+  }
+
+  private calculateFutureOrientation(entries: DiaryEntry[]): number {
+    let futureCount = 0;
+    entries.forEach(entry => {
+      if (entry.answers?.tomorrow && entry.answers.tomorrow.trim().length > 10) {
+        futureCount++;
+      }
+    });
+    return (futureCount / entries.length) * 100;
+  }
+
+  private calculateEnergyTracking(entries: DiaryEntry[]): number {
+    let energyCount = 0;
+    entries.forEach(entry => {
+      if (entry.answers?.energy && entry.answers.energy.trim().length > 8) {
+        energyCount++;
+      }
+    });
+    return (energyCount / entries.length) * 100;
+  }
+
   public async getPersonalizedMotivation(userId?: string): Promise<MotivationData | null> {
     try {
       const userStats = await this.getUserStats(userId);
+      const reflectionInsights = await this.getReflectionInsights(userId);
       const lastShown = await this.getLastShownMessages(userId);
       
       // Uygun mesajları filtrele
@@ -206,6 +479,30 @@ export class MotivationService {
         }
         if (message.conditions.streakDays && userStats.streakDays < message.conditions.streakDays) {
           return false;
+        }
+        
+        // Reflection insights'a göre mesajları filtrele
+        if (message.type === 'encouragement') {
+          // Minnettarlık seviyesi yüksekse gratitude mesajlarını göster
+          if (message.id === 'gratitude_practice' && reflectionInsights.gratitudeLevel < 50) {
+            return false;
+          }
+          // Duygusal derinlik yüksekse emotion mesajlarını göster
+          if (message.id === 'emotional_awareness' && reflectionInsights.emotionalDepth < 40) {
+            return false;
+          }
+          // Öz-farkındalık yüksekse growth mesajlarını göster
+          if (message.id === 'growth_mindset' && reflectionInsights.selfAwareness < 60) {
+            return false;
+          }
+          // Gelecek odaklılık yüksekse planning mesajlarını göster
+          if (message.id === 'future_planning' && reflectionInsights.futureOrientation < 30) {
+            return false;
+          }
+          // Enerji takibi yüksekse energy mesajlarını göster
+          if (message.id === 'energy_awareness' && reflectionInsights.energyTracking < 35) {
+            return false;
+          }
         }
         
         // Cooldown kontrolü

@@ -189,11 +189,14 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     try {
       const newReminder = await addReminder({
         title: reminderTitle.trim(),
-        frequency: reminderFrequency,
         time: reminderTime,
         date: reminderDate,
         emoji: '🔔',
         isActive: true,
+        category: 'general',
+        priority: 'medium',
+        repeatType: 'once',
+        reminderType: 'scheduled',
       });
       
       console.log('Reminder saved successfully:', newReminder);
@@ -454,11 +457,6 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       borderRadius: 3,
       marginTop: 16,
     },
-    progressFill: {
-      height: '100%',
-      backgroundColor: currentTheme.colors.success,
-      borderRadius: 3,
-    },
 
     // Hatırlatıcılar Bölümü
     remindersSection: {
@@ -536,6 +534,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
+      paddingTop: 60,
+      paddingBottom: 60,
     },
     modalContent: {
       backgroundColor: currentTheme.colors.card,
@@ -585,28 +585,35 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       flex: 1,
       paddingVertical: 12,
       paddingHorizontal: 8,
-      borderRadius: 12,
+      borderRadius: 8,
       alignItems: 'center',
+      justifyContent: 'center',
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
+      backgroundColor: 'transparent',
       minHeight: 60,
     },
     frequencyButtonActive: {
-      backgroundColor: currentTheme.colors.primary,
+      backgroundColor: currentTheme.colors.primary + '15',
       borderColor: currentTheme.colors.primary,
     },
     frequencyButtonText: {
-      fontSize: 12,
+      fontSize: 11,
       fontWeight: '500',
       color: currentTheme.colors.secondary,
       fontFamily: 'Poppins_500Medium',
       textAlign: 'center',
-      lineHeight: 16,
+      lineHeight: 14,
+      marginTop: 4,
     },
     frequencyButtonTextActive: {
-      color: currentTheme.colors.background,
+      color: currentTheme.colors.primary,
       fontWeight: '600',
       fontFamily: 'Poppins_600SemiBold',
+    },
+    frequencyButtonEmoji: {
+      fontSize: 20,
+      marginBottom: 2,
     },
     modalButtons: {
       flexDirection: 'row',
@@ -615,25 +622,26 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     },
     modalButton: {
       flex: 1,
-      paddingVertical: 16,
-      borderRadius: 16,
+      paddingVertical: 10,
+      borderRadius: 6,
       alignItems: 'center',
+      borderWidth: 1,
     },
     modalButtonSecondary: {
-      backgroundColor: currentTheme.colors.card,
-      borderWidth: 2,
-      borderColor: currentTheme.colors.primary,
+      backgroundColor: 'transparent',
+      borderColor: currentTheme.colors.border,
     },
     modalButtonPrimary: {
       backgroundColor: currentTheme.colors.primary,
+      borderColor: currentTheme.colors.primary,
     },
     modalButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      fontFamily: 'Poppins_600SemiBold',
+      fontSize: 15,
+      fontWeight: '500',
+      fontFamily: 'Poppins_500Medium',
     },
     modalButtonTextSecondary: {
-      color: currentTheme.colors.primary,
+      color: currentTheme.colors.text,
     },
     modalButtonTextPrimary: {
       color: currentTheme.colors.background,
@@ -931,7 +939,12 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           style={dynamicStyles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={dynamicStyles.modalContent}>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>📝 Yeni Görev Ekle</Text>
             
             <View style={dynamicStyles.inputGroup}>
@@ -942,6 +955,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onChangeText={setTaskTitle}
                 placeholder="Görev başlığını yazın..."
                 placeholderTextColor={currentTheme.colors.muted}
+                autoCorrect={false}
+                autoCapitalize="sentences"
+                textContentType="none"
               />
             </View>
 
@@ -954,6 +970,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 placeholder="15"
                 placeholderTextColor={currentTheme.colors.muted}
                 keyboardType="numeric"
+                autoCorrect={false}
+                textContentType="none"
               />
             </View>
 
@@ -995,10 +1013,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                     ]}
                     onPress={() => setTaskFrequency(freq.key as any)}
                   >
-                    <Text style={[
-                      dynamicStyles.frequencyButtonText,
-                      taskFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
-                    ]}>
+                    <Text style={dynamicStyles.frequencyButtonEmoji}>
                       {freq.emoji}
                     </Text>
                     <Text style={[
@@ -1030,7 +1045,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -1045,7 +1061,12 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           style={dynamicStyles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={dynamicStyles.modalContent}>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>🔔 Yeni Hatırlatıcı Ekle</Text>
             
             <View style={dynamicStyles.inputGroup}>
@@ -1097,10 +1118,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                     ]}
                     onPress={() => setReminderFrequency(freq.key as any)}
                   >
-                    <Text style={[
-                      dynamicStyles.frequencyButtonText,
-                      reminderFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
-                    ]}>
+                    <Text style={dynamicStyles.frequencyButtonEmoji}>
                       {freq.emoji}
                     </Text>
                     <Text style={[
@@ -1132,7 +1150,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 

@@ -13,7 +13,8 @@ import {
   getRandomMessage,
   celebrationMessages,
   missingYouMessages,
-  motivationalMessages
+  motivationalMessages,
+  weekendMessages
 } from '../constants/notifications';
 import { 
   getUserTimezone, 
@@ -258,16 +259,35 @@ export const scheduleMorningNotification = async (): Promise<void> => {
   
   // Hafta içi/sonu kontrolü
   const isWeekend = isWeekendLocal(settings.timezone);
+  console.log('🔍 Morning notification check:', {
+    isWeekend,
+    weekendMotivationEnabled: settings.weekendMotivationEnabled,
+    weeklyMotivationEnabled: settings.weeklyMotivationEnabled,
+    timezone: settings.timezone
+  });
+  
   if (isWeekend && !settings.weekendMotivationEnabled) {
-    console.log('Weekend motivation disabled, skipping morning notification');
+    console.log('❌ Weekend motivation disabled, skipping morning notification');
     return;
   }
   if (!isWeekend && !settings.weeklyMotivationEnabled) {
-    console.log('Weekly motivation disabled, skipping morning notification');
+    console.log('❌ Weekly motivation disabled, skipping morning notification');
     return;
   }
 
-  const message = getMessageByDayOfWeek(settings.timezone);
+  // Hafta içi/sonu mesaj kontrolü - ekstra güvenlik
+  const isWeekendForMessage = isWeekendLocal(settings.timezone);
+  let message;
+  
+  if (isWeekendForMessage) {
+    // Hafta sonu mesajları sadece hafta sonu gösterilsin
+    message = getRandomMessage(weekendMessages);
+    console.log('✅ Weekend message selected for weekend day');
+  } else {
+    // Hafta içi mesajları sadece hafta içi gösterilsin
+    message = getMessageByTimeOfDay(undefined, settings.timezone);
+    console.log('✅ Weekday message selected for weekday');
+  }
 
   await Notifications.cancelScheduledNotificationAsync('morning-reminder');
   await scheduleNotification(
@@ -295,16 +315,35 @@ export const scheduleEveningNotification = async (): Promise<void> => {
   
   // Hafta içi/sonu kontrolü
   const isWeekend = isWeekendLocal(settings.timezone);
+  console.log('🔍 Evening notification check:', {
+    isWeekend,
+    weekendMotivationEnabled: settings.weekendMotivationEnabled,
+    weeklyMotivationEnabled: settings.weeklyMotivationEnabled,
+    timezone: settings.timezone
+  });
+  
   if (isWeekend && !settings.weekendMotivationEnabled) {
-    console.log('Weekend motivation disabled, skipping evening notification');
+    console.log('❌ Weekend motivation disabled, skipping evening notification');
     return;
   }
   if (!isWeekend && !settings.weeklyMotivationEnabled) {
-    console.log('Weekly motivation disabled, skipping evening notification');
+    console.log('❌ Weekly motivation disabled, skipping evening notification');
     return;
   }
 
-  const message = getMessageByTimeOfDay(undefined, settings.timezone);
+  // Hafta içi/sonu mesaj kontrolü - ekstra güvenlik
+  const isWeekendForMessage = isWeekendLocal(settings.timezone);
+  let message;
+  
+  if (isWeekendForMessage) {
+    // Hafta sonu mesajları sadece hafta sonu gösterilsin
+    message = getRandomMessage(weekendMessages);
+    console.log('✅ Weekend message selected for weekend day (evening)');
+  } else {
+    // Hafta içi mesajları sadece hafta içi gösterilsin
+    message = getMessageByTimeOfDay(undefined, settings.timezone);
+    console.log('✅ Weekday message selected for weekday (evening)');
+  }
 
   await Notifications.cancelScheduledNotificationAsync('evening-reminder');
   await scheduleNotification(

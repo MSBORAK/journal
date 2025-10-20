@@ -19,6 +19,9 @@ import { resetAllTooltips } from '../services/tooltipService';
 import { soundService } from '../services/soundService';
 import { motivationService } from '../services/motivationService';
 import { CustomAlert } from '../components/CustomAlert';
+import { useMigration } from '../hooks/useMigration';
+import { BackupService } from '../services/backupService';
+import { useCloudData } from '../hooks/useCloudData';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -28,7 +31,7 @@ interface MenuItem {
   id: string;
   title: string;
   subtitle: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap | string;
   screen?: string;
   action?: () => void;
   color: string;
@@ -38,6 +41,8 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
   const { user, signOut } = useAuth();
   const { currentTheme } = useTheme();
   const { t, language } = useLanguage();
+  const { migrateData, checkMigrationStatus, isMigrating } = useMigration();
+  const { syncFromCloud, pushToCloud, isLoading: isSyncing } = useCloudData();
   const [soundEnabled, setSoundEnabled] = useState(soundService.isSoundEnabled());
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -83,6 +88,65 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       await signOut();
     } catch (error) {
       showAlert('❌ Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+    }
+  };
+
+  const handleMigration = async () => {
+    try {
+      const result = await migrateData();
+      if (result?.success) {
+        showAlert('✅ Başarılı', 'Verileriniz başarıyla cloud\'a taşındı! Artık tüm cihazlarınızda senkronize olacak.', 'success');
+      } else {
+        showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
+      }
+    } catch (error) {
+      showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
+    }
+  };
+
+  const handleExportData = async () => {
+    if (!user?.uid) {
+      showAlert('❌ Hata', 'Lütfen önce giriş yapın', 'error');
+      return;
+    }
+
+    try {
+      const result = await BackupService.exportData(user.uid);
+      if (result.success && result.filePath) {
+        await BackupService.shareData(result.filePath);
+        showAlert('✅ Başarılı', 'Verileriniz başarıyla dışa aktarıldı!', 'success');
+      } else {
+        showAlert('❌ Hata', result.error || 'Veri dışa aktarma başarısız', 'error');
+      }
+    } catch (error) {
+      showAlert('❌ Hata', 'Veri dışa aktarma başarısız', 'error');
+    }
+  };
+
+  const handleCloudBackup = async () => {
+    if (!user?.uid) {
+      showAlert('❌ Hata', 'Lütfen önce giriş yapın', 'error');
+      return;
+    }
+
+    try {
+      const result = await BackupService.createCloudBackup(user.uid, 'Manuel yedekleme');
+      if (result.success) {
+        showAlert('✅ Başarılı', 'Cloud yedekleme başarıyla oluşturuldu!', 'success');
+      } else {
+        showAlert('❌ Hata', result.error || 'Cloud yedekleme başarısız', 'error');
+      }
+    } catch (error) {
+      showAlert('❌ Hata', 'Cloud yedekleme başarısız', 'error');
+    }
+  };
+
+  const handleSyncNow = async () => {
+    try {
+      await syncFromCloud();
+      showAlert('✅ Başarılı', 'Verileriniz başarıyla senkronize edildi!', 'success');
+    } catch (error) {
+      showAlert('❌ Hata', 'Senkronizasyon başarısız', 'error');
     }
   };
 
@@ -154,20 +218,20 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       color: '#f59e0b',
     },
     {
-      id: 'account',
-      title: 'Hesap Ayarları',
-      subtitle: 'Profil, e-posta ve şifre ayarları',
-      icon: 'person-outline',
-      screen: 'AccountSettings',
-      color: '#10b981',
-    },
-    {
       id: 'achievements',
       title: 'Başarılarım',
       subtitle: 'Rozetler ve başarılarım',
       icon: 'trophy-outline',
       screen: 'Achievements',
       color: '#FFD700',
+    },
+    {
+      id: 'account',
+      title: 'Hesap Ayarları',
+      subtitle: 'Profil, e-posta ve şifre ayarları',
+      icon: 'person-outline',
+      screen: 'AccountSettings',
+      color: '#10b981',
     },
     {
       id: 'app',
@@ -186,9 +250,9 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       color: '#f59e0b',
     },
     {
-      id: 'backup',
-      title: 'Veri Yedekleme',
-      subtitle: 'Verilerinizi yedekleyin ve geri yükleyin',
+      id: 'data-backup',
+      title: 'Veri Yönetimi',
+      subtitle: 'Cloud\'a taşı, yedekle ve senkronize et',
       icon: 'cloud-upload-outline',
       screen: 'DataBackupSettings',
       color: '#06b6d4',
@@ -427,7 +491,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
                     { backgroundColor: item.color + '20' },
                   ]}
                 >
-                  <Ionicons name={item.icon} size={24} color={item.color} />
+                  <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
                 </View>
                 <View style={dynamicStyles.menuItemText}>
                   <Text style={dynamicStyles.menuItemTitle}>{item.title}</Text>

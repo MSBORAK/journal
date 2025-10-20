@@ -316,7 +316,9 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
         <View style={dynamicStyles.cardContent}>
           <Text style={dynamicStyles.cardTitle}>{dream.title}</Text>
           {dream.description && (
-            <Text style={dynamicStyles.cardDescription}>{dream.description}</Text>
+            <Text style={dynamicStyles.cardDescription} numberOfLines={2} ellipsizeMode="tail">
+              {dream.description}
+            </Text>
           )}
           <Text style={dynamicStyles.cardMeta}>
             Yazıldı: {formatDate(dream.createdAt)}
@@ -378,7 +380,9 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
         <View style={dynamicStyles.cardContent}>
           <Text style={dynamicStyles.cardTitle}>{goal.title}</Text>
           {goal.description && (
-            <Text style={dynamicStyles.cardDescription}>{goal.description}</Text>
+            <Text style={dynamicStyles.cardDescription} numberOfLines={2} ellipsizeMode="tail">
+              {goal.description}
+            </Text>
           )}
           <Text style={dynamicStyles.cardMeta}>
             Yazıldı: {formatDate(goal.createdAt)}
@@ -531,9 +535,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       paddingTop: 20,
     },
     cardsList: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
+      flexDirection: 'column',
       gap: 16,
     },
     card: {
@@ -545,8 +547,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       shadowOpacity: 0.2,
       shadowRadius: 8,
       elevation: 6,
-      width: '48%',
-      aspectRatio: 0.9,
+      width: '100%',
       backgroundColor: currentTheme.colors.card,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,

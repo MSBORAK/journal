@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { updateEmail, updatePassword } from '../lib/supabase';
 import { getProfile, updateProfile, createProfile } from '../services/profileService';
-import { clearAllData } from '../services/backupService';
+import { BackupService } from '../services/backupService';
 import { CustomAlert } from '../components/CustomAlert';
 
 interface AccountSettingsScreenProps {
@@ -273,24 +273,22 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       marginBottom: 16,
     },
     actionButton: {
-      backgroundColor: currentTheme.colors.primary,
-      borderRadius: 12,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
+      backgroundColor: 'transparent',
+      borderRadius: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
       alignItems: 'center',
-      shadowColor: currentTheme.colors.primary,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 2,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary,
     },
     actionButtonText: {
-      color: currentTheme.colors.background,
+      color: currentTheme.colors.primary,
       fontSize: 14,
-      fontWeight: '600',
+      fontWeight: '500',
     },
     dangerButton: {
-      backgroundColor: '#EF4444',
+      backgroundColor: 'transparent',
+      borderColor: '#EF4444',
     },
     infoCard: {
       backgroundColor: currentTheme.colors.primary + '10',
@@ -311,6 +309,8 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,
+      paddingTop: 60,
+      paddingBottom: 60,
     },
     modalContent: {
       backgroundColor: currentTheme.colors.card,
@@ -354,27 +354,28 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     },
     modalButton: {
       flex: 1,
-      paddingVertical: 12,
-      borderRadius: 12,
+      paddingVertical: 10,
+      borderRadius: 6,
       alignItems: 'center',
+      borderWidth: 1,
     },
     modalButtonPrimary: {
       backgroundColor: currentTheme.colors.primary,
+      borderColor: currentTheme.colors.primary,
     },
     modalButtonSecondary: {
-      backgroundColor: currentTheme.colors.primary + '15',
-      borderWidth: 1,
-      borderColor: currentTheme.colors.primary + '30',
+      backgroundColor: 'transparent',
+      borderColor: currentTheme.colors.border,
     },
     modalButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
+      fontSize: 15,
+      fontWeight: '500',
     },
     modalButtonTextPrimary: {
       color: currentTheme.colors.background,
     },
     modalButtonTextSecondary: {
-      color: currentTheme.colors.primary,
+      color: currentTheme.colors.text,
     },
   });
 
@@ -533,7 +534,12 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}
         >
-          <View style={dynamicStyles.modalContent}>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>Profil Düzenle</Text>
             
             <Text style={dynamicStyles.inputLabel}>Ad Soyad</Text>
@@ -576,17 +582,32 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
       {/* Email Modal */}
       <Modal visible={showEmailModal} transparent animationType="fade" onRequestClose={() => setShowEmailModal(false)}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        <TouchableOpacity 
           style={dynamicStyles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowEmailModal(false)}
         >
-          <View style={dynamicStyles.modalContent}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
+            <ScrollView 
+              contentContainerStyle={{ flexGrow: 1 }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+          <TouchableOpacity 
+            style={dynamicStyles.modalContent}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={dynamicStyles.modalTitle}>Email Değiştir</Text>
             
             <Text style={dynamicStyles.inputLabel}>Yeni Email</Text>
@@ -621,8 +642,10 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </KeyboardAvoidingView>
+          </TouchableOpacity>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </TouchableOpacity>
       </Modal>
 
       {/* Password Modal */}
@@ -631,7 +654,12 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}
         >
-          <View style={dynamicStyles.modalContent}>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>Şifre Değiştir</Text>
             
             <Text style={dynamicStyles.inputLabel}>Mevcut Şifre</Text>
@@ -688,7 +716,8 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 

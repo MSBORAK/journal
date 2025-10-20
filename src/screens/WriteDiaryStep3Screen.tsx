@@ -269,7 +269,8 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
         mood: mood,
         tags: tags,
         date: new Date().toISOString().split('T')[0],
-        createdAt: new Date().toISOString(),
+        answers: answers,
+        freeWriting: freeWriting,
       };
       
       console.log('Entry to save:', entry);

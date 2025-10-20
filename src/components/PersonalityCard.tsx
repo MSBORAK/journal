@@ -35,8 +35,8 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
   const { habits } = useHabits(user?.uid);
   const { dreams, goals } = useDreamsGoals(user?.uid);
 
-  const [isFlipped, setIsFlipped] = useState(true);
-  const flipAnim = useRef(new Animated.Value(1)).current;
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   // Kişilik analizi

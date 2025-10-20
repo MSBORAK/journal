@@ -14,7 +14,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 import * as Haptics from 'expo-haptics';
-import { backupToCloud, restoreFromCloud, clearAllData, downloadUserData } from '../services/backupService';
+import { BackupService } from '../services/backupService';
+import { useMigration } from '../hooks/useMigration';
 
 interface DataBackupSettingsScreenProps {
   navigation: any;
@@ -42,7 +43,21 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
   const hideAlert = () => {
     setAlertConfig(prev => ({ ...prev, visible: false }));
   };
+
+  const handleMigration = async () => {
+    try {
+      const result = await migrateData();
+      if (result?.success) {
+        showAlert('✅ Başarılı', 'Verileriniz başarıyla cloud\'a taşındı! Artık tüm cihazlarınızda senkronize olacak.', 'success');
+      } else {
+        showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
+      }
+    } catch (error) {
+      showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
+    }
+  };
   const { user } = useAuth();
+  const { migrateData, isMigrating } = useMigration();
   const [loading, setLoading] = useState(false);
 
   const handleBackup = async () => {
@@ -51,7 +66,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await backupToCloud(user.uid);
+      await BackupService.backupToCloud(user.uid);
       showAlert('✅ Başarılı', 'Verileriniz başarıyla yedeklendi!');
     } catch (error) {
       showAlert('❌ Hata', 'Yedekleme sırasında hata oluştu: ' + error);
@@ -66,7 +81,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await restoreFromCloud(user.uid);
+      await BackupService.restoreFromCloud(user.uid);
       showAlert('✅ Başarılı', 'Verileriniz başarıyla geri yüklendi!');
     } catch (error) {
       showAlert('❌ Hata', 'Geri yükleme sırasında hata oluştu: ' + error);
@@ -81,7 +96,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await downloadUserData(user.uid);
+      await BackupService.downloadUserData(user.uid);
       showAlert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
     } catch (error) {
       showAlert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);
@@ -208,7 +223,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
   return (
     <SafeAreaView style={dynamicStyles.container}>
       {/* Header */}
-      <View style={dynamicStyles.header}>
+      <View style={[dynamicStyles.header, { paddingTop: 20 }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{
@@ -239,6 +254,28 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
         <View style={dynamicStyles.section}>
           <Text style={dynamicStyles.sectionTitle}>Yedekleme İşlemleri</Text>
           
+          <View style={dynamicStyles.settingCard}>
+            <View style={dynamicStyles.settingHeader}>
+              <View style={dynamicStyles.settingIcon}>
+                <Ionicons name="cloud-upload-outline" size={20} color={currentTheme.colors.primary} />
+              </View>
+              <Text style={dynamicStyles.settingTitle}>Verileri Cloud'a Taşı</Text>
+            </View>
+            <Text style={dynamicStyles.settingDescription}>
+              Telefonundaki görevler ve hatırlatıcıları cloud'a taşıyarak tüm cihazlarda senkronize et.
+            </Text>
+            <TouchableOpacity
+              style={dynamicStyles.actionButton}
+              onPress={handleMigration}
+              disabled={isMigrating}
+              activeOpacity={0.8}
+            >
+              <Text style={dynamicStyles.actionButtonText}>
+                {isMigrating ? 'Taşınıyor...' : '☁️ Cloud\'a Taşı'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>

@@ -14,7 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 import * as Haptics from 'expo-haptics';
-import { downloadUserData } from '../services/backupService';
+import { BackupService } from '../services/backupService';
 
 interface PrivacySecuritySettingsScreenProps {
   navigation: any;
@@ -51,7 +51,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await downloadUserData(user.uid);
+      await BackupService.downloadUserData(user.uid);
       showAlert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
     } catch (error) {
       showAlert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);

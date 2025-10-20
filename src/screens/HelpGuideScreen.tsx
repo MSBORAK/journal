@@ -26,7 +26,7 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: currentTheme.colors.background },
-    header: { paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 },
+    header: { paddingTop: 100, paddingHorizontal: 20, paddingBottom: 20 },
     title: { fontSize: 24, fontWeight: 'bold', color: currentTheme.colors.text, marginBottom: 8 },
     subtitle: { fontSize: 14, color: currentTheme.colors.secondary },
     section: { paddingHorizontal: 20, marginBottom: 20 },
@@ -56,20 +56,10 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
       marginTop: 8,
     },
     actionText: { color: currentTheme.colors.card, fontWeight: '700' },
-    backBtn: { position: 'absolute', top: 60, left: 20, width: 40, height: 40, borderRadius: 20,
-      backgroundColor: currentTheme.colors.primary + '15', alignItems: 'center', justifyContent: 'center' },
   });
 
   return (
     <View style={s.container}>
-      <TouchableOpacity
-        style={s.backBtn}
-        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.goBack(); }}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
-      </TouchableOpacity>
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={s.header}>
           <Text style={s.title}>📘 Yardım & Kılavuz</Text>
@@ -116,7 +106,7 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
               onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
               activeOpacity={0.9}
             >
-              <Text style={s.actionText}>📩 support@dailydiary.app</Text>
+              <Text style={s.actionText}>📩 msesoftware1425@gmail.com</Text>
             </TouchableOpacity>
           </View>
         </View>
