@@ -45,18 +45,43 @@ export const getCurrentUser = async () => {
 // Email değiştirme
 export const updateEmail = async (newEmail: string) => {
   try {
+    // Email formatını kontrol et
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      throw new Error('Geçerli bir email adresi giriniz.');
+    }
+
     // Önce kullanıcı oturumunu kontrol et
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       throw new Error('Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
     }
 
+    // Eski email ile aynıysa hata ver
+    if (user.email?.toLowerCase() === newEmail.toLowerCase()) {
+      throw new Error('Yeni email adresi mevcut email adresinizle aynı olamaz.');
+    }
+
     const { data, error } = await supabase.auth.updateUser({
       email: newEmail.toLowerCase().trim(),
+    }, {
       emailRedirectTo: 'daily://auth/callback?type=email_confirm',
     });
     
-    if (error) throw error;
+    if (error) {
+      // Supabase hatalarını Türkçe'ye çevir
+      if (error.message.includes('already registered')) {
+        throw new Error('Bu email adresi zaten kullanılıyor.');
+      }
+      if (error.message.includes('rate limit')) {
+        throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
+      }
+      if (error.message.includes('invalid email')) {
+        throw new Error('Geçersiz email adresi.');
+      }
+      throw new Error('Email güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+    
     return data;
   } catch (error) {
     console.error('Update email error:', error);
@@ -65,19 +90,59 @@ export const updateEmail = async (newEmail: string) => {
 };
 
 // Şifre değiştirme
-export const updatePassword = async (newPassword: string) => {
+export const updatePassword = async (newPassword: string, oldPassword?: string) => {
   try {
+    // Şifre validasyonu
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error('Şifre en az 6 karakter olmalıdır.');
+    }
+
+    if (newPassword.length > 128) {
+      throw new Error('Şifre çok uzun. Maksimum 128 karakter olabilir.');
+    }
+
+    // Şifre güçlülük kontrolü
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+    
+    if (!hasLowerCase || !hasNumbers) {
+      throw new Error('Şifre en az bir küçük harf ve bir rakam içermelidir.');
+    }
+
     // Önce kullanıcı oturumunu kontrol et
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       throw new Error('Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
     }
 
+    // Eski şifre kontrolü (eğer sağlanmışsa)
+    if (oldPassword && user.email) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: oldPassword,
+      });
+      
+      if (signInError) {
+        throw new Error('Mevcut şifreniz yanlış.');
+      }
+    }
+
     const { data, error } = await supabase.auth.updateUser({
       password: newPassword
     });
     
-    if (error) throw error;
+    if (error) {
+      // Supabase hatalarını Türkçe'ye çevir
+      if (error.message.includes('password')) {
+        throw new Error('Şifre çok zayıf. Daha güçlü bir şifre seçin.');
+      }
+      if (error.message.includes('rate limit')) {
+        throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
+      }
+      throw new Error('Şifre güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+    
     return data;
   } catch (error) {
     console.error('Update password error:', error);

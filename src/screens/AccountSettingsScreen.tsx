@@ -58,6 +58,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     bio: '',
   });
   const [newEmail, setNewEmail] = useState(user?.email || '');
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -94,8 +95,20 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   };
 
   const handleEmailUpdate = async () => {
-    if (!newEmail || newEmail === user?.email) {
-      showAlert('⚠️ Uyarı', 'Yeni email adresi giriniz!', 'warning');
+    // Validasyonlar
+    if (!newEmail) {
+      showAlert('⚠️ Uyarı', 'Email adresi giriniz!', 'warning');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      showAlert('⚠️ Uyarı', 'Geçerli bir email adresi giriniz!', 'warning');
+      return;
+    }
+
+    if (newEmail.toLowerCase() === user?.email?.toLowerCase()) {
+      showAlert('⚠️ Uyarı', 'Yeni email adresi mevcut email adresinizle aynı olamaz!', 'warning');
       return;
     }
     
@@ -104,38 +117,53 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updateEmail(newEmail);
       setShowEmailModal(false);
-      showAlert('✅ E-posta doğrulama gönderildi', 'Yeni e-posta adresinize doğrulama maili gönderildi. Onayladıktan sonra uygulamada yenileme ile güncellenecektir.', 'success');
-      // UI'da güncel e-postayı göstermek için geçici olarak alanı güncelle
-      // fakat gerçek güncelleme onaydan sonra Supabase tarafından yapılır
-      // useAuth tarafında onAuthStateChange ile yakalanır
-    } catch (error) {
-      showAlert('❌ Hata', 'Email güncellenirken hata oluştu.', 'error');
+      showAlert('✅ E-posta doğrulama gönderildi', 'Yeni e-posta adresinize doğrulama maili gönderildi. Lütfen email kutunuzu kontrol edin ve linke tıklayarak onaylayın.', 'success');
+    } catch (error: any) {
+      showAlert('❌ Hata', error.message || 'Email güncellenirken hata oluştu.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handlePasswordUpdate = async () => {
+    // Validasyonlar
+    if (!oldPassword) {
+      showAlert('⚠️ Uyarı', 'Mevcut şifrenizi giriniz!', 'warning');
+      return;
+    }
+    
     if (!newPassword || newPassword.length < 6) {
-      showAlert('⚠️ Uyarı', 'Şifre en az 6 karakter olmalıdır!', 'warning');
+      showAlert('⚠️ Uyarı', 'Yeni şifre en az 6 karakter olmalıdır!', 'warning');
+      return;
+    }
+    
+    if (newPassword.length > 128) {
+      showAlert('⚠️ Uyarı', 'Şifre çok uzun. Maksimum 128 karakter olabilir!', 'warning');
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      showAlert('⚠️ Uyarı', 'Şifreler eşleşmiyor!', 'warning');
+      showAlert('⚠️ Uyarı', 'Yeni şifreler eşleşmiyor!', 'warning');
+      return;
+    }
+
+    // Eski ve yeni şifre aynıysa uyarı ver
+    if (oldPassword === newPassword) {
+      showAlert('⚠️ Uyarı', 'Yeni şifre mevcut şifrenizle aynı olamaz!', 'warning');
       return;
     }
     
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await updatePassword(newPassword);
+      await updatePassword(newPassword, oldPassword);
       setShowPasswordModal(false);
+      setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      showAlert('✅ Başarılı', 'Şifreniz güncellendi!', 'success');
-    } catch (error) {
-      showAlert('❌ Hata', 'Şifre güncellenirken hata oluştu.', 'error');
+      showAlert('✅ Başarılı', 'Şifreniz başarıyla güncellendi!', 'success');
+    } catch (error: any) {
+      showAlert('❌ Hata', error.message || 'Şifre güncellenirken hata oluştu.', 'error');
     } finally {
       setLoading(false);
     }
@@ -432,6 +460,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={() => {
+                setOldPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
                 setShowPasswordModal(true);
@@ -594,24 +623,37 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>Şifre Değiştir</Text>
             
+            <Text style={dynamicStyles.inputLabel}>Mevcut Şifre</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={oldPassword}
+              onChangeText={setOldPassword}
+              placeholder="Mevcut şifrenizi girin"
+              placeholderTextColor={currentTheme.colors.muted}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+            
             <Text style={dynamicStyles.inputLabel}>Yeni Şifre</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={newPassword}
               onChangeText={setNewPassword}
-              placeholder="Yeni şifrenizi girin"
+              placeholder="Yeni şifrenizi girin (min. 6 karakter)"
               placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
+              autoCapitalize="none"
             />
             
-            <Text style={dynamicStyles.inputLabel}>Şifre Tekrar</Text>
+            <Text style={dynamicStyles.inputLabel}>Yeni Şifre Tekrar</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Şifrenizi tekrar girin"
+              placeholder="Yeni şifrenizi tekrar girin"
               placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
+              autoCapitalize="none"
             />
             
             <View style={dynamicStyles.modalButtons}>

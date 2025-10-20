@@ -92,6 +92,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             if (error) {
               console.error('❌ Sign in error:', error);
+              // Supabase hatalarını Türkçe'ye çevir
+              if (error.message.includes('Invalid login credentials')) {
+                throw new Error('Email veya şifre hatalı.');
+              }
+              if (error.message.includes('Email not confirmed')) {
+                throw new Error('Email adresinizi onaylamanız gerekiyor. Lütfen email kutunuzu kontrol edin.');
+              }
+              if (error.message.includes('Too many requests')) {
+                throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
+              }
               throw new Error(error.message || 'Giriş yapılamadı');
             }
             
@@ -137,6 +147,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             if (error) {
               console.error('❌ Sign up error:', error);
+              // Supabase hatalarını Türkçe'ye çevir
+              if (error.message.includes('already registered')) {
+                throw new Error('Bu email adresi zaten kullanılıyor.');
+              }
+              if (error.message.includes('Invalid email')) {
+                throw new Error('Geçersiz email adresi.');
+              }
+              if (error.message.includes('Password should be at least')) {
+                throw new Error('Şifre en az 6 karakter olmalıdır.');
+              }
+              if (error.message.includes('Too many requests')) {
+                throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
+              }
               throw new Error(error.message || 'Hesap oluşturulamadı');
             }
             
