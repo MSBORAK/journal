@@ -86,7 +86,7 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       borderRadius: 20,
     },
     nextButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -129,7 +129,7 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       fontWeight: '500',
     },
     questionContainer: {
-      marginBottom: 24,
+      marginBottom: 32,
     },
     questionHeader: {
       flexDirection: 'row',
@@ -164,17 +164,22 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       fontStyle: 'italic',
     },
     skipButton: {
-      backgroundColor: currentTheme.colors.accent,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 16,
-      alignSelf: 'flex-start',
+      backgroundColor: currentTheme.colors.primary,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 20,
+      alignSelf: 'center',
       marginBottom: 24,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
     },
     skipButtonText: {
-      color: currentTheme.colors.primary,
-      fontSize: 14,
-      fontWeight: '500',
+      color: currentTheme.colors.background,
+      fontSize: 16,
+      fontWeight: '600',
     },
   });
 

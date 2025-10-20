@@ -371,7 +371,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       marginLeft: 4,
     },
     activeFilterButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     clearFiltersButton: {
       backgroundColor: currentTheme.colors.accent,
@@ -408,7 +408,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       color: currentTheme.colors.text,
     },
     activeViewModeButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     // Calendar styles
     calendarContainer: {
@@ -474,7 +474,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       color: currentTheme.colors.text,
     },
     calendarDayTextWithEntry: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '600',
     },
     calendarDayTextToday: {
@@ -656,7 +656,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       fontWeight: '500',
     },
     selectedTagText: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
   });
 
@@ -707,7 +707,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
             <Ionicons 
               name="happy-outline" 
               size={16} 
-              color={selectedMood !== null ? 'white' : currentTheme.colors.secondary} 
+              color={selectedMood !== null ? currentTheme.colors.background : currentTheme.colors.secondary} 
             />
             <Text style={[
               dynamicStyles.filterButtonText,
@@ -727,7 +727,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
             <Ionicons 
               name="pricetag-outline" 
               size={16} 
-              color={selectedTag ? 'white' : currentTheme.colors.secondary} 
+              color={selectedTag ? currentTheme.colors.background : currentTheme.colors.secondary} 
             />
             <Text style={[
               dynamicStyles.filterButtonText,

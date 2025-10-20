@@ -34,8 +34,11 @@ export const useReminders = (userId?: string) => {
   // Save reminders to storage
   const saveReminders = async (newReminders: Reminder[]) => {
     try {
+      console.log('saveReminders called with:', newReminders.length, 'reminders');
       await AsyncStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(newReminders));
+      console.log('Reminders saved to AsyncStorage');
       setReminders(newReminders);
+      console.log('Reminders state updated');
     } catch (error) {
       console.error('Error saving reminders:', error);
     }
@@ -43,6 +46,8 @@ export const useReminders = (userId?: string) => {
 
   // Add new reminder
   const addReminder = async (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>) => {
+    console.log('addReminder called with:', reminder);
+    
     const newReminder: Reminder = {
       ...reminder,
       id: Date.now().toString(),
@@ -52,8 +57,14 @@ export const useReminders = (userId?: string) => {
       reminderType: reminder.reminderType || 'today',
     };
     
+    console.log('New reminder created:', newReminder);
+    
     const newReminders = [...reminders, newReminder];
+    console.log('New reminders array:', newReminders);
+    
     await saveReminders(newReminders);
+    console.log('Reminders saved to storage');
+    
     return newReminder;
   };
 

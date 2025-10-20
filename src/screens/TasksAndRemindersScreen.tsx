@@ -8,6 +8,10 @@ import {
   SafeAreaView,
   Dimensions,
   Animated,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +21,8 @@ import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
+import { useTimer } from '../contexts/TimerContext';
+import FocusMode from '../components/FocusMode';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -41,6 +47,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const { 
     reminders,
     loading: remindersLoading,
+    addReminder,
     getTodayReminders,
   } = useReminders(user?.uid);
 
@@ -48,6 +55,34 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('daily');
   const [showReminders, setShowReminders] = useState(true);
   const [fadeAnim] = useState(new Animated.Value(1));
+  const { 
+    setShowFocusMode, 
+    showFocusMode, 
+    isActive, 
+    isPaused, 
+    timeLeft, 
+    selectedDuration,
+    progressAnim, 
+    scaleAnim 
+  } = useTimer();
+  
+  // Modal states
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [showAddReminderModal, setShowAddReminderModal] = useState(false);
+  
+  // Task form states
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskCategory, setTaskCategory] = useState('personal');
+  const [taskFrequency, setTaskFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [taskEstimatedTime, setTaskEstimatedTime] = useState('15');
+  const [taskDate, setTaskDate] = useState(new Date().toISOString().split('T')[0]);
+  const [taskTime, setTaskTime] = useState('09:00');
+  
+  // Reminder form states
+  const [reminderTitle, setReminderTitle] = useState('');
+  const [reminderFrequency, setReminderFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [reminderTime, setReminderTime] = useState('09:00');
+  const [reminderDate, setReminderDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Computed values
   const todayTasks = getTodayTasks();
@@ -89,31 +124,156 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   };
 
   const handleAddTask = () => {
-    navigation.navigate('Tasks');
+    setShowAddTaskModal(true);
   };
 
   const handleAddReminder = () => {
-    navigation.navigate('Reminders');
+    setShowAddReminderModal(true);
+  };
+
+  const handleSaveTask = async () => {
+    if (!taskTitle.trim()) {
+      console.log('Task title is empty');
+      return;
+    }
+    
+    console.log('Saving task:', {
+      title: taskTitle.trim(),
+      category: taskCategory,
+      estimatedTime: parseInt(taskEstimatedTime),
+      emoji: '📝',
+      date: taskDate,
+      priority: 'medium',
+    });
+    
+    try {
+      const newTask = await addTask({
+        title: taskTitle.trim(),
+        category: taskCategory as 'health' | 'personal' | 'work' | 'custom' | 'hobby',
+        estimatedTime: parseInt(taskEstimatedTime),
+        emoji: '📝',
+        date: taskDate,
+        priority: 'medium',
+      });
+      
+      console.log('Task saved successfully:', newTask);
+      
+      // Reset form
+      setTaskTitle('');
+      setTaskCategory('personal');
+      setTaskFrequency('daily');
+      setTaskEstimatedTime('15');
+      setTaskDate(new Date().toISOString().split('T')[0]);
+      setTaskTime('09:00');
+      setShowAddTaskModal(false);
+      
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
+  };
+
+  const handleSaveReminder = async () => {
+    if (!reminderTitle.trim()) {
+      console.log('Reminder title is empty');
+      return;
+    }
+    
+    console.log('Saving reminder:', {
+      title: reminderTitle.trim(),
+      frequency: reminderFrequency,
+      time: reminderTime,
+      date: reminderDate,
+    });
+    
+    try {
+      const newReminder = await addReminder({
+        title: reminderTitle.trim(),
+        frequency: reminderFrequency,
+        time: reminderTime,
+        date: reminderDate,
+        emoji: '🔔',
+        isActive: true,
+      });
+      
+      console.log('Reminder saved successfully:', newReminder);
+      
+      // Reset form
+      setReminderTitle('');
+      setReminderFrequency('daily');
+      setReminderTime('09:00');
+      setReminderDate(new Date().toISOString().split('T')[0]);
+      setShowAddReminderModal(false);
+      
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Error adding reminder:', error);
+    }
   };
 
   const getFilteredTasks = () => {
+    console.log('getFilteredTasks called with activeTab:', activeTab);
+    console.log('Total tasks:', tasks.length);
+    
     switch (activeTab) {
       case 'daily':
+        console.log('Returning daily tasks:', todayTasks.length);
         return todayTasks;
       case 'weekly':
-        // TODO: Implement weekly tasks
-        return [];
+        // Haftalık görevler - bu hafta içindeki görevler
+        const today = new Date();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        
+        const weeklyTasks = tasks.filter(task => {
+          const taskDate = new Date(task.date);
+          return taskDate >= startOfWeek && taskDate <= endOfWeek;
+        });
+        console.log('Returning weekly tasks:', weeklyTasks.length);
+        return weeklyTasks;
       case 'monthly':
-        // TODO: Implement monthly tasks
-        return [];
+        // Aylık görevler - bu ay içindeki görevler
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        
+        const monthlyTasks = tasks.filter(task => {
+          const taskDate = new Date(task.date);
+          return taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear;
+        });
+        console.log('Returning monthly tasks:', monthlyTasks.length);
+        console.log('Monthly tasks:', monthlyTasks);
+        return monthlyTasks;
       case 'all':
+        console.log('Returning all tasks:', tasks.length);
         return tasks;
       default:
+        console.log('Returning default daily tasks:', todayTasks.length);
         return todayTasks;
     }
   };
 
+  // Calculate work time from timer
+  const getWorkTime = () => {
+    if (isActive && selectedDuration > 0) {
+      const totalSeconds = selectedDuration * 60;
+      const elapsedSeconds = totalSeconds - timeLeft;
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
+      
+      if (minutes > 0) {
+        return `${minutes}dk`;
+      } else if (seconds > 0) {
+        return `${seconds}s`;
+      }
+    }
+    return '0dk';
+  };
+
   const filteredTasks = getFilteredTasks();
+  const pendingTasks = filteredTasks.filter(task => !task.isCompleted);
+  const completedTasks = filteredTasks.filter(task => task.isCompleted);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -184,21 +344,21 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     },
     actionButton: {
       flex: 1,
-      height: 48,
-      borderRadius: 24,
+      height: 52,
+      borderRadius: 26,
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: 'rgba(0,0,0,0.25)',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 1,
-      shadowRadius: 4,
-      elevation: 4,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8,
     },
     actionButtonText: {
       fontSize: 16,
-      fontWeight: '600',
-      color: 'white',
-      fontFamily: 'Poppins_600SemiBold',
+      fontWeight: '700',
+      color: currentTheme.colors.background,
+      fontFamily: 'Poppins_700Bold',
     },
 
     // Görevler Bölümü
@@ -233,11 +393,11 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     tabText: {
       fontSize: 14,
       fontWeight: '500',
-      color: currentTheme.colors.muted,
+      color: currentTheme.colors.secondary,
       fontFamily: 'Poppins_500Medium',
     },
     activeTabText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '600',
       fontFamily: 'Poppins_600SemiBold',
     },
@@ -248,16 +408,12 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       marginBottom: 12,
       flexDirection: 'row',
       alignItems: 'center',
-      shadowColor: 'rgba(0,0,0,0.25)',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 1,
-      shadowRadius: 4,
-      elevation: 4,
+      justifyContent: 'space-between',
     },
     taskLeft: {
-      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
+      flex: 1,
     },
     taskEmoji: {
       fontSize: 24,
@@ -373,6 +529,197 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       textAlign: 'center',
       fontFamily: 'Poppins_400Regular',
     },
+
+    // Modal styles
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 20,
+      padding: 24,
+      width: '90%',
+      maxHeight: '80%',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 1,
+      shadowRadius: 20,
+      elevation: 10,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      marginBottom: 20,
+      textAlign: 'center',
+      fontFamily: 'Poppins_700Bold',
+    },
+    inputGroup: {
+      marginBottom: 16,
+    },
+    inputLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginBottom: 8,
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    textInput: {
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 16,
+      color: currentTheme.colors.text,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      fontFamily: 'Poppins_400Regular',
+    },
+    frequencyContainer: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    frequencyButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      minHeight: 60,
+    },
+    frequencyButtonActive: {
+      backgroundColor: currentTheme.colors.primary,
+      borderColor: currentTheme.colors.primary,
+    },
+    frequencyButtonText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: currentTheme.colors.secondary,
+      fontFamily: 'Poppins_500Medium',
+      textAlign: 'center',
+      lineHeight: 16,
+    },
+    frequencyButtonTextActive: {
+      color: currentTheme.colors.background,
+      fontWeight: '600',
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      gap: 12,
+      marginTop: 24,
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: 16,
+      borderRadius: 16,
+      alignItems: 'center',
+    },
+    modalButtonSecondary: {
+      backgroundColor: currentTheme.colors.card,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
+    },
+    modalButtonPrimary: {
+      backgroundColor: currentTheme.colors.primary,
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    modalButtonTextSecondary: {
+      color: currentTheme.colors.primary,
+    },
+    modalButtonTextPrimary: {
+      color: currentTheme.colors.background,
+    },
+    floatingTimerButton: {
+      position: 'absolute',
+      bottom: 100,
+      right: 20,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: currentTheme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      zIndex: 1000,
+    },
+    timerButtonContent: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    timerDisplay: {
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    timerText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: currentTheme.colors.background,
+      fontFamily: 'Poppins_700Bold',
+      zIndex: 2,
+    },
+    progressRing: {
+      position: 'absolute',
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    progressFill: {
+      position: 'absolute',
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.background,
+      borderRightColor: 'transparent',
+      borderBottomColor: 'transparent',
+      transform: [{ rotate: '-90deg' }],
+    },
+    subsectionTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginTop: 20,
+      marginBottom: 12,
+      marginLeft: 4,
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    completedTaskCard: {
+      opacity: 0.8,
+      backgroundColor: currentTheme.colors.card + '60',
+    },
+    completedTaskTitle: {
+      textDecorationLine: 'line-through',
+      color: currentTheme.colors.secondary,
+    },
+    completedTaskDetails: {
+      color: currentTheme.colors.secondary,
+    },
+    completedTaskTime: {
+      color: currentTheme.colors.secondary,
+    },
+    completedButton: {
+      backgroundColor: currentTheme.colors.success || '#4CAF50',
+    },
   });
 
   return (
@@ -395,48 +742,34 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           
           <View style={dynamicStyles.statsRow}>
             <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>Tamamlanan: {completedCount}/{todayTasks.length}</Text>
+              <Text style={dynamicStyles.statNumber}>{completedCount}/{todayTasks.length}</Text>
               <Text style={dynamicStyles.statLabel}>Görevler</Text>
             </View>
             <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>Pomodoro: 2/4</Text>
-              <Text style={dynamicStyles.statLabel}>Oturum</Text>
+              <Text style={dynamicStyles.statNumber}>0/0</Text>
+              <Text style={dynamicStyles.statLabel}>Pomodoro</Text>
             </View>
             <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>Toplam Süre: 2s 15dk</Text>
+              <Text style={dynamicStyles.statNumber}>{getWorkTime()}</Text>
               <Text style={dynamicStyles.statLabel}>Çalışma</Text>
             </View>
           </View>
 
           <View style={dynamicStyles.buttonsRow}>
             <TouchableOpacity 
-              style={dynamicStyles.actionButton}
+              style={[dynamicStyles.actionButton, { backgroundColor: currentTheme.colors.primary }]}
               onPress={handleAddTask}
               activeOpacity={0.8}
             >
-              <LinearGradient
-                colors={['#FFD700', '#FFA500']}
-                style={dynamicStyles.actionButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <Text style={dynamicStyles.actionButtonText}>+ Görev Ekle</Text>
-              </LinearGradient>
+              <Text style={dynamicStyles.actionButtonText}>+ Görev Ekle</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={dynamicStyles.actionButton}
+              style={[dynamicStyles.actionButton, { backgroundColor: currentTheme.colors.accent }]}
               onPress={handleAddReminder}
               activeOpacity={0.8}
             >
-              <LinearGradient
-                colors={['#4A90E2', '#357ABD']}
-                style={dynamicStyles.actionButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <Text style={dynamicStyles.actionButtonText}>+ Hatırlatıcı Ekle</Text>
-              </LinearGradient>
+              <Text style={dynamicStyles.actionButtonText}>+ Hatırlatıcı Ekle</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -482,32 +815,62 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               </View>
             ) : (
               <>
-                {filteredTasks.map((task) => (
-                  <View key={task.id} style={dynamicStyles.taskCard}>
-                    <View style={dynamicStyles.taskLeft}>
-                      <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
-                      <View style={dynamicStyles.taskContent}>
-                        <Text style={dynamicStyles.taskTitle}>{task.title}</Text>
-                        <Text style={dynamicStyles.taskDetails}>
-                          {task.category} • {task.estimatedTime || '15 dk'}
-                        </Text>
-                        <Text style={dynamicStyles.taskTime}>⏰ {task.estimatedTime || '08:00'}</Text>
+                {/* Bekleyen Görevler */}
+                {pendingTasks.length > 0 && (
+                  <View>
+                    <Text style={dynamicStyles.subsectionTitle}>🔄 Bekleyen Görevler</Text>
+                    {pendingTasks.map((task) => (
+                      <View key={task.id} style={dynamicStyles.taskCard}>
+                        <View style={dynamicStyles.taskLeft}>
+                          <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
+                          <View style={dynamicStyles.taskContent}>
+                            <Text style={dynamicStyles.taskTitle}>{task.title}</Text>
+                            <Text style={dynamicStyles.taskDetails}>
+                              {task.category} • {task.estimatedTime || '15 dk'}
+                            </Text>
+                            <Text style={dynamicStyles.taskTime}>⏰ {task.estimatedTime || '08:00'}</Text>
+                          </View>
+                        </View>
+                        <TouchableOpacity
+                          style={dynamicStyles.completeButton}
+                          onPress={() => handleTaskComplete(task.id)}
+                          activeOpacity={0.7}
+                        >
+                          <Ionicons name="checkmark" size={20} color={currentTheme.colors.background} />
+                        </TouchableOpacity>
                       </View>
-                    </View>
-                    <TouchableOpacity
-                      style={dynamicStyles.completeButton}
-                      onPress={() => handleTaskComplete(task.id)}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="checkmark" size={20} color="white" />
-                    </TouchableOpacity>
+                    ))}
                   </View>
-                ))}
+                )}
 
-                {/* İlerleme Barı */}
-                <View style={dynamicStyles.progressBar}>
-                  <View style={[dynamicStyles.progressFill, { width: `${completionRate}%` }]} />
-                </View>
+                {/* Tamamlanan Görevler */}
+                {completedTasks.length > 0 && (
+                  <View>
+                    <Text style={dynamicStyles.subsectionTitle}>✅ Tamamlanan Görevler</Text>
+                    {completedTasks.map((task) => (
+                      <View key={task.id} style={[dynamicStyles.taskCard, dynamicStyles.completedTaskCard]}>
+                        <View style={dynamicStyles.taskLeft}>
+                          <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
+                          <View style={dynamicStyles.taskContent}>
+                            <Text style={[dynamicStyles.taskTitle, dynamicStyles.completedTaskTitle]}>{task.title}</Text>
+                            <Text style={[dynamicStyles.taskDetails, dynamicStyles.completedTaskDetails]}>
+                              {task.category} • {task.estimatedTime || '15 dk'}
+                            </Text>
+                            <Text style={[dynamicStyles.taskTime, dynamicStyles.completedTaskTime]}>⏰ {task.estimatedTime || '08:00'}</Text>
+                          </View>
+                        </View>
+                        <TouchableOpacity
+                          style={[dynamicStyles.completeButton, dynamicStyles.completedButton]}
+                          onPress={() => handleTaskComplete(task.id)}
+                          activeOpacity={0.7}
+                        >
+                          <Ionicons name="checkmark" size={20} color={currentTheme.colors.background} />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
               </>
             )}
           </Animated.View>
@@ -556,6 +919,273 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         </View>
 
       </ScrollView>
+
+      {/* Add Task Modal */}
+      <Modal
+        visible={showAddTaskModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAddTaskModal(false)}
+      >
+        <KeyboardAvoidingView 
+          style={dynamicStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={dynamicStyles.modalContent}>
+            <Text style={dynamicStyles.modalTitle}>📝 Yeni Görev Ekle</Text>
+            
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Görev Başlığı</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={taskTitle}
+                onChangeText={setTaskTitle}
+                placeholder="Görev başlığını yazın..."
+                placeholderTextColor={currentTheme.colors.muted}
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Süre (dakika)</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={taskEstimatedTime}
+                onChangeText={setTaskEstimatedTime}
+                placeholder="15"
+                placeholderTextColor={currentTheme.colors.muted}
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Tarih</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={taskDate}
+                onChangeText={setTaskDate}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={currentTheme.colors.muted}
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Saat</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={taskTime}
+                onChangeText={setTaskTime}
+                placeholder="09:00"
+                placeholderTextColor={currentTheme.colors.muted}
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Sıklık</Text>
+              <View style={dynamicStyles.frequencyContainer}>
+                {[
+                  { key: 'daily', label: 'Günlük', emoji: '📅' },
+                  { key: 'weekly', label: 'Haftalık', emoji: '📆' },
+                  { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
+                ].map((freq) => (
+                  <TouchableOpacity
+                    key={freq.key}
+                    style={[
+                      dynamicStyles.frequencyButton,
+                      taskFrequency === freq.key && dynamicStyles.frequencyButtonActive
+                    ]}
+                    onPress={() => setTaskFrequency(freq.key as any)}
+                  >
+                    <Text style={[
+                      dynamicStyles.frequencyButtonText,
+                      taskFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
+                    ]}>
+                      {freq.emoji}
+                    </Text>
+                    <Text style={[
+                      dynamicStyles.frequencyButtonText,
+                      taskFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
+                    ]}>
+                      {freq.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => setShowAddTaskModal(false)}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  İptal
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={handleSaveTask}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  Kaydet
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Add Reminder Modal */}
+      <Modal
+        visible={showAddReminderModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAddReminderModal(false)}
+      >
+        <KeyboardAvoidingView 
+          style={dynamicStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={dynamicStyles.modalContent}>
+            <Text style={dynamicStyles.modalTitle}>🔔 Yeni Hatırlatıcı Ekle</Text>
+            
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Hatırlatıcı Başlığı</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={reminderTitle}
+                onChangeText={setReminderTitle}
+                placeholder="Hatırlatıcı başlığını yazın..."
+                placeholderTextColor={currentTheme.colors.muted}
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Tarih</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={reminderDate}
+                onChangeText={setReminderDate}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={currentTheme.colors.muted}
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Saat</Text>
+              <TextInput
+                style={dynamicStyles.textInput}
+                value={reminderTime}
+                onChangeText={setReminderTime}
+                placeholder="09:00"
+                placeholderTextColor={currentTheme.colors.muted}
+              />
+            </View>
+
+            <View style={dynamicStyles.inputGroup}>
+              <Text style={dynamicStyles.inputLabel}>Sıklık</Text>
+              <View style={dynamicStyles.frequencyContainer}>
+                {[
+                  { key: 'daily', label: 'Günlük', emoji: '📅' },
+                  { key: 'weekly', label: 'Haftalık', emoji: '📆' },
+                  { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
+                ].map((freq) => (
+                  <TouchableOpacity
+                    key={freq.key}
+                    style={[
+                      dynamicStyles.frequencyButton,
+                      reminderFrequency === freq.key && dynamicStyles.frequencyButtonActive
+                    ]}
+                    onPress={() => setReminderFrequency(freq.key as any)}
+                  >
+                    <Text style={[
+                      dynamicStyles.frequencyButtonText,
+                      reminderFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
+                    ]}>
+                      {freq.emoji}
+                    </Text>
+                    <Text style={[
+                      dynamicStyles.frequencyButtonText,
+                      reminderFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
+                    ]}>
+                      {freq.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => setShowAddReminderModal(false)}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  İptal
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={handleSaveReminder}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  Kaydet
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Floating Timer Button - Only on Tasks Screen */}
+      <TouchableOpacity
+        style={dynamicStyles.floatingTimerButton}
+        onPress={() => setShowFocusMode(true)}
+        activeOpacity={0.8}
+      >
+        <Animated.View
+          style={[
+            dynamicStyles.timerButtonContent,
+            { transform: [{ scale: scaleAnim }] },
+          ]}
+        >
+          {isActive ? (
+            <View style={dynamicStyles.timerDisplay}>
+              <Text style={dynamicStyles.timerText}>
+                {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              </Text>
+              <View style={dynamicStyles.progressRing}>
+                <Animated.View
+                  style={[
+                    dynamicStyles.progressFill,
+                    {
+                      transform: [
+                        {
+                          rotate: progressAnim.interpolate({
+                            inputRange: [0, 100],
+                            outputRange: ['0deg', '360deg'],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          ) : (
+            <Ionicons 
+              name="timer-outline" 
+              size={24} 
+              color={currentTheme.colors.background} 
+            />
+          )}
+        </Animated.View>
+      </TouchableOpacity>
+
+      {/* Focus Mode Modal */}
+      <FocusMode
+        visible={showFocusMode}
+        onClose={() => setShowFocusMode(false)}
+      />
     </SafeAreaView>
   );
 }

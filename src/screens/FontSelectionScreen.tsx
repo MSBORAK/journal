@@ -186,7 +186,7 @@ export default function FontSelectionScreen({ navigation }: FontSelectionScreenP
       marginRight: 16,
     },
     fontIconText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: 'bold',
     },

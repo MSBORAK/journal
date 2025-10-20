@@ -35,8 +35,8 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
   const { habits } = useHabits(user?.uid);
   const { dreams, goals } = useDreamsGoals(user?.uid);
 
-  const [isFlipped, setIsFlipped] = useState(false);
-  const flipAnim = useRef(new Animated.Value(0)).current;
+  const [isFlipped, setIsFlipped] = useState(true);
+  const flipAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   // Kişilik analizi
@@ -46,6 +46,15 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
     const totalHabits = habits.length;
     const completedGoals = goals.filter(g => g.status === 'completed').length;
     const totalDreams = dreams.length;
+
+    // Debug log
+    console.log('🎭 Personality Debug:', {
+      totalEntries,
+      currentStreak,
+      totalHabits,
+      completedGoals,
+      totalDreams
+    });
 
     // Mood analizi
     const moodCounts = entries.reduce((acc, entry) => {
@@ -65,28 +74,30 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
     let personalityDescription = 'Hayat yolculuğunun başında, her adım bir keşif!';
     let personalityMotivation = 'Her gün yeni bir hikaye yazıyorsun!';
 
-    if (totalEntries >= 100 && currentStreak >= 21) {
+    console.log('🎭 Seviye Kontrol:', { totalEntries, currentStreak });
+
+    if (totalEntries >= 100) {
       personalityType = 'Ruh Ustası';
       personalityTraits = ['Bilge', 'Dengeli', 'İçsel güçlü'];
       personalityEmoji = '🧘‍♀️';
       personalityColor = '#8b5cf6';
       personalityDescription = 'Ruhsal olgunluğa ulaşmış, iç dünyasını derinlemesine tanıyan bir kişi!';
       personalityMotivation = 'Sen bir ruh rehberisin!';
-    } else if (totalEntries >= 50 && currentStreak >= 14) {
+    } else if (totalEntries >= 50) {
       personalityType = 'İstikrar Kahramanı';
       personalityTraits = ['Disiplinli', 'Kararlı', 'Güvenilir'];
       personalityEmoji = '💪';
       personalityColor = '#f59e0b';
       personalityDescription = 'Hedeflerine ulaşmak için gerekli disiplin ve kararlılığa sahip!';
       personalityMotivation = 'İstikrarın seni zirveye taşıyacak!';
-    } else if (totalEntries >= 30 && currentStreak >= 7) {
+    } else if (totalEntries >= 30) {
       personalityType = 'Gelişim Savaşçısı';
       personalityTraits = ['Hedef odaklı', 'İlerici', 'Motivasyonlu'];
       personalityEmoji = '🎯';
       personalityColor = '#3b82f6';
       personalityDescription = 'Sürekli gelişim odaklı, hedeflerine kararlılıkla ilerleyen!';
       personalityMotivation = 'Gelişimin sınır tanımıyor!';
-    } else if (totalEntries >= 15 && currentStreak >= 3) {
+    } else if (totalEntries >= 15) {
       personalityType = 'Keşif Avcısı';
       personalityTraits = ['Meraklı', 'Deneyimci', 'Açık fikirli'];
       personalityEmoji = '🔍';
@@ -100,6 +111,13 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
       personalityColor = '#84cc16';
       personalityDescription = 'Yolculuğuna yeni başlamış, her adımda büyüyen!';
       personalityMotivation = 'Her adım seni daha güçlü yapıyor!';
+    } else if (totalEntries >= 1) {
+      personalityType = 'Yeni Yolcu';
+      personalityTraits = ['Keşfetmeye açık', 'Meraklı', 'Cesur'];
+      personalityEmoji = '🌱';
+      personalityColor = '#10b981';
+      personalityDescription = 'Hayat yolculuğunun başında, her adım bir keşif!';
+      personalityMotivation = 'Her gün yeni bir hikaye yazıyorsun!';
     }
 
     // Wellness skoru hesapla
@@ -186,150 +204,218 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
     >
       {/* Front Side */}
       <Animated.View style={[styles.card, frontAnimatedStyle]}>
-        <LinearGradient
-          colors={[
-            personality.color + 'FF', 
-            personality.color + 'DD', 
-            personality.color + 'BB',
-            personality.color + '99'
-          ]}
-          style={[styles.gradient, styles.frontGradient]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          locations={[0, 0.3, 0.7, 1]}
-        >
+        <View style={[styles.frontCard, { backgroundColor: currentTheme.colors.card }]}>
           <View style={styles.frontContent}>
             {/* Header */}
             <View style={styles.frontHeader}>
               <Text style={styles.emoji}>{personality.emoji}</Text>
-              <Text style={styles.title}>Kişilik Kartım</Text>
-              <Text style={styles.personalityType}>{personality.type} 🪶</Text>
+              <Text style={[styles.title, { color: currentTheme.colors.text }]}>Kişilik Kartım</Text>
+              <Text style={[styles.personalityType, { color: currentTheme.colors.primary }]}>
+                {personality.type} 🪶
+              </Text>
             </View>
             
             {/* Description */}
             <View style={styles.descriptionContainer}>
-              <Text style={styles.description}>{personality.description}</Text>
+              <Text style={[styles.description, { color: currentTheme.colors.secondary }]}>
+                {personality.description}
+              </Text>
             </View>
             
             {/* Stats */}
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
-                <View style={styles.statIcon}>
-                  <Text style={styles.statEmoji}>💎</Text>
-                </View>
-                <Text style={styles.statNumber}>{personality.wellnessScore}</Text>
-                <Text style={styles.statLabel}>Wellness</Text>
+                <Text style={styles.statEmoji}>💎</Text>
+                <Text style={[styles.statNumber, { color: currentTheme.colors.text }]}>
+                  {personality.wellnessScore}
+                </Text>
+                <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
+                  Wellness
+                </Text>
               </View>
               <View style={styles.statItem}>
-                <View style={styles.statIcon}>
-                  <Text style={styles.statEmoji}>🔥</Text>
-                </View>
-                <Text style={styles.statNumber}>{personality.stats.currentStreak}</Text>
-                <Text style={styles.statLabel}>Günlük Seri</Text>
+                <Text style={styles.statEmoji}>🔥</Text>
+                <Text style={[styles.statNumber, { color: currentTheme.colors.text }]}>
+                  {personality.stats.currentStreak}
+                </Text>
+                <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
+                  Günlük Seri
+                </Text>
               </View>
               <View style={styles.statItem}>
-                <View style={styles.statIcon}>
-                  <Text style={styles.statEmoji}>🎯</Text>
-                </View>
-                <Text style={styles.statNumber}>{personality.stats.completedGoals}</Text>
-                <Text style={styles.statLabel}>Hedef</Text>
+                <Text style={styles.statEmoji}>🎯</Text>
+                <Text style={[styles.statNumber, { color: currentTheme.colors.text }]}>
+                  {personality.stats.completedGoals}
+                </Text>
+                <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
+                  Hedef
+                </Text>
               </View>
             </View>
 
             {/* Flip Hint */}
             <View style={styles.flipHint}>
-              <Ionicons name="refresh" size={16} color="rgba(255, 255, 255, 0.8)" />
-              <Text style={styles.flipText}>Dokunarak detayları gör</Text>
+              <Ionicons name="refresh" size={14} color={currentTheme.colors.secondary} />
+              <Text style={[styles.flipText, { color: currentTheme.colors.secondary }]}>
+                Dokunarak detayları gör
+              </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </Animated.View>
 
       {/* Back Side */}
       <Animated.View style={[styles.card, styles.backCard, backAnimatedStyle]}>
-        <LinearGradient
-          colors={[
-            personality.color + '99', 
-            personality.color + 'BB', 
-            personality.color + 'DD',
-            personality.color + 'FF'
-          ]}
-          style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          locations={[0, 0.3, 0.7, 1]}
-        >
+        <View style={[styles.backCard, { backgroundColor: currentTheme.colors.card }]}>
           <View style={styles.backContent}>
             {/* Back Header */}
             <View style={styles.backHeader}>
-              <Text style={styles.backTitle}>Gelişim Profilim</Text>
-              <Text style={styles.motivation}>{personality.motivation}</Text>
-            </View>
-            
-            {/* Development Level */}
-            <View style={styles.developmentLevel}>
-              <Text style={styles.levelLabel}>Gelişim Seviyesi</Text>
-              <View style={styles.levelBar}>
-                <View style={[styles.levelProgress, { 
-                  width: `${Math.min((personality.stats.totalEntries / 100) * 100, 100)}%`,
-                  backgroundColor: personality.color 
-                }]} />
-              </View>
-              <Text style={styles.levelText}>
-                {personality.stats.totalEntries < 10 ? 'Başlangıç' : 
-                 personality.stats.totalEntries < 30 ? 'Gelişim' : 
-                 personality.stats.totalEntries < 50 ? 'İlerleme' : 'Ustalık'}
+              <Text style={[styles.backTitle, { color: currentTheme.colors.text }]}>Gelişim Profilim</Text>
+              <Text style={[styles.motivation, { color: currentTheme.colors.secondary }]}>
+                {personality.motivation}
               </Text>
             </View>
             
-            {/* Traits */}
-            <View style={styles.traitsContainer}>
-              {personality.traits.map((trait, index) => (
-                <View key={index} style={styles.traitItem}>
-                  <View style={styles.traitIcon}>
-                    <Text style={styles.traitEmoji}>✨</Text>
+            {/* Simple Progress */}
+            <View style={styles.simpleProgress}>
+              <Text style={[styles.progressLabel, { color: currentTheme.colors.secondary }]}>
+                İlerleme: {personality.stats.totalEntries} / 100 günlük
+              </Text>
+              <View style={[styles.progressBar, { backgroundColor: currentTheme.colors.border }]}>
+                <View style={[styles.progressFill, { 
+                  width: `${Math.min((personality.stats.totalEntries / 100) * 100, 100)}%`,
+                  backgroundColor: currentTheme.colors.primary 
+                }]} />
+              </View>
+            </View>
+
+            {/* Unlock System - Clean */}
+            <View style={styles.unlockContainer}>
+              <Text style={[styles.unlockTitle, { color: currentTheme.colors.text }]}>
+                Açılan Özellikler
+              </Text>
+              
+              
+              <View style={styles.unlockGrid}>
+                {/* Row 1 */}
+                <View style={styles.unlockRow}>
+                  <View style={[
+                    styles.unlockItemBox, 
+                    personality.stats.totalEntries >= 1 ? 
+                      { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
+                      { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
+                  ]}>
+                    <Text style={styles.unlockEmojiBox}>📝</Text>
+                    <Text style={[
+                      styles.unlockTextBox, 
+                      { color: personality.stats.totalEntries >= 1 ? currentTheme.colors.primary : currentTheme.colors.secondary }
+                    ]}>Günlük</Text>
                   </View>
-                  <Text style={styles.traitText}>{trait}</Text>
+                  <View style={[
+                    styles.unlockItemBox, 
+                    personality.stats.totalEntries >= 5 ? 
+                      { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
+                      { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
+                  ]}>
+                    <Text style={styles.unlockEmojiBox}>🎯</Text>
+                    <Text style={[
+                      styles.unlockTextBox, 
+                      { color: personality.stats.totalEntries >= 5 ? currentTheme.colors.primary : currentTheme.colors.secondary }
+                    ]}>Hedef</Text>
+                  </View>
+                  <View style={[
+                    styles.unlockItemBox, 
+                    personality.stats.totalEntries >= 15 ? 
+                      { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
+                      { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
+                  ]}>
+                    {personality.stats.totalEntries >= 15 ? (
+                      <Text style={styles.unlockEmojiBox}>✨</Text>
+                    ) : (
+                      <View style={styles.lockedIconContainer}>
+                        <Text style={styles.unlockEmojiBox}>✨</Text>
+                        <Ionicons name="lock-closed" size={8} color={currentTheme.colors.secondary} style={styles.lockIcon} />
+                      </View>
+                    )}
+                    <Text style={[
+                      styles.unlockTextBox, 
+                      { color: personality.stats.totalEntries >= 15 ? currentTheme.colors.primary : currentTheme.colors.secondary }
+                    ]}>Hayal</Text>
+                  </View>
                 </View>
-              ))}
-            </View>
-
-            {/* Detailed Stats */}
-            <View style={styles.detailedStats}>
-              <View style={styles.detailedStat}>
-                <Text style={styles.detailedStatEmoji}>📝</Text>
-                <Text style={styles.detailedStatNumber}>{personality.stats.totalEntries}</Text>
-                <Text style={styles.detailedStatLabel}>Günlük</Text>
+                
+                {/* Row 2 */}
+                <View style={styles.unlockRow}>
+                  <View style={[
+                    styles.unlockItemBox, 
+                    personality.stats.totalEntries >= 30 ? 
+                      { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
+                      { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
+                  ]}>
+                    {personality.stats.totalEntries >= 30 ? (
+                      <Text style={styles.unlockEmojiBox}>🔥</Text>
+                    ) : (
+                      <View style={styles.lockedIconContainer}>
+                        <Text style={styles.unlockEmojiBox}>🔥</Text>
+                        <Ionicons name="lock-closed" size={8} color={currentTheme.colors.secondary} style={styles.lockIcon} />
+                      </View>
+                    )}
+                    <Text style={[
+                      styles.unlockTextBox, 
+                      { color: personality.stats.totalEntries >= 30 ? currentTheme.colors.primary : currentTheme.colors.secondary }
+                    ]}>Alışkanlık</Text>
+                  </View>
+                  <View style={[
+                    styles.unlockItemBox, 
+                    personality.stats.totalEntries >= 50 ? 
+                      { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
+                      { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
+                  ]}>
+                    {personality.stats.totalEntries >= 50 ? (
+                      <Text style={styles.unlockEmojiBox}>🏆</Text>
+                    ) : (
+                      <View style={styles.lockedIconContainer}>
+                        <Text style={styles.unlockEmojiBox}>🏆</Text>
+                        <Ionicons name="lock-closed" size={8} color={currentTheme.colors.secondary} style={styles.lockIcon} />
+                      </View>
+                    )}
+                    <Text style={[
+                      styles.unlockTextBox, 
+                      { color: personality.stats.totalEntries >= 50 ? currentTheme.colors.primary : currentTheme.colors.secondary }
+                    ]}>Başarı</Text>
+                  </View>
+                  <View style={[
+                    styles.unlockItemBox, 
+                    personality.stats.totalEntries >= 100 ? 
+                      { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
+                      { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
+                  ]}>
+                    {personality.stats.totalEntries >= 100 ? (
+                      <Text style={styles.unlockEmojiBox}>🧘‍♀️</Text>
+                    ) : (
+                      <View style={styles.lockedIconContainer}>
+                        <Text style={styles.unlockEmojiBox}>🧘‍♀️</Text>
+                        <Ionicons name="lock-closed" size={8} color={currentTheme.colors.secondary} style={styles.lockIcon} />
+                      </View>
+                    )}
+                    <Text style={[
+                      styles.unlockTextBox, 
+                      { color: personality.stats.totalEntries >= 100 ? currentTheme.colors.primary : currentTheme.colors.secondary }
+                    ]}>Usta</Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.detailedStat}>
-                <Text style={styles.detailedStatEmoji}>🎯</Text>
-                <Text style={styles.detailedStatNumber}>{personality.stats.completedGoals}</Text>
-                <Text style={styles.detailedStatLabel}>Hedef</Text>
-              </View>
-              <View style={styles.detailedStat}>
-                <Text style={styles.detailedStatEmoji}>✨</Text>
-                <Text style={styles.detailedStatNumber}>{personality.stats.totalDreams}</Text>
-                <Text style={styles.detailedStatLabel}>Hayal</Text>
-              </View>
-              <View style={styles.detailedStat}>
-                <Text style={styles.detailedStatEmoji}>🔥</Text>
-                <Text style={styles.detailedStatNumber}>{personality.stats.totalHabits}</Text>
-                <Text style={styles.detailedStatLabel}>Alışkanlık</Text>
-              </View>
-            </View>
-
-            {/* Inspirational Quote */}
-            <View style={styles.quoteContainer}>
-              <Text style={styles.quote}>"Küçük adımlar büyük dönüşümler yaratır 🌱"</Text>
             </View>
 
             {/* Flip Hint */}
             <View style={styles.flipHint}>
-              <Ionicons name="refresh" size={16} color="rgba(255, 255, 255, 0.8)" />
-              <Text style={styles.flipText}>Tekrar dokunarak çevir</Text>
+              <Ionicons name="refresh" size={12} color={currentTheme.colors.secondary} />
+              <Text style={[styles.flipText, { color: currentTheme.colors.secondary }]}>
+                Dokunarak çevir
+              </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </Animated.View>
     </TouchableOpacity>
   );
@@ -338,7 +424,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
 const styles = StyleSheet.create({
   container: {
     width: width - 40,
-    height: 300,
+    height: 360,
     alignSelf: 'center',
     marginVertical: 20,
   },
@@ -346,67 +432,60 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    borderRadius: BORDER_RADIUS.large,
-    // Subtle shadow for floating effect
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    borderRadius: 20,
+    // Soft, emotional shadow
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
     backfaceVisibility: 'hidden',
   },
-  backCard: {
-    backgroundColor: 'transparent',
-  },
-          gradient: {
-            flex: 1,
-            borderRadius: BORDER_RADIUS.large,
-            padding: 16,
-            justifyContent: 'space-between',
-            // Soft light glow
-            shadowColor: 'rgba(255, 255, 255, 0.15)',
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 1,
-            shadowRadius: 4,
-            elevation: 0,
-          },
-  frontGradient: {
+  frontCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 20,
+    justifyContent: 'space-between',
+    // Soft border
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: 'rgba(255, 255, 255, 0.15)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 0,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  backCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 20,
+    justifyContent: 'space-between',
+    // Soft border
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   },
   frontContent: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingVertical: 8,
   },
   frontHeader: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   emoji: {
-    fontSize: 40,
-    marginBottom: 6,
+    fontSize: 50,
+    marginBottom: 8,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   title: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '800',
     color: 'white',
     textAlign: 'center',
-    marginBottom: 3,
+    marginBottom: 4,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   personalityType: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'rgba(255, 255, 255, 0.95)',
     textAlign: 'center',
     fontWeight: '700',
@@ -415,15 +494,14 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   descriptionContainer: {
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    minHeight: 40,
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   description: {
-    fontSize: 11,
+    fontSize: 12,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 16,
     fontStyle: 'italic',
     fontWeight: '500',
     textShadowColor: 'rgba(0,0,0,0.2)',
@@ -433,35 +511,36 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 8,
-    paddingBottom: 8,
+    marginBottom: 12,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    // İnce gri çizgi
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
-    paddingTop: 8,
+    paddingTop: 12,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statIcon: {
-    marginBottom: 2,
+    marginBottom: 4,
   },
   statEmoji: {
-    fontSize: 14,
+    fontSize: 16,
   },
   statNumber: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '900',
     color: 'white',
-    marginBottom: 2,
+    marginBottom: 3,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: 'rgba(255, 255, 255, 0.85)',
     fontWeight: '600',
     textAlign: 'center',
@@ -473,56 +552,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: 0.8,
-    marginTop: 4,
+    opacity: 0.7,
+    marginTop: 8,
   },
   flipText: {
     fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginLeft: 4,
-    fontWeight: '500',
+    marginLeft: 3,
+    fontWeight: '400',
   },
   backContent: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingVertical: 8,
   },
   backHeader: {
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   backTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
     color: 'white',
     textAlign: 'center',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   motivation: {
-    fontSize: 11,
+    fontSize: 12,
     color: 'rgba(255, 255, 255, 0.85)',
     textAlign: 'center',
     fontStyle: 'italic',
-    lineHeight: 14,
+    lineHeight: 16,
   },
   traitsContainer: {
-    marginBottom: 8,
-    paddingHorizontal: 8,
+    flex: 1,
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   traitItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 2,
-    paddingHorizontal: 4,
+    marginVertical: 3,
+    paddingHorizontal: 8,
   },
   traitIcon: {
-    marginRight: 6,
+    marginRight: 8,
   },
   traitEmoji: {
-    fontSize: 12,
+    fontSize: 14,
   },
   traitText: {
-    fontSize: 11,
+    fontSize: 13,
     color: 'white',
     fontWeight: '600',
     flex: 1,
@@ -530,45 +608,44 @@ const styles = StyleSheet.create({
   detailedStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 6,
-    paddingHorizontal: 4,
+    marginBottom: 8,
   },
   detailedStat: {
     alignItems: 'center',
     flex: 1,
   },
   detailedStatEmoji: {
-    fontSize: 12,
-    marginBottom: 1,
+    fontSize: 14,
+    marginBottom: 2,
   },
   detailedStatNumber: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '700',
     color: 'white',
     marginBottom: 1,
   },
   detailedStatLabel: {
-    fontSize: 8,
+    fontSize: 9,
     color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     fontWeight: '500',
   },
   developmentLevel: {
-    marginBottom: 8,
+    marginBottom: 12,
     paddingHorizontal: 8,
   },
   levelLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
     fontWeight: '600',
   },
   levelBar: {
-    height: 3,
+    height: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 2,
-    marginBottom: 3,
+    marginBottom: 4,
     overflow: 'hidden',
   },
   levelProgress: {
@@ -576,24 +653,90 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   levelText: {
-    fontSize: 9,
+    fontSize: 10,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     fontWeight: '600',
   },
   quoteContainer: {
-    marginBottom: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    marginBottom: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 6,
+    borderRadius: 8,
   },
   quote: {
-    fontSize: 10,
+    fontSize: 11,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     fontStyle: 'italic',
     fontWeight: '500',
-    lineHeight: 12,
+    lineHeight: 14,
+  },
+  simpleProgress: {
+    marginBottom: 16,
+  },
+  progressLabel: {
+    fontSize: 11,
+    textAlign: 'center',
+    marginBottom: 6,
+    fontWeight: '500',
+  },
+  progressBar: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  unlockContainer: {
+    marginBottom: 16,
+  },
+  unlockTitle: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  unlockGrid: {
+    gap: 8,
+  },
+  unlockRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  unlockItemBox: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    minWidth: 55,
+    // Box style
+  },
+  unlockEmojiBox: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  unlockTextBox: {
+    fontSize: 9,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  lockedIconContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockIcon: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 4,
+    padding: 1,
   },
 });

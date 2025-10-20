@@ -239,7 +239,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       textAlign: 'center',
     },
     selectedLevelText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '600',
     },
     saveButton: {
@@ -250,7 +250,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       marginTop: 20,
     },
     saveButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -279,7 +279,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
           onPress={() => value > 0 && onChange(value - 1)}
           disabled={value <= 0}
         >
-          <Ionicons name="remove" size={20} color="white" />
+          <Ionicons name="remove" size={20} color={currentTheme.colors.background} />
         </TouchableOpacity>
         <Text style={dynamicStyles.counterValue}>{value}</Text>
         <TouchableOpacity
@@ -287,7 +287,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
           onPress={() => value < max && onChange(value + 1)}
           disabled={value >= max}
         >
-          <Ionicons name="add" size={20} color="white" />
+          <Ionicons name="add" size={20} color={currentTheme.colors.background} />
         </TouchableOpacity>
       </View>
     </View>

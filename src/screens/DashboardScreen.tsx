@@ -1234,7 +1234,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       borderRadius: 12,
     },
     moodBadgeText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 10,
       fontWeight: 'bold',
     },
@@ -1630,7 +1630,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     tasksAddButtonText: {
       fontSize: 14,
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '500',
     },
     // Reminders Styles
@@ -1813,7 +1813,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     healthScoreBadgeNumber: {
       fontSize: 32,
       fontWeight: '900',
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     healthScoreBadgeLabel: {
       fontSize: 14,
@@ -2899,7 +2899,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               }}
             >
               <Text style={{
-                color: 'white',
+                color: currentTheme.colors.background,
                 fontSize: 16,
                 fontWeight: 'bold',
                 textAlign: 'center',

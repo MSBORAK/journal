@@ -157,7 +157,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       textAlign: 'center',
     },
     selectedTagFilterText: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     resultsInfo: {
       flexDirection: 'row',
@@ -249,7 +249,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     tagText: {
       fontSize: 12,
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '500',
       textAlign: 'center',
       lineHeight: 16,

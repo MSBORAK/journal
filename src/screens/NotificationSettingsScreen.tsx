@@ -318,7 +318,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       borderColor: currentTheme.colors.primary,
     },
     actionButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '700',
     },

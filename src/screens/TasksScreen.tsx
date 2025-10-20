@@ -157,7 +157,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       textAlign: 'center',
     },
     activeTabText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '600',
     },
     statsContainer: {
@@ -280,7 +280,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       textAlign: 'center',
     },
     selectedCategoryName: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     categoryCount: {
       fontSize: 10,
@@ -288,7 +288,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       marginTop: 2,
     },
     selectedCategoryCount: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     tasksList: {
       paddingHorizontal: 20,
@@ -500,7 +500,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       color: currentTheme.colors.text,
     },
     selectedOptionText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '500',
     },
     modalActions: {
@@ -637,7 +637,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
             setShowAddModal(true);
           }}
         >
-          <Ionicons name="add" size={24} color="white" />
+          <Ionicons name="add" size={24} color={currentTheme.colors.background} />
         </TouchableOpacity>
       </View>
 
@@ -740,7 +740,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   onPress={() => toggleTaskCompletion(task.id)}
                 >
                   {task.isCompleted && (
-                    <Ionicons name="checkmark" size={16} color="white" />
+                    <Ionicons name="checkmark" size={16} color={currentTheme.colors.background} />
                   )}
                 </TouchableOpacity>
               </View>

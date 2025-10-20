@@ -115,7 +115,7 @@ export default function AuthScreen() {
       backgroundColor: currentTheme.colors.primary,
     },
     buttonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },

@@ -65,30 +65,30 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       fontWeight: '700',
       textAlign: 'center',
       marginBottom: 20,
-      color: '#000000',
+      color: currentTheme.colors.text,
       fontFamily: 'Poppins_700Bold',
     },
     description: {
       fontSize: 18,
       textAlign: 'center',
-      color: '#000000',
+      color: currentTheme.colors.text,
       marginBottom: 40,
       lineHeight: 28,
       fontFamily: 'Poppins_400Regular',
     },
     nextButton: {
-      backgroundColor: '#000000',
+      backgroundColor: currentTheme.colors.primary,
       paddingHorizontal: 40,
       paddingVertical: 16,
       borderRadius: 30,
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOpacity: 0.2,
       shadowOffset: { width: 0, height: 4 },
       shadowRadius: 8,
       elevation: 8,
     },
     nextButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '600',
       fontSize: 18,
       fontFamily: 'Poppins_600SemiBold',
@@ -103,7 +103,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     skipButtonText: {
-      color: '#000000',
+      color: currentTheme.colors.text,
       fontSize: 16,
       fontWeight: '500',
       fontFamily: 'Poppins_500Medium',
@@ -117,7 +117,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       paddingVertical: 16,
       paddingHorizontal: 24,
       borderRadius: 25,
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOpacity: 0.1,
       shadowOffset: { width: 0, height: 3 },
       shadowRadius: 6,
@@ -147,7 +147,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
     paginationDotActive: {
-      backgroundColor: '#000000',
+      backgroundColor: currentTheme.colors.primary,
       width: 30,
       height: 10,
       borderRadius: 5,
@@ -291,7 +291,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               style={[styles.themeBtn, { backgroundColor: '#2D423B' }]}
               onPress={() => handleThemeSelect('luxury')}
             >
-              <Text style={[styles.themeText, { color: 'white' }]}>Luxury ✨</Text>
+              <Text style={[styles.themeText, { color: currentTheme.colors.background }]}>Luxury ✨</Text>
             </TouchableOpacity>
           </View>
         )}

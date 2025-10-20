@@ -211,7 +211,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       lineHeight: 14,
     },
     activeTabText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '700',
     },
     content: {
@@ -397,7 +397,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       alignItems: 'center',
     },
     modalCloseText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -466,7 +466,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
             <Ionicons 
               name={isUnlocked ? "checkmark" : "lock-closed"} 
               size={14} 
-              color={isUnlocked ? '#000' : currentTheme.colors.text} 
+              color={isUnlocked ? currentTheme.colors.text : currentTheme.colors.text} 
             />
           </View>
 

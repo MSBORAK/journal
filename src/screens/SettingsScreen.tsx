@@ -274,7 +274,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       borderRadius: 28,
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 8,

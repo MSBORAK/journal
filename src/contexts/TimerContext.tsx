@@ -1,216 +1,186 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
-
-const TIMER_STORAGE_KEY = 'active_timer_state';
-
-interface TimerState {
-  isActive: boolean;
-  isPaused: boolean;
-  duration: number; // dakika cinsinden
-  remainingTime: number; // saniye cinsinden
-  startTime: number | null;
-  type: 'focus' | 'break' | 'custom';
-  label: string;
-}
+import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
+import { Animated } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { soundService } from '../services/soundService';
 
 interface TimerContextType {
-  timerState: TimerState;
-  startTimer: (duration: number, type?: 'focus' | 'break' | 'custom', label?: string) => void;
+  // Timer states
+  isActive: boolean;
+  isPaused: boolean;
+  timeLeft: number;
+  selectedDuration: number;
+  showTimer: boolean;
+  
+  // Timer controls
+  startTimer: () => void;
   pauseTimer: () => void;
-  resumeTimer: () => void;
-  stopTimer: () => void;
   resetTimer: () => void;
+  setDuration: (duration: number) => void;
+  toggleTimer: () => void;
+  
+  // UI states
+  showFocusMode: boolean;
+  setShowFocusMode: (show: boolean) => void;
+  
+  // Animation values
+  progressAnim: Animated.Value;
+  scaleAnim: Animated.Value;
 }
 
-const defaultTimerState: TimerState = {
-  isActive: false,
-  isPaused: false,
-  duration: 25,
-  remainingTime: 0,
-  startTime: null,
-  type: 'focus',
-  label: 'Odaklanma',
-};
-
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
-
-export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [timerState, setTimerState] = useState<TimerState>(defaultTimerState);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Timer durumunu yükle
-  useEffect(() => {
-    loadTimerState();
-  }, []);
-
-  // Timer durumunu kaydet
-  useEffect(() => {
-    if (timerState.isActive || timerState.remainingTime > 0) {
-      saveTimerState();
-    }
-  }, [timerState]);
-
-  // Timer çalışırken countdown
-  useEffect(() => {
-    if (timerState.isActive && !timerState.isPaused) {
-      intervalRef.current = setInterval(() => {
-        setTimerState(prev => {
-          if (prev.remainingTime <= 1) {
-            // Timer bitti
-            handleTimerComplete();
-            return {
-              ...prev,
-              isActive: false,
-              remainingTime: 0,
-            };
-          }
-          return {
-            ...prev,
-            remainingTime: prev.remainingTime - 1,
-          };
-        });
-      }, 1000);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [timerState.isActive, timerState.isPaused]);
-
-  const loadTimerState = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
-      if (stored) {
-        const parsed: TimerState = JSON.parse(stored);
-        
-        // Eğer timer aktifse ve başlangıç zamanı varsa, geçen süreyi hesapla
-        if (parsed.isActive && parsed.startTime) {
-          const now = Date.now();
-          const elapsedSeconds = Math.floor((now - parsed.startTime) / 1000);
-          const newRemainingTime = Math.max(0, parsed.remainingTime - elapsedSeconds);
-          
-          if (newRemainingTime > 0) {
-            setTimerState({
-              ...parsed,
-              remainingTime: newRemainingTime,
-            });
-          } else {
-            // Timer bitmiş
-            setTimerState(defaultTimerState);
-            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('❌ Timer durumu yüklenemedi:', error);
-    }
-  };
-
-  const saveTimerState = async () => {
-    try {
-      await AsyncStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(timerState));
-    } catch (error) {
-      console.error('❌ Timer durumu kaydedilemedi:', error);
-    }
-  };
-
-  const handleTimerComplete = async () => {
-    try {
-      // Bildirim gönder
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: '⏰ Süre Doldu!',
-          body: `${timerState.label} tamamlandı! Harika iş çıkardın! 🎉`,
-          sound: true,
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: 1,
-        },
-      });
-
-      // Timer durumunu temizle
-      await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-      console.log('✅ Timer tamamlandı!');
-    } catch (error) {
-      console.error('❌ Timer tamamlama hatası:', error);
-    }
-  };
-
-  const startTimer = (duration: number, type: 'focus' | 'break' | 'custom' = 'focus', label: string = 'Odaklanma') => {
-    const newState: TimerState = {
-      isActive: true,
-      isPaused: false,
-      duration,
-      remainingTime: duration * 60, // dakikayı saniyeye çevir
-      startTime: Date.now(),
-      type,
-      label,
-    };
-    setTimerState(newState);
-    console.log(`✅ Timer başlatıldı: ${duration} dakika - ${label}`);
-  };
-
-  const pauseTimer = () => {
-    setTimerState(prev => ({
-      ...prev,
-      isPaused: true,
-    }));
-    console.log('⏸️ Timer duraklatıldı');
-  };
-
-  const resumeTimer = () => {
-    setTimerState(prev => ({
-      ...prev,
-      isPaused: false,
-      startTime: Date.now(), // Yeni başlangıç zamanı
-    }));
-    console.log('▶️ Timer devam ediyor');
-  };
-
-  const stopTimer = async () => {
-    setTimerState(defaultTimerState);
-    await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-    console.log('⏹️ Timer durduruldu');
-  };
-
-  const resetTimer = () => {
-    setTimerState(prev => ({
-      ...prev,
-      remainingTime: prev.duration * 60,
-      startTime: Date.now(),
-    }));
-    console.log('🔄 Timer sıfırlandı');
-  };
-
-  return (
-    <TimerContext.Provider
-      value={{
-        timerState,
-        startTimer,
-        pauseTimer,
-        resumeTimer,
-        stopTimer,
-        resetTimer,
-      }}
-    >
-      {children}
-    </TimerContext.Provider>
-  );
-};
 
 export const useTimer = () => {
   const context = useContext(TimerContext);
   if (!context) {
-    throw new Error('useTimer must be used within TimerProvider');
+    throw new Error('useTimer must be used within a TimerProvider');
   }
   return context;
+};
+
+interface TimerProviderProps {
+  children: ReactNode;
+}
+
+export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
+  // Timer states
+  const [isActive, setIsActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes default
+  const [selectedDuration, setSelectedDuration] = useState(25);
+  const [showTimer, setShowTimer] = useState(false);
+  const [showFocusMode, setShowFocusMode] = useState(false);
+  
+  // Animation values
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  
+  // Timer controls
+  const startTimer = async () => {
+    setIsActive(true);
+    setIsPaused(false);
+    setShowTimer(true);
+    await soundService.playTap();
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // Pulse animation
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+  
+  const pauseTimer = async () => {
+    setIsPaused(true);
+    await soundService.playTap();
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+  
+  const resetTimer = () => {
+    setIsActive(false);
+    setIsPaused(false);
+    setTimeLeft(selectedDuration * 60);
+    setShowTimer(false);
+    Animated.timing(progressAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+  
+  const setDuration = (duration: number) => {
+    if (!isActive) {
+      setSelectedDuration(duration);
+      setTimeLeft(duration * 60);
+      Animated.timing(progressAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+  
+  const toggleTimer = () => {
+    if (isActive) {
+      if (isPaused) {
+        startTimer();
+      } else {
+        pauseTimer();
+      }
+    } else {
+      startTimer();
+    }
+  };
+  
+  
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isActive && !isPaused && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((time) => {
+          if (time <= 1) {
+            // Handle completion inline to avoid dependency issues
+            setIsActive(false);
+            setShowTimer(false);
+            soundService.playSuccess();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            
+            setTimeout(() => {
+              setShowFocusMode(true);
+            }, 1000);
+            return 0;
+          }
+          return time - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive, isPaused, timeLeft]);
+  
+  // Progress animation
+  useEffect(() => {
+    const totalTime = selectedDuration * 60;
+    const progress = ((totalTime - timeLeft) / totalTime) * 100;
+    
+    Animated.timing(progressAnim, {
+      toValue: progress,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  }, [timeLeft, selectedDuration]);
+  
+  const value: TimerContextType = {
+    isActive,
+    isPaused,
+    timeLeft,
+    selectedDuration,
+    showTimer,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    setDuration,
+    toggleTimer,
+    showFocusMode,
+    setShowFocusMode,
+    progressAnim,
+    scaleAnim,
+  };
+  
+  return (
+    <TimerContext.Provider value={value}>
+      {children}
+    </TimerContext.Provider>
+  );
 };

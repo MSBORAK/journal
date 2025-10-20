@@ -398,7 +398,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       borderRadius: 20,
     },
     tasksAddButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -491,7 +491,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       color: currentTheme.colors.text,
     },
     selectedOptionText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '500',
     },
     timeInput: {
@@ -533,7 +533,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     saveButtonText: {
       fontSize: 16,
       fontWeight: '500',
-      color: 'white',
+      color: currentTheme.colors.background,
     },
   });
 
@@ -656,7 +656,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
             setShowAddModal(true);
           }}
         >
-          <Ionicons name="add" size={24} color="white" />
+          <Ionicons name="add" size={24} color={currentTheme.colors.background} />
         </TouchableOpacity>
       </View>
 

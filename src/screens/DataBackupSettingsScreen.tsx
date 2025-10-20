@@ -183,7 +183,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
       elevation: 2,
     },
     actionButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '600',
     },

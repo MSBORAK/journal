@@ -9,7 +9,6 @@ import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './src/i18n/LanguageContext';
 import { TimerProvider } from './src/contexts/TimerContext';
 import { PomodoroProvider } from './src/contexts/PomodoroContext';
-import FloatingTimer from './src/components/FloatingTimer';
 import GlobalFloatingPomodoro from './src/components/GlobalFloatingPomodoro';
 import BackgroundWrapper from './src/components/BackgroundWrapper';
 // import { FontProvider } from './src/contexts/FontContext'; // Kaldırıldı
@@ -347,7 +346,6 @@ export default function App() {
               <PomodoroProvider>
                 <AuthProvider>
                   <AppNavigator />
-                  <FloatingTimer />
                   <GlobalFloatingPomodoro />
                   <StatusBar style="auto" />
                 </AuthProvider>

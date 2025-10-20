@@ -1069,7 +1069,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                     <Text style={{
                       fontSize: 16,
                       fontWeight: '600',
-                      color: '#FFFFFF',
+                      color: currentTheme.colors.background,
                     }}>
                       Kaydet
                     </Text>
@@ -1247,7 +1247,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                 <Text style={{
                   fontSize: 16,
                   fontWeight: '600',
-                  color: '#FFFFFF',
+                  color: currentTheme.colors.background,
                 }}>
                   Düzenle
                 </Text>
@@ -1299,7 +1299,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                 <Text style={{
                   fontSize: 18,
                   fontWeight: 'bold',
-                  color: '#FFFFFF',
+                  color: currentTheme.colors.background,
                   flex: 1,
                   textAlign: 'center',
                 }}>
@@ -1316,7 +1316,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                     justifyContent: 'center',
                   }}
                 >
-                  <Ionicons name="close" size={16} color="#FFFFFF" />
+                  <Ionicons name="close" size={16} color={currentTheme.colors.background} />
                 </TouchableOpacity>
               </View>
 
@@ -1498,7 +1498,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                     <Text style={{
                       fontSize: 16,
                       fontWeight: '600',
-                      color: '#FFFFFF',
+                      color: currentTheme.colors.background,
                     }}>
                       Kaydet
                     </Text>

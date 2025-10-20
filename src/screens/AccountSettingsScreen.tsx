@@ -243,7 +243,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       elevation: 2,
     },
     actionButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '600',
     },
@@ -329,7 +329,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       fontWeight: '600',
     },
     modalButtonTextPrimary: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     modalButtonTextSecondary: {
       color: currentTheme.colors.primary,

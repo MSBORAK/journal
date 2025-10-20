@@ -69,8 +69,11 @@ export const useTasks = (userId?: string) => {
   // Save tasks to storage
   const saveTasks = async (newTasks: DailyTask[]) => {
     try {
+      console.log('saveTasks called with:', newTasks.length, 'tasks');
       await AsyncStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
+      console.log('Tasks saved to AsyncStorage');
       setTasks(newTasks);
+      console.log('Tasks state updated');
     } catch (error) {
       console.error('Error saving tasks:', error);
     }
@@ -88,6 +91,8 @@ export const useTasks = (userId?: string) => {
 
   // Add new task
   const addTask = async (task: Omit<DailyTask, 'id' | 'createdAt' | 'updatedAt' | 'isCompleted'>) => {
+    console.log('addTask called with:', task);
+    
     const newTask: DailyTask = {
       ...task,
       id: Date.now().toString(),
@@ -96,8 +101,14 @@ export const useTasks = (userId?: string) => {
       updatedAt: new Date().toISOString(),
     };
     
+    console.log('New task created:', newTask);
+    
     const newTasks = [...tasks, newTask];
+    console.log('New tasks array:', newTasks);
+    
     await saveTasks(newTasks);
+    console.log('Tasks saved to storage');
+    
     return newTask;
   };
 

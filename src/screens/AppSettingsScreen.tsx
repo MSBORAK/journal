@@ -186,7 +186,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
       elevation: 2,
     },
     actionButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '600',
     },
@@ -212,7 +212,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
       marginTop: 8,
     },
     versionBadgeText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 12,
       fontWeight: '600',
     },

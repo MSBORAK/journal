@@ -140,13 +140,13 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
           <View style={dynamicStyles.habitContent}>
             <Text style={[
               dynamicStyles.habitTitle,
-              habit.todayCompleted && { color: 'white' }
+              habit.todayCompleted && { color: currentTheme.colors.background }
             ]}>
               {habit.title}
             </Text>
             <Text style={[
               dynamicStyles.habitDescription,
-              habit.todayCompleted && { color: 'white', opacity: 0.9 }
+              habit.todayCompleted && { color: currentTheme.colors.background, opacity: 0.9 }
             ]}>
               {habit.description}
             </Text>
@@ -165,7 +165,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </View>
               <Text style={[
                 dynamicStyles.habitProgressText,
-                habit.todayCompleted && { color: 'white' }
+                habit.todayCompleted && { color: currentTheme.colors.background }
               ]}>
                 {habit.todayValue} / {habit.target} {habit.unit === 'glasses' ? 'bardak' : 
                  habit.unit === 'minutes' ? 'dk' : 
@@ -178,7 +178,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               <View style={dynamicStyles.habitStreak}>
                 <Text style={[
                   dynamicStyles.habitStreakText,
-                  habit.todayCompleted && { color: 'white' }
+                  habit.todayCompleted && { color: currentTheme.colors.background }
                 ]}>
                   🔥 {streak.currentStreak} gün seri
                 </Text>
@@ -517,11 +517,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     lifeMapScoreNumber: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     lifeMapScoreLabel: {
       fontSize: 14,
-      color: 'white',
+      color: currentTheme.colors.background,
       marginLeft: 4,
     },
     title: {
@@ -615,7 +615,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       fontWeight: '500',
     },
     activePeriodButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontWeight: '600',
     },
     summaryContainer: {
@@ -1011,7 +1011,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       elevation: 6,
     },
     startWritingButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '600',
     },
@@ -1028,7 +1028,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       elevation: 4,
     },
     startJourneyButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '600',
       textAlign: 'center',
@@ -1083,7 +1083,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       borderRadius: 6,
       borderWidth: 2,
       borderColor: 'white',
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 4,
@@ -1134,7 +1134,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       borderRadius: 40,
       overflow: 'hidden',
       marginBottom: 12,
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.2,
       shadowRadius: 8,
@@ -1311,7 +1311,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       maxHeight: '85%',
       borderRadius: 32,
       overflow: 'hidden',
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 20 },
       shadowOpacity: 0.4,
       shadowRadius: 30,
@@ -1349,7 +1349,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       marginBottom: 24,
       borderRadius: 20,
       overflow: 'hidden',
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 8,
@@ -1425,7 +1425,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       width: 24,
       height: 24,
       borderRadius: 12,
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 4,
@@ -1435,7 +1435,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       marginTop: 24,
       borderRadius: 20,
       overflow: 'hidden',
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.3,
       shadowRadius: 16,
@@ -1449,7 +1449,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     modalSaveButtonText: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: 'white',
+      color: currentTheme.colors.background,
       textShadowColor: 'rgba(0, 0, 0, 0.3)',
       textShadowOffset: { width: 0, height: 1 },
       textShadowRadius: 2,
@@ -1482,13 +1482,13 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       color: currentTheme.colors.secondary,
     },
     activeTabText: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
     // Habit Card Styles
     habitCard: {
       marginBottom: 12,
       borderRadius: 16,
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
@@ -1569,7 +1569,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     progressCard: {
       marginBottom: 12,
       borderRadius: 16,
-      shadowColor: '#000',
+      shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,

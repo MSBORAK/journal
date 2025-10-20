@@ -59,7 +59,7 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
       borderRadius: 20,
     },
     nextButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -76,10 +76,10 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
     subtitle: {
       fontSize: 16,
       color: currentTheme.colors.secondary,
-      marginBottom: 32,
+      marginBottom: 24,
     },
     inputContainer: {
-      marginBottom: 32,
+      marginBottom: 24,
     },
     label: {
       fontSize: 16,
@@ -88,14 +88,14 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
       marginBottom: 8,
     },
     titleInput: {
-      backgroundColor: currentTheme.colors.card,
-      borderRadius: 12,
-      padding: 16,
+      backgroundColor: 'transparent',
+      borderBottomWidth: 2,
+      borderBottomColor: currentTheme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 0,
       fontSize: 18,
       fontWeight: '600',
       color: currentTheme.colors.text,
-      borderWidth: 1,
-      borderColor: currentTheme.colors.border,
     },
     moodSection: {
       marginBottom: 32,
@@ -103,7 +103,7 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
     moodGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 12,
+      gap: 16,
     },
     moodOption: {
       flexDirection: 'row',

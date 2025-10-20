@@ -27,14 +27,14 @@ export const themes = {
   },
   luxury: {
     name: "Luxury Mode",
-    background: "#0E141C",
-    card: "#2D423B",
-    primary: "#E38792",
-    secondary: "#4D3A38",
-    text: "#EDE3DE",
-    muted: "#9CB5AD",
-    success: "#9C866F",
-    danger: "#E38792",
+    background: "#1A1A1A",
+    card: "#2D2D2D",
+    primary: "#D4AF37", // Gold
+    secondary: "#B8860B", // Dark Goldenrod
+    text: "#FFFFFF", // Pure white for maximum contrast
+    muted: "#CCCCCC", // Light gray for secondary text
+    success: "#4CAF50", // Green
+    danger: "#F44336", // Red
   },
   dark: {
     name: "Dark",

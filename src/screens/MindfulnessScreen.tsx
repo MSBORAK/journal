@@ -208,7 +208,7 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
       elevation: 6,
     },
     affirmationButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '700',
     },
@@ -254,7 +254,7 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
       alignItems: 'center',
     },
     modalButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '700',
     },

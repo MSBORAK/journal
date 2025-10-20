@@ -56,7 +56,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
   const [selectedTool, setSelectedTool] = useState<DrawingTool>({
     name: 'pen',
     icon: '✏️',
-    color: '#000000',
+    color: currentTheme.colors.text,
     strokeWidth: 3
   });
   
@@ -226,7 +226,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       justifyContent: 'center',
     },
     saveButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 16,
       fontWeight: '600',
     },
@@ -329,7 +329,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       justifyContent: 'center',
     },
     tagText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '500',
       marginRight: 4,
@@ -427,7 +427,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       backgroundColor: '#ef4444',
     },
     clearButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
     },
   });
 
@@ -629,7 +629,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
                 returnKeyType="done"
               />
               <TouchableOpacity style={styles.addTagButton} onPress={addTag}>
-                <Ionicons name="add" size={20} color="white" />
+                <Ionicons name="add" size={20} color={currentTheme.colors.background} />
               </TouchableOpacity>
             </View>
 
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 20,

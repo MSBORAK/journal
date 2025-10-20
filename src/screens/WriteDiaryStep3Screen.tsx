@@ -77,14 +77,19 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
     },
     saveButton: {
       backgroundColor: currentTheme.colors.primary,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
+      paddingHorizontal: 32,
+      paddingVertical: 16,
+      borderRadius: 24,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8,
     },
     saveButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: '600',
+      color: currentTheme.colors.background,
+      fontSize: 18,
+      fontWeight: '700',
     },
     content: {
       flex: 1,
@@ -125,7 +130,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       fontWeight: '500',
     },
     tagsSection: {
-      marginBottom: 24,
+      marginBottom: 20,
     },
     label: {
       fontSize: 16,
@@ -158,7 +163,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       justifyContent: 'center',
     },
     tagText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '500',
       marginRight: 4,
@@ -173,10 +178,15 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       borderRadius: 16,
       padding: 20,
       marginBottom: 24,
+      shadowColor: 'rgba(0, 0, 0, 0.1)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
     },
     summaryTitle: {
       fontSize: 18,
-      fontWeight: '600',
+      fontWeight: '700',
       color: currentTheme.colors.text,
       marginBottom: 16,
     },
@@ -184,13 +194,17 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       marginBottom: 12,
     },
     summaryLabel: {
-      fontSize: 14,
+      fontSize: 12,
       color: currentTheme.colors.secondary,
       marginBottom: 4,
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     summaryValue: {
       fontSize: 16,
       color: currentTheme.colors.text,
+      fontWeight: '600',
     },
   });
 
@@ -386,7 +400,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
                 <View key={index} style={dynamicStyles.tag}>
                   <Text style={dynamicStyles.tagText}>#{tag}</Text>
                   <TouchableOpacity onPress={() => removeTag(tag)}>
-                    <Ionicons name="close" size={16} color="white" />
+                    <Ionicons name="close" size={16} color={currentTheme.colors.background} />
                   </TouchableOpacity>
                 </View>
               ))}

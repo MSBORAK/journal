@@ -177,7 +177,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
       elevation: 2,
     },
     actionButtonText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 14,
       fontWeight: '600',
     },
@@ -203,7 +203,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
       marginTop: 8,
     },
     securityBadgeText: {
-      color: 'white',
+      color: currentTheme.colors.background,
       fontSize: 12,
       fontWeight: '600',
     },
