@@ -28,89 +28,93 @@ export default function AuthCallbackScreen() {
   };
 
   useEffect(() => {
-    const handleEmailConfirmation = async () => {
+    const handleUrl = async (url: string) => {
+      try {
+        console.log('🔗 URL received:', url);
+        
+        // URL'den token'ı çıkar (ChatGPT'nin önerdiği yöntem)
+        if (url.includes('token=')) {
+          const token = url.split('token=')[1].split('&')[0];
+          console.log('🔑 Token extracted:', token);
+          
+          // Supabase verifyOtp ile token'ı doğrula
+          const { data, error } = await supabase.auth.verifyOtp({ 
+            token_hash: token,
+            type: 'email_change'
+          });
+          
+          if (error) {
+            console.error('❌ Token verification error:', error);
+            showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
+            return;
+          }
+
+          if (data.user) {
+            console.log('✅ Email confirmed successfully');
+            
+            // UI state'ini güncelle
+            await refreshUser();
+            
+            showAlert(
+              '✅ Başarılı', 
+              'Email adresiniz başarıyla onaylandı ve güncellendi!',
+              'success'
+            );
+            
+            // Navigate back to settings after 2 seconds
+            setTimeout(() => {
+              navigation.navigate('AccountSettings' as never);
+            }, 2000);
+          }
+        } else {
+          console.warn('⚠️ No token found in URL');
+          showAlert('⚠️ Uyarı', 'Geçersiz onay linki.', 'warning');
+        }
+      } catch (error) {
+        console.error('❌ URL handling error:', error);
+        showAlert('❌ Hata', 'Email onayında beklenmeyen bir hata oluştu.', 'error');
+      }
+    };
+
+    const initializeAuthCallback = async () => {
       try {
         console.log('🔗 AuthCallback started');
         
         // Deep link'ten gelen URL'i al
-        const url = await Linking.getInitialURL();
-        console.log('📱 Initial URL:', url);
+        const initialUrl = await Linking.getInitialURL();
+        console.log('📱 Initial URL:', initialUrl);
         
-        if (url) {
-          // URL'den hash parametrelerini çıkar
-          const urlObj = new URL(url);
-          const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-          const accessToken = hashParams.get('access_token');
-          const refreshToken = hashParams.get('refresh_token');
-          const type = hashParams.get('type');
-          
-          console.log('🔑 Token info:', { 
-            hasAccessToken: !!accessToken, 
-            hasRefreshToken: !!refreshToken,
-            type 
-          });
-
-          if (accessToken && refreshToken) {
-            // Token'ları kullanarak session oluştur
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
-
-            if (error) {
-              console.error('❌ Session set error:', error);
-              showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
-              return;
-            }
-
-            if (data.session) {
-              console.log('✅ Email confirmed and session updated');
-              
-              // UI state'ini güncelle
-              await refreshUser();
-              
-              showAlert(
-                '✅ Başarılı', 
-                'Email adresiniz başarıyla onaylandı ve güncellendi!',
-                'success'
-              );
-              
-              // Navigate back to settings after 2 seconds
-              setTimeout(() => {
-                navigation.navigate('AccountSettings' as never);
-              }, 2000);
-              return;
-            }
-          }
-        }
-
-        // Eğer URL'den token alamazsak, mevcut session'ı kontrol et
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('❌ Get session error:', error);
-          showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
-          return;
-        }
-
-        if (session) {
-          console.log('✅ Session found');
-          
-          // UI state'ini güncelle
-          await refreshUser();
-          
-          showAlert(
-            '✅ Başarılı', 
-            'Email adresiniz başarıyla onaylandı!',
-            'success'
-          );
-          
-          setTimeout(() => {
-            navigation.navigate('AccountSettings' as never);
-          }, 2000);
+        if (initialUrl) {
+          await handleUrl(initialUrl);
         } else {
-          console.warn('⚠️ No session found');
-          showAlert('⚠️ Uyarı', 'Email onayı tamamlanamadı. Lütfen linki tekrar kullanın.', 'warning');
+          // Eğer initial URL yoksa, mevcut session'ı kontrol et
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('❌ Get session error:', error);
+            showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
+            return;
+          }
+
+          if (session) {
+            console.log('✅ Session found');
+            
+            // UI state'ini güncelle
+            await refreshUser();
+            
+            showAlert(
+              '✅ Başarılı', 
+              'Email adresiniz başarıyla onaylandı!',
+              'success'
+            );
+            
+            setTimeout(() => {
+              navigation.navigate('AccountSettings' as never);
+            }, 2000);
+          } else {
+            console.warn('⚠️ No session found');
+            showAlert('⚠️ Uyarı', 'Email onayı tamamlanamadı. Lütfen linki tekrar kullanın.', 'warning');
+          }
         }
       } catch (error) {
         console.error('❌ Auth callback error:', error);
@@ -118,7 +122,16 @@ export default function AuthCallbackScreen() {
       }
     };
 
-    handleEmailConfirmation();
+    // Initial URL'yi kontrol et
+    initializeAuthCallback();
+
+    // Deep link listener ekle (uygulama açıkken gelen linkler için)
+    const listener = Linking.addEventListener('url', (event) => {
+      console.log('📱 Deep link received:', event.url);
+      handleUrl(event.url);
+    });
+
+    return () => listener?.remove();
   }, []);
 
   return (
