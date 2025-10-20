@@ -92,17 +92,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             if (error) {
               console.error('❌ Sign in error:', error);
+              const errorMessage = error?.message || '';
               // Supabase hatalarını Türkçe'ye çevir
-              if (error.message.includes('Invalid login credentials')) {
+              if (errorMessage.toLowerCase().includes('invalid login credentials') || 
+                  errorMessage.toLowerCase().includes('invalid credentials')) {
                 throw new Error('Email veya şifre hatalı.');
               }
-              if (error.message.includes('Email not confirmed')) {
+              if (errorMessage.toLowerCase().includes('email not confirmed')) {
                 throw new Error('Email adresinizi onaylamanız gerekiyor. Lütfen email kutunuzu kontrol edin.');
               }
-              if (error.message.includes('Too many requests')) {
+              if (errorMessage.toLowerCase().includes('too many') || 
+                  errorMessage.toLowerCase().includes('rate limit')) {
                 throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
               }
-              throw new Error(error.message || 'Giriş yapılamadı');
+              throw new Error(errorMessage || 'Giriş yapılamadı');
             }
             
             if (data.user) {
@@ -116,8 +119,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               console.log('✅ User signed in successfully:', user);
             }
           } catch (error: any) {
-            console.error('❌ Sign in error:', error);
-            throw new Error(error.message || 'Giriş yapılamadı');
+            console.error('❌ Sign in catch error:', error);
+            // Eğer error zaten bir Error object ise direkt throw et
+            if (error instanceof Error) {
+              throw error;
+            }
+            // Değilse generic mesaj ver
+            throw new Error('Giriş yapılamadı. Lütfen tekrar deneyin.');
           } finally {
             setLoading(false);
           }
@@ -147,20 +155,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             if (error) {
               console.error('❌ Sign up error:', error);
+              const errorMessage = error?.message || '';
               // Supabase hatalarını Türkçe'ye çevir
-              if (error.message.includes('already registered')) {
+              if (errorMessage.toLowerCase().includes('already registered') || 
+                  errorMessage.toLowerCase().includes('already been registered')) {
                 throw new Error('Bu email adresi zaten kullanılıyor.');
               }
-              if (error.message.includes('Invalid email')) {
+              if (errorMessage.toLowerCase().includes('invalid email')) {
                 throw new Error('Geçersiz email adresi.');
               }
-              if (error.message.includes('Password should be at least')) {
+              if (errorMessage.toLowerCase().includes('password should be at least')) {
                 throw new Error('Şifre en az 6 karakter olmalıdır.');
               }
-              if (error.message.includes('Too many requests')) {
+              if (errorMessage.toLowerCase().includes('too many') || 
+                  errorMessage.toLowerCase().includes('rate limit')) {
                 throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
               }
-              throw new Error(error.message || 'Hesap oluşturulamadı');
+              throw new Error(errorMessage || 'Hesap oluşturulamadı');
             }
             
             if (data.user) {
@@ -174,8 +185,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               console.log('✅ User signed up successfully:', user);
             }
           } catch (error: any) {
-            console.error('❌ Sign up error:', error);
-            throw new Error(error.message || 'Hesap oluşturulamadı');
+            console.error('❌ Sign up catch error:', error);
+            // Eğer error zaten bir Error object ise direkt throw et
+            if (error instanceof Error) {
+              throw error;
+            }
+            // Değilse generic mesaj ver
+            throw new Error('Hesap oluşturulamadı. Lütfen tekrar deneyin.');
           } finally {
             setLoading(false);
           }

@@ -70,13 +70,16 @@ export const updateEmail = async (newEmail: string) => {
     
     if (error) {
       // Supabase hatalarını Türkçe'ye çevir
-      if (error.message.includes('already registered')) {
+      const errorMessage = error?.message || '';
+      if (errorMessage.toLowerCase().includes('already registered') || 
+          errorMessage.toLowerCase().includes('already been registered')) {
         throw new Error('Bu email adresi zaten kullanılıyor.');
       }
-      if (error.message.includes('rate limit')) {
+      if (errorMessage.toLowerCase().includes('rate limit') || 
+          errorMessage.toLowerCase().includes('too many')) {
         throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
       }
-      if (error.message.includes('invalid email')) {
+      if (errorMessage.toLowerCase().includes('invalid email')) {
         throw new Error('Geçersiz email adresi.');
       }
       throw new Error('Email güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
@@ -134,10 +137,12 @@ export const updatePassword = async (newPassword: string, oldPassword?: string) 
     
     if (error) {
       // Supabase hatalarını Türkçe'ye çevir
-      if (error.message.includes('password')) {
+      const errorMessage = error?.message || '';
+      if (errorMessage.toLowerCase().includes('password')) {
         throw new Error('Şifre çok zayıf. Daha güçlü bir şifre seçin.');
       }
-      if (error.message.includes('rate limit')) {
+      if (errorMessage.toLowerCase().includes('rate limit') || 
+          errorMessage.toLowerCase().includes('too many')) {
         throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
       }
       throw new Error('Şifre güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
