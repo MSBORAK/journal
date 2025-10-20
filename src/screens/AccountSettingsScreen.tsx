@@ -528,7 +528,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       </ScrollView>
 
       {/* Profile Modal */}
-      <Modal visible={showProfileModal} transparent animationType="fade">
+      <Modal visible={showProfileModal} transparent animationType="fade" onRequestClose={() => setShowProfileModal(false)}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}
@@ -581,7 +581,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       </Modal>
 
       {/* Email Modal */}
-      <Modal visible={showEmailModal} transparent animationType="fade">
+      <Modal visible={showEmailModal} transparent animationType="fade" onRequestClose={() => setShowEmailModal(false)}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}
@@ -626,7 +626,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       </Modal>
 
       {/* Password Modal */}
-      <Modal visible={showPasswordModal} transparent animationType="fade">
+      <Modal visible={showPasswordModal} transparent animationType="fade" onRequestClose={() => setShowPasswordModal(false)}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}

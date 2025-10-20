@@ -15,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
 import { CustomAlert } from '../components/CustomAlert';
+import { supabase } from '../lib/supabase';
 // import { MotiView } from 'moti'; // Removed for now
 
 export default function AuthScreen() {
@@ -130,6 +131,41 @@ export default function AuthScreen() {
     },
   });
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      showAlert('⚠️ Uyarı', 'Şifre sıfırlama linki için email adresinizi giriniz.', 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'daily://auth/callback?type=password_reset',
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      showAlert(
+        '✅ E-posta Gönderildi', 
+        'Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.',
+        'success'
+      );
+    } catch (error: any) {
+      const errorMessage = error?.message || '';
+      if (errorMessage.toLowerCase().includes('rate limit')) {
+        showAlert('⚠️ Uyarı', 'Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.', 'warning');
+      } else if (errorMessage.toLowerCase().includes('invalid email')) {
+        showAlert('❌ Hata', 'Geçersiz email adresi.', 'error');
+      } else {
+        showAlert('❌ Hata', 'Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!email || !password) {
       showAlert('❌ ' + t('common.error'), t('auth.emailRequired') + ' & ' + t('auth.passwordRequired'), 'error');
@@ -234,6 +270,17 @@ export default function AuthScreen() {
             </Text>
           </TouchableOpacity>
 
+          {isLogin && (
+            <TouchableOpacity
+              style={[dynamicStyles.switchButton, { marginBottom: 16 }]}
+              onPress={handleForgotPassword}
+              disabled={loading}
+            >
+              <Text style={[dynamicStyles.switchText, { fontSize: 13, opacity: 0.8 }]}>
+                🔑 Şifremi Unuttum
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={dynamicStyles.switchButton}
