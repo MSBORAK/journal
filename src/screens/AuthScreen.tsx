@@ -335,12 +335,12 @@ export default function AuthScreen() {
 
           {!isLogin && (
             <View style={dynamicStyles.inputContainer}>
-              <Text style={dynamicStyles.label}>{t('auth.displayName')}</Text>
+              <Text style={dynamicStyles.label}>{t('welcome') === 'Welcome' ? 'Display Name' : 'Görünen Ad'}</Text>
               <TextInput
                 style={dynamicStyles.input}
                 value={displayName}
                 onChangeText={setDisplayName}
-                placeholder={t('auth.displayName')}
+                placeholder={t('welcome') === 'Welcome' ? 'Display Name' : 'Görünen Ad'}
                 placeholderTextColor="#9ca3af"
                 autoCorrect={false}
                 autoCapitalize="words"
