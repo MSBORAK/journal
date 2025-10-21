@@ -184,8 +184,10 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
 
   const handleDeleteAccount = () => {
     showAlert(
-      '⚠️ Hesap Silme',
-      'Bu işlem GERİ ALINAMAZ!\n\nSilinecek veriler:\n• Tüm günlük yazıları\n• Profil bilgileri\n• İstatistikler ve içgörüler\n• Kullanım geçmişi\n\nEmin misiniz?',
+      t('welcome') === 'Welcome' ? '⚠️ Delete Account' : '⚠️ Hesap Silme',
+      t('welcome') === 'Welcome' 
+        ? 'This action CANNOT be undone!\n\nData to be deleted:\n• All diary entries\n• Profile information\n• Statistics and insights\n• Usage history\n\nAre you sure?'
+        : 'Bu işlem GERİ ALINAMAZ!\n\nSilinecek veriler:\n• Tüm günlük yazıları\n• Profil bilgileri\n• İstatistikler ve içgörüler\n• Kullanım geçmişi\n\nEmin misiniz?',
       'error'
     );
   };

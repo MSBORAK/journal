@@ -59,7 +59,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     type: 'success' as 'success' | 'warning' | 'error' | 'info',
   });
 
-  // Bildirim izni = sistem izni + uygulama ayarları
+  // Notification permission = system permission + app settings
   const permissionGranted = systemPermissionGranted && settings.enabled;
 
   const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'success') => {
@@ -138,18 +138,22 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         return;
       }
 
-      // Sistem izni kontrolü
+      // System permission check
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
         showAlert(
-          '⚠️ İzin Gerekli',
-          'Bildirimler için sistem izni gerekli. Lütfen ayarlardan bildirim iznini etkinleştirin.',
+          t('welcome') === 'Welcome' ? '⚠️ Permission Required' : '⚠️ İzin Gerekli',
+          t('welcome') === 'Welcome' 
+            ? 'System permission required for notifications. Please enable notification permission from settings.'
+            : 'Bildirimler için sistem izni gerekli. Lütfen ayarlardan bildirim iznini etkinleştirin.',
           'warning'
         );
       } else {
         showAlert(
-          '🎉 Başarılı!',
-          'Bildirim izni başarıyla verildi! Artık günlük hatırlatıcılar ve motivasyon mesajları alabileceksin.',
+          t('welcome') === 'Welcome' ? '🎉 Success!' : '🎉 Başarılı!',
+          t('welcome') === 'Welcome' 
+            ? 'Notification permission granted successfully! You can now receive daily reminders and motivation messages.'
+            : 'Bildirim izni başarıyla verildi! Artık günlük hatırlatıcılar ve motivasyon mesajları alabileceksin.',
           'success'
         );
         await checkPermission();
@@ -442,7 +446,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           </View>
         </View>
 
-        {/* Günlük Hatırlatıcılar */}
+        {/* Daily Reminders */}
         <View style={dynamicStyles.section}>
           <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? '🌅 Daily Reminders' : '🌅 Günlük Hatırlatıcılar'}</Text>
           

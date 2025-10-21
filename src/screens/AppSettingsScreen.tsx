@@ -49,7 +49,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
       t('welcome') === 'Welcome' ? 'ℹ️ About' : 'ℹ️ Hakkında',
       t('welcome') === 'Welcome' 
         ? 'Rhythm v1.0.0\n\n🎵 Spiritual balance and life rhythm app:\n• Daily journaling system\n• Mood tracking and analysis\n• Dreams & goals dashboard\n• Tasks and reminders\n• Pomodoro timer and focus mode\n• Statistics and progress tracking\n• Personality card system\n• 7 different theme options\n• Offline working\n• Data backup\n\nDeveloper: MSESOFT\n© 2025\n\nContact: msesoftware1425@gmail.com'
-        : 'Rhythm v1.0.0\n\n🎵 Ruhsal denge ve yaşam ritmi uygulaması:\n• Günlük yazma sistemi\n• Mood takibi ve analizi\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro timer ve odak modu\n• İstatistikler ve gelişim takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Offline çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com',
+        : 'Rhythm v1.0.0\n\n🎵 Spiritual balance and life rhythm app:\n• Daily writing system\n• Mood tracking and analysis\n• Dreams & goals board\n• Tasks and reminders\n• Pomodoro timer and focus mode\n• Statistics and progress tracking\n• Personality card system\n• 7 different theme options\n• Offline working\n• Data backup\n\nDeveloper: MSESOFT\n© 2025\n\nContact: msesoftware1425@gmail.com',
       'info'
     );
   };
@@ -59,7 +59,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
       t('welcome') === 'Welcome' ? '❓ Help & Support' : '❓ Yardım & Destek',
       t('welcome') === 'Welcome' 
         ? 'Frequently Asked Questions:\n\n❓ How can I write a diary?\n• Press the "Write Diary" button on the main page\n\n❓ How can I backup my data?\n• From Settings > Data & Backup section\n\n❓ How can I change the theme?\n• From Settings > Appearance section\n\n❓ How can I set notifications?\n• From Settings > Notifications section\n\nFor more help: msesoftware1425@gmail.com'
-        : 'Sık Sorulan Sorular:\n\n❓ Nasıl günlük yazabilirim?\n• Ana sayfadaki "Günlük Yaz" butonuna basın\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Tema nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: msesoftware1425@gmail.com',
+        : 'Frequently Asked Questions:\n\n❓ How can I write a diary?\n• Press the "Write Diary" button on the main page\n\n❓ How do I backup my data?\n• From Settings > Data & Backup section\n\n❓ How do I change theme?\n• From Settings > Appearance section\n\n❓ How do I set notifications?\n• From Settings > Notifications section\n\nFor more help: msesoftware1425@gmail.com',
       'info'
     );
   };
@@ -101,8 +101,8 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
   const showChangelog = () => {
     showAlert(
-      '📝 Değişiklik Günlüğü',
-      'Versiyon 1.0.0 (2025):\n\n✨ Yeni Özellikler:\n• Günlük yazma sistemi\n• Mood takibi\n• İstatistikler ve analizler\n• Hayaller & Hedefler panosu\n• Pomodoro timer\n• Tema sistemi\n\n🐛 Düzeltmeler:\n• Performans iyileştirmeleri\n• UI/UX geliştirmeleri\n• Bug düzeltmeleri\n\n🔮 Gelecek Güncellemeler:\n• Cloud senkronizasyon\n• Daha fazla tema\n• Sosyal özellikler',
+      t('welcome') === 'Welcome' ? '📝 Changelog' : '📝 Değişiklik Günlüğü',
+      'Version 1.0.0 (2025):\n\n✨ New Features:\n• Daily writing system\n• Mood tracking\n• Statistics and analysis\n• Dreams & Goals board\n• Pomodoro timer\n• Theme system\n\n🐛 Fixes:\n• Performance improvements\n• UI/UX enhancements\n• Bug fixes\n\n🔮 Future Updates:\n• Cloud synchronization\n• More themes\n• Social features',
       'info'
     );
   };
@@ -298,17 +298,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="document-text" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Değişiklik Günlüğü</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Changelog' : 'Değişiklik Günlüğü'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Uygulamanın güncelleme geçmişini ve yeni özelliklerini görün.
+              {t('welcome') === 'Welcome' ? 'View app update history and new features.' : 'Uygulamanın güncelleme geçmişini ve yeni özelliklerini görün.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showChangelog}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>📝 Günlük</Text>
+              <Text style={dynamicStyles.actionButtonText}>📝 {t('welcome') === 'Welcome' ? 'Diary' : 'Günlük'}</Text>
             </TouchableOpacity>
           </View>
 

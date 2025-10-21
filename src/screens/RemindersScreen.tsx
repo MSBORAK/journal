@@ -710,7 +710,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                         📅 {(() => {
                           const [year, month, day] = reminder.date.split('-').map(Number);
                           const date = new Date(year, month - 1, day);
-                          return date.toLocaleDateString('tr-TR', {
+                          return date.toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'

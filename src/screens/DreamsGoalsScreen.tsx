@@ -111,7 +111,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
     if (!dateIso) return '';
     try {
       const d = new Date(dateIso);
-      return d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      return d.toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch {
       return '';
     }

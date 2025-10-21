@@ -507,7 +507,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
           {/* Unlocked Date */}
           {isUnlocked && (
             <Text style={dynamicStyles.progressText}>
-              {new Date(isUnlocked.unlockedAt).toLocaleDateString('tr-TR')}
+              {new Date(isUnlocked.unlockedAt).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR')}
             </Text>
           )}
         </LinearGradient>

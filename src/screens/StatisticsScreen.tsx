@@ -1720,29 +1720,29 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
   const milestones = [
     { 
       icon: '✍️', 
-      label: 'İlk Günlük', 
-      status: entries.length > 0 ? 'Tamamlandı ✅' : 'Henüz başlamadın',
+      label: t('welcome') === 'Welcome' ? 'First Diary' : 'İlk Günlük', 
+      status: entries.length > 0 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : (t('welcome') === 'Welcome' ? 'Haven\'t started yet' : 'Henüz başlamadın'),
       completed: entries.length > 0,
       color: '#4ade80'
     },
     { 
       icon: '🔥', 
-      label: '7 Gün Seri', 
-      status: stats.currentStreak >= 7 ? 'Tamamlandı ✅' : `${stats.currentStreak}/7 gün`,
+      label: t('welcome') === 'Welcome' ? '7 Day Streak' : '7 Gün Seri', 
+      status: stats.currentStreak >= 7 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : `${stats.currentStreak}/7 ${t('welcome') === 'Welcome' ? 'days' : 'gün'}`,
       completed: stats.currentStreak >= 7,
       color: '#f59e0b'
     },
     { 
       icon: '🎯', 
-      label: '30 Gün Hedefi', 
-      status: stats.totalEntries >= 30 ? 'Tamamlandı ✅' : `${stats.totalEntries}/30 günlük`,
+      label: t('welcome') === 'Welcome' ? '30 Day Goal' : '30 Gün Hedefi', 
+      status: stats.totalEntries >= 30 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : `${stats.totalEntries}/30 ${t('welcome') === 'Welcome' ? 'diaries' : 'günlük'}`,
       completed: stats.totalEntries >= 30,
       color: '#8b5cf6'
     },
     { 
       icon: '💎', 
-      label: '100 Gün Efsanesi', 
-      status: stats.totalEntries >= 100 ? 'Tamamlandı ✅' : `${stats.totalEntries}/100 günlük`,
+      label: t('welcome') === 'Welcome' ? '100 Day Legend' : '100 Gün Efsanesi', 
+      status: stats.totalEntries >= 100 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : `${stats.totalEntries}/100 ${t('welcome') === 'Welcome' ? 'diaries' : 'günlük'}`,
       completed: stats.totalEntries >= 100,
       color: '#ef4444'
     },
@@ -2091,11 +2091,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             >
               <Text style={dynamicStyles.journeyTitle}>🌅 {t('welcome') === 'Welcome' ? 'Journey Start' : 'Yolculuk Başlangıcı'}</Text>
               <Text style={dynamicStyles.journeyDate}>
-                {firstEntry ? new Date(firstEntry.date).toLocaleDateString('tr-TR', { 
+                {firstEntry ? new Date(firstEntry.date).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', { 
                   day: 'numeric', 
                   month: 'long', 
                   year: 'numeric' 
-                }) : 'Henüz başlamadın'}
+                }) : (t('welcome') === 'Welcome' ? 'Haven\'t started yet' : 'Henüz başlamadın')}
               </Text>
               <Text style={dynamicStyles.journeyDuration}>
                 {daysSinceStart > 0 ? (t('welcome') === 'Welcome' ? `${daysSinceStart} days ago you started` : `${daysSinceStart} gün önce başladın`) : (t('welcome') === 'Welcome' ? 'Your journey hasn\'t started yet' : 'Yolculuğun henüz başlamadı')}
@@ -2156,13 +2156,13 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               {entries.length === 0 ? (
                 <View style={dynamicStyles.emptyMoodContainer}>
                   <Text style={dynamicStyles.emptyMoodText}>
-                    📊 Mood grafiği henüz oluşmadı
+                    📊 {t('welcome') === 'Welcome' ? 'Mood chart not created yet' : 'Mood grafiği henüz oluşmadı'}
               </Text>
                   <Text style={dynamicStyles.emptyMoodSubtext}>
-                    Birkaç günlük yazarak renkli grafiğini gör!
+                    {t('welcome') === 'Welcome' ? 'Write a few diaries to see your colorful chart!' : 'Birkaç günlük yazarak renkli grafiğini gör!'}
               </Text>
                   <View style={dynamicStyles.sampleChart}>
-                    <Text style={dynamicStyles.sampleChartTitle}>Örnek Grafik:</Text>
+                    <Text style={dynamicStyles.sampleChartTitle}>{t('welcome') === 'Welcome' ? 'Sample Chart:' : 'Örnek Grafik:'}</Text>
                     <View style={dynamicStyles.sampleBars}>
                       <View style={[dynamicStyles.sampleBar, { height: 60, backgroundColor: '#F59E0B' }]} />
                       <View style={[dynamicStyles.sampleBar, { height: 40, backgroundColor: '#10B981' }]} />

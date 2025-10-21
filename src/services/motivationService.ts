@@ -303,10 +303,10 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
 ];
 
 export interface UserStats {
-  moodTrend: number; // Son 7 günün ortalama mood'u
-  goalProgress: number; // Aktif hedeflerin ortalama ilerlemesi
-  streakDays: number; // Günlük yazma serisi
-  lastDiaryDate?: string; // Son günlük tarihi
+  moodTrend: number; // Average mood of last 7 days
+  goalProgress: number; // Average progress of active goals
+  streakDays: number; // Daily writing streak
+  lastDiaryDate?: string; // Last diary date
 }
 
 export class MotivationService {
@@ -324,17 +324,17 @@ export class MotivationService {
 
   public async getUserStats(userId?: string): Promise<UserStats> {
     try {
-      // Son 7 günün günlük verilerini al
+      // Get diary data for last 7 days
       const diaryEntries = await this.getDiaryEntries(userId);
       const recentEntries = diaryEntries.slice(-7);
       
-      // Mood trend hesapla
+      // Calculate mood trend
       const moodTrend = this.calculateMoodTrend(recentEntries);
       
-      // Goal progress hesapla (şimdilik basit bir değer)
-      const goalProgress = 65; // TODO: Gerçek hedef verilerinden hesapla
+      // Calculate goal progress (simple value for now)
+      const goalProgress = 65; // TODO: Calculate from real goal data
       
-      // Streak hesapla
+      // Calculate streak
       const streakDays = this.calculateStreak(diaryEntries);
       
       return {

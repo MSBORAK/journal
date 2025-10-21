@@ -1,6 +1,6 @@
 /**
  * Mood Chart Component
- * 7 günlük mood değişim grafiği - Basit versiyon
+ * 7-day mood change chart - Simple version
  */
 
 import React from 'react';
@@ -20,7 +20,7 @@ export const MoodChart: React.FC<MoodChartProps> = ({ period = 'week' }) => {
   const { user } = useAuth();
   const { entries } = useDiary(user?.uid);
 
-  // Son 7 günün mood verilerini hazırla
+  // Prepare mood data for the last 7 days
   const getMoodData = () => {
     const today = new Date();
     const data = [];
@@ -31,10 +31,10 @@ export const MoodChart: React.FC<MoodChartProps> = ({ period = 'week' }) => {
       const dateString = date.toISOString().split('T')[0];
       
       const entry = entries.find(e => e.date === dateString);
-      const moodValue = entry?.mood || 3; // Varsayılan 3 (nötr)
+      const moodValue = entry?.mood || 3; // Default 3 (neutral)
       
       data.push({
-        x: date.getDate(), // Gün numarası
+        x: date.getDate(), // Day number
         y: moodValue,
         date: dateString,
         emoji: getMoodEmoji(moodValue)
@@ -105,21 +105,21 @@ export const MoodChart: React.FC<MoodChartProps> = ({ period = 'week' }) => {
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: currentTheme.colors.text }]}>
-        📈 Ruh Hali Trendi
+        📈 {t('welcome') === 'Welcome' ? 'Mood Trend' : 'Ruh Hali Trendi'}
       </Text>
       <Text style={[styles.subtitle, { color: currentTheme.colors.secondary }]}>
-        Son 7 gün - Ortalama: {averageMood.toFixed(1)}/5
+        {t('welcome') === 'Welcome' ? 'Last 7 days - Average:' : 'Son 7 gün - Ortalama:'} {averageMood.toFixed(1)}/5
       </Text>
       
       {renderSimpleChart()}
       
-      {/* Günlük mood göstergesi */}
+      {/* Daily mood indicator */}
       <View style={styles.moodIndicators}>
         {chartData.map((point, index) => (
           <View key={index} style={styles.moodIndicator}>
             <Text style={styles.moodEmoji}>{point.emoji}</Text>
             <Text style={[styles.moodDay, { color: currentTheme.colors.secondary }]}>
-              {point.x}.gün
+              {point.x}.{t('welcome') === 'Welcome' ? 'day' : 'gün'}
             </Text>
           </View>
         ))}

@@ -507,12 +507,12 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     const longest = getLongestStreak();
     const badges = [];
     
-    if (streak >= 3) badges.push({ icon: '🔥', title: '3 Günlük Ateş', desc: '3 gün üst üste yazdın!' });
-    if (streak >= 7) badges.push({ icon: '🏆', title: 'Haftalık Şampiyon', desc: '7 gün üst üste yazdın!' });
-    if (streak >= 14) badges.push({ icon: '⭐', title: '2 Haftalık Yıldız', desc: '14 gün üst üste yazdın!' });
-    if (streak >= 30) badges.push({ icon: '💎', title: 'Aylık Elmas', desc: '30 gün üst üste yazdın!' });
-    if (streak >= 100) badges.push({ icon: '👑', title: 'Yüzlük Kral', desc: '100 gün üst üste yazdın!' });
-    if (longest >= 365) badges.push({ icon: '🌟', title: 'Yıllık Efsane', desc: '365 gün üst üste yazdın!' });
+    if (streak >= 3) badges.push({ icon: '🔥', title: t('welcome') === 'Welcome' ? '3 Day Fire' : '3 Günlük Ateş', desc: t('welcome') === 'Welcome' ? 'You wrote 3 days in a row!' : '3 gün üst üste yazdın!' });
+    if (streak >= 7) badges.push({ icon: '🏆', title: t('welcome') === 'Welcome' ? 'Weekly Champion' : 'Haftalık Şampiyon', desc: t('welcome') === 'Welcome' ? 'You wrote 7 days in a row!' : '7 gün üst üste yazdın!' });
+    if (streak >= 14) badges.push({ icon: '⭐', title: t('welcome') === 'Welcome' ? '2 Week Star' : '2 Haftalık Yıldız', desc: t('welcome') === 'Welcome' ? 'You wrote 14 days in a row!' : '14 gün üst üste yazdın!' });
+    if (streak >= 30) badges.push({ icon: '💎', title: t('welcome') === 'Welcome' ? 'Monthly Diamond' : 'Aylık Elmas', desc: t('welcome') === 'Welcome' ? 'You wrote 30 days in a row!' : '30 gün üst üste yazdın!' });
+    if (streak >= 100) badges.push({ icon: '👑', title: t('welcome') === 'Welcome' ? 'Hundred King' : 'Yüzlük Kral', desc: t('welcome') === 'Welcome' ? 'You wrote 100 days in a row!' : '100 gün üst üste yazdın!' });
+    if (longest >= 365) badges.push({ icon: '🌟', title: t('welcome') === 'Welcome' ? 'Yearly Legend' : 'Yıllık Efsane', desc: t('welcome') === 'Welcome' ? 'You wrote 365 days in a row!' : '365 gün üst üste yazdın!' });
     
     return badges;
   };
@@ -555,7 +555,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     })();
     
     
-    // Günlük Skoru (İçerik kalitesi)
+    // Daily Score (Content quality)
     const diaryScore = (() => {
       if (last7Days.length === 0) return 0;
       const avgLength = last7Days.reduce((sum, e) => sum + (e.content?.length || 0), 0) / last7Days.length;
@@ -2360,7 +2360,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Text style={dynamicStyles.modalSectionTitle}>💡 Seriyi Koruma İpuçları</Text>
               <View style={dynamicStyles.streakTipCard}>
                 <Text style={dynamicStyles.streakTipIcon}>⏰</Text>
-                <Text style={dynamicStyles.streakTipText}>Her gün aynı saatte günlük yaz</Text>
+                <Text style={dynamicStyles.streakTipText}>{t('welcome') === 'Welcome' ? 'Write diary at the same time every day' : 'Her gün aynı saatte günlük yaz'}</Text>
               </View>
               <View style={dynamicStyles.streakTipCard}>
                 <Text style={dynamicStyles.streakTipIcon}>📝</Text>
@@ -2381,7 +2381,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Text style={dynamicStyles.modalSectionTitle}>🎯 Hedefler</Text>
               <View style={dynamicStyles.streakGoalCard}>
                 <View style={dynamicStyles.streakGoalHeader}>
-                  <Text style={dynamicStyles.streakGoalTitle}>3 Günlük Hedef</Text>
+                  <Text style={dynamicStyles.streakGoalTitle}>{t('welcome') === 'Welcome' ? '3 Day Goal' : '3 Günlük Hedef'}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
                     {getCurrentStreak() >= 3 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/3`}
                   </Text>
@@ -2398,7 +2398,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
               <View style={dynamicStyles.streakGoalCard}>
                 <View style={dynamicStyles.streakGoalHeader}>
-                  <Text style={dynamicStyles.streakGoalTitle}>7 Günlük Hedef</Text>
+                  <Text style={dynamicStyles.streakGoalTitle}>{t('welcome') === 'Welcome' ? '7 Day Goal' : '7 Günlük Hedef'}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
                     {getCurrentStreak() >= 7 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/7`}
                   </Text>
@@ -2415,7 +2415,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
               <View style={dynamicStyles.streakGoalCard}>
                 <View style={dynamicStyles.streakGoalHeader}>
-                  <Text style={dynamicStyles.streakGoalTitle}>30 Günlük Hedef</Text>
+                  <Text style={dynamicStyles.streakGoalTitle}>{t('welcome') === 'Welcome' ? '30 Day Goal' : '30 Günlük Hedef'}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
                     {getCurrentStreak() >= 30 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/30`}
                   </Text>
@@ -2463,9 +2463,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               </View>
             </View>
 
-            {/* Haftalık Trend Grafiği */}
+            {/* Weekly Trend Chart */}
             <View style={dynamicStyles.modalSection}>
-              <Text style={dynamicStyles.modalSectionTitle}>📈 Haftalık Trend</Text>
+              <Text style={dynamicStyles.modalSectionTitle}>📈 {t('welcome') === 'Welcome' ? 'Weekly Trend' : 'Haftalık Trend'}</Text>
               <View style={dynamicStyles.trendChartContainer}>
                 {healthTrend.map((day, index) => (
                   <View key={index} style={dynamicStyles.trendChartBar}>
@@ -2574,17 +2574,17 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 <View style={dynamicStyles.modalAchievementCard}>
                   <Text style={dynamicStyles.modalAchievementIcon}>📔</Text>
                   <Text style={dynamicStyles.modalAchievementNumber}>{entries.length}</Text>
-                  <Text style={dynamicStyles.modalAchievementLabel}>Günlük</Text>
+                  <Text style={dynamicStyles.modalAchievementLabel}>{t('welcome') === 'Welcome' ? 'Daily' : 'Günlük'}</Text>
                 </View>
                 <View style={dynamicStyles.modalAchievementCard}>
                   <Text style={dynamicStyles.modalAchievementIcon}>🔥</Text>
                   <Text style={dynamicStyles.modalAchievementNumber}>{getCurrentStreak()}</Text>
-                  <Text style={dynamicStyles.modalAchievementLabel}>Gün Seri</Text>
+                  <Text style={dynamicStyles.modalAchievementLabel}>{t('welcome') === 'Welcome' ? 'Day Streak' : 'Gün Seri'}</Text>
                 </View>
                 <View style={dynamicStyles.modalAchievementCard}>
                   <Text style={dynamicStyles.modalAchievementIcon}>✅</Text>
                   <Text style={dynamicStyles.modalAchievementNumber}>{todayCompletedCount}</Text>
-                  <Text style={dynamicStyles.modalAchievementLabel}>Tamamlanan</Text>
+                  <Text style={dynamicStyles.modalAchievementLabel}>{t('welcome') === 'Welcome' ? 'Completed' : 'Tamamlanan'}</Text>
                 </View>
               </View>
             </View>

@@ -246,7 +246,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
           </View>
           
           <Text style={dynamicStyles.entryDate}>
-            {new Date(entry.date).toLocaleDateString('tr-TR', {
+            {new Date(entry.date).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',

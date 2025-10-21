@@ -358,7 +358,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
           <View style={dynamicStyles.entryMeta}>
             <View style={dynamicStyles.entryMetaLeft}>
               <Text style={dynamicStyles.entryDate}>
-                {new Date(item.date).toLocaleDateString('tr-TR')}
+                {new Date(item.date).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR')}
               </Text>
               {item.answers && (
                 <View style={dynamicStyles.questionsCount}>
@@ -511,9 +511,9 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       {loading ? (
         <View style={dynamicStyles.emptyState}>
           <Ionicons name="hourglass-outline" size={64} color={currentTheme.colors.secondary} />
-          <Text style={dynamicStyles.emptyTitle}>Yükleniyor...</Text>
+          <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'Loading...' : 'Yükleniyor...'}</Text>
           <Text style={dynamicStyles.emptyMessage}>
-            Günlükleriniz getiriliyor
+            {t('welcome') === 'Welcome' ? 'Loading your diaries...' : 'Günlükleriniz getiriliyor'}
           </Text>
         </View>
       ) : filteredEntries.length === 0 ? (
