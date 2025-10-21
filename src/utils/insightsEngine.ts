@@ -40,8 +40,8 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
   } else if (avgMood < 2.5) {
     insights.push({
       type: 'mood',
-      title: t('welcome') === 'Welcome' ? 'A Difficult Period 💙' : 'Zor Bir Dönem 💙',
-      description: t('welcome') === 'Welcome' ? `Recent days have been a bit tough. Take extra good care of yourself.` : `Son günler biraz zor geçmiş. Kendine ekstra iyi bak.`,
+      title: 'Zor Bir Dönem 💙',
+      description: `Son günler biraz zor geçmiş. Kendine ekstra iyi bak.`,
       icon: '💙',
       color: '#3b82f6',
       priority: 'high',
@@ -116,14 +116,14 @@ export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
     hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b
   );
   
-  const timeOfDay = parseInt(mostActiveHour) < 12 ? (t('welcome') === 'Welcome' ? 'morning' : 'sabah') :
-                    parseInt(mostActiveHour) < 17 ? (t('welcome') === 'Welcome' ? 'noon' : 'öğlen') :
-                    parseInt(mostActiveHour) < 21 ? (t('welcome') === 'Welcome' ? 'evening' : 'akşam') : (t('welcome') === 'Welcome' ? 'night' : 'gece');
+  const timeOfDay = parseInt(mostActiveHour) < 12 ? 'sabah' :
+                    parseInt(mostActiveHour) < 17 ? 'öğlen' :
+                    parseInt(mostActiveHour) < 21 ? 'akşam' : 'gece';
   
   insights.push({
     type: 'habit',
-    title: t('welcome') === 'Welcome' ? 'Your Most Productive Hour ⏰' : 'En Üretken Saatin ⏰',
-    description: t('welcome') === 'Welcome' ? `You usually write around ${timeOfDay} (${mostActiveHour}:00)` : `Genellikle ${timeOfDay} saatlerinde yazıyorsun (${mostActiveHour}:00)`,
+    title: 'En Üretken Saatin ⏰',
+    description: `Genellikle ${timeOfDay} saatlerinde yazıyorsun (${mostActiveHour}:00)`,
     icon: '⏰',
     color: '#8b5cf6',
     priority: 'medium',
@@ -366,8 +366,8 @@ export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
   if (entries.length === 1) {
     insights.push({
       type: 'achievement',
-      title: t('welcome') === 'Welcome' ? 'Your First Diary! 🎉' : 'İlk Günlüğün! 🎉',
-      description: t('welcome') === 'Welcome' ? 'Congratulations! You\'ve started your journey' : 'Tebrikler! Yolculuğuna başladın',
+      title: 'İlk Günlüğün! 🎉',
+      description: 'Tebrikler! Yolculuğuna başladın',
       icon: '🎉',
       color: '#ec4899',
       priority: 'high'
@@ -439,8 +439,8 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
   if (entries.length === 0) {
     suggestions.push({
       type: 'suggestion',
-      title: t('welcome') === 'Welcome' ? 'Write Your First Diary! 🌟' : 'İlk Günlüğünü Yaz! 🌟',
-      description: t('welcome') === 'Welcome' ? 'Create your first diary to start your journey' : 'Yolculuğuna başlamak için ilk günlüğünü oluştur',
+      title: 'İlk Günlüğünü Yaz! 🌟',
+      description: 'Yolculuğuna başlamak için ilk günlüğünü oluştur',
       icon: '🌟',
       color: '#3b82f6',
       priority: 'high'
