@@ -46,24 +46,30 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
   const showAbout = () => {
     showAlert(
-      'ℹ️ Hakkında',
-      'Rhythm v1.0.0\n\n🎵 Ruhsal denge ve yaşam ritmi uygulaması:\n• Günlük yazma sistemi\n• Mood takibi ve analizi\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro timer ve odak modu\n• İstatistikler ve gelişim takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Offline çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com',
+      t('welcome') === 'Welcome' ? 'ℹ️ About' : 'ℹ️ Hakkında',
+      t('welcome') === 'Welcome' 
+        ? 'Rhythm v1.0.0\n\n🎵 Spiritual balance and life rhythm app:\n• Daily journaling system\n• Mood tracking and analysis\n• Dreams & goals dashboard\n• Tasks and reminders\n• Pomodoro timer and focus mode\n• Statistics and progress tracking\n• Personality card system\n• 7 different theme options\n• Offline working\n• Data backup\n\nDeveloper: MSESOFT\n© 2025\n\nContact: msesoftware1425@gmail.com'
+        : 'Rhythm v1.0.0\n\n🎵 Ruhsal denge ve yaşam ritmi uygulaması:\n• Günlük yazma sistemi\n• Mood takibi ve analizi\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro timer ve odak modu\n• İstatistikler ve gelişim takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Offline çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com',
       'info'
     );
   };
 
   const showHelp = () => {
     showAlert(
-      '❓ Yardım & Destek',
-      'Sık Sorulan Sorular:\n\n❓ Nasıl günlük yazabilirim?\n• Ana sayfadaki "Günlük Yaz" butonuna basın\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Tema nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: msesoftware1425@gmail.com',
+      t('welcome') === 'Welcome' ? '❓ Help & Support' : '❓ Yardım & Destek',
+      t('welcome') === 'Welcome' 
+        ? 'Frequently Asked Questions:\n\n❓ How can I write a diary?\n• Press the "Write Diary" button on the main page\n\n❓ How can I backup my data?\n• From Settings > Data & Backup section\n\n❓ How can I change the theme?\n• From Settings > Appearance section\n\n❓ How can I set notifications?\n• From Settings > Notifications section\n\nFor more help: msesoftware1425@gmail.com'
+        : 'Sık Sorulan Sorular:\n\n❓ Nasıl günlük yazabilirim?\n• Ana sayfadaki "Günlük Yaz" butonuna basın\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Tema nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: msesoftware1425@gmail.com',
       'info'
     );
   };
 
   const rateApp = () => {
     showAlert(
-      '⭐ Uygulamayı Değerlendir',
-      'Uygulamamızı beğendiyseniz, App Store\'da 5 yıldız vererek bize destek olabilirsiniz!\n\nDeğerlendirmeniz bizim için çok değerli! 🌟',
+      t('welcome') === 'Welcome' ? '⭐ Rate App' : '⭐ Uygulamayı Değerlendir',
+      t('welcome') === 'Welcome' 
+        ? 'If you like our app, you can support us by giving 5 stars on the App Store!\n\nYour rating is very valuable to us! 🌟'
+        : 'Uygulamamızı beğendiyseniz, App Store\'da 5 yıldız vererek bize destek olabilirsiniz!\n\nDeğerlendirmeniz bizim için çok değerli! 🌟',
       'info'
     );
   };
@@ -71,11 +77,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const shareApp = async () => {
     try {
       await Share.share({
-        message: 'Rhythm - Ruhsal denge ve yaşam ritmi! 🎵✨\n\nApp Store\'dan indirin: https://apps.apple.com/app/rhythm/id1234567890',
+        message: t('welcome') === 'Welcome' 
+          ? 'Rhythm - Spiritual balance and life rhythm! 🎵✨\n\nDownload from App Store: https://apps.apple.com/app/rhythm/id1234567890'
+          : 'Rhythm - Ruhsal denge ve yaşam ritmi! 🎵✨\n\nApp Store\'dan indirin: https://apps.apple.com/app/rhythm/id1234567890',
         title: 'Rhythm',
       });
     } catch (error) {
-      showAlert('❌ Hata', 'Paylaşım sırasında hata oluştu', 'error');
+      showAlert(
+        t('welcome') === 'Welcome' ? '❌ Error' : '❌ Hata', 
+        t('welcome') === 'Welcome' ? 'An error occurred during sharing' : 'Paylaşım sırasında hata oluştu', 
+        'error'
+      );
     }
   };
 

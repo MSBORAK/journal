@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Achievement } from '../types';
 import { sendAchievementNotification } from '../services/notificationService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ACHIEVEMENTS_STORAGE_KEY = '@daily_achievements';
 const USER_STATS_STORAGE_KEY = '@daily_user_stats';
