@@ -192,7 +192,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
 
   const handleSignOut = () => {
     showAlert(
-      '🚪 Çıkış Yap',
+      t('welcome') === 'Welcome' ? '🚪 Logout' : '🚪 Çıkış Yap',
       'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
       'warning'
     );
@@ -397,7 +397,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Hesap Ayarları</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'Account Settings' : 'Hesap Ayarları'}</Text>
       </View>
 
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
@@ -411,7 +411,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
 
         {/* Profil Bilgileri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Profil Bilgileri</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Profile Information' : 'Profil Bilgileri'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
