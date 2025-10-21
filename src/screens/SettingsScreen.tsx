@@ -38,7 +38,7 @@ interface MenuItem {
 const SettingsScreen = React.memo(function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { user, signOut } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { migrateData, checkMigrationStatus, isMigrating } = useMigration();
   const { syncFromCloud, pushToCloud, isLoading: isSyncing } = useCloudData();
   const [soundEnabled, setSoundEnabled] = useState(soundService.isSoundEnabled());
@@ -187,7 +187,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     {
       id: 'language',
       title: 'Dil Seçimi',
-      subtitle: language === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English',
+      subtitle: currentLanguage === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English',
       icon: 'language-outline',
       screen: 'LanguageSelection',
       color: '#3b82f6',
@@ -217,7 +217,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       color: '#10b981',
     },
     {
-      id: 'language',
+      id: 'language2',
       title: t('welcome') === 'Welcome' ? 'Language Selection' : 'Dil Seçimi',
       subtitle: t('welcome') === 'Welcome' ? 'Change app language' : 'Uygulama dilini değiştir',
       icon: 'language-outline',

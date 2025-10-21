@@ -197,7 +197,7 @@ function MainTabs() {
         name="History"
         component={HistoryScreen}
         options={{
-          title: t('history.title'),
+          title: t('welcome') === 'Welcome' ? 'History' : 'Geçmiş',
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('History', focused, color, size),
         }}
       />
@@ -205,7 +205,7 @@ function MainTabs() {
         name="Tasks"
         component={TasksAndRemindersScreen}
         options={{
-          title: 'Görevler',
+          title: t('welcome') === 'Welcome' ? 'Tasks' : 'Görevler',
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Tasks', focused, color, size),
         }}
       />
@@ -213,7 +213,7 @@ function MainTabs() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          title: t('settings.title'),
+          title: t('welcome') === 'Welcome' ? 'Settings' : 'Ayarlar',
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Settings', focused, color, size),
         }}
       />

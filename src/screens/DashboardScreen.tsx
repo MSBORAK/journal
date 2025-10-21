@@ -2645,7 +2645,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           >
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
-            {t('dashboard.expressYourself')}
+            {t('welcome') === 'Welcome' ? 'Express Yourself' : 'Kendini İfade Et'}
           </Text>
         </View>
         

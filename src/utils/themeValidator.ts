@@ -1,5 +1,5 @@
-import { themes, Theme } from '../themes.ts';
-import { getContrastRatio, isAccessible } from './colorUtils.ts';
+import { themes, Theme } from '../themes';
+import { getContrastRatio, isAccessible } from './colorUtils';
 
 interface ThemeIssue {
   themeName: string;

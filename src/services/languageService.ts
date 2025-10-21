@@ -67,13 +67,11 @@ export const translations = {
     sleepHours: 'Uyku Saatleri',
     
     // Statistics
-    statistics: 'İstatistikler',
     streak: 'Seri',
     totalEntries: 'Toplam Giriş',
     averageMood: 'Ortalama Ruh Hali',
     
     // Settings
-    settings: 'Ayarlar',
     accountSettings: 'Hesap Ayarları',
     notificationSettings: 'Bildirim Ayarları',
     themeSettings: 'Tema Ayarları',
@@ -149,13 +147,11 @@ export const translations = {
     sleepHours: 'Sleep Hours',
     
     // Statistics
-    statistics: 'Statistics',
     streak: 'Streak',
     totalEntries: 'Total Entries',
     averageMood: 'Average Mood',
     
     // Settings
-    settings: 'Settings',
     accountSettings: 'Account Settings',
     notificationSettings: 'Notification Settings',
     themeSettings: 'Theme Settings',

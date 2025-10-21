@@ -143,7 +143,7 @@ export const Toast: React.FC<ToastProps> = ({
         </TouchableOpacity>
         
         <View style={styles.content}>
-          <Ionicons name={config.icon} size={20} color={config.iconColor} />
+          <Ionicons name={config.icon as any} size={20} color={config.iconColor} />
           <Text
             style={[
               styles.message,
