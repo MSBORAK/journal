@@ -564,9 +564,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Görev Hatırlatıcıları</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Task Reminders' : 'Görev Hatırlatıcıları'}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  Günlük görevler ve hatırlatıcılar için bildirimler
+                  {t('welcome') === 'Welcome' ? 'Notifications for daily tasks and reminders' : 'Günlük görevler ve hatırlatıcılar için bildirimler'}
                 </Text>
               </View>
               <Switch
@@ -582,9 +582,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Başarı Bildirimleri</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Achievement Notifications' : 'Başarı Bildirimleri'}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  Streak, başarı rozetleri ve kutlamalar
+                  {t('welcome') === 'Welcome' ? 'Streak, achievement badges and celebrations' : 'Streak, başarı rozetleri ve kutlamalar'}
                 </Text>
               </View>
               <Switch
@@ -600,14 +600,14 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
 
         {/* Akıllı Bildirimler */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>🧠 Akıllı Bildirimler</Text>
+          <Text style={dynamicStyles.sectionTitle}>🧠 {t('welcome') === 'Welcome' ? 'Smart Notifications' : 'Akıllı Bildirimler'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Hafta İçi Motivasyon</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Weekday Motivation' : 'Hafta İçi Motivasyon'}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  Pazartesi-Cuma arası motivasyon mesajları
+                  {t('welcome') === 'Welcome' ? 'Motivation messages between Monday-Friday' : 'Pazartesi-Cuma arası motivasyon mesajları'}
                 </Text>
               </View>
               <Switch
@@ -623,9 +623,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Hafta Sonu Motivasyonu</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Weekend Motivation' : 'Hafta Sonu Motivasyonu'}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  Cumartesi-Pazar rahatlatıcı mesajlar
+                  {t('welcome') === 'Welcome' ? 'Relaxing messages on Saturday-Sunday' : 'Cumartesi-Pazar rahatlatıcı mesajlar'}
                 </Text>
               </View>
               <Switch
@@ -641,9 +641,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Günlük Özet Bildirimi</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Daily Summary Notification' : 'Günlük Özet Bildirimi'}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  Gün sonu özet ve istatistikler (22:00)
+                  {t('welcome') === 'Welcome' ? 'End of day summary and statistics (22:00)' : 'Gün sonu özet ve istatistikler (22:00)'}
                 </Text>
               </View>
               <Switch
@@ -659,12 +659,12 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
 
         {/* Sessiz Saatler (DND) */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>🔕 Sessiz Saatler</Text>
+          <Text style={dynamicStyles.sectionTitle}>🔕 {t('welcome') === 'Welcome' ? 'Silent Hours' : 'Sessiz Saatler'}</Text>
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Sessiz saatleri etkinleştir</Text>
-                <Text style={dynamicStyles.settingDescription}>Bu aralıkta bildirim gönderilmez</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Activate silent hours' : 'Sessiz saatleri etkinleştir'}</Text>
+                <Text style={dynamicStyles.settingDescription}>{t('welcome') === 'Welcome' ? 'No notifications are sent during this interval' : 'Bu aralıkta bildirim gönderilmez'}</Text>
               </View>
               <Switch
                 value={settings.quietHoursEnabled}
