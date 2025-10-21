@@ -654,7 +654,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>⏰ Hatırlatıcılar</Text>
+        <Text style={dynamicStyles.headerTitle}>⏰ {t('welcome') === 'Welcome' ? 'Reminders' : 'Hatırlatıcılar'}</Text>
         <TouchableOpacity 
           style={dynamicStyles.addButton}
           onPress={() => {

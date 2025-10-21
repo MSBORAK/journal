@@ -323,7 +323,7 @@ export default function AuthScreen() {
           end={{ x: 1, y: 1 }}
         >
           <Text style={dynamicStyles.title}>
-            {isLogin ? t('auth.signIn') : t('auth.signUp')}
+            {isLogin ? (t('welcome') === 'Welcome' ? 'Sign In' : 'Giriş Yap') : (t('welcome') === 'Welcome' ? 'Sign Up' : 'Kayıt Ol')}
           </Text>
           
           <Text style={dynamicStyles.subtitle}>
@@ -350,7 +350,7 @@ export default function AuthScreen() {
           )}
 
           <View style={dynamicStyles.inputContainer}>
-            <Text style={dynamicStyles.label}>{t('auth.email')}</Text>
+            <Text style={dynamicStyles.label}>{t('welcome') === 'Welcome' ? 'Email' : 'E-posta'}</Text>
             <TextInput
               style={dynamicStyles.input}
               value={email}
@@ -366,12 +366,12 @@ export default function AuthScreen() {
           </View>
 
           <View style={dynamicStyles.inputContainer}>
-            <Text style={dynamicStyles.label}>{t('auth.password')}</Text>
+            <Text style={dynamicStyles.label}>{t('welcome') === 'Welcome' ? 'Password' : 'Şifre'}</Text>
             <TextInput
               style={dynamicStyles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder={t('auth.password')}
+              placeholder={t('welcome') === 'Welcome' ? 'Password' : 'Şifre'}
               placeholderTextColor="#9ca3af"
               secureTextEntry
               autoCorrect={false}
@@ -386,7 +386,7 @@ export default function AuthScreen() {
             disabled={loading}
           >
             <Text style={dynamicStyles.buttonText}>
-              {loading ? t('common.loading') : (isLogin ? t('auth.signIn') : t('auth.signUp'))}
+              {loading ? (t('welcome') === 'Welcome' ? 'Loading...' : 'Yükleniyor...') : (isLogin ? (t('welcome') === 'Welcome' ? 'Sign In' : 'Giriş Yap') : (t('welcome') === 'Welcome' ? 'Sign Up' : 'Kayıt Ol'))}
             </Text>
           </TouchableOpacity>
 
@@ -414,8 +414,8 @@ export default function AuthScreen() {
           >
             <Text style={dynamicStyles.switchText}>
               {isLogin 
-                ? t('auth.noAccount') 
-                : t('auth.hasAccount')
+                ? (t('welcome') === 'Welcome' ? 'Don\'t have an account? Sign up' : 'Hesabınız yok mu? Kayıt olun') 
+                : (t('welcome') === 'Welcome' ? 'Already have an account? Sign in' : 'Zaten hesabınız var mı? Giriş yapın')
               }
             </Text>
           </TouchableOpacity>
