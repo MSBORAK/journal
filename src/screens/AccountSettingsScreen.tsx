@@ -404,8 +404,8 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            👤 Hesap bilgilerinizi buradan yönetebilirsiniz. Profil bilgilerinizi güncelleyin, 
-            email ve şifre değiştirin veya hesabınızı silin.
+            👤 {t('welcome') === 'Welcome' ? 'Manage your account information from here. Update your profile information,' : 'Hesap bilgilerinizi buradan yönetebilirsiniz. Profil bilgilerinizi güncelleyin,'} 
+            {t('welcome') === 'Welcome' ? 'change email and password or delete your account.' : 'email ve şifre değiştinte veya hesabınızı silin.'}
           </Text>
         </View>
 
@@ -418,34 +418,34 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="person" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Profil Düzenle</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Edit Profile' : 'Profil Düzenle'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Adınızı ve bio bilginizi güncelleyin.
+              {t('welcome') === 'Welcome' ? 'Update your name and bio information.' : 'Adınızı ve bio bilginizi güncelleyin.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={() => setShowProfileModal(true)}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>✏️ Düzenle</Text>
+              <Text style={dynamicStyles.actionButtonText}>✏️ {t('welcome') === 'Welcome' ? 'Edit' : 'Düzenle'}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Hesap Güvenliği */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Hesap Güvenliği</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Account Security' : 'Hesap Güvenliği'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="mail" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Email Değiştir</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Change Email' : 'Email Değiştir'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Hesap email adresinizi değiştirin. Yeni email adresinize doğrulama maili gönderilecek.
+              {t('welcome') === 'Welcome' ? 'Change your account email address. A verification email will be sent to your new email address.' : 'Hesap email adresinizi değiştirin. Yeni email adresinize doğrulama maili gönderilecek.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -455,7 +455,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               }}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>📧 Değiştir</Text>
+              <Text style={dynamicStyles.actionButtonText}>📧 {t('welcome') === 'Welcome' ? 'Change' : 'Değiştir'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -464,10 +464,10 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="key" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Şifre Değiştir</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Change Password' : 'Şifre Değiştir'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Hesap şifrenizi güncelleyin. Güvenli bir şifre seçin.
+              {t('welcome') === 'Welcome' ? 'Update your account password. Choose a secure password.' : 'Hesap şifrenizi güncelleyin. Güvenli bir şifre seçin.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -479,24 +479,24 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               }}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>🔑 Değiştir</Text>
+              <Text style={dynamicStyles.actionButtonText}>🔑 {t('welcome') === 'Welcome' ? 'Change' : 'Değiştir'}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Hesap İşlemleri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Hesap İşlemleri</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Account Operations' : 'Hesap İşlemleri'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="log-out" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Çıkış Yap</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Logout' : 'Çıkış Yap'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Hesabınızdan güvenli bir şekilde çıkış yapın.
+              {t('welcome') === 'Welcome' ? 'Log out securely from your account.' : 'Hesabınızdan güvenli bir şekilde çıkış yapın.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
