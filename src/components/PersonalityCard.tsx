@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useDiary } from '../hooks/useDiary';
 import { useHabits } from '../hooks/useHabits';
 import { useDreamsGoals } from '../hooks/useDreamsGoals';
@@ -31,6 +32,7 @@ interface PersonalityCardProps {
 export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => {
   const { currentTheme } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { entries, getStreak } = useDiary(user?.uid);
   const { habits } = useHabits(user?.uid);
   const { dreams, goals } = useDreamsGoals(user?.uid);

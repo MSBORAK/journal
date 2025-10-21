@@ -94,6 +94,14 @@ export const translations = {
     success: 'Başarılı',
     loading: 'Yükleniyor...',
     
+    // Auth
+    signIn: 'Giriş Yap',
+    signUp: 'Kayıt Ol',
+    email: 'E-posta',
+    password: 'Şifre',
+    noAccount: 'Hesabınız yok mu? Kayıt olun',
+    forgotPassword: 'Şifremi Unuttum',
+    
     // Notifications
     morningReminder: 'Sabah Hatırlatıcısı',
     eveningReminder: 'Akşam Hatırlatıcısı',
@@ -173,6 +181,14 @@ export const translations = {
     error: 'Error',
     success: 'Success',
     loading: 'Loading...',
+    
+    // Auth
+    signIn: 'Sign In',
+    signUp: 'Sign Up',
+    email: 'Email',
+    password: 'Password',
+    noAccount: 'Don\'t have an account? Sign up',
+    forgotPassword: 'Forgot Password',
     
     // Notifications
     morningReminder: 'Morning Reminder',
