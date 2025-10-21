@@ -812,7 +812,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               onPress={handleAddReminder}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>+ Hatırlatıcı Ekle</Text>
+              <Text style={dynamicStyles.actionButtonText}>+ {t('welcome') === 'Welcome' ? 'Add Reminder' : 'Hatırlatıcı Ekle'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -932,7 +932,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         {/* Hatırlatıcılar Bölümü */}
         <View style={dynamicStyles.remindersSection}>
           <View style={dynamicStyles.remindersHeader}>
-            <Text style={dynamicStyles.sectionTitle}>🔔 Yaklaşan Hatırlatıcılar</Text>
+            <Text style={dynamicStyles.sectionTitle}>🔔 {t('welcome') === 'Welcome' ? 'Upcoming Reminders' : 'Yaklaşan Hatırlatıcılar'}</Text>
             <TouchableOpacity
               style={dynamicStyles.toggleButton}
               onPress={() => setShowReminders(!showReminders)}
@@ -951,8 +951,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               {upcomingReminders.length === 0 ? (
                 <View style={dynamicStyles.emptyState}>
                   <Text style={dynamicStyles.emptyIcon}>🔔</Text>
-                  <Text style={dynamicStyles.emptyTitle}>Henüz hatırlatıcı yok</Text>
-                  <Text style={dynamicStyles.emptyMessage}>Hatırlatıcı ekleyerek başlayın</Text>
+                  <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'No reminders yet' : 'Henüz hatırlatıcı yok'}</Text>
+                  <Text style={dynamicStyles.emptyMessage}>{t('welcome') === 'Welcome' ? 'Start by adding a reminder' : 'Hatırlatıcı ekleyerek başlayın'}</Text>
                 </View>
               ) : (
                 upcomingReminders.slice(0, 3).map((reminder) => (
@@ -985,15 +985,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>📝 Yeni Görev Ekle</Text>
+            <Text style={dynamicStyles.modalTitle}>📝 {t('welcome') === 'Welcome' ? 'Add New Task' : 'Yeni Görev Ekle'}</Text>
             
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Görev Başlığı</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Task Title' : 'Görev Başlığı'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskTitle}
                 onChangeText={setTaskTitle}
-                placeholder="Görev başlığını yazın..."
+                placeholder={t('welcome') === 'Welcome' ? 'Enter task title...' : 'Görev başlığını yazın...'}
                 placeholderTextColor={currentTheme.colors.muted}
                 autoCorrect={false}
                 autoCapitalize="sentences"
@@ -1101,15 +1101,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>🔔 Yeni Hatırlatıcı Ekle</Text>
+            <Text style={dynamicStyles.modalTitle}>🔔 {t('welcome') === 'Welcome' ? 'Add New Reminder' : 'Yeni Hatırlatıcı Ekle'}</Text>
             
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Hatırlatıcı Başlığı</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Reminder Title' : 'Hatırlatıcı Başlığı'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={reminderTitle}
                 onChangeText={setReminderTitle}
-                placeholder="Hatırlatıcı başlığını yazın..."
+                placeholder={t('welcome') === 'Welcome' ? 'Enter reminder title...' : 'Hatırlatıcı başlığını yazın...'}
                 placeholderTextColor={currentTheme.colors.muted}
               />
             </View>

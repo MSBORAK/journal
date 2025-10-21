@@ -2786,7 +2786,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
           <View style={dynamicStyles.achievementsProgress}>
             <Text style={dynamicStyles.achievementsProgressText}>
-              {getAchievementStats().unlocked} / {getAchievementStats().total} rozet kazandın
+              {getAchievementStats().unlocked} / {getAchievementStats().total} {t('welcome') === 'Welcome' ? 'badges earned' : 'rozet kazandın'}
             </Text>
             <View style={dynamicStyles.achievementsProgressBar}>
               <View 

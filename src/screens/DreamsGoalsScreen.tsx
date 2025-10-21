@@ -773,7 +773,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           onPress={() => handleTabChange('dreams')}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'dreams' && dynamicStyles.activeTabText]}>
-            🌟 Hayaller
+            🌟 {t('welcome') === 'Welcome' ? 'Dreams' : 'Hayaller'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -781,7 +781,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           onPress={() => handleTabChange('goals')}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'goals' && dynamicStyles.activeTabText]}>
-            🎯 Hedefler
+            🎯 {t('welcome') === 'Welcome' ? 'Goals' : 'Hedefler'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -789,7 +789,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           onPress={() => handleTabChange('promise')}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'promise' && dynamicStyles.activeTabText]}>
-            🤝 Söz
+            🤝 {t('welcome') === 'Welcome' ? 'Promise' : 'Söz'}
           </Text>
         </TouchableOpacity>
       </View>
