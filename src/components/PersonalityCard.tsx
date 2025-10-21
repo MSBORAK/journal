@@ -67,17 +67,17 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
     )[0];
 
     // Gelişmiş kişilik tipi belirleme
-    let personalityType = 'Yeni Yolcu';
+    let personalityType = t('welcome') === 'Welcome' ? 'New Traveler' : 'Yeni Yolcu';
     let personalityTraits = ['Keşfetmeye açık', 'Meraklı', 'Cesur'];
     let personalityEmoji = '🌱';
     let personalityColor = '#10b981';
     let personalityDescription = 'Hayat yolculuğunun başında, her adım bir keşif!';
-    let personalityMotivation = 'Her gün yeni bir hikaye yazıyorsun!';
+    let personalityMotivation = t('welcome') === 'Welcome' ? 'You are writing a new story every day!' : 'Her gün yeni bir hikaye yazıyorsun!';
 
     console.log('🎭 Seviye Kontrol:', { totalEntries, currentStreak });
 
     if (totalEntries >= 100) {
-      personalityType = 'Ruh Ustası';
+      personalityType = t('welcome') === 'Welcome' ? 'Soul Master' : 'Ruh Ustası';
       personalityTraits = ['Bilge', 'Dengeli', 'İçsel güçlü'];
       personalityEmoji = '🧘‍♀️';
       personalityColor = '#8b5cf6';
@@ -88,11 +88,11 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
       personalityTraits = ['Disiplinli', 'Kararlı', 'Güvenilir'];
       personalityEmoji = '💪';
       personalityColor = '#f59e0b';
-      personalityDescription = 'Hedeflerine ulaşmak için gerekli disiplin ve kararlılığa sahip!';
+      personalityDescription = t('welcome') === 'Welcome' ? 'You have the discipline and determination to reach your goals!' : 'Hedeflerine ulaşmak için gerekli disiplin ve kararlılığa sahip!';
       personalityMotivation = 'İstikrarın seni zirveye taşıyacak!';
     } else if (totalEntries >= 30) {
       personalityType = 'Gelişim Savaşçısı';
-      personalityTraits = ['Hedef odaklı', 'İlerici', 'Motivasyonlu'];
+      personalityTraits = t('welcome') === 'Welcome' ? ['Goal-oriented', 'Progressive', 'Motivated'] : ['Hedef odaklı', 'İlerici', 'Motivasyonlu'];
       personalityEmoji = '🎯';
       personalityColor = '#3b82f6';
       personalityDescription = 'Sürekli gelişim odaklı, hedeflerine kararlılıkla ilerleyen!';
@@ -112,12 +112,12 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
       personalityDescription = 'Yolculuğuna yeni başlamış, her adımda büyüyen!';
       personalityMotivation = 'Her adım seni daha güçlü yapıyor!';
     } else if (totalEntries >= 1) {
-      personalityType = 'Yeni Yolcu';
+      personalityType = t('welcome') === 'Welcome' ? 'New Traveler' : 'Yeni Yolcu';
       personalityTraits = ['Keşfetmeye açık', 'Meraklı', 'Cesur'];
       personalityEmoji = '🌱';
       personalityColor = '#10b981';
       personalityDescription = 'Hayat yolculuğunun başında, her adım bir keşif!';
-      personalityMotivation = 'Her gün yeni bir hikaye yazıyorsun!';
+      personalityMotivation = t('welcome') === 'Welcome' ? 'You are writing a new story every day!' : 'Her gün yeni bir hikaye yazıyorsun!';
     }
 
     // Wellness skoru hesapla
@@ -209,7 +209,9 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
             {/* Header */}
             <View style={styles.frontHeader}>
               <Text style={styles.emoji}>{personality.emoji}</Text>
-              <Text style={[styles.title, { color: currentTheme.colors.text }]}>Kişilik Kartım</Text>
+              <Text style={[styles.title, { color: currentTheme.colors.text }]}>
+                {t('welcome') === 'Welcome' ? 'My Personality Card' : 'Kişilik Kartım'}
+              </Text>
               <Text style={[styles.personalityType, { color: currentTheme.colors.primary }]}>
                 {personality.type} 🪶
               </Text>
@@ -239,7 +241,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                   {personality.stats.currentStreak}
                 </Text>
                 <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
-                  Günlük Seri
+                  {t('welcome') === 'Welcome' ? 'Daily Streak' : 'Günlük Seri'}
                 </Text>
               </View>
               <View style={styles.statItem}>
@@ -248,7 +250,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                   {personality.stats.completedGoals}
                 </Text>
                 <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
-                  Hedef
+                  {t('welcome') === 'Welcome' ? 'Goal' : 'Hedef'}
                 </Text>
               </View>
             </View>
@@ -257,7 +259,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
             <View style={styles.flipHint}>
               <Ionicons name="refresh" size={14} color={currentTheme.colors.secondary} />
               <Text style={[styles.flipText, { color: currentTheme.colors.secondary }]}>
-                Dokunarak detayları gör
+                {t('welcome') === 'Welcome' ? 'Tap to see details' : 'Dokunarak detayları gör'}
               </Text>
             </View>
           </View>
@@ -270,7 +272,9 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
           <View style={styles.backContent}>
             {/* Back Header */}
             <View style={styles.backHeader}>
-              <Text style={[styles.backTitle, { color: currentTheme.colors.text }]}>Gelişim Profilim</Text>
+              <Text style={[styles.backTitle, { color: currentTheme.colors.text }]}>
+                {t('welcome') === 'Welcome' ? 'My Growth Profile' : 'Gelişim Profilim'}
+              </Text>
               <Text style={[styles.motivation, { color: currentTheme.colors.secondary }]}>
                 {personality.motivation}
               </Text>
@@ -279,7 +283,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
             {/* Simple Progress */}
             <View style={styles.simpleProgress}>
               <Text style={[styles.progressLabel, { color: currentTheme.colors.secondary }]}>
-                İlerleme: {personality.stats.totalEntries} / 100 günlük
+                {t('welcome') === 'Welcome' ? 'Progress' : 'İlerleme'}: {personality.stats.totalEntries} / 100 {t('welcome') === 'Welcome' ? 'diaries' : 'günlük'}
               </Text>
               <View style={[styles.progressBar, { backgroundColor: currentTheme.colors.border }]}>
                 <View style={[styles.progressFill, { 
@@ -292,7 +296,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
             {/* Unlock System - Clean */}
             <View style={styles.unlockContainer}>
               <Text style={[styles.unlockTitle, { color: currentTheme.colors.text }]}>
-                Açılan Özellikler
+                {t('welcome') === 'Welcome' ? 'Unlocked Features' : 'Açılan Özellikler'}
               </Text>
               
               
@@ -309,7 +313,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                     <Text style={[
                       styles.unlockTextBox, 
                       { color: personality.stats.totalEntries >= 1 ? currentTheme.colors.primary : currentTheme.colors.secondary }
-                    ]}>Günlük</Text>
+                    ]}>{t('welcome') === 'Welcome' ? 'Diary' : 'Günlük'}</Text>
                   </View>
                   <View style={[
                     styles.unlockItemBox, 
@@ -321,7 +325,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                     <Text style={[
                       styles.unlockTextBox, 
                       { color: personality.stats.totalEntries >= 5 ? currentTheme.colors.primary : currentTheme.colors.secondary }
-                    ]}>Hedef</Text>
+                    ]}>{t('welcome') === 'Welcome' ? 'Goal' : 'Hedef'}</Text>
                   </View>
                   <View style={[
                     styles.unlockItemBox, 
@@ -340,7 +344,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                     <Text style={[
                       styles.unlockTextBox, 
                       { color: personality.stats.totalEntries >= 15 ? currentTheme.colors.primary : currentTheme.colors.secondary }
-                    ]}>Hayal</Text>
+                    ]}>{t('welcome') === 'Welcome' ? 'Dream' : 'Hayal'}</Text>
                   </View>
                 </View>
                 
@@ -363,7 +367,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                     <Text style={[
                       styles.unlockTextBox, 
                       { color: personality.stats.totalEntries >= 30 ? currentTheme.colors.primary : currentTheme.colors.secondary }
-                    ]}>Alışkanlık</Text>
+                    ]}>{t('welcome') === 'Welcome' ? 'Habit' : 'Alışkanlık'}</Text>
                   </View>
                   <View style={[
                     styles.unlockItemBox, 

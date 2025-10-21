@@ -742,7 +742,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       // Daha fazla pozitif mesaj
       'Sen muhteşemsin! 🌈',
       'Hayat sana gülüyor! 🌻',
-      'Sen özelsin! ✨',
+      t('welcome') === 'Welcome' ? 'You are special! ✨' : 'Sen özelsin! ✨',
       'Kendinle barışık ol! 🕊️',
       'Sen bir ışıksın! 💡',
       'Bugün güzel olacak! 🌅',
@@ -787,7 +787,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       'Bugün küçük şeylerle mutlu ol! 🌸',
       'Her gün aynı olmak zorunda değil! Farklılık güzel! 🌺',
       'Kendine zaman ver! Her şey yerli yerine gelecek! ⏰',
-      'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
+      t('welcome') === 'Welcome' ? 'Just existing today is enough! You are special! ✨' : 'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
       
       // Sevgili ve pozitif
       'Kendinle konuşmak, en değerli sohbet! 💬',
@@ -1006,7 +1006,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         'Kendini yargılamadan kabul et! Sen mükemmelsin! 🕊️',
         'Bugün küçük şeylerle mutlu ol! 🌸',
         'Kendine zaman ver! Her şey yerli yerine gelecek! ⏰',
-        'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
+        t('welcome') === 'Welcome' ? 'Just existing today is enough! You are special! ✨' : 'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
       ];
     }
     
