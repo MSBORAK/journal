@@ -30,8 +30,8 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
   if (avgMood >= 4) {
     insights.push({
       type: 'mood',
-      title: 'Harika Bir Hafta! 😊',
-      description: `Son 7 günde ortalama mood'un ${avgMood.toFixed(1)}/5. Çok iyi gidiyorsun!`,
+      title: 'Great Week! 😊',
+      description: `Your average mood in the last 7 days is ${avgMood.toFixed(1)}/5. You're doing great!`,
       icon: '🎉',
       color: '#10b981',
       priority: 'high',
@@ -40,8 +40,8 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
   } else if (avgMood < 2.5) {
     insights.push({
       type: 'mood',
-      title: 'Zor Bir Dönem 💙',
-      description: `Son günler biraz zor geçmiş. Kendine ekstra iyi bak.`,
+      title: 'Tough Period 💙',
+      description: `The last few days have been a bit difficult. Take extra good care of yourself.`,
       icon: '💙',
       color: '#3b82f6',
       priority: 'high',
@@ -57,8 +57,8 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
     if (secondHalf > firstHalf + 0.5) {
       insights.push({
         type: 'mood',
-        title: 'Yükseliş Trendi! 📈',
-        description: 'Mood\'un son günlerde yükselişte. Böyle devam!',
+        title: 'Rising Trend! 📈',
+        description: 'Your mood has been rising in recent days. Keep it up!',
         icon: '📈',
         color: '#10b981',
         priority: 'medium'
@@ -66,8 +66,8 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
     } else if (secondHalf < firstHalf - 0.5) {
       insights.push({
         type: 'mood',
-        title: 'Dikkat Et 💭',
-        description: 'Mood\'un son günlerde düşüşte. Nedenini düşünmek ister misin?',
+        title: 'Pay Attention 💭',
+        description: 'Your mood has been declining recently. Would you like to think about why?',
         icon: '💭',
         color: '#f59e0b',
         priority: 'medium'
@@ -81,12 +81,12 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
   );
   
   const happyDate = new Date(happiest.createdAt);
-  const dayName = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][happyDate.getDay()];
+  const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][happyDate.getDay()];
   
   insights.push({
     type: 'pattern',
-    title: 'En Mutlu Günün 🌟',
-    description: `${dayName} günü en mutlu hissetmişsin (${happiest.mood}/5)`,
+    title: 'Your Happiest Day 🌟',
+    description: `You felt happiest on ${dayName} (${happiest.mood}/5)`,
     icon: '🌟',
     color: '#f59e0b',
     priority: 'low',
@@ -116,14 +116,14 @@ export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
     hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b
   );
   
-  const timeOfDay = parseInt(mostActiveHour) < 12 ? 'sabah' :
-                    parseInt(mostActiveHour) < 17 ? 'öğlen' :
-                    parseInt(mostActiveHour) < 21 ? 'akşam' : 'gece';
+  const timeOfDay = parseInt(mostActiveHour) < 12 ? 'morning' :
+                    parseInt(mostActiveHour) < 17 ? 'afternoon' :
+                    parseInt(mostActiveHour) < 21 ? 'evening' : 'night';
   
   insights.push({
     type: 'habit',
-    title: 'En Üretken Saatin ⏰',
-    description: `Genellikle ${timeOfDay} saatlerinde yazıyorsun (${mostActiveHour}:00)`,
+    title: 'Your Most Productive Hour ⏰',
+    description: `You usually write in the ${timeOfDay} (${mostActiveHour}:00)`,
     icon: '⏰',
     color: '#8b5cf6',
     priority: 'medium',
@@ -137,8 +137,8 @@ export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
   if (avgLength > 500) {
     insights.push({
       type: 'habit',
-      title: 'Detaylı Yazar! 📝',
-      description: `Ortalama ${Math.round(avgLength)} karakter yazıyorsun. Ne kadar çok paylaşıyorsun!`,
+      title: 'Detailed Writer! 📝',
+      description: `You write an average of ${Math.round(avgLength)} characters. How much you share!`,
       icon: '📝',
       color: '#6366f1',
       priority: 'low'
@@ -146,8 +146,8 @@ export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
   } else if (avgLength < 150) {
     insights.push({
       type: 'suggestion',
-      title: 'Biraz Daha Açıl 💭',
-      description: 'Daha fazla detay paylaşırsan içgörülerin daha zengin olur',
+      title: 'Open Up a Bit More 💭',
+      description: 'If you share more details, your insights will be richer',
       icon: '💭',
       color: '#3b82f6',
       priority: 'low'
@@ -172,8 +172,8 @@ export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
     if (weekendAvg > weekdayAvg + 0.5) {
       insights.push({
         type: 'pattern',
-        title: 'Hafta Sonu Mutluluğu 🎉',
-        description: 'Hafta sonları çok daha mutlu oluyorsun. İş-yaşam dengesine dikkat!',
+        title: 'Weekend Happiness 🎉',
+        description: 'You are much happier on weekends. Pay attention to work-life balance!',
         icon: '🎉',
         color: '#ec4899',
         priority: 'medium'
@@ -218,8 +218,8 @@ export const analyzeStreak = (entries: DiaryEntry[]): Insight[] => {
   if (currentStreak >= 7) {
     insights.push({
       type: 'streak',
-      title: `${currentStreak} Günlük Streak! 🔥`,
-      description: 'İnanılmaz bir disiplin! Böyle devam et',
+      title: `${currentStreak} Day Streak! 🔥`,
+      description: 'Incredible discipline! Keep it up',
       icon: '🔥',
       color: '#ef4444',
       priority: 'high',
@@ -228,8 +228,8 @@ export const analyzeStreak = (entries: DiaryEntry[]): Insight[] => {
   } else if (currentStreak >= 3) {
     insights.push({
       type: 'streak',
-      title: `${currentStreak} Gün Üst Üste! ⭐`,
-      description: 'Güzel gidiyorsun! 7 güne ulaşabilirsin',
+      title: `${currentStreak} Days in a Row! ⭐`,
+      description: 'You\'re doing great! You can reach 7 days',
       icon: '⭐',
       color: '#f59e0b',
       priority: 'medium',
@@ -238,8 +238,8 @@ export const analyzeStreak = (entries: DiaryEntry[]): Insight[] => {
   } else if (currentStreak === 0 && entries.length > 0) {
     insights.push({
       type: 'suggestion',
-      title: 'Yeniden Başla 💪',
-      description: 'Streak\'in kopmuş ama sorun değil. Bugün yeniden başla!',
+      title: 'Start Again 💪',
+      description: 'Your streak is broken but it\'s okay. Start again today!',
       icon: '💪',
       color: '#3b82f6',
       priority: 'medium'
@@ -272,8 +272,8 @@ export const analyzeStreak = (entries: DiaryEntry[]): Insight[] => {
   if (maxStreak >= 7 && maxStreak > currentStreak) {
     insights.push({
       type: 'achievement',
-      title: `En Uzun Streak: ${maxStreak} Gün! 🏆`,
-      description: 'Bu rekoru tekrar kırabilirsin!',
+      title: `Longest Streak: ${maxStreak} Days! 🏆`,
+      description: 'You can break this record again!',
       icon: '🏆',
       color: '#f59e0b',
       priority: 'low',
@@ -315,8 +315,8 @@ export const analyzeWords = (entries: DiaryEntry[]): Insight[] => {
   if (topWords.length > 0) {
     insights.push({
       type: 'pattern',
-      title: 'En Çok Kullandığın Kelimeler 💬',
-      description: `${topWords.slice(0, 3).join(', ')} kelimelerini sık kullanıyorsun`,
+      title: 'Your Most Used Words 💬',
+      description: `You frequently use the words: ${topWords.slice(0, 3).join(', ')}`,
       icon: '💬',
       color: '#06b6d4',
       priority: 'low',
@@ -334,8 +334,8 @@ export const analyzeWords = (entries: DiaryEntry[]): Insight[] => {
   if (positiveCount > negativeCount * 1.5) {
     insights.push({
       type: 'mood',
-      title: 'Pozitif Enerji! ✨',
-      description: 'Yazılarında pozitif kelimeler daha fazla. Harika!',
+      title: 'Positive Energy! ✨',
+      description: 'You use more positive words in your writings. Great!',
       icon: '✨',
       color: '#10b981',
       priority: 'medium',
@@ -344,8 +344,8 @@ export const analyzeWords = (entries: DiaryEntry[]): Insight[] => {
   } else if (negativeCount > positiveCount * 1.5) {
     insights.push({
       type: 'suggestion',
-      title: 'Kendine İyi Bak 💙',
-      description: 'Son günlerde stresli kelimeler artmış. Bir nefes al.',
+      title: 'Take Care of Yourself 💙',
+      description: 'Stressful words have increased recently. Take a breath.',
       icon: '💙',
       color: '#3b82f6',
       priority: 'high',
@@ -366,8 +366,8 @@ export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
   if (entries.length === 1) {
     insights.push({
       type: 'achievement',
-      title: 'İlk Günlüğün! 🎉',
-      description: 'Tebrikler! Yolculuğuna başladın',
+      title: 'Your First Diary! 🎉',
+      description: 'Congratulations! You\'ve started your journey',
       icon: '🎉',
       color: '#ec4899',
       priority: 'high'
@@ -380,8 +380,8 @@ export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
     if (entries.length === milestone) {
       insights.push({
         type: 'achievement',
-        title: `${milestone}. Günlüğün! 🏆`,
-        description: `${milestone} günlük yazdın! İnanılmaz bir başarı`,
+        title: `Your ${milestone}th Diary! 🏆`,
+        description: `You wrote ${milestone} diaries! An incredible achievement`,
         icon: '🏆',
         color: '#f59e0b',
         priority: 'high',
@@ -399,8 +399,8 @@ export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
   if (totalWords > 10000) {
     insights.push({
       type: 'achievement',
-      title: 'Kelime Ustası! 📚',
-      description: `${totalWords.toLocaleString('tr-TR')} kelime yazmışsın! Bu bir kitap olur`,
+      title: 'Word Master! 📚',
+      description: `You wrote ${totalWords.toLocaleString('en-US')} words! This would be a book`,
       icon: '📚',
       color: '#8b5cf6',
       priority: 'medium',
@@ -439,8 +439,8 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
   if (entries.length === 0) {
     suggestions.push({
       type: 'suggestion',
-      title: 'İlk Günlüğünü Yaz! 🌟',
-      description: 'Yolculuğuna başlamak için ilk günlüğünü oluştur',
+      title: 'Write Your First Diary! 🌟',
+      description: 'Create your first diary to start your journey',
       icon: '🌟',
       color: '#3b82f6',
       priority: 'high'
@@ -457,8 +457,8 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
   if (daysSinceLastEntry >= 3) {
     suggestions.push({
       type: 'suggestion',
-      title: 'Seni Özledik! 💙',
-      description: `${daysSinceLastEntry} gündür yazmıyorsun. Geri dön!`,
+      title: 'We Miss You! 💙',
+      description: `You haven't written for ${daysSinceLastEntry} days. Come back!`,
       icon: '💙',
       color: '#3b82f6',
       priority: 'high'
@@ -471,8 +471,8 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
     if (last7Days.length === 7) {
       suggestions.push({
         type: 'suggestion',
-        title: 'Düzenli Yazma Hedefi 🎯',
-        description: 'Her gün yazmayı dene, 30 günlük hedefine ulaş!',
+        title: 'Regular Writing Goal 🎯',
+        description: 'Try writing every day, reach your 30-day goal!',
         icon: '🎯',
         color: '#10b981',
         priority: 'medium'
