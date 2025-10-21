@@ -9,22 +9,23 @@ interface HelpGuideScreenProps {
   navigation: any;
 }
 
-const FAQ_ITEMS: { q: string; a: string }[] = [
-  { q: t('welcome') === 'Welcome' ? 'How to write a diary?' : 'Günlük nasıl yazılır?', a: t('welcome') === 'Welcome' ? 'Press the "Write Today" button on the main page, write your feelings and thoughts.' : 'Ana sayfadaki "Bugün Yaz" butonuna bas, hislerini ve düşüncelerini yaz.' },
-  { q: t('welcome') === 'Welcome' ? 'What is the difference between Dream and Goal?' : 'Hayal ve Hedef arasındaki fark nedir?', a: t('welcome') === 'Welcome' ? 'Dream is vision, goal is measurable step. Goals progress with milestones.' : 'Hayal vizyonundur, hedef ise ölçülebilir bir adımdır. Hedefler milestone'larla ilerler.' },
-  { q: t('welcome') === 'Welcome' ? 'What are promises for?' : 'Sözler ne işe yarar?', a: t('welcome') === 'Welcome' ? 'Simple commitments you make to yourself. Increases confidence as you complete them.' : 'Kendine verdiğin basit taahhütlerdir. Tamamladıkça güvenini artırır.' },
-  { q: t('welcome') === 'Welcome' ? 'How do I set up notifications?' : 'Bildirimleri nasıl ayarlarım?', a: t('welcome') === 'Welcome' ? 'Manage morning/evening, silent hours and summary options from Settings > Notifications.' : 'Ayarlar > Bildirimler ekranından sabah/akşam, sessiz saatler ve özet seçeneklerini yönet.' },
-  { q: t('welcome') === 'Welcome' ? 'How does theme change?' : 'Tema nasıl değişir?', a: t('welcome') === 'Welcome' ? 'You can change it instantly via Settings > Theme Selection.' : 'Ayarlar > Tema Seçimi üzerinden anında değiştirebilirsin.' },
-  { q: t('welcome') === 'Welcome' ? 'What is Milestone?' : 'Milestone nedir?', a: t('welcome') === 'Welcome' ? 'Sub-tasks within goals. Percentage automatically increases as you mark them, mini celebration at 100%.' : 'Hedef içindeki alt görevlerdir. İşaretledikçe yüzde otomatik artar, %100'de mini kutlama olur.' },
-  { q: t('welcome') === 'Welcome' ? 'Will my data be lost?' : 'Verilerim kaybolur mu?', a: t('welcome') === 'Welcome' ? 'Data is stored on device; use "Data Backup" screen for regular backups.' : 'Veriler cihazında saklanır; düzenli yedekleme için "Veri Yedekleme" ekranını kullan.' },
-  { q: t('welcome') === 'Welcome' ? 'How is language changed?' : 'Dil nasıl değiştirilir?', a: t('welcome') === 'Welcome' ? 'Switch between Turkish/English via Settings > Language Selection.' : 'Ayarlar > Dil Seçimi üzerinden Türkçe/İngilizce arasında geçiş yap.' },
-  { q: t('welcome') === 'Welcome' ? 'Are motivation messages personal?' : 'Motivasyon mesajları kişisel mi?', a: t('welcome') === 'Welcome' ? 'Messages become dynamic according to your mood and goal trends.' : 'Ruh halin ve hedef trendlerine göre mesajlar dinamikleşir.' },
-  { q: t('welcome') === 'Welcome' ? 'I want to report a problem.' : 'Sorun bildirmek isterim.', a: t('welcome') === 'Welcome' ? 'You can reach us from Settings > Help & Support section.' : 'Ayarlar > Yardım & Destek bölümünden bize ulaşabilirsin.' },
-];
 
 export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+
+  const FAQ_ITEMS: { q: string; a: string }[] = [
+    { q: t('welcome') === 'Welcome' ? 'How to write a diary?' : 'Günlük nasıl yazılır?', a: t('welcome') === 'Welcome' ? 'Press the "Write Today" button on the main page, write your feelings and thoughts.' : 'Ana sayfadaki "Bugün Yaz" butonuna bas, hislerini ve düşüncelerini yaz.' },
+    { q: t('welcome') === 'Welcome' ? 'What is the difference between Dream and Goal?' : 'Hayal ve Hedef arasındaki fark nedir?', a: t('welcome') === 'Welcome' ? 'Dream is vision, goal is measurable step. Goals progress with milestones.' : 'Hayal vizyonundur, hedef ise ölçülebilir bir adımdır. Hedefler milestone'larla ilerler.' },
+    { q: t('welcome') === 'Welcome' ? 'What are promises for?' : 'Sözler ne işe yarar?', a: t('welcome') === 'Welcome' ? 'Simple commitments you make to yourself. Increases confidence as you complete them.' : 'Kendine verdiğin basit taahhütlerdir. Tamamladıkça güvenini artırır.' },
+    { q: t('welcome') === 'Welcome' ? 'How do I set up notifications?' : 'Bildirimleri nasıl ayarlarım?', a: t('welcome') === 'Welcome' ? 'Manage morning/evening, silent hours and summary options from Settings > Notifications.' : 'Ayarlar > Bildirimler ekranından sabah/akşam, sessiz saatler ve özet seçeneklerini yönet.' },
+    { q: t('welcome') === 'Welcome' ? 'How does theme change?' : 'Tema nasıl değişir?', a: t('welcome') === 'Welcome' ? 'You can change it instantly via Settings > Theme Selection.' : 'Ayarlar > Tema Seçimi üzerinden anında değiştirebilirsin.' },
+    { q: t('welcome') === 'Welcome' ? 'What is Milestone?' : 'Milestone nedir?', a: t('welcome') === 'Welcome' ? 'Sub-tasks within goals. Percentage automatically increases as you mark them, mini celebration at 100%.' : 'Hedef içindeki alt görevlerdir. İşaretledikçe yüzde otomatik artar, %100'de mini kutlama olur.' },
+    { q: t('welcome') === 'Welcome' ? 'Will my data be lost?' : 'Verilerim kaybolur mu?', a: t('welcome') === 'Welcome' ? 'Data is stored on device; use "Data Backup" screen for regular backups.' : 'Veriler cihazında saklanır; düzenli yedekleme için "Veri Yedekleme" ekranını kullan.' },
+    { q: t('welcome') === 'Welcome' ? 'How is language changed?' : 'Dil nasıl değiştirilir?', a: t('welcome') === 'Welcome' ? 'Switch between Turkish/English via Settings > Language Selection.' : 'Ayarlar > Dil Seçimi üzerinden Türkçe/İngilizce arasında geçiş yap.' },
+    { q: t('welcome') === 'Welcome' ? 'Are motivation messages personal?' : 'Motivasyon mesajları kişisel mi?', a: t('welcome') === 'Welcome' ? 'Messages become dynamic according to your mood and goal trends.' : 'Ruh halin ve hedef trendlerine göre mesajlar dinamikleşir.' },
+    { q: t('welcome') === 'Welcome' ? 'I want to report a problem.' : 'Sorun bildirmek isterim.', a: t('welcome') === 'Welcome' ? 'You can reach us from Settings > Help & Support section.' : 'Ayarlar > Yardım & Destek bölümünden bize ulaşabilirsin.' },
+  ];
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: currentTheme.colors.background },
