@@ -758,7 +758,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       {/* Header */}
       <View style={dynamicStyles.header}>
         <View style={{ width: 24 }} />
-        <Text style={dynamicStyles.headerTitle}>Görevler & Hatırlatıcılar</Text>
+        <Text style={dynamicStyles.headerTitle}>
+          {t('welcome') === 'Welcome' ? 'Tasks & Reminders' : 'Görevler & Hatırlatıcılar'}
+        </Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -769,20 +771,28 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       >
         {/* Gün Özeti Kartı */}
         <View style={dynamicStyles.summaryCard}>
-          <Text style={dynamicStyles.summaryTitle}>🎯 Bugün</Text>
+          <Text style={dynamicStyles.summaryTitle}>
+            🎯 {t('welcome') === 'Welcome' ? 'Today' : 'Bugün'}
+          </Text>
           
           <View style={dynamicStyles.statsRow}>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{completedCount}/{todayTasks.length}</Text>
-              <Text style={dynamicStyles.statLabel}>Görevler</Text>
+              <Text style={dynamicStyles.statLabel}>
+                {t('welcome') === 'Welcome' ? 'Tasks' : 'Görevler'}
+              </Text>
             </View>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{getTotalFocusTime()}</Text>
-              <Text style={dynamicStyles.statLabel}>Odaklanma</Text>
+              <Text style={dynamicStyles.statLabel}>
+                {t('welcome') === 'Welcome' ? 'Focus' : 'Odaklanma'}
+              </Text>
             </View>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{getWorkTime()}</Text>
-              <Text style={dynamicStyles.statLabel}>Çalışma</Text>
+              <Text style={dynamicStyles.statLabel}>
+                {t('welcome') === 'Welcome' ? 'Work' : 'Çalışma'}
+              </Text>
             </View>
           </View>
 
@@ -809,14 +819,16 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
 
         {/* Görevler Bölümü */}
         <View style={dynamicStyles.tasksSection}>
-          <Text style={dynamicStyles.sectionTitle}>📋 Görevlerim</Text>
+          <Text style={dynamicStyles.sectionTitle}>
+            📋 {t('welcome') === 'Welcome' ? 'My Tasks' : 'Görevlerim'}
+          </Text>
           
           <View style={dynamicStyles.tabContainer}>
             {[
               { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
-              { key: 'weekly', label: 'Haftalık', emoji: '📆' },
-              { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
-              { key: 'all', label: 'Tümü', emoji: '📝' },
+              { key: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık', emoji: '📆' },
+              { key: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık', emoji: '🗓️' },
+              { key: 'all', label: t('welcome') === 'Welcome' ? 'All' : 'Tümü', emoji: '📝' },
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
@@ -838,12 +850,20 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             {filteredTasks.length === 0 ? (
               <View style={dynamicStyles.emptyState}>
                 <Text style={dynamicStyles.emptyIcon}>📝</Text>
-                <Text style={dynamicStyles.emptyTitle}>Henüz görev yok</Text>
+                <Text style={dynamicStyles.emptyTitle}>
+                  {t('welcome') === 'Welcome' ? 'No tasks yet' : 'Henüz görev yok'}
+                </Text>
                 <Text style={dynamicStyles.emptyMessage}>
-                  {activeTab === 'daily' ? 'Bugün için görev ekleyin' : 
-                   activeTab === 'weekly' ? 'Haftalık görevlerinizi planlayın' :
-                   activeTab === 'monthly' ? 'Aylık hedeflerinizi belirleyin' :
-                   'İlk görevinizi ekleyerek başlayın'}
+                  {t('welcome') === 'Welcome' 
+                    ? (activeTab === 'daily' ? 'Add a task for today' : 
+                       activeTab === 'weekly' ? 'Plan your weekly tasks' :
+                       activeTab === 'monthly' ? 'Set your monthly goals' :
+                       'Start by adding your first task')
+                    : (activeTab === 'daily' ? 'Bugün için görev ekleyin' : 
+                       activeTab === 'weekly' ? 'Haftalık görevlerinizi planlayın' :
+                       activeTab === 'monthly' ? 'Aylık hedeflerinizi belirleyin' :
+                       'İlk görevinizi ekleyerek başlayın')
+                  }
                 </Text>
               </View>
             ) : (

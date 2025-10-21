@@ -402,7 +402,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
             style={dynamicStyles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Günlük ara..."
+            placeholder={t('welcome') === 'Welcome' ? 'Search diary...' : 'Günlük ara...'}
             placeholderTextColor={currentTheme.colors.muted}
           />
         </View>
@@ -412,7 +412,9 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       <View style={dynamicStyles.filtersContainer}>
         {/* Mood Filters */}
         <View style={dynamicStyles.filterSection}>
-          <Text style={dynamicStyles.filterLabel}>Ruh Hali:</Text>
+          <Text style={dynamicStyles.filterLabel}>
+            {t('welcome') === 'Welcome' ? 'Mood:' : 'Ruh Hali:'}
+          </Text>
           <View style={dynamicStyles.moodFilterContainer}>
             <TouchableOpacity
               style={[
@@ -425,7 +427,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
                 dynamicStyles.tagFilterText,
                 selectedMood === null && dynamicStyles.selectedTagFilterText,
               ]}>
-                Tümü
+                {t('welcome') === 'Welcome' ? 'All' : 'Tümü'}
               </Text>
             </TouchableOpacity>
             
@@ -463,7 +465,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
                     dynamicStyles.tagFilterText,
                     selectedTag === null && dynamicStyles.selectedTagFilterText,
                   ]}>
-                    Tümü
+                    {t('welcome') === 'Welcome' ? 'All' : 'Tümü'}
                   </Text>
                 </TouchableOpacity>
                 
@@ -501,7 +503,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       {/* Results Count */}
       <View style={dynamicStyles.resultsInfo}>
         <Text style={dynamicStyles.resultsText}>
-          {filteredEntries.length} günlük bulundu
+          {filteredEntries.length} {t('welcome') === 'Welcome' ? 'diaries found' : 'günlük bulundu'}
         </Text>
       </View>
 
@@ -517,9 +519,11 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       ) : filteredEntries.length === 0 ? (
         <View style={dynamicStyles.emptyState}>
           <Ionicons name="book-outline" size={64} color={currentTheme.colors.secondary} />
-          <Text style={dynamicStyles.emptyTitle}>Günlük bulunamadı</Text>
+          <Text style={dynamicStyles.emptyTitle}>
+            {t('welcome') === 'Welcome' ? 'No diary found' : 'Günlük bulunamadı'}
+          </Text>
           <Text style={dynamicStyles.emptyMessage}>
-            Arama kriterlerinizi değiştirmeyi deneyin
+            {t('welcome') === 'Welcome' ? 'Try changing your search criteria' : 'Arama kriterlerinizi değiştirmeyi deneyin'}
           </Text>
         </View>
       ) : (

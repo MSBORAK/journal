@@ -758,9 +758,11 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       />
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.headerTitle}>✨ Hayaller & Hedefler</Text>
+        <Text style={dynamicStyles.headerTitle}>
+          ✨ {t('welcome') === 'Welcome' ? 'Dreams & Goals' : 'Hayaller & Hedefler'}
+        </Text>
         <Text style={dynamicStyles.headerSubtitle}>
-          Geleceğine yön ver, hayallerini gerçeğe dönüştür
+          {t('welcome') === 'Welcome' ? 'Guide your future, turn your dreams into reality' : 'Geleceğine yön ver, hayallerini gerçeğe dönüştür'}
         </Text>
       </View>
 
