@@ -217,6 +217,14 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       color: '#10b981',
     },
     {
+      id: 'language',
+      title: 'Dil Seçimi',
+      subtitle: 'Uygulama dilini değiştir',
+      icon: 'language-outline',
+      screen: 'LanguageSelection',
+      color: '#3b82f6',
+    },
+    {
       id: 'app',
       title: 'Uygulama Ayarları',
       subtitle: 'Diğer uygulama tercihleri',

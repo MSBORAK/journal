@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
-import { LanguageProvider, useLanguage } from './src/i18n/LanguageContext';
+import { LanguageProvider, useLanguage } from './src/contexts/LanguageContext';
 import { TimerProvider } from './src/contexts/TimerContext';
 import { PomodoroProvider } from './src/contexts/PomodoroContext';
 import GlobalFloatingPomodoro from './src/components/GlobalFloatingPomodoro';

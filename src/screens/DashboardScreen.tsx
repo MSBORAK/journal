@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useTranslation } from '../i18n/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { themes } from '../themes';
 // import { useFont } from '../contexts/FontContext'; // Kaldırıldı
 import { useDiary } from '../hooks/useDiary';
@@ -53,7 +53,7 @@ interface DashboardScreenProps {
 const DashboardScreen = React.memo(function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   
   // Tooltips
   const tooltipManager = useTooltips('Dashboard');
