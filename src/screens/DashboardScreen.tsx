@@ -2909,23 +2909,23 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               lineHeight: 24,
               marginBottom: 20,
             }}>
-              Artık burası senin dünyan! 🌟{'\n\n'}
-              Senin kuralların geçerli, senin hikayen burada yazılacak.{'\n\n'}
-              Her gün biraz daha kendini keşfetmeye hazır mısın? ✨
+              {t('welcome') === 'Welcome' ? 'Now this is your world! 🌟' : 'Artık burası senin dünyan! 🌟'}{'\n\n'}
+              {t('welcome') === 'Welcome' ? 'Your rules apply, your story will be written here.' : 'Senin kuralların geçerli, senin hikayen burada yazılacak.'}{'\n\n'}
+              {t('welcome') === 'Welcome' ? 'Are you ready to discover yourself a little more every day? ✨' : 'Her gün biraz daha kendini keşfetmeye hazır mısın? ✨'}
             </Text>
             
             <View style={{ width: '100%', marginBottom: 24 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>📝</Text>
-                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>Günlük yaz, ruhunu dinle</Text>
+                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Write a diary, listen to your soul' : 'Günlük yaz, ruhunu dinle'}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>🎯</Text>
-                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>Hedeflerini takip et</Text>
+                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Track your goals' : 'Hedeflerini takip et'}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>💖</Text>
-                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>Kendini sev ve büyüt</Text>
+                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Love and grow yourself' : 'Kendini sev ve büyüt'}</Text>
               </View>
             </View>
             
@@ -2951,7 +2951,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 fontSize: 16,
                 fontWeight: 'bold',
                 textAlign: 'center',
-              }}>Harika! Başlayalım 🚀</Text>
+              }}>{t('welcome') === 'Welcome' ? 'Great! Let\'s start 🚀' : 'Harika! Başlayalım 🚀'}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

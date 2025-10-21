@@ -181,7 +181,7 @@ function MainTabs() {
         name="DreamsGoals"
         component={DreamsGoalsScreen}
         options={{
-          title: 'Hayaller',
+          title: t('welcome') === 'Welcome' ? 'Dreams' : 'Hayaller',
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('DreamsGoals', focused, color, size),
         }}
       />
@@ -189,7 +189,7 @@ function MainTabs() {
         name="Statistics"
         component={StatisticsScreen}
         options={{
-          title: 'İstatistikler',
+          title: t('welcome') === 'Welcome' ? 'Statistics' : 'İstatistikler',
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Statistics', focused, color, size),
         }}
       />
