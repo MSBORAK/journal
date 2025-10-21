@@ -169,10 +169,10 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 dynamicStyles.habitProgressText,
                 habit.todayCompleted && { color: currentTheme.colors.background }
               ]}>
-                {habit.todayValue} / {habit.target} {habit.unit === 'glasses' ? 'bardak' : 
-                 habit.unit === 'minutes' ? 'dk' : 
-                 habit.unit === 'times' ? 'kez' : 
-                 habit.unit === 'hours' ? 'saat' : ''}
+                {habit.todayValue} / {habit.target} {habit.unit === 'glasses' ? (t('welcome') === 'Welcome' ? 'glasses' : 'bardak') : 
+                 habit.unit === 'minutes' ? (t('welcome') === 'Welcome' ? 'min' : 'dk') : 
+                 habit.unit === 'times' ? (t('welcome') === 'Welcome' ? 'times' : 'kez') : 
+                 habit.unit === 'hours' ? (t('welcome') === 'Welcome' ? 'hours' : 'saat') : ''}
               </Text>
             </View>
 
@@ -182,7 +182,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   dynamicStyles.habitStreakText,
                   habit.todayCompleted && { color: currentTheme.colors.background }
                 ]}>
-                  🔥 {streak.currentStreak} gün seri
+                  🔥 {streak.currentStreak} {t('welcome') === 'Welcome' ? 'day streak' : 'gün seri'}
                 </Text>
               </View>
             )}
@@ -206,19 +206,19 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             colors={[currentTheme.colors.primary + '20', currentTheme.colors.accent + '15']}
             style={dynamicStyles.progressGradient}
           >
-            <Text style={dynamicStyles.progressCardTitle}>📊 Haftalık Özet</Text>
+            <Text style={dynamicStyles.progressCardTitle}>📊 {t('welcome') === 'Welcome' ? 'Weekly Summary' : 'Haftalık Özet'}</Text>
             <View style={dynamicStyles.progressStats}>
               <View style={dynamicStyles.progressStat}>
                 <Text style={dynamicStyles.progressStatNumber}>{weeklyStats.totalHabits}</Text>
-                <Text style={dynamicStyles.progressStatLabel}>Aktif Alışkanlık</Text>
+                <Text style={dynamicStyles.progressStatLabel}>{t('welcome') === 'Welcome' ? 'Active Habits' : 'Aktif Alışkanlık'}</Text>
               </View>
               <View style={dynamicStyles.progressStat}>
                 <Text style={dynamicStyles.progressStatNumber}>{weeklyStats.totalCompletions}</Text>
-                <Text style={dynamicStyles.progressStatLabel}>Tamamlanan</Text>
+                <Text style={dynamicStyles.progressStatLabel}>{t('welcome') === 'Welcome' ? 'Completed' : 'Tamamlanan'}</Text>
               </View>
               <View style={dynamicStyles.progressStat}>
                 <Text style={dynamicStyles.progressStatNumber}>{Math.round(weeklyStats.completionRate)}%</Text>
-                <Text style={dynamicStyles.progressStatLabel}>Başarı Oranı</Text>
+                <Text style={dynamicStyles.progressStatLabel}>{t('welcome') === 'Welcome' ? 'Success Rate' : 'Başarı Oranı'}</Text>
               </View>
             </View>
           </LinearGradient>
@@ -230,7 +230,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             colors={[currentTheme.colors.accent + '20', currentTheme.colors.primary + '15']}
             style={dynamicStyles.progressGradient}
           >
-            <Text style={dynamicStyles.progressCardTitle}>🔥 En Uzun Seriler</Text>
+            <Text style={dynamicStyles.progressCardTitle}>🔥 {t('welcome') === 'Welcome' ? 'Longest Streaks' : 'En Uzun Seriler'}</Text>
             {streaks
               .sort((a, b) => b.currentStreak - a.currentStreak)
               .slice(0, 3)
@@ -241,7 +241,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     <Text style={dynamicStyles.streakIcon}>{habit.icon}</Text>
                     <View style={dynamicStyles.streakContent}>
                       <Text style={dynamicStyles.streakTitle}>{habit.title}</Text>
-                      <Text style={dynamicStyles.streakNumber}>{streak.currentStreak} gün</Text>
+                      <Text style={dynamicStyles.streakNumber}>{streak.currentStreak} {t('welcome') === 'Welcome' ? 'days' : 'gün'}</Text>
                     </View>
                   </View>
                 ) : null;
