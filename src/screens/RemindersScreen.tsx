@@ -75,8 +75,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     { value: 'health', label: t('welcome') === 'Welcome' ? 'Health' : 'Sağlık', emoji: '🏥' },
     { value: 'exercise', label: 'Egzersiz', emoji: '🏃‍♀️' },
     { value: 'meal', label: 'Yemek', emoji: '🍽️' },
-    { value: 'personal', label: 'Kişisel', emoji: '👤' },
-    { value: 'work', label: 'İş', emoji: '💼' },
+    { value: 'personal', label: t('welcome') === 'Welcome' ? 'Personal' : 'Kişisel', emoji: '👤' },
+    { value: 'work', label: t('welcome') === 'Welcome' ? 'Work' : 'İş', emoji: '💼' },
     { value: 'study', label: 'Ders', emoji: '📚' },
     { value: 'custom', label: 'Özel', emoji: '⭐' },
   ];
@@ -89,8 +89,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     { value: 'once', label: 'Tek Seferlik' },
     { value: 'hourly', label: 'Saatlik' },
     { value: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük' },
-    { value: 'weekly', label: 'Haftalık' },
-    { value: 'monthly', label: 'Aylık' },
+    { value: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık' },
+    { value: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık' },
   ];
 
   const reminderTypeOptions = [
@@ -557,13 +557,13 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      showAlert('Hata', 'Başlık boş olamaz', 'error');
+      showAlert(t('welcome') === 'Welcome' ? 'Error' : 'Hata', t('welcome') === 'Welcome' ? 'Title cannot be empty' : 'Başlık boş olamaz', 'error');
       return;
     }
 
     // Eğer gelecek tarih seçilmişse tarih kontrolü yap
     if (formData.reminderType === 'scheduled' && !formData.date) {
-      showAlert('Hata', 'Gelecek tarih için bir tarih seçmelisiniz', 'error');
+      showAlert(t('welcome') === 'Welcome' ? 'Error' : 'Hata', t('welcome') === 'Welcome' ? 'You must select a date for future date' : 'Gelecek tarih için bir tarih seçmelisiniz', 'error');
       return;
     }
 
@@ -606,7 +606,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       resetForm();
     } catch (error) {
       console.error('Error saving reminder:', error);
-      showAlert('Hata', 'Hatırlatıcı kaydedilemedi', 'error');
+      showAlert(t('welcome') === 'Welcome' ? 'Error' : 'Hata', t('welcome') === 'Welcome' ? 'Reminder could not be saved' : 'Hatırlatıcı kaydedilemedi', 'error');
     }
   };
 
@@ -631,8 +631,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     setPendingDeleteId(reminderId);
     setAlertConfig({
       visible: true,
-      title: 'Hatırlatıcıyı Sil',
-      message: 'Bu hatırlatıcıyı silmek istediğinizden emin misiniz?',
+      title: t('welcome') === 'Welcome' ? 'Delete Reminder' : 'Hatırlatıcıyı Sil',
+      message: t('welcome') === 'Welcome' ? 'Are you sure you want to delete this reminder?' : 'Bu hatırlatıcıyı silmek istediğinizden emin misiniz?',
       type: 'warning',
     });
   };
