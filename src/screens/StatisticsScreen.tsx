@@ -1780,13 +1780,13 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             }
           ]}
         >
-          <Text style={dynamicStyles.title}>🗺️ YOLCULUĞUM</Text>
-          <Text style={dynamicStyles.titleSubtitle}>Yaşam haritan ve kişisel gelişim yolculuğun</Text>
+          <Text style={dynamicStyles.title}>🗺️ {t('welcome') === 'Welcome' ? 'MY JOURNEY' : 'YOLCULUĞUM'}</Text>
+          <Text style={dynamicStyles.titleSubtitle}>{t('welcome') === 'Welcome' ? 'Your life map and personal development journey' : 'Yaşam haritan ve kişisel gelişim yolculuğun'}</Text>
         </Animated.View>
 
         {/* Yaşam Haritası */}
         <Animated.View
-          style={[
+            style={[
             dynamicStyles.lifeMapCard,
             {
               opacity: fadeAnims.lifeMap,
@@ -1819,8 +1819,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               end={{ x: 1, y: 1 }}
             >
               <View style={dynamicStyles.lifeMapHeader}>
-                <Text style={dynamicStyles.lifeMapTitle}>🔥 Yolculuğum</Text>
-                <Text style={dynamicStyles.lifeMapSubtitle}>Alışkanlıklar ve kişisel gelişim takibi</Text>
+                <Text style={dynamicStyles.lifeMapTitle}>🔥 {t('welcome') === 'Welcome' ? 'My Journey' : 'Yolculuğum'}</Text>
+                <Text style={dynamicStyles.lifeMapSubtitle}>{t('welcome') === 'Welcome' ? 'Habit and personal development tracking' : 'Alışkanlıklar ve kişisel gelişim takibi'}</Text>
               </View>
 
               {/* Tab Bar */}
@@ -1831,30 +1831,30 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   activeOpacity={0.7}
                 >
                   <Text style={[dynamicStyles.tabText, activeTab === 'stats' && dynamicStyles.activeTabText]}>
-                    📊 İstatistikler
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
+                    📊 {t('welcome') === 'Welcome' ? 'Statistics' : 'İstatistikler'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
                   style={[dynamicStyles.tab, activeTab === 'habits' && dynamicStyles.activeTab]}
                   onPress={() => handleTabChange('habits')}
                   activeOpacity={0.7}
                 >
                   <Text style={[dynamicStyles.tabText, activeTab === 'habits' && dynamicStyles.activeTabText]}>
-                    🔥 Alışkanlıklar
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
+                    🔥 {t('welcome') === 'Welcome' ? 'Habits' : 'Alışkanlıklar'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
                   style={[dynamicStyles.tab, activeTab === 'progress' && dynamicStyles.activeTab]}
                   onPress={() => handleTabChange('progress')}
                   activeOpacity={0.7}
                 >
                   <Text style={[dynamicStyles.tabText, activeTab === 'progress' && dynamicStyles.activeTabText]}>
-                    📈 İlerleme
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                    📈 {t('welcome') === 'Welcome' ? 'Progress' : 'İlerleme'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
               {/* Tab Content */}
               <Animated.View
@@ -1867,7 +1867,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                   <View style={dynamicStyles.healthInfoContainer}>
                     <Text style={dynamicStyles.healthInfoText}>
-                      📊 Ruh hali dağılımı ve mood trendlerin
+                      📊 {t('welcome') === 'Welcome' ? 'Mood distribution and mood trends' : 'Ruh hali dağılımı ve mood trendlerin'}
                     </Text>
                     <Text style={{
                       fontSize: 14,
@@ -1877,11 +1877,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                       textAlign: 'center',
                     }}>
                       {moodData.length > 0 && moodData[0].percentage > 50 
-                        ? "💫 Harika bir gün geçiriyorsun! Bu enerjiyi koru!"
-                        : "🌱 Her gün farklı olabilir, bu normal! Kendini dinle."
+                        ? (t('welcome') === 'Welcome' ? "💫 You are having a great day! Keep this energy!" : "💫 Harika bir gün geçiriyorsun! Bu enerjiyi koru!")
+                        : (t('welcome') === 'Welcome' ? "🌱 Every day can be different, that's normal! Listen to yourself." : "🌱 Her gün farklı olabilir, bu normal! Kendini dinle.")
                       }
                     </Text>
-                  </View>
+            </View>
 
                   {/* Simple Mood Distribution */}
                   <View style={{
@@ -1895,7 +1895,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     shadowRadius: 4,
                     elevation: 3,
                   }}>
-                    <Text style={dynamicStyles.chartTitle}>📊 Mood Dağılımı</Text>
+                    <Text style={dynamicStyles.chartTitle}>📊 {t('welcome') === 'Welcome' ? 'Mood Distribution' : 'Mood Dağılımı'}</Text>
                     <View style={{
                       flexDirection: 'row',
                       justifyContent: 'space-around',
@@ -1916,16 +1916,16 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                             marginBottom: 8,
                           }}>
                             <Text style={{ fontSize: 24 }}>{mood.emoji}</Text>
-                          </View>
+            </View>
                           <Text style={{
                             fontSize: 12,
                             color: currentTheme.colors.text,
                             fontWeight: 'bold',
                           }}>{mood.percentage}%</Text>
-                        </View>
+            </View>
                       ))}
-                    </View>
-                  </View>
+        </View>
+      </View>
 
                   {/* Simple Mood Progress Bar */}
                   <View style={{
@@ -1939,7 +1939,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     shadowRadius: 4,
                     elevation: 3,
                   }}>
-                    <Text style={dynamicStyles.chartTitle}>📈 Mood Trendi</Text>
+                    <Text style={dynamicStyles.chartTitle}>📈 {t('welcome') === 'Welcome' ? 'Mood Trend' : 'Mood Trendi'}</Text>
                     <View style={{
                       marginTop: 20,
                     }}>
@@ -1950,7 +1950,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                         marginBottom: 16,
                       }}>
                         {moodData.map((mood, index) => (
-                          <View 
+                    <View 
                             key={index}
                             style={{
                               position: 'absolute',
@@ -1961,8 +1961,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                               borderRadius: 4,
                             }}
                           />
-                        ))}
-                      </View>
+                ))}
+              </View>
                       <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
@@ -1973,9 +1973,9 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                             color: currentTheme.colors.text,
                           }}>{mood.emoji}</Text>
                         ))}
-                      </View>
-                    </View>
-                  </View>
+            </View>
+              </View>
+              </View>
 
                   {/* Mood Summary */}
                   <View style={{
@@ -2011,10 +2011,10 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                             color: currentTheme.colors.text,
                             flex: 1,
                           }}>{mood.emoji} {mood.percentage}%</Text>
-                        </View>
+              </View>
                       ))}
-                    </View>
-                  </View>
+            </View>
+          </View>
                 </ScrollView>
               )}
 
@@ -2023,11 +2023,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   {getTodayHabits().length === 0 ? (
                     <View style={dynamicStyles.emptyState}>
                       <Text style={dynamicStyles.emptyIcon}>🔥</Text>
-                      <Text style={dynamicStyles.emptyTitle}>Alışkanlıklarını Oluştur</Text>
+                      <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'Create Your Habits' : 'Alışkanlıklarını Oluştur'}</Text>
                       <Text style={dynamicStyles.emptyMessage}>
-                        Günlük alışkanlıklar, büyük değişimlerin anahtarıdır.
+                        {t('welcome') === 'Welcome' ? 'Daily habits are the key to great changes.' : 'Günlük alışkanlıklar, büyük değişimlerin anahtarıdır.'}
                       </Text>
-                    </View>
+        </View>
                   ) : (
                     getTodayHabits().map((habit, index) => {
                       const streak = getHabitStreaks().find(s => s.habitId === habit.id);
@@ -2042,11 +2042,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   {habits.length === 0 ? (
                     <View style={dynamicStyles.emptyState}>
                       <Text style={dynamicStyles.emptyIcon}>📊</Text>
-                      <Text style={dynamicStyles.emptyTitle}>İlerlemeni Takip Et</Text>
+                      <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'Track Your Progress' : 'İlerlemeni Takip Et'}</Text>
                       <Text style={dynamicStyles.emptyMessage}>
-                        Alışkanlıklarını oluşturduktan sonra burada ilerlemeni görebilirsin.
+                        {t('welcome') === 'Welcome' ? 'You can see your progress here after creating your habits.' : 'Alışkanlıklarını oluşturduktan sonra burada ilerlemeni görebilirsin.'}
                       </Text>
-                    </View>
+            </View>
                   ) : (
                     renderProgressCards()
                   )}
@@ -2054,7 +2054,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               )}
               </Animated.View>
             </LinearGradient>
-          </TouchableOpacity>
+            </TouchableOpacity>
         </Animated.View>
 
 
@@ -2114,8 +2114,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     <Ionicons name="arrow-forward" size={16} color={currentTheme.colors.primary} />
                     {' '}{!firstEntry ? 'İlk günlüğünü yaz' : 'Günlük yaz'}
                   </Text>
-                </TouchableOpacity>
-              </View>
+                  </TouchableOpacity>
+            </View>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
@@ -2157,10 +2157,10 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 <View style={dynamicStyles.emptyMoodContainer}>
                   <Text style={dynamicStyles.emptyMoodText}>
                     📊 Mood grafiği henüz oluşmadı
-                  </Text>
+              </Text>
                   <Text style={dynamicStyles.emptyMoodSubtext}>
                     Birkaç günlük yazarak renkli grafiğini gör!
-                  </Text>
+              </Text>
                   <View style={dynamicStyles.sampleChart}>
                     <Text style={dynamicStyles.sampleChartTitle}>Örnek Grafik:</Text>
                     <View style={dynamicStyles.sampleBars}>
@@ -2168,9 +2168,9 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                       <View style={[dynamicStyles.sampleBar, { height: 40, backgroundColor: '#10B981' }]} />
                       <View style={[dynamicStyles.sampleBar, { height: 30, backgroundColor: '#8B5CF6' }]} />
                       <View style={[dynamicStyles.sampleBar, { height: 20, backgroundColor: '#EF4444' }]} />
-                    </View>
-                  </View>
-                </View>
+              </View>
+            </View>
+          </View>
               ) : (
                 <View style={dynamicStyles.moodChartContainer}>
                   {/* Line Chart */}
@@ -2184,8 +2184,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                         <Text style={dynamicStyles.yAxisLabel}>50%</Text>
                         <Text style={dynamicStyles.yAxisLabel}>25%</Text>
                         <Text style={dynamicStyles.yAxisLabel}>0%</Text>
-                      </View>
-                      
+        </View>
+
                       {/* Chart Area */}
                       <View style={dynamicStyles.chartArea}>
                         <View style={dynamicStyles.lineChartLine}>
@@ -2206,14 +2206,14 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                                 />
                                 <Text style={[dynamicStyles.lineChartEmoji, { left: x - 10, top: y + 20 }]}>
                                   {mood.emoji}
-                                </Text>
+                </Text>
                                 <Text style={[dynamicStyles.lineChartPercent, { left: x - 15, top: y - 25 }]}>
                                   {mood.percentage}%
-                                </Text>
-                              </View>
+                </Text>
+              </View>
                             );
                           })}
-                        </View>
+              </View>
                         
                         {/* Grid Lines */}
                         <View style={dynamicStyles.gridLine} />
@@ -2221,8 +2221,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                         <View style={[dynamicStyles.gridLine, { top: 30 }]} />
                         <View style={[dynamicStyles.gridLine, { top: 45 }]} />
                         <View style={[dynamicStyles.gridLine, { top: 60 }]} />
-                      </View>
-                    </View>
+              </View>
+            </View>
                     
                     {/* X-axis labels */}
                     <View style={dynamicStyles.xAxisContainer}>
@@ -2231,18 +2231,18 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                           {mood.emoji}
                         </Text>
                       ))}
-                    </View>
-                  </View>
+          </View>
+        </View>
                   
                   {/* Pie chart removed per request to avoid duplication */}
-                </View>
+      </View>
               )}
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
 
 
-      </ScrollView>
+    </ScrollView>
 
     </SafeAreaView>
   );
