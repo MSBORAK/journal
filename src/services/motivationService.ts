@@ -215,8 +215,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'communication_skills',
     type: 'encouragement',
-    title: 'Bağlar Seni Güçlendirir! 🤝',
-    message: 'İnsanlarla kurduğun güzel bağlar hayatını zenginleştiriyor. Sevgiyle paylaş!',
+    title: 'Connections Empower You! 🤝',
+    message: 'The beautiful connections you build with people enrich your life. Share with love!',
     emoji: '🗣️',
     priority: 'low',
     conditions: {
