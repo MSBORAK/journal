@@ -144,13 +144,29 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               dynamicStyles.habitTitle,
               habit.todayCompleted && { color: currentTheme.colors.background }
             ]}>
-              {habit.title}
+              {habit.title === 'Su İç' ? (t('welcome') === 'Welcome' ? 'Drink Water' : 'Su İç') :
+               habit.title === 'Egzersiz Yap' ? (t('welcome') === 'Welcome' ? 'Exercise' : 'Egzersiz Yap') :
+               habit.title === 'Kitap Oku' ? (t('welcome') === 'Welcome' ? 'Read Books' : 'Kitap Oku') :
+               habit.title === 'Meditasyon Yap' ? (t('welcome') === 'Welcome' ? 'Meditation' : 'Meditasyon Yap') :
+               habit.title === 'Erken Yat' ? (t('welcome') === 'Welcome' ? 'Early Sleep' : 'Erken Yat') :
+               habit.title === 'Sağlıklı Beslen' ? (t('welcome') === 'Welcome' ? 'Healthy Eating' : 'Sağlıklı Beslen') :
+               habit.title === 'Yeni Şey Öğren' ? (t('welcome') === 'Welcome' ? 'Learn New Things' : 'Yeni Şey Öğren') :
+               habit.title === 'Telefon Kullanımı' ? (t('welcome') === 'Welcome' ? 'Phone Usage' : 'Telefon Kullanımı') :
+               habit.title}
             </Text>
             <Text style={[
               dynamicStyles.habitDescription,
               habit.todayCompleted && { color: currentTheme.colors.background, opacity: 0.9 }
             ]}>
-              {habit.description}
+              {habit.description === 'Günde 8 bardak su iç' ? (t('welcome') === 'Welcome' ? 'Drink 8 glasses of water daily' : 'Günde 8 bardak su iç') :
+               habit.description === 'Günde 30 dakika egzersiz' ? (t('welcome') === 'Welcome' ? 'Exercise 30 minutes daily' : 'Günde 30 dakika egzersiz') :
+               habit.description === 'Günde 20 dakika kitap oku' ? (t('welcome') === 'Welcome' ? 'Read for 20 minutes daily' : 'Günde 20 dakika kitap oku') :
+               habit.description === 'Günde 10 dakika meditasyon' ? (t('welcome') === 'Welcome' ? '10 minutes of meditation daily' : 'Günde 10 dakika meditasyon') :
+               habit.description === 'Her gece 23:00\'da yat' ? (t('welcome') === 'Welcome' ? 'Sleep at 11 PM every night' : 'Her gece 23:00\'da yat') :
+               habit.description === 'Günde 3 öğün sağlıklı beslen' ? (t('welcome') === 'Welcome' ? 'Eat 3 healthy meals daily' : 'Günde 3 öğün sağlıklı beslen') :
+               habit.description === 'Günde 1 yeni şey öğren' ? (t('welcome') === 'Welcome' ? 'Learn 1 new thing daily' : 'Günde 1 yeni şey öğren') :
+               habit.description === 'Günde 2 saat telefon kullan' ? (t('welcome') === 'Welcome' ? 'Use phone 2 hours daily' : 'Günde 2 saat telefon kullan') :
+               habit.description}
             </Text>
             
             <View style={dynamicStyles.habitProgress}>
@@ -240,7 +256,17 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   <View key={streak.habitId} style={dynamicStyles.streakItem}>
                     <Text style={dynamicStyles.streakIcon}>{habit.icon}</Text>
                     <View style={dynamicStyles.streakContent}>
-                      <Text style={dynamicStyles.streakTitle}>{habit.title}</Text>
+                      <Text style={dynamicStyles.streakTitle}>
+                        {habit.title === 'Su İç' ? (t('welcome') === 'Welcome' ? 'Drink Water' : 'Su İç') :
+                         habit.title === 'Egzersiz Yap' ? (t('welcome') === 'Welcome' ? 'Exercise' : 'Egzersiz Yap') :
+                         habit.title === 'Kitap Oku' ? (t('welcome') === 'Welcome' ? 'Read Books' : 'Kitap Oku') :
+                         habit.title === 'Meditasyon Yap' ? (t('welcome') === 'Welcome' ? 'Meditation' : 'Meditasyon Yap') :
+                         habit.title === 'Erken Yat' ? (t('welcome') === 'Welcome' ? 'Early Sleep' : 'Erken Yat') :
+                         habit.title === 'Sağlıklı Beslen' ? (t('welcome') === 'Welcome' ? 'Healthy Eating' : 'Sağlıklı Beslen') :
+                         habit.title === 'Yeni Şey Öğren' ? (t('welcome') === 'Welcome' ? 'Learn New Things' : 'Yeni Şey Öğren') :
+                         habit.title === 'Telefon Kullanımı' ? (t('welcome') === 'Welcome' ? 'Phone Usage' : 'Telefon Kullanımı') :
+                         habit.title}
+                      </Text>
                       <Text style={dynamicStyles.streakNumber}>{streak.currentStreak} {t('welcome') === 'Welcome' ? 'days' : 'gün'}</Text>
                     </View>
                   </View>
