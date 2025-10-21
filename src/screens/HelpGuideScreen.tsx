@@ -64,8 +64,8 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
     <View style={s.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={s.header}>
-          <Text style={s.title}>📘 Yardım & Kılavuz</Text>
-          <Text style={s.subtitle}>Kısa adımlarla başla, SSS ile hızlı cevapları bul.</Text>
+          <Text style={s.title}>📘 {t('welcome') === 'Welcome' ? 'Help & Guide' : 'Yardım & Kılavuz'}</Text>
+          <Text style={s.subtitle}>{t('welcome') === 'Welcome' ? 'Start with quick steps, find quick answers with FAQ.' : 'Kısa adımlarla başla, SSS ile hızlı cevapları bul.'}</Text>
         </View>
 
         {/* Hızlı Başlangıç */}
@@ -101,8 +101,8 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
         {/* Yardım */}
         <View style={s.section}>
           <View style={s.card}>
-            <Text style={s.stepTitle}>Daha Fazla Yardım</Text>
-            <Text style={s.stepDesc}>Sorun, öneri veya destek için bizimle iletişime geç.</Text>
+            <Text style={s.stepTitle}>{t('welcome') === 'Welcome' ? 'More Help' : 'Daha Fazla Yardım'}</Text>
+            <Text style={s.stepDesc}>{t('welcome') === 'Welcome' ? 'Contact us for issues, suggestions or support.' : 'Sorun, öneri veya destek için bizimle iletişime geç.'}</Text>
             <TouchableOpacity
               style={s.actionButton}
               onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
