@@ -606,20 +606,20 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         if (cat.label === 'Ruh Hali') {
           recommendations.push({
             icon: '🌈',
-            title: 'Ruh Halini İyileştir',
-            description: 'Kendini daha iyi hissetmek için günlük yazarken pozitif anılarını hatırla.'
+            title: t('welcome') === 'Welcome' ? 'Improve Your Mood' : 'Ruh Halini İyileştir',
+            description: t('welcome') === 'Welcome' ? 'Remember your positive memories while writing your diary to feel better.' : 'Kendini daha iyi hissetmek için günlük yazarken pozitif anılarını hatırla.'
           });
         } else if (cat.label === 'Rhythm') {
           recommendations.push({
             icon: '📝',
-            title: 'Daha Detaylı Yaz',
-            description: 'Düşüncelerini daha detaylı ifade et. Her şey önemli!'
+            title: t('welcome') === 'Welcome' ? 'Write More Detailed' : 'Daha Detaylı Yaz',
+            description: t('welcome') === 'Welcome' ? 'Express your thoughts in more detail. Everything is important!' : 'Düşüncelerini daha detaylı ifade et. Her şey önemli!'
           });
         } else if (cat.label === 'Düzenlilik') {
           recommendations.push({
             icon: '✅',
-            title: 'Görevlerini Tamamla',
-            description: 'Küçük adımlarla başla. Her tamamlanan görev seni güçlendirir!'
+            title: t('welcome') === 'Welcome' ? 'Complete Your Tasks' : 'Görevlerini Tamamla',
+            description: t('welcome') === 'Welcome' ? 'Start with small steps. Every completed task strengthens you!' : 'Küçük adımlarla başla. Her tamamlanan görev seni güçlendirir!'
           });
         }
       }
