@@ -276,9 +276,9 @@ export const nightMessages: NotificationMessage[] = [
     emoji: "😴"
   },
   {
-    title: "Gece yarısı yaklaşıyor 🌙",
-    body: "Yatmadan önce bugünü not etmek ister misin?",
-    emoji: "🌙"
+    title: "Rahat uyu zzz",
+    body: "Bugünü yazdıysan, rahat uyu. Yazmadıysan yarın başla!",
+    emoji: "💤"
   }
 ];
 
@@ -515,41 +515,51 @@ export const getMessageByMood = (moodValue: number): NotificationMessage => {
 export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): NotificationMessage => {
   const userTimezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const now = new Date();
-  const hour = parseInt(now.toLocaleString('en-US', {
-    timeZone: userTimezone,
-    hour: 'numeric',
-    hour12: false
-  }));
+  
+  // Daha güvenli zaman dilimi kontrolü
+  let hour;
+  try {
+    hour = parseInt(now.toLocaleString('en-US', {
+      timeZone: userTimezone,
+      hour: 'numeric',
+      hour12: false
+    }));
+  } catch (error) {
+    console.error('❌ Timezone error, using local time:', error);
+    hour = now.getHours();
+  }
   
   console.log(`🕐 Current hour in ${userTimezone}: ${hour}`);
   console.log(`🕐 Current time: ${now.toLocaleString()}`);
   console.log(`🕐 Timezone: ${userTimezone}`);
+  console.log(`🕐 Local hour: ${now.getHours()}`);
   
   // Eğer mood değeri verilmişse, mood bazlı mesaj seç
   if (moodValue !== undefined && moodValue !== null) {
+    console.log('😊 Using mood-based message');
     return getMessageByMood(moodValue);
   }
   
-  // Aksi halde zaman bazlı mesaj seç
+  // Aksi halde zaman bazlı mesaj seç - daha sıkı kontrol
   if (hour >= 5 && hour < 11) {
-    console.log('🌅 Using morning messages');
+    console.log('🌅 Using morning messages (5-11)');
     return getRandomMessage(morningMessages);
   } else if (hour >= 11 && hour < 16) {
-    console.log('☀️ Using afternoon messages');
+    console.log('☀️ Using afternoon messages (11-16)');
     return getRandomMessage(afternoonMessages);
   } else if (hour >= 16 && hour < 21) {
-    console.log('🌆 Using evening messages');
+    console.log('🌆 Using evening messages (16-21)');
     return getRandomMessage(eveningMessages);
   } else if (hour >= 21 && hour < 23) {
-    console.log('🌙 Using night messages');
+    console.log('🌙 Using night messages (21-23)');
     return getRandomMessage(nightMessages);
   } else {
     // Sessiz saatler (23:00 - 05:00) - mesaj gönderilmemeli
-    console.log('💤 Silent hours - no message');
+    console.log('💤 Silent hours (23-5) - no message');
     return {
       title: "Sessiz Saatler",
-      body: "Uyku zamanı, yarın görüşürüz 🌙",
-      emoji: "🌙"
+      body: "Rahat uyu 💤",
+      emoji: "💤"
     };
   }
 };
@@ -565,7 +575,7 @@ export const getMessageByDayOfWeek = (timezone?: string): NotificationMessage =>
       weekday: 'long' // Monday, Tuesday, etc.
     });
     
-    console.log(`Current time in ${userTimezone}: ${now.toLocaleString()}, Day: ${dayOfWeek}`);
+    console.log(`📅 Current time in ${userTimezone}: ${now.toLocaleString()}, Day: ${dayOfWeek}`);
     
     // Hafta sonu kontrolü
     if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
@@ -576,14 +586,14 @@ export const getMessageByDayOfWeek = (timezone?: string): NotificationMessage =>
       return getMessageByTimeOfDay(undefined, userTimezone);
     }
   } catch (error) {
-    console.error('Error in getMessageByDayOfWeek:', error);
+    console.error('❌ Error in getMessageByDayOfWeek:', error);
     // Fallback: UTC tabanlı kontrol
     const dayNumber = now.getUTCDay(); // 0=Sunday, 6=Saturday
     if (dayNumber === 6 || dayNumber === 0) {
-      console.log('Weekend detected (UTC fallback), showing weekend message');
+      console.log('📅 Weekend detected (UTC fallback), showing weekend message');
       return getRandomMessage(weekendMessages);
     } else {
-      console.log('Weekday detected (UTC fallback), showing time-based message');
+      console.log('📅 Weekday detected (UTC fallback), showing time-based message');
       return getMessageByTimeOfDay(undefined, userTimezone);
     }
   }
