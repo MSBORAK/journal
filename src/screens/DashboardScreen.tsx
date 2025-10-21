@@ -2597,15 +2597,17 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     >
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.headerTitle}>Hoş Geldin! 🌟</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('welcome')}! 🌟</Text>
         <Text style={dynamicStyles.headerSubtitle}>
-          Burası senin gizli dünyan - ruhunu dinlediğin, anlam bulduğun güvenli limanın. 
-          Her kelime, her hissiyat burada değerli. Seni bekleyen hikayeler var.
+          {t('welcome') === 'Welcome' 
+            ? "This is your secret world - your safe harbor where you listen to your soul and find meaning. Every word, every feeling is precious here. Stories are waiting for you."
+            : "Burası senin gizli dünyan - ruhunu dinlediğin, anlam bulduğun güvenli limanın. Her kelime, her hissiyat burada değerli. Seni bekleyen hikayeler var."
+          }
         </Text>
         <Text style={dynamicStyles.userGreeting}>
           {greeting} {displayName}
         </Text>
-        <Text style={dynamicStyles.userEmail}>{t('dashboard.howAreYou')}</Text>
+        <Text style={dynamicStyles.userEmail}>{t('howAreYou')}</Text>
       </View>
 
 
@@ -2651,9 +2653,17 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             <Text style={dynamicStyles.recentMood}>✍️</Text>
           </View>
           <View style={dynamicStyles.moodTextContainer}>
-            <Text style={dynamicStyles.moodLabel}>{t('dashboard.captureThisMoment')}</Text>
+            <Text style={dynamicStyles.moodLabel}>
+              {t('welcome') === 'Welcome' 
+                ? "Capture this moment" 
+                : "Bu anı yakala"
+              }
+            </Text>
             <Text style={dynamicStyles.moodSubtitle}>
-              {t('dashboard.yourThoughtsYourStory')}
+              {t('welcome') === 'Welcome' 
+                ? "Your thoughts, your story" 
+                : "Düşüncelerin, hikayen"
+              }
             </Text>
           </View>
         </View>
@@ -2670,7 +2680,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           >
             <Text style={dynamicStyles.moodActionText}>
               <Ionicons name="create-outline" size={18} color={currentTheme.colors.primary} />
-              {' '}{t('dashboard.writeToday')}
+              {' '}{t('writeDiary')}
             </Text>
           </TouchableOpacity>
         </View>

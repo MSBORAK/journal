@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CustomAlert } from '../components/CustomAlert';
@@ -22,6 +23,7 @@ interface AppSettingsScreenProps {
 
 export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',

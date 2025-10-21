@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
@@ -38,7 +38,7 @@ interface MenuItem {
 const SettingsScreen = React.memo(function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { user, signOut } = useAuth();
   const { currentTheme } = useTheme();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { migrateData, checkMigrationStatus, isMigrating } = useMigration();
   const { syncFromCloud, pushToCloud, isLoading: isSyncing } = useCloudData();
   const [soundEnabled, setSoundEnabled] = useState(soundService.isSoundEnabled());
@@ -194,40 +194,40 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     },
     {
       id: 'notifications',
-      title: 'Bildirimler',
-      subtitle: 'Günlük hatırlatıcılar ve bildirim ayarları',
+      title: t('notificationSettings'),
+      subtitle: t('welcome') === 'Welcome' ? 'Daily reminders and notification settings' : 'Günlük hatırlatıcılar ve bildirim ayarları',
       icon: 'notifications-outline',
       screen: 'NotificationSettings',
       color: '#f59e0b',
     },
     {
       id: 'achievements',
-      title: 'Başarılarım',
-      subtitle: 'Rozetler ve başarılarım',
+      title: t('welcome') === 'Welcome' ? 'My Achievements' : 'Başarılarım',
+      subtitle: t('welcome') === 'Welcome' ? 'Badges and achievements' : 'Rozetler ve başarılarım',
       icon: 'trophy-outline',
       screen: 'Achievements',
       color: '#FFD700',
     },
     {
       id: 'account',
-      title: 'Hesap Ayarları',
-      subtitle: 'Profil, e-posta ve şifre ayarları',
+      title: t('accountSettings'),
+      subtitle: t('welcome') === 'Welcome' ? 'Profile, email and password settings' : 'Profil, e-posta ve şifre ayarları',
       icon: 'person-outline',
       screen: 'AccountSettings',
       color: '#10b981',
     },
     {
       id: 'language',
-      title: 'Dil Seçimi',
-      subtitle: 'Uygulama dilini değiştir',
+      title: t('welcome') === 'Welcome' ? 'Language Selection' : 'Dil Seçimi',
+      subtitle: t('welcome') === 'Welcome' ? 'Change app language' : 'Uygulama dilini değiştir',
       icon: 'language-outline',
       screen: 'LanguageSelection',
       color: '#3b82f6',
     },
     {
       id: 'app',
-      title: 'Uygulama Ayarları',
-      subtitle: 'Diğer uygulama tercihleri',
+      title: t('welcome') === 'Welcome' ? 'App Settings' : 'Uygulama Ayarları',
+      subtitle: t('welcome') === 'Welcome' ? 'Other app preferences' : 'Diğer uygulama tercihleri',
       icon: 'settings-outline',
       screen: 'AppSettings',
       color: '#8b5cf6',

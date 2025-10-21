@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useTranslation } from '../i18n/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { CustomAlert } from '../components/CustomAlert';
 import { Toast } from '../components/Toast';
 import { supabase } from '../lib/supabase';
@@ -70,7 +70,7 @@ export default function AuthScreen() {
 
   const { signIn, signUp } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t } = useLanguage();
 
   const dynamicStyles = StyleSheet.create({
     container: {
