@@ -420,12 +420,7 @@ export default function AuthScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={dynamicStyles.modalOverlay}
         >
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={dynamicStyles.modalContent}>
+          <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>🔑 Şifremi Unuttum</Text>
             
             <TextInput
@@ -466,7 +461,6 @@ export default function AuthScreen() {
               </TouchableOpacity>
             </View>
             </View>
-          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 

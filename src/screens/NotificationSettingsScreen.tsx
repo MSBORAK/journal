@@ -158,34 +158,6 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     }
   };
 
-  const testNotification = async () => {
-    try {
-      console.log('🔔 Attempting to send test notification...');
-      console.log('📋 Current settings:', settings);
-      
-      // Önce izin kontrolü yap
-      const hasPermission = await requestNotificationPermissions();
-      if (!hasPermission) {
-        showAlert('⚠️ İzin Gerekli', 'Bildirim izni verilmedi. Lütfen önce izin verin.', 'warning');
-        return;
-      }
-      
-      const { sendLocalNotification } = await import('../services/notificationService');
-      // Test bildirimi için kontrolleri atla (skipChecks: true)
-      await sendLocalNotification(
-        '🔔 Test Bildirimi',
-        'Bildirimler düzgün çalışıyor!',
-        { type: 'test' },
-        'default',
-        true // skipChecks
-      );
-      console.log('✅ Test notification sent successfully');
-      showAlert('🎉 Başarılı!', 'Test bildirimi gönderildi! Birkaç saniye içinde gelecek.', 'success');
-    } catch (error) {
-      console.error('❌ Error sending test notification:', error);
-      showAlert('❌ Hata', 'Test bildirimi gönderilemedi. Lütfen tekrar deneyin.', 'error');
-    }
-  };
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':');
@@ -720,35 +692,6 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           </View>
         </View>
 
-        {/* Test ve Yönetim */}
-        <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>🔧 Test & Yönetim</Text>
-          
-          <TouchableOpacity
-            style={[dynamicStyles.actionButton, dynamicStyles.actionButtonSecondary]}
-            onPress={testNotification}
-          >
-            <Text style={[dynamicStyles.actionButtonText, dynamicStyles.actionButtonTextSecondary]}>
-              📤 Test Bildirimi Gönder
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[dynamicStyles.actionButton, dynamicStyles.actionButtonSecondary]}
-            onPress={async () => {
-              try {
-                await scheduleAllNotifications();
-                showAlert('✅ Başarılı', 'Bildirimler başarıyla yeniden planlandı!', 'success');
-              } catch (error) {
-                showAlert('❌ Hata', 'Bildirimler yeniden planlanamadı. Lütfen tekrar deneyin.', 'error');
-              }
-            }}
-          >
-            <Text style={[dynamicStyles.actionButtonText, dynamicStyles.actionButtonTextSecondary]}>
-              🔄 Bildirimleri Yenile
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
 
       {/* Custom Alert */}

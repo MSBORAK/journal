@@ -46,32 +46,32 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
       case 'success':
         return {
           icon: 'checkmark-circle',
-          iconColor: '#10b981',
-          bgColor: '#ecfdf5',
-          borderColor: '#10b981',
-          titleColor: '#065f46',
+          iconColor: currentTheme.colors.success,
+          bgColor: currentTheme.colors.card,
+          borderColor: currentTheme.colors.success,
+          titleColor: currentTheme.colors.text,
         };
       case 'warning':
         return {
           icon: 'warning' as any,
           iconColor: '#f59e0b',
-          bgColor: '#fffbeb',
+          bgColor: currentTheme.colors.card,
           borderColor: '#f59e0b',
-          titleColor: '#92400e',
+          titleColor: currentTheme.colors.text,
         };
       case 'error':
         return {
           icon: 'close-circle',
-          iconColor: '#ef4444',
-          bgColor: '#fef2f2',
-          borderColor: '#ef4444',
-          titleColor: '#991b1b',
+          iconColor: currentTheme.colors.danger,
+          bgColor: currentTheme.colors.card,
+          borderColor: currentTheme.colors.danger,
+          titleColor: currentTheme.colors.text,
         };
       default: // info
         return {
           icon: 'information-circle',
           iconColor: currentTheme.colors.primary,
-          bgColor: currentTheme.colors.accent,
+          bgColor: currentTheme.colors.card,
           borderColor: currentTheme.colors.primary,
           titleColor: currentTheme.colors.text,
         };

@@ -14,8 +14,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { resetOnboarding } from '../services/onboardingService';
-import { resetAllTooltips } from '../services/tooltipService';
 import { soundService } from '../services/soundService';
 import { motivationService } from '../services/motivationService';
 import { CustomAlert } from '../components/CustomAlert';
@@ -150,21 +148,6 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     }
   };
 
-  const handleResetOnboarding = async () => {
-    showAlert(
-      '🎯 Onboarding\'i Yeniden Göster',
-      'İlk kullanım rehberini tekrar görmek istediğinizden emin misiniz?',
-      'warning'
-    );
-  };
-
-  const handleResetTooltips = async () => {
-    showAlert(
-      '💡 Tooltipleri Yeniden Göster',
-      'Tüm ipuçlarını tekrar görmek istediğinizden emin misiniz?',
-      'warning'
-    );
-  };
 
   const handleToggleSound = async () => {
     const newSoundEnabled = !soundEnabled;
@@ -264,22 +247,6 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       icon: 'help-buoy-outline',
       screen: 'HelpGuide',
       color: currentTheme.colors.primary,
-    },
-    {
-      id: 'onboarding',
-      title: 'Onboarding\'i Yeniden Göster',
-      subtitle: 'İlk kullanım rehberini tekrar göster',
-      icon: 'refresh-outline',
-      action: handleResetOnboarding,
-      color: '#8b5cf6',
-    },
-    {
-      id: 'tooltips',
-      title: 'Tooltipleri Yeniden Göster',
-      subtitle: 'Tüm ipuçlarını tekrar göster',
-      icon: 'help-circle-outline',
-      action: handleResetTooltips,
-      color: '#10b981',
     },
     {
       id: 'motivation',

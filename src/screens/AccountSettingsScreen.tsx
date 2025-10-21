@@ -309,15 +309,13 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,
-      paddingTop: 60,
-      paddingBottom: 60,
     },
     modalContent: {
       backgroundColor: currentTheme.colors.card,
       borderRadius: 20,
       padding: 24,
-      width: '100%',
-      maxWidth: 400,
+      width: '90%',
+      maxWidth: 500,
       shadowColor: currentTheme.colors.primary,
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.3,
@@ -345,8 +343,8 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       fontSize: 16,
       color: currentTheme.colors.text,
       marginBottom: 16,
-      borderWidth: 1,
-      borderColor: currentTheme.colors.primary + '20',
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
     },
     modalButtons: {
       flexDirection: 'row',
@@ -532,14 +530,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       <Modal visible={showProfileModal} transparent animationType="fade" onRequestClose={() => setShowProfileModal(false)}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={dynamicStyles.modalOverlay}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={dynamicStyles.modalContent}>
+          <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>Profil Düzenle</Text>
             
             <Text style={dynamicStyles.inputLabel}>Ad Soyad</Text>
@@ -583,7 +576,6 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               </TouchableOpacity>
             </View>
             </View>
-          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -594,15 +586,10 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           activeOpacity={1}
           onPress={() => setShowEmailModal(false)}
         >
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-          >
-            <ScrollView 
-              contentContainerStyle={{ flexGrow: 1 }}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <TouchableOpacity 
             style={dynamicStyles.modalContent}
             activeOpacity={1}
@@ -643,8 +630,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
-            </ScrollView>
-          </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
         </TouchableOpacity>
       </Modal>
 
@@ -652,14 +638,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       <Modal visible={showPasswordModal} transparent animationType="fade" onRequestClose={() => setShowPasswordModal(false)}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={dynamicStyles.modalOverlay}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={dynamicStyles.modalContent}>
+          <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>Şifre Değiştir</Text>
             
             <Text style={dynamicStyles.inputLabel}>Mevcut Şifre</Text>
@@ -717,7 +698,6 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               </TouchableOpacity>
             </View>
             </View>
-          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 

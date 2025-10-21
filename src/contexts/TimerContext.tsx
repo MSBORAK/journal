@@ -11,6 +11,10 @@ interface TimerContextType {
   selectedDuration: number;
   showTimer: boolean;
   
+  // Focus tracking
+  totalFocusTime: number; // Toplam odaklanma süresi (dakika)
+  sessionStartTime: number | null; // Mevcut session başlangıç zamanı
+  
   // Timer controls
   startTimer: () => void;
   pauseTimer: () => void;
@@ -50,6 +54,10 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
   const [showTimer, setShowTimer] = useState(false);
   const [showFocusMode, setShowFocusMode] = useState(false);
   
+  // Focus tracking states
+  const [totalFocusTime, setTotalFocusTime] = useState(0); // Toplam odaklanma süresi (dakika)
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  
   // Animation values
   const progressAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -59,6 +67,7 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
     setIsActive(true);
     setIsPaused(false);
     setShowTimer(true);
+    setSessionStartTime(Date.now()); // Session başlangıç zamanını kaydet
     await soundService.playTap();
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
@@ -78,16 +87,30 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
   };
   
   const pauseTimer = async () => {
+    // Timer durdurulduğunda odaklanma süresini hesapla ve ekle
+    if (isActive && sessionStartTime) {
+      const sessionDuration = (Date.now() - sessionStartTime) / (1000 * 60); // dakika
+      setTotalFocusTime(prev => prev + sessionDuration);
+      setSessionStartTime(null); // Session'ı sıfırla
+    }
+    
     setIsPaused(true);
     await soundService.playTap();
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
   
   const resetTimer = () => {
+    // Eğer timer aktifse, odaklanma süresini hesapla ve ekle
+    if (isActive && sessionStartTime) {
+      const sessionDuration = (Date.now() - sessionStartTime) / (1000 * 60); // dakika
+      setTotalFocusTime(prev => prev + sessionDuration);
+    }
+    
     setIsActive(false);
     setIsPaused(false);
     setTimeLeft(selectedDuration * 60);
     setShowTimer(false);
+    setSessionStartTime(null); // Session'ı sıfırla
     Animated.timing(progressAnim, {
       toValue: 0,
       duration: 300,
@@ -129,8 +152,15 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
         setTimeLeft((time) => {
           if (time <= 1) {
             // Handle completion inline to avoid dependency issues
+            // Odaklanma süresini hesapla ve ekle
+            if (sessionStartTime) {
+              const sessionDuration = (Date.now() - sessionStartTime) / (1000 * 60); // dakika
+              setTotalFocusTime(prev => prev + sessionDuration);
+            }
+            
             setIsActive(false);
             setShowTimer(false);
+            setSessionStartTime(null);
             soundService.playSuccess();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             
@@ -167,6 +197,8 @@ export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
     timeLeft,
     selectedDuration,
     showTimer,
+    totalFocusTime,
+    sessionStartTime,
     startTimer,
     pauseTimer,
     resetTimer,

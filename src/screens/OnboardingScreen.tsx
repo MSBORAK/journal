@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { ONBOARDING_STEPS, setOnboardingCompleted, setSelectedTheme } from '../services/onboardingService';
 import { soundService } from '../services/soundService';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +28,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [currentStep, setCurrentStep] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const { user } = useAuth();
+  const { currentTheme } = useTheme();
   
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -222,8 +224,13 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           : 'Zarif ve modern bir atmosfer seni bekliyor!',
         'success'
       );
+      
+      // Tema seçimi sonrası onboarding'i tamamla
+      setTimeout(() => {
+        handleComplete();
+      }, 2000); // 2 saniye bekle, alert'i göster
     } catch (error) {
-      console.error('Error selecting theme:', error);
+      console.error('❌ Error selecting theme:', error);
       handleComplete();
     }
   };

@@ -62,6 +62,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     isPaused, 
     timeLeft, 
     selectedDuration,
+    totalFocusTime,
     progressAnim, 
     scaleAnim 
   } = useTimer();
@@ -272,6 +273,27 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       }
     }
     return '0dk';
+  };
+
+  // Get total focus time
+  const getTotalFocusTime = () => {
+    if (totalFocusTime > 0) {
+      if (totalFocusTime < 1) {
+        // 1 dakikadan az ise saniye olarak göster
+        const seconds = Math.floor(totalFocusTime * 60);
+        return `${seconds}s`;
+      } else {
+        // 1 dakika ve üzeri ise dakika olarak göster
+        const minutes = Math.floor(totalFocusTime);
+        const remainingSeconds = Math.floor((totalFocusTime - minutes) * 60);
+        if (remainingSeconds > 0) {
+          return `${minutes}dk ${remainingSeconds}s`;
+        } else {
+          return `${minutes}dk`;
+        }
+      }
+    }
+    return '0s';
   };
 
   const filteredTasks = getFilteredTasks();
@@ -534,15 +556,14 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingTop: 60,
-      paddingBottom: 60,
+      paddingHorizontal: 20,
     },
     modalContent: {
       backgroundColor: currentTheme.colors.card,
       borderRadius: 20,
       padding: 24,
-      width: '90%',
-      maxHeight: '80%',
+      width: '95%',
+      maxHeight: '85%',
       shadowColor: 'rgba(0, 0, 0, 0.3)',
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 1,
@@ -754,8 +775,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               <Text style={dynamicStyles.statLabel}>Görevler</Text>
             </View>
             <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>0/0</Text>
-              <Text style={dynamicStyles.statLabel}>Pomodoro</Text>
+              <Text style={dynamicStyles.statNumber}>{getTotalFocusTime()}</Text>
+              <Text style={dynamicStyles.statLabel}>Odaklanma</Text>
             </View>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{getWorkTime()}</Text>
@@ -939,12 +960,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           style={dynamicStyles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={dynamicStyles.modalContent}>
+          <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>📝 Yeni Görev Ekle</Text>
             
             <View style={dynamicStyles.inputGroup}>
@@ -1046,7 +1062,6 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               </TouchableOpacity>
             </View>
             </View>
-          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -1061,12 +1076,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           style={dynamicStyles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={dynamicStyles.modalContent}>
+          <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>🔔 Yeni Hatırlatıcı Ekle</Text>
             
             <View style={dynamicStyles.inputGroup}>
@@ -1151,7 +1161,6 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               </TouchableOpacity>
             </View>
             </View>
-          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
