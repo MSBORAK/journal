@@ -170,23 +170,23 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
   const menuItems: MenuItem[] = [
     {
       id: 'theme',
-      title: 'Tema Seçimi',
-      subtitle: `Şu anki tema: ${currentTheme.name}`,
+      title: t('welcome') === 'Welcome' ? 'Theme Selection' : 'Tema Seçimi',
+      subtitle: t('welcome') === 'Welcome' ? `Current theme: ${currentTheme.name}` : `Şu anki tema: ${currentTheme.name}`,
       icon: 'color-palette-outline',
       screen: 'ThemeSelection',
       color: currentTheme.colors.primary,
     },
     {
       id: 'sound',
-      title: 'Ses Efektleri',
-      subtitle: soundEnabled ? 'Ses efektleri açık' : 'Ses efektleri kapalı',
+      title: t('welcome') === 'Welcome' ? 'Sound Effects' : 'Ses Efektleri',
+      subtitle: soundEnabled ? (t('welcome') === 'Welcome' ? 'Sound effects on' : 'Ses efektleri açık') : (t('welcome') === 'Welcome' ? 'Sound effects off' : 'Ses efektleri kapalı'),
       icon: soundEnabled ? 'volume-high-outline' : 'volume-mute-outline',
       action: handleToggleSound,
       color: soundEnabled ? '#10b981' : '#6b7280',
     },
     {
       id: 'language',
-      title: 'Dil Seçimi',
+      title: t('welcome') === 'Welcome' ? 'Language Selection' : 'Dil Seçimi',
       subtitle: currentLanguage === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English',
       icon: 'language-outline',
       screen: 'LanguageSelection',
@@ -417,7 +417,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       >
         {/* Header */}
         <View style={dynamicStyles.header}>
-          <Text style={dynamicStyles.title}>⚙️ Ayarlar</Text>
+          <Text style={dynamicStyles.title}>⚙️ {t('welcome') === 'Welcome' ? 'Settings' : 'Ayarlar'}</Text>
 
           {/* User Card */}
           <View style={dynamicStyles.userCard}>
