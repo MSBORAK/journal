@@ -977,35 +977,35 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         'Bu pozitiflik seni güzel yerlere götürecek! 🦋',
         'Bugün de kendini sevmeye devam et! 💕',
         'Bu enerjiyi kullan, hedeflerine odaklan! 🎯',
-        'Bugün de harika bir gün geçireceğini biliyorum! 🌟',
-        'Her yeni gün yeni fırsatlar demek! Sen hazırsın! 🚀',
+        t('welcome') === 'Welcome' ? 'I know you will have a wonderful day today! 🌟' : 'Bugün de harika bir gün geçireceğini biliyorum! 🌟',
+        t('welcome') === 'Welcome' ? 'Every new day means new opportunities! You are ready! 🚀' : 'Her yeni gün yeni fırsatlar demek! Sen hazırsın! 🚀',
       ];
     } else if (moodValue === 3) {
       // Yorgun ruh hali - dinlenme mesajları
       selectedMessages = [
-        'Yorgun hissediyorsan bu normal! Kendine zaman ver! 😴',
-        'Dinlenmek de bir ihtiyaç! Bugün kendini şımart! 🛁',
-        'Yorgunluk geçici! Yarın daha enerjik olacaksın! ⚡',
-        'Bugün dinlen! Yarın daha güçlü başlayacaksın! 💪',
-        'Kendine şefkatli ol! Yorgunluk da bir deneyim! 🤗',
-        'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
-        'Dinlenmek, yenilenmek demek! Kendine izin ver! 🧘',
+        t('welcome') === 'Welcome' ? 'If you feel tired, that\'s normal! Give yourself time! 😴' : 'Yorgun hissediyorsan bu normal! Kendine zaman ver! 😴',
+        t('welcome') === 'Welcome' ? 'Rest is also a need! Pamper yourself today! 🛁' : 'Dinlenmek de bir ihtiyaç! Bugün kendini şımart! 🛁',
+        t('welcome') === 'Welcome' ? 'Tiredness is temporary! Tomorrow you will be more energetic! ⚡' : 'Yorgunluk geçici! Yarın daha enerjik olacaksın! ⚡',
+        t('welcome') === 'Welcome' ? 'Rest today! Tomorrow you will start stronger! 💪' : 'Bugün dinlen! Yarın daha güçlü başlayacaksın! 💪',
+        t('welcome') === 'Welcome' ? 'Be compassionate to yourself! Tiredness is also an experience! 🤗' : 'Kendine şefkatli ol! Yorgunluk da bir deneyim! 🤗',
+        t('welcome') === 'Welcome' ? 'Just breathing today is enough! You are fine! 🌬️' : 'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
+        t('welcome') === 'Welcome' ? 'Resting means renewing! Allow yourself! 🧘' : 'Dinlenmek, yenilenmek demek! Kendine izin ver! 🧘',
       ];
     } else if (moodValue <= 2) {
       // Düşük ruh hali - destekleyici mesajlar
       selectedMessages = [
-        'Bugün zor geçiyorsa, bu normal! Sen güçlüsün! 💙',
-        'Her gün aynı olmak zorunda değil! Bugün farklı olabilir! 🌈',
-        'Kendini dinle! İhtiyacın olan şey ne? 🤗',
-        'Bugün küçük adımlar atsan da yeter! Her adım değerli! 👣',
-        'Zor zamanlar geçici! Sen kalıcısın! ⏳',
-        'Kendine şefkatli ol! Sen insansın! 💝',
-        'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
-        'Bugün dinlen! Yarın daha iyi olacak! 😴',
-        'Sen değerlisin, modun nasıl olursa olsun! 💎',
-        'Kendini yargılamadan kabul et! Sen mükemmelsin! 🕊️',
-        'Bugün küçük şeylerle mutlu ol! 🌸',
-        'Kendine zaman ver! Her şey yerli yerine gelecek! ⏰',
+        t('welcome') === 'Welcome' ? 'If today is hard, that\'s normal! You are strong! 💙' : 'Bugün zor geçiyorsa, bu normal! Sen güçlüsün! 💙',
+        t('welcome') === 'Welcome' ? 'Every day doesn\'t have to be the same! Today can be different! 🌈' : 'Her gün aynı olmak zorunda değil! Bugün farklı olabilir! 🌈',
+        t('welcome') === 'Welcome' ? 'Listen to yourself! What do you need? 🤗' : 'Kendini dinle! İhtiyacın olan şey ne? 🤗',
+        t('welcome') === 'Welcome' ? 'Even small steps today are enough! Every step is valuable! 👣' : 'Bugün küçük adımlar atsan da yeter! Her adım değerli! 👣',
+        t('welcome') === 'Welcome' ? 'Difficult times are temporary! You are permanent! ⏳' : 'Zor zamanlar geçici! Sen kalıcısın! ⏳',
+        t('welcome') === 'Welcome' ? 'Be compassionate to yourself! You are human! 💝' : 'Kendine şefkatli ol! Sen insansın! 💝',
+        t('welcome') === 'Welcome' ? 'Just breathing today is enough! You are fine! 🌬️' : 'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
+        t('welcome') === 'Welcome' ? 'Rest today! Tomorrow will be better! 😴' : 'Bugün dinlen! Yarın daha iyi olacak! 😴',
+        t('welcome') === 'Welcome' ? 'You are valuable, no matter what your mood is! 💎' : 'Sen değerlisin, modun nasıl olursa olsun! 💎',
+        t('welcome') === 'Welcome' ? 'Accept yourself without judgment! You are perfect! 🕊️' : 'Kendini yargılamadan kabul et! Sen mükemmelsin! 🕊️',
+        t('welcome') === 'Welcome' ? 'Be happy with small things today! 🌸' : 'Bugün küçük şeylerle mutlu ol! 🌸',
+        t('welcome') === 'Welcome' ? 'Give yourself time! Everything will fall into place! ⏰' : 'Kendine zaman ver! Her şey yerli yerine gelecek! ⏰',
         t('welcome') === 'Welcome' ? 'Just existing today is enough! You are special! ✨' : 'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
       ];
     }

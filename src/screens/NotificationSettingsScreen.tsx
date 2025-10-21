@@ -383,7 +383,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>🔔 Bildirimler</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? '🔔 Notifications' : '🔔 Bildirimler'}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -391,9 +391,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         {/* Permission Card */}
           <View style={dynamicStyles.permissionCard}>
           <Text style={dynamicStyles.permissionIcon}>🔔</Text>
-          <Text style={dynamicStyles.permissionTitle}>Bildirim İzni</Text>
+          <Text style={dynamicStyles.permissionTitle}>{t('welcome') === 'Welcome' ? 'Notification Permission' : 'Bildirim İzni'}</Text>
           <Text style={dynamicStyles.permissionDescription}>
-            Günlük hatırlatıcılar ve motivasyon mesajları için bildirim izni gerekli
+            {t('welcome') === 'Welcome' ? 'Notification permission is required for daily reminders and motivation messages' : 'Günlük hatırlatıcılar ve motivasyon mesajları için bildirim izni gerekli'}
           </Text>
           <View style={dynamicStyles.statusIndicator}>
             <View style={[
@@ -402,10 +402,10 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
             ]} />
             <Text style={dynamicStyles.statusText}>
               {permissionGranted 
-                ? 'İzin Verildi' 
+                ? (t('welcome') === 'Welcome' ? 'Permission Granted' : 'İzin Verildi')
                 : !systemPermissionGranted 
-                  ? 'Sistem İzni Gerekli' 
-                  : 'Uygulama Ayarları Kapalı'
+                  ? (t('welcome') === 'Welcome' ? 'System Permission Required' : 'Sistem İzni Gerekli')
+                  : (t('welcome') === 'Welcome' ? 'App Settings Disabled' : 'Uygulama Ayarları Kapalı')
               }
             </Text>
           </View>
@@ -414,21 +414,21 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
             onPress={handlePermissionRequest}
           >
             <Text style={dynamicStyles.actionButtonText}>
-              {!settings.enabled ? 'Bildirimleri Aç' : 'İzin Ver'}
+              {!settings.enabled ? (t('welcome') === 'Welcome' ? 'Enable Notifications' : 'Bildirimleri Aç') : (t('welcome') === 'Welcome' ? 'Grant Permission' : 'İzin Ver')}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Genel Ayarlar */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>⚙️ Genel Ayarlar</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? '⚙️ General Settings' : '⚙️ Genel Ayarlar'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>Bildirimler</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Notifications' : 'Bildirimler'}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  Tüm bildirimleri aç/kapat
+                  {t('welcome') === 'Welcome' ? 'Turn all notifications on/off' : 'Tüm bildirimleri aç/kapat'}
                 </Text>
               </View>
               <Switch
@@ -444,7 +444,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
 
         {/* Günlük Hatırlatıcılar */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>🌅 Günlük Hatırlatıcılar</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? '🌅 Daily Reminders' : '🌅 Günlük Hatırlatıcılar'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
@@ -458,10 +458,10 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                       style={{ marginRight: 8 }}
                     />
                   )}
-                  <Text style={dynamicStyles.settingTitle}>Sabah Bildirimi</Text>
+                  <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Morning Notification' : 'Sabah Bildirimi'}</Text>
                 </View>
                 <Text style={dynamicStyles.settingDescription}>
-                  Motivasyon mesajları ve günlük hatırlatıcılar
+                  {t('welcome') === 'Welcome' ? 'Motivation messages and daily reminders' : 'Motivasyon mesajları ve günlük hatırlatıcılar'}
                 </Text>
               </View>
               <Switch
@@ -513,10 +513,10 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                       style={{ marginRight: 8 }}
                     />
                   )}
-                  <Text style={dynamicStyles.settingTitle}>Akşam Bildirimi</Text>
+                  <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Evening Notification' : 'Akşam Bildirimi'}</Text>
                 </View>
                 <Text style={dynamicStyles.settingDescription}>
-                  Günlük özet ve akşam hatırlatıcıları
+                  {t('welcome') === 'Welcome' ? 'Daily summary and evening reminders' : 'Günlük özet ve akşam hatırlatıcıları'}
                 </Text>
               </View>
               <Switch
