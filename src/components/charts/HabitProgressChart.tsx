@@ -96,15 +96,15 @@ export const HabitProgressChart: React.FC<HabitProgressChartProps> = ({ period =
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: currentTheme.colors.text }]}>
-        🔥 Alışkanlık İlerlemesi
+        🔥 Habit Progress
       </Text>
       <Text style={[styles.subtitle, { color: currentTheme.colors.secondary }]}>
-        Bu hafta - Ortalama: {averageCompletion.toFixed(0)}% tamamlama
+        This week - Average: {averageCompletion.toFixed(0)}% completion
       </Text>
       
       {renderSimpleChart()}
       
-      {/* Alışkanlık detayları */}
+      {/* Habit details */}
       {habitStats.length > 0 && (
         <View style={styles.habitDetails}>
           {habitStats.map((habit, index) => (
@@ -115,7 +115,7 @@ export const HabitProgressChart: React.FC<HabitProgressChartProps> = ({ period =
                   {habit.name}
                 </Text>
                 <Text style={[styles.habitProgress, { color: currentTheme.colors.secondary }]}>
-                  {habit.completedDays}/{habit.totalDays} gün
+                  {habit.completedDays}/{habit.totalDays} days
                 </Text>
               </View>
               <Text style={[styles.habitPercentage, { color: currentTheme.colors.primary }]}>

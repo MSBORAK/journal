@@ -55,7 +55,7 @@ export default function ProgressCard({ completionRate, style }: ProgressCardProp
   return (
     <View style={[dynamicStyles.progressContainer, style]}>
       <Text style={dynamicStyles.progressText}>
-        🟩 %{completionRate} tamamlandı
+        🟩 %{completionRate} completed
       </Text>
       <View style={dynamicStyles.progressBar}>
         <View style={dynamicStyles.progressFill} />
