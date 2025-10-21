@@ -2518,6 +2518,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               </TouchableOpacity>
             </View>
 
+
             {/* Kategori Detayları */}
             <View style={dynamicStyles.modalSection}>
               <Text style={dynamicStyles.modalSectionTitle}>📊 Kategori Detayları</Text>
