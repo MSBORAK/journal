@@ -181,7 +181,9 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
 
   useEffect(() => {
     navigation.setOptions({
-      title: isEditing ? 'Günlüğü Düzenle' : 'Yeni Günlük',
+      title: isEditing 
+        ? (t('welcome') === 'Welcome' ? 'Edit Diary' : 'Günlüğü Düzenle')
+        : (t('welcome') === 'Welcome' ? 'New Diary' : 'Yeni Günlük'),
       headerRight: () => (
         <TouchableOpacity 
           style={dynamicStyles.saveButton} 
@@ -509,7 +511,9 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
 
           {/* Content Input */}
           <View style={dynamicStyles.inputContainer}>
-            <Text style={dynamicStyles.label}>Günlük İçeriği</Text>
+            <Text style={dynamicStyles.label}>
+              {t('welcome') === 'Welcome' ? 'Diary Content' : 'Günlük İçeriği'}
+            </Text>
             <TextInput
               style={dynamicStyles.contentInput}
               value={content}

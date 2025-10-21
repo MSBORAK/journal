@@ -813,7 +813,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           
           <View style={dynamicStyles.tabContainer}>
             {[
-              { key: 'daily', label: 'Günlük', emoji: '📅' },
+              { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
               { key: 'weekly', label: 'Haftalık', emoji: '📆' },
               { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
               { key: 'all', label: 'Tümü', emoji: '📝' },
@@ -1021,7 +1021,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               <Text style={dynamicStyles.inputLabel}>Sıklık</Text>
               <View style={dynamicStyles.frequencyContainer}>
                 {[
-                  { key: 'daily', label: 'Günlük', emoji: '📅' },
+                  { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
                   { key: 'weekly', label: 'Haftalık', emoji: '📆' },
                   { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
                 ].map((freq) => (
@@ -1120,7 +1120,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               <Text style={dynamicStyles.inputLabel}>Sıklık</Text>
               <View style={dynamicStyles.frequencyContainer}>
                 {[
-                  { key: 'daily', label: 'Günlük', emoji: '📅' },
+                  { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
                   { key: 'weekly', label: 'Haftalık', emoji: '📆' },
                   { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
                 ].map((freq) => (

@@ -392,7 +392,9 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     <View style={dynamicStyles.container}>
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.title}>Geçmiş Günlükler</Text>
+        <Text style={dynamicStyles.title}>
+          {t('welcome') === 'Welcome' ? 'Past Diaries' : 'Geçmiş Günlükler'}
+        </Text>
         
         {/* Search Bar */}
         <View style={dynamicStyles.searchContainer}>

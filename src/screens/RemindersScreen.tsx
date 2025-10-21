@@ -72,7 +72,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     { value: 'appointment', label: 'Randevu', emoji: '📅' },
     { value: 'birthday', label: 'Doğum Günü', emoji: '🎂' },
     { value: 'meeting', label: 'Toplantı', emoji: '👥' },
-    { value: 'health', label: 'Sağlık', emoji: '🏥' },
+    { value: 'health', label: t('welcome') === 'Welcome' ? 'Health' : 'Sağlık', emoji: '🏥' },
     { value: 'exercise', label: 'Egzersiz', emoji: '🏃‍♀️' },
     { value: 'meal', label: 'Yemek', emoji: '🍽️' },
     { value: 'personal', label: 'Kişisel', emoji: '👤' },
@@ -88,7 +88,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
   const repeatOptions = [
     { value: 'once', label: 'Tek Seferlik' },
     { value: 'hourly', label: 'Saatlik' },
-    { value: 'daily', label: 'Günlük' },
+    { value: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük' },
     { value: 'weekly', label: 'Haftalık' },
     { value: 'monthly', label: 'Aylık' },
   ];
@@ -571,7 +571,11 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       // Bildirim izni iste
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
-        showAlert('Bildirim İzni', 'Hatırlatıcılar için bildirim izni gerekli', 'warning');
+        showAlert(
+          t('welcome') === 'Welcome' ? 'Notification Permission' : 'Bildirim İzni', 
+          t('welcome') === 'Welcome' ? 'Notification permission required for reminders' : 'Hatırlatıcılar için bildirim izni gerekli', 
+          'warning'
+        );
         return;
       }
 

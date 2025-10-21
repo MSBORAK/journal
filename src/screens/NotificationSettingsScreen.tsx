@@ -131,7 +131,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       if (!settings.enabled) {
         await updateSetting('enabled', true);
         showAlert(
-          '🔔 Bildirimler Açıldı',
+          t('welcome') === 'Welcome' ? '🔔 Notifications Enabled' : '🔔 Bildirimler Açıldı',
           'Uygulama bildirim ayarları etkinleştirildi. Artık bildirimler alabileceksin!',
           'success'
         );

@@ -342,7 +342,9 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
       {/* Content */}
       <ScrollView style={dynamicStyles.content}>
-        <Text style={dynamicStyles.title}>Günlük Sağlık Takibi</Text>
+        <Text style={dynamicStyles.title}>
+          {t('welcome') === 'Welcome' ? 'Daily Health Tracking' : 'Günlük Sağlık Takibi'}
+        </Text>
         <Text style={dynamicStyles.subtitle}>
           Bugünkü sağlık durumunu kaydet ve wellness skorunu artır
         </Text>
