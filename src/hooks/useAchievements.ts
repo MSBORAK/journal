@@ -226,8 +226,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'achiever_50',
-      title: 'Başarılı',
-      description: '50 görev tamamladın!',
+      title: t('welcome') === 'Welcome' ? 'Successful' : 'Başarılı',
+      description: t('welcome') === 'Welcome' ? 'You completed 50 tasks!' : '50 görev tamamladın!',
       icon: '🏅',
       category: 'goals',
       requirement: { type: 'total', value: 50 },
