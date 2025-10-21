@@ -174,11 +174,11 @@ export default function CelebrationModal({
               </View>
               <View style={styles.titleContainer}>
                 <Text style={styles.titleEmoji}>🎉</Text>
-                <Text style={styles.title}>Tebrikler!</Text>
+                <Text style={styles.title}>Congratulations!</Text>
               </View>
             </View>
 
-            {/* Mesaj */}
+            {/* Message */}
             <View style={styles.content}>
               <View style={styles.messageCard}>
                 <Text style={styles.messageTitle}>"{title}"</Text>
@@ -186,7 +186,7 @@ export default function CelebrationModal({
               </View>
             </View>
 
-            {/* Kapat Butonu */}
+            {/* Close Button */}
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleClose}
@@ -198,7 +198,7 @@ export default function CelebrationModal({
                 end={{ x: 1, y: 1 }}
                 style={styles.closeButtonGradient}
               >
-                <Text style={styles.closeButtonText}>Kapat ✨</Text>
+                <Text style={styles.closeButtonText}>Close ✨</Text>
               </LinearGradient>
             </TouchableOpacity>
           </LinearGradient>
