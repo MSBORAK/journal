@@ -362,7 +362,7 @@ export const analyzeWords = (entries: DiaryEntry[]): Insight[] => {
 export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
   const insights: Insight[] = [];
 
-  // İlk günlük
+  // First diary
   if (entries.length === 1) {
     insights.push({
       type: 'achievement',

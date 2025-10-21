@@ -485,7 +485,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
 
         {/* App Version */}
         <View style={dynamicStyles.appVersion}>
-          <Text style={dynamicStyles.versionText}>Günlük v1.0.0</Text>
+          <Text style={dynamicStyles.versionText}>{t('welcome') === 'Welcome' ? 'Rhythm v1.0.0' : 'Günlük v1.0.0'}</Text>
         </View>
       </ScrollView>
 
