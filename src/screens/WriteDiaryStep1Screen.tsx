@@ -24,11 +24,11 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
   const [mood, setMood] = useState<number | null>(null);
 
   const moodOptions = [
-    { emoji: '😔', label: 'Üzgün', value: 1 },
-    { emoji: '😐', label: 'Normal', value: 2 },
-    { emoji: '🫠', label: 'Yorgun', value: 3 },
-    { emoji: '😎', label: 'Mutlu', value: 4 },
-    { emoji: '🤩', label: 'Harika', value: 5 },
+    { emoji: '😔', label: t('welcome') === 'Welcome' ? 'Sad' : 'Üzgün', value: 1 },
+    { emoji: '😐', label: t('welcome') === 'Welcome' ? 'Normal' : 'Normal', value: 2 },
+    { emoji: '🫠', label: t('welcome') === 'Welcome' ? 'Tired' : 'Yorgun', value: 3 },
+    { emoji: '😎', label: t('welcome') === 'Welcome' ? 'Happy' : 'Mutlu', value: 4 },
+    { emoji: '🤩', label: t('welcome') === 'Welcome' ? 'Amazing' : 'Harika', value: 5 },
   ];
 
   const dynamicStyles = StyleSheet.create({
@@ -184,13 +184,13 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
         >
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Yeni Günlük</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'New Diary' : 'Yeni Günlük'}</Text>
         <TouchableOpacity
           style={[dynamicStyles.nextButton, (!title.trim() || mood === null) && { opacity: 0.5 }]}
           onPress={handleNext}
           disabled={!title.trim() || mood === null}
         >
-          <Text style={dynamicStyles.nextButtonText}>İleri</Text>
+          <Text style={dynamicStyles.nextButtonText}>{t('welcome') === 'Welcome' ? 'Next' : 'İleri'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -204,26 +204,26 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
           <Text style={dynamicStyles.progressText}>1/3</Text>
         </View>
 
-        <Text style={dynamicStyles.title}>Temel Bilgiler</Text>
+        <Text style={dynamicStyles.title}>{t('welcome') === 'Welcome' ? 'Basic Information' : 'Temel Bilgiler'}</Text>
         <Text style={dynamicStyles.subtitle}>
-          Günlüğün için başlık ve bugünkü ruh halini seç
+          {t('welcome') === 'Welcome' ? 'Choose a title for your diary and today\'s mood' : 'Günlüğün için başlık ve bugünkü ruh halini seç'}
         </Text>
 
         {/* Title Input */}
         <View style={dynamicStyles.inputContainer}>
-          <Text style={dynamicStyles.label}>Başlık</Text>
+          <Text style={dynamicStyles.label}>{t('welcome') === 'Welcome' ? 'Title' : 'Başlık'}</Text>
           <TextInput
             style={dynamicStyles.titleInput}
             value={title}
             onChangeText={setTitle}
-            placeholder="Bugün nasıl geçti?"
+            placeholder={t('welcome') === 'Welcome' ? 'How was your day?' : 'Bugün nasıl geçti?'}
             placeholderTextColor={currentTheme.colors.muted}
           />
         </View>
 
         {/* Mood Selection */}
         <View style={dynamicStyles.moodSection}>
-          <Text style={dynamicStyles.label}>Bugünkü mood'un</Text>
+          <Text style={dynamicStyles.label}>{t('welcome') === 'Welcome' ? 'Today\'s mood' : 'Bugünkü mood\'un'}</Text>
           <View style={dynamicStyles.moodGrid}>
             {moodOptions.map((option) => (
               <TouchableOpacity

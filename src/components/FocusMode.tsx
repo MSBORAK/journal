@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTimer } from '../contexts/TimerContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
 import { CustomAlert } from './CustomAlert';
@@ -23,6 +24,7 @@ interface FocusModeProps {
 
 export default function FocusMode({ visible, onClose }: FocusModeProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const {
     isActive,
     isPaused,
@@ -74,9 +76,9 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
 
   // Duration options
   const durations = [
-    { label: '15 dk', value: 15 },
-    { label: '25 dk', value: 25 },
-    { label: '45 dk', value: 45 },
+    { label: t('welcome') === 'Welcome' ? '15 min' : '15 dk', value: 15 },
+    { label: t('welcome') === 'Welcome' ? '25 min' : '25 dk', value: 25 },
+    { label: t('welcome') === 'Welcome' ? '45 min' : '45 dk', value: 45 },
   ];
 
   // Mood options
@@ -136,11 +138,11 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
     if (isActive && !isPaused) {
       setAlertConfig({
         visible: true,
-        title: 'Odaklanmayı Bırak?',
-        message: 'Yarıda bırakmak istediğinden emin misin?',
+        title: t('welcome') === 'Welcome' ? 'Quit Focus?' : 'Odaklanmayı Bırak?',
+        message: t('welcome') === 'Welcome' ? 'Are you sure you want to quit?' : 'Yarıda bırakmak istediğinden emin misin?',
         type: 'warning',
         primaryButton: {
-          text: 'Bırak',
+          text: t('welcome') === 'Welcome' ? 'Quit' : 'Bırak',
           onPress: () => {
             setAlertConfig({ ...alertConfig, visible: false });
             resetTimer();
@@ -424,9 +426,9 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
 
           {!showReflection ? (
             <View style={dynamicStyles.content}>
-              <Text style={dynamicStyles.title}>Odaklanma Zamanı</Text>
+              <Text style={dynamicStyles.title}>{t('welcome') === 'Welcome' ? 'Focus Time' : 'Odaklanma Zamanı'}</Text>
               <Text style={dynamicStyles.subtitle}>
-                Bu an sadece senin... Huzurla odaklan 🕯️
+                {t('welcome') === 'Welcome' ? 'This moment is only yours... Focus peacefully 🕯️' : 'Bu an sadece senin... Huzurla odaklan 🕯️'}
               </Text>
 
               {/* Duration Selector */}
@@ -495,7 +497,7 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
                     onPress={startTimer}
                   >
                     <Text style={[dynamicStyles.buttonText, dynamicStyles.primaryButtonText]}>
-                      Başlat
+                      {t('welcome') === 'Welcome' ? 'Start' : 'Başlat'}
                     </Text>
                   </TouchableOpacity>
                 ) : (
