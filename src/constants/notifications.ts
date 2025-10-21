@@ -276,9 +276,9 @@ export const nightMessages: NotificationMessage[] = [
     emoji: "😴"
   },
   {
-    title: "Rahat uyu 💤",
-    body: "Bugünü yazdıysan, rahat uyu. Yazmadıysan yarın başla!",
-    emoji: "💤"
+    title: "Gece yarısı yaklaşıyor 🌙",
+    body: "Yatmadan önce bugünü not etmek ister misin?",
+    emoji: "🌙"
   }
 ];
 
@@ -522,6 +522,8 @@ export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): No
   }));
   
   console.log(`🕐 Current hour in ${userTimezone}: ${hour}`);
+  console.log(`🕐 Current time: ${now.toLocaleString()}`);
+  console.log(`🕐 Timezone: ${userTimezone}`);
   
   // Eğer mood değeri verilmişse, mood bazlı mesaj seç
   if (moodValue !== undefined && moodValue !== null) {
@@ -546,8 +548,8 @@ export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): No
     console.log('💤 Silent hours - no message');
     return {
       title: "Sessiz Saatler",
-      body: "Rahat uyu 💤",
-      emoji: "💤"
+      body: "Uyku zamanı, yarın görüşürüz 🌙",
+      emoji: "🌙"
     };
   }
 };

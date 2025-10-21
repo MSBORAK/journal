@@ -335,6 +335,12 @@ export const scheduleEveningNotification = async (): Promise<void> => {
   const isWeekendForMessage = isWeekendLocal(settings.timezone);
   let message;
   
+  console.log('🔍 Evening notification message selection:', {
+    isWeekendForMessage,
+    timezone: settings.timezone,
+    currentTime: new Date().toLocaleString()
+  });
+  
   if (isWeekendForMessage) {
     // Hafta sonu mesajları sadece hafta sonu gösterilsin
     message = getRandomMessage(weekendMessages);
@@ -344,6 +350,8 @@ export const scheduleEveningNotification = async (): Promise<void> => {
     message = getMessageByTimeOfDay(undefined, settings.timezone);
     console.log('✅ Weekday message selected for weekday (evening)');
   }
+  
+  console.log('📱 Selected message:', message);
 
   await Notifications.cancelScheduledNotificationAsync('evening-reminder');
   await scheduleNotification(
