@@ -363,7 +363,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
               {item.answers && (
                 <View style={dynamicStyles.questionsCount}>
                   <Text style={dynamicStyles.questionsCountText}>
-                    {Object.values(item.answers).filter(answer => answer && answer.trim() !== '').length} soru
+                    {Object.values(item.answers).filter(answer => answer && answer.trim() !== '').length} {t('welcome') === 'Welcome' ? 'questions' : 'soru'}
                   </Text>
                 </View>
               )}
