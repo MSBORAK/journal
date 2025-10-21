@@ -1016,7 +1016,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Tarih</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Date' : 'Tarih'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskDate}
@@ -1027,7 +1027,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Saat</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Time' : 'Saat'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskTime}
@@ -1038,7 +1038,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Sıklık</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Frequency' : 'Sıklık'}</Text>
               <View style={dynamicStyles.frequencyContainer}>
                 {[
                   { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
@@ -1073,7 +1073,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={() => setShowAddTaskModal(false)}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  İptal
+                  {t('welcome') === 'Welcome' ? 'Cancel' : 'İptal'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1081,7 +1081,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={handleSaveTask}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  Kaydet
+                  {t('welcome') === 'Welcome' ? 'Save' : 'Kaydet'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1115,7 +1115,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Tarih</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Date' : 'Tarih'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={reminderDate}
@@ -1126,7 +1126,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Saat</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Time' : 'Saat'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={reminderTime}
@@ -1137,7 +1137,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Sıklık</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Frequency' : 'Sıklık'}</Text>
               <View style={dynamicStyles.frequencyContainer}>
                 {[
                   { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
@@ -1172,7 +1172,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={() => setShowAddReminderModal(false)}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  İptal
+                  {t('welcome') === 'Welcome' ? 'Cancel' : 'İptal'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1180,7 +1180,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={handleSaveReminder}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  Kaydet
+                  {t('welcome') === 'Welcome' ? 'Save' : 'Kaydet'}
                 </Text>
               </TouchableOpacity>
             </View>

@@ -232,7 +232,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Günlük Detayı</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'Diary Detail' : 'Günlük Detayı'}</Text>
       </View>
 
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
@@ -297,9 +297,9 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
         {answeredQuestions.length === 0 && !entry.freeWriting && (
           <View style={dynamicStyles.emptyState}>
             <Text style={dynamicStyles.emptyIcon}>📝</Text>
-            <Text style={dynamicStyles.emptyTitle}>Soru Cevaplanmamış</Text>
+            <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'Question Not Answered' : 'Soru Cevaplanmamış'}</Text>
             <Text style={dynamicStyles.emptyMessage}>
-              Bu günlük girişinde herhangi bir soru cevaplanmamış veya serbest yazım yapılmamış.
+              {t('welcome') === 'Welcome' ? 'No questions were answered or free writing was done in this diary entry.' : 'Bu günlük girişinde herhangi bir soru cevaplanmamış veya serbest yazım yapılmamış.'}
             </Text>
           </View>
         )}

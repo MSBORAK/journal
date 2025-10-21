@@ -2089,7 +2089,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Text style={dynamicStyles.journeyTitle}>🌅 Yolculuk Başlangıcı</Text>
+              <Text style={dynamicStyles.journeyTitle}>🌅 {t('welcome') === 'Welcome' ? 'Journey Start' : 'Yolculuk Başlangıcı'}</Text>
               <Text style={dynamicStyles.journeyDate}>
                 {firstEntry ? new Date(firstEntry.date).toLocaleDateString('tr-TR', { 
                   day: 'numeric', 
@@ -2098,7 +2098,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 }) : 'Henüz başlamadın'}
               </Text>
               <Text style={dynamicStyles.journeyDuration}>
-                {daysSinceStart > 0 ? `${daysSinceStart} gün önce başladın` : 'Yolculuğun henüz başlamadı'}
+                {daysSinceStart > 0 ? (t('welcome') === 'Welcome' ? `${daysSinceStart} days ago you started` : `${daysSinceStart} gün önce başladın`) : (t('welcome') === 'Welcome' ? 'Your journey hasn\'t started yet' : 'Yolculuğun henüz başlamadı')}
               </Text>
               
               <View style={dynamicStyles.journeyActionContainer}>
@@ -2112,7 +2112,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 >
                   <Text style={dynamicStyles.journeyActionText}>
                     <Ionicons name="arrow-forward" size={16} color={currentTheme.colors.primary} />
-                    {' '}{!firstEntry ? 'İlk günlüğünü yaz' : 'Günlük yaz'}
+                    {' '}{!firstEntry ? (t('welcome') === 'Welcome' ? 'Write your first diary' : 'İlk günlüğünü yaz') : (t('welcome') === 'Welcome' ? 'Write diary' : 'Günlük yaz')}
                   </Text>
                   </TouchableOpacity>
             </View>
@@ -2151,7 +2151,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Text style={dynamicStyles.highlightTitle}>😊 Mood Dağılımı</Text>
+              <Text style={dynamicStyles.highlightTitle}>😊 {t('welcome') === 'Welcome' ? 'Mood Distribution' : 'Mood Dağılımı'}</Text>
               
               {entries.length === 0 ? (
                 <View style={dynamicStyles.emptyMoodContainer}>
@@ -2174,7 +2174,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               ) : (
                 <View style={dynamicStyles.moodChartContainer}>
                   {/* Line Chart */}
-                  <Text style={dynamicStyles.moodChartTitle}>📈 Mood Trend Grafiği</Text>
+                  <Text style={dynamicStyles.moodChartTitle}>📈 {t('welcome') === 'Welcome' ? 'Mood Trend Chart' : 'Mood Trend Grafiği'}</Text>
                   <View style={dynamicStyles.lineChartContainer}>
                     <View style={dynamicStyles.lineChartGrid}>
                       {/* Y-axis labels */}
