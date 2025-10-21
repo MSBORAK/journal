@@ -13,6 +13,7 @@ import { Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { ONBOARDING_STEPS, setOnboardingCompleted, setSelectedTheme } from '../services/onboardingService';
 import { soundService } from '../services/soundService';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,6 +30,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [showConfetti, setShowConfetti] = useState(false);
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   
   const [alertConfig, setAlertConfig] = useState({
     visible: false,

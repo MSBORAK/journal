@@ -10,6 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useDiary } from '../hooks/useDiary';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +32,7 @@ const moodOptions = [
 
 export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { entries } = useDiary(user?.uid);
   

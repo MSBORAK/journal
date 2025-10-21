@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface WriteDiaryStep2ScreenProps {
@@ -82,6 +83,7 @@ const questions = [
 
 export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryStep2ScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { title, mood } = route.params;
   
   const [answers, setAnswers] = useState({

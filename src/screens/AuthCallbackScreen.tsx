@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Linking } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
@@ -8,6 +9,7 @@ import { CustomAlert } from '../components/CustomAlert';
 
 export default function AuthCallbackScreen() {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { refreshUser } = useAuth();
   const navigation = useNavigation();
   const route = useRoute();

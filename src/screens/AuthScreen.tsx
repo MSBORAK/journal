@@ -223,7 +223,11 @@ export default function AuthScreen() {
 
   const handleForgotPassword = async () => {
     if (!forgotPasswordEmail) {
-      showAlert('⚠️ Uyarı', 'Şifre sıfırlama linki için email adresinizi giriniz.', 'warning');
+      showAlert(
+        t('welcome') === 'Welcome' ? '⚠️ Warning' : '⚠️ Uyarı', 
+        t('welcome') === 'Welcome' ? 'Please enter your email address for password reset link.' : 'Şifre sıfırlama linki için email adresinizi giriniz.', 
+        'warning'
+      );
       return;
     }
 
@@ -240,8 +244,8 @@ export default function AuthScreen() {
       setShowForgotPasswordModal(false);
       setForgotPasswordEmail('');
       showAlert(
-        '✅ E-posta Gönderildi', 
-        'Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.',
+        t('welcome') === 'Welcome' ? '✅ Email Sent' : '✅ E-posta Gönderildi', 
+        t('welcome') === 'Welcome' ? 'Password reset link has been sent to your email address. Please check your inbox.' : 'Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.',
         'success'
       );
     } catch (error: any) {
@@ -253,7 +257,11 @@ export default function AuthScreen() {
       } else if (errorMessage.toLowerCase().includes('user not found')) {
         showAlert('❌ Hata', 'Bu email adresi ile kayıtlı kullanıcı bulunamadı.', 'error');
       } else {
-        showAlert('❌ Hata', 'Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.', 'error');
+        showAlert(
+          t('welcome') === 'Welcome' ? '❌ Error' : '❌ Hata', 
+          t('welcome') === 'Welcome' ? 'Password reset link could not be sent. Please try again.' : 'Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.', 
+          'error'
+        );
       }
     } finally {
       setLoading(false);

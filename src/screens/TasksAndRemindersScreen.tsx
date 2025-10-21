@@ -17,6 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
 import * as Haptics from 'expo-haptics';
@@ -33,6 +34,7 @@ interface TasksAndRemindersScreenProps {
 export default function TasksAndRemindersScreen({ navigation }: TasksAndRemindersScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { 
     tasks,
     loading: tasksLoading, 
@@ -790,7 +792,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               onPress={handleAddTask}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>+ Görev Ekle</Text>
+              <Text style={dynamicStyles.actionButtonText}>
+                + {t('welcome') === 'Welcome' ? 'Add Task' : 'Görev Ekle'}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity 

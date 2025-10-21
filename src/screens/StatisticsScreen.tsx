@@ -17,6 +17,7 @@ import { useHealth } from '../hooks/useHealth';
 import { useHabits } from '../hooks/useHabits';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 // import { useDreamsGoals } from '../hooks/useDreamsGoals'; // Kaldırıldı
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -30,6 +31,7 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function StatisticsScreen({ navigation }: StatisticsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { entries, getStreak } = useDiary(user?.uid);
   const { getTodayHealthData, saveHealthData, getTodayWellnessScore, getWeeklyAverage } = useHealth(user?.uid);
   const {

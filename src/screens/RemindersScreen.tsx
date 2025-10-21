@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useReminders } from '../hooks/useReminders';
 import { Ionicons } from '@expo/vector-icons';
 import { Reminder } from '../types';
@@ -30,6 +31,7 @@ interface RemindersScreenProps {
 const RemindersScreen = React.memo(function RemindersScreen({ navigation }: RemindersScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { 
     reminders, 
     loading, 

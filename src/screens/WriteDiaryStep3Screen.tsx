@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useDiary } from '../hooks/useDiary';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
@@ -24,6 +25,7 @@ interface WriteDiaryStep3ScreenProps {
 export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryStep3ScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { addEntry } = useDiary(user?.uid);
   
   const { title, mood, answers, freeWriting } = route.params;

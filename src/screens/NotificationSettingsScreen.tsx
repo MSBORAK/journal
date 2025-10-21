@@ -12,6 +12,7 @@ import {
 import * as Notifications from 'expo-notifications';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -32,6 +33,7 @@ interface NotificationSettingsScreenProps {
 export default function NotificationSettingsScreen({ navigation }: NotificationSettingsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const [systemPermissionGranted, setSystemPermissionGranted] = useState<boolean>(false);
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: true,

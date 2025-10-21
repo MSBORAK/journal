@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface WriteDiaryStep1ScreenProps {
@@ -18,6 +19,7 @@ interface WriteDiaryStep1ScreenProps {
 
 export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryStep1ScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [mood, setMood] = useState<number | null>(null);
 

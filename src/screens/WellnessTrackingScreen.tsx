@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 
@@ -28,6 +29,7 @@ interface WellnessData {
 
 export default function WellnessTrackingScreen({ navigation }: WellnessTrackingScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
 
   const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info', primaryButton?: any, secondaryButton?: any) => {
     setAlertConfig({

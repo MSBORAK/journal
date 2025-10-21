@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
 
@@ -25,6 +26,7 @@ interface DiaryDetailScreenProps {
 
 export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { entry } = route.params;
 
   const questions = [

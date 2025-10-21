@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDiary } from '../hooks/useDiary';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 // import { View } from 'moti'; // Removed for now
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
@@ -23,6 +24,7 @@ interface HistoryScreenProps {
 export default function HistoryScreen({ navigation }: HistoryScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { entries, loading, getEntriesByTag, getEntriesByMood } = useDiary(user?.uid);
   
   const [searchQuery, setSearchQuery] = useState('');

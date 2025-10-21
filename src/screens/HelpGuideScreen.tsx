@@ -3,6 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface HelpGuideScreenProps {
   navigation: any;
@@ -23,6 +24,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
 
 export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: currentTheme.colors.background },

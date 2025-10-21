@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 // import { useFont } from '../contexts/FontContext'; // Kaldırıldı
 import { CustomAlert } from '../components/CustomAlert';
 import { useDiary } from '../hooks/useDiary';
@@ -27,6 +28,7 @@ interface WriteDiaryScreenProps {
 export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   // const { fontConfig } = useFont(); // Kaldırıldı
   const { addEntry, updateEntry } = useDiary(user?.uid);
 

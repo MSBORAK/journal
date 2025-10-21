@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 
@@ -22,6 +23,7 @@ interface MindfulnessScreenProps {
 export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   
   const [activeTab, setActiveTab] = useState<'morning' | 'evening' | 'weekly'>('morning');
   const [showAffirmationModal, setShowAffirmationModal] = useState(false);

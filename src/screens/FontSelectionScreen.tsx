@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useFont } from '../contexts/FontContext';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -85,6 +86,7 @@ const fontOptions: FontOption[] = [
 
 export default function FontSelectionScreen({ navigation }: FontSelectionScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { fontConfig, setFontConfig } = useFont();
   const [selectedFont, setSelectedFont] = React.useState(fontConfig.name);
 

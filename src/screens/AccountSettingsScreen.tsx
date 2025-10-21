@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -28,6 +29,7 @@ interface AccountSettingsScreenProps {
 
 export default function AccountSettingsScreen({ navigation }: AccountSettingsScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { user, signOut, refreshUser } = useAuth();
   const [alertConfig, setAlertConfig] = useState({
     visible: false,

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
@@ -22,6 +23,7 @@ interface PrivacySecuritySettingsScreenProps {
 
 export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySecuritySettingsScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   
   const [alertConfig, setAlertConfig] = useState({
     visible: false,

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useTasks } from '../hooks/useTasks';
 import { Ionicons } from '@expo/vector-icons';
 import { DailyTask } from '../types';
@@ -28,6 +29,7 @@ interface TasksScreenProps {
 export default function TasksScreen({ navigation }: TasksScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { 
     tasks,
     categories,

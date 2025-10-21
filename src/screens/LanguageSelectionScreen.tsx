@@ -19,6 +19,7 @@ interface LanguageSelectionScreenProps {
 
 export default function LanguageSelectionScreen({ navigation }: LanguageSelectionScreenProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { t, setCurrentLanguage, currentLanguage } = useLanguage();
   const [selectedLanguage, setSelectedLanguage] = useState(currentLanguage);
 

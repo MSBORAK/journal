@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useDreamsGoals } from '../hooks/useDreamsGoals';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +30,7 @@ interface DreamsGoalsScreenProps {
 const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const {
     dreams,
     goals,

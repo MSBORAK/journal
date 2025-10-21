@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +9,7 @@ import { CustomAlert } from '../components/CustomAlert';
 
 export default function PasswordResetScreen() {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const navigation = useNavigation();
   const [newPassword, setNewPassword] = useState('');
