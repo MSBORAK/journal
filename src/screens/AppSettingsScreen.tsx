@@ -289,7 +289,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
               onPress={showAbout}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>ℹ️ Bilgiler</Text>
+              <Text style={dynamicStyles.actionButtonText}>ℹ️ {t('welcome') === 'Welcome' ? 'Information' : 'Bilgiler'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -317,17 +317,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="settings" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Sistem Bilgileri</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'System Information' : 'Sistem Bilgileri'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Teknik detaylar ve sistem gereksinimlerini görüntüleyin.
+              {t('welcome') === 'Welcome' ? 'View technical details and system requirements.' : 'Teknik detaylar ve sistem gereksinimlerini görüntüleyin.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showSystemInfo}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>🔧 Sistem</Text>
+              <Text style={dynamicStyles.actionButtonText}>🔧 {t('welcome') === 'Welcome' ? 'System' : 'Sistem'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -378,16 +378,16 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
         {/* Geliştirici Bilgileri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Geliştirici</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Developer' : 'Geliştirici'}</Text>
           
           <View style={dynamicStyles.infoCard}>
             <Text style={dynamicStyles.infoText}>
-              👨‍💻 <Text style={{ fontWeight: '600' }}>Geliştirici:</Text> MSESOFT{'\n'}
+              👨‍💻 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Developer:' : 'Geliştirici:'}</Text> MSESOFT{'\n'}
               📧 <Text style={{ fontWeight: '600' }}>Email:</Text> msesoftware1425@gmail.com{'\n'}
               🌐 <Text style={{ fontWeight: '600' }}>Website:</Text> www.msesoftware.com{'\n'}
-              📅 <Text style={{ fontWeight: '600' }}>Tarih:</Text> 2025{'\n\n'}
+              📅 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Date:' : 'Tarih:'}</Text> 2025{'\n\n'}
               
-              Tüm hakları saklıdır.
+              {t('welcome') === 'Welcome' ? 'All rights reserved.' : 'Tüm hakları saklıdır.'}
             </Text>
           </View>
         </View>
