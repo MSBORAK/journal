@@ -86,11 +86,11 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       setWellnessData(data);
       
       showAlert(
-        '💚 Kaydedildi!',
-        'Wellness verilerin başarıyla kaydedildi. Bugünkü sağlık durumun kaydedildi!',
+        t('welcome') === 'Welcome' ? '💚 Saved!' : '💚 Kaydedildi!',
+        t('welcome') === 'Welcome' ? 'Wellness data saved successfully. Your health status for today has been recorded!' : 'Wellness verilerin başarıyla kaydedildi. Bugünkü sağlık durumun kaydedildi!',
         'success',
         {
-          text: 'Tamam',
+          text: t('welcome') === 'Welcome' ? 'OK' : 'Tamam',
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
@@ -98,11 +98,11 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
     } catch (error) {
       console.error('Error saving wellness data:', error);
       showAlert(
-        '❌ Hata',
-        'Veriler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        t('welcome') === 'Welcome' ? '❌ Error' : '❌ Hata',
+        t('welcome') === 'Welcome' ? 'An error occurred while saving data. Please try again.' : 'Veriler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
         'error',
         {
-          text: 'Tamam',
+          text: t('welcome') === 'Welcome' ? 'OK' : 'Tamam',
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
@@ -346,12 +346,12 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
           {t('welcome') === 'Welcome' ? 'Daily Health Tracking' : 'Günlük Sağlık Takibi'}
         </Text>
         <Text style={dynamicStyles.subtitle}>
-          Bugünkü sağlık durumunu kaydet ve wellness skorunu artır
+          {t('welcome') === 'Welcome' ? 'Record your health status for today and increase your wellness score' : 'Bugünkü sağlık durumunu kaydet ve wellness skorunu artır'}
         </Text>
 
         {/* Su İçme */}
         {renderCounter(
-          'Su İçme',
+          t('welcome') === 'Welcome' ? 'Water Intake' : 'Su İçme',
           wellnessData.waterGlasses,
           (value) => updateValue('waterGlasses', value),
           '💧',
@@ -363,7 +363,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Egzersiz */}
         {renderCounter(
-          'Egzersiz (Dakika)',
+          t('welcome') === 'Welcome' ? 'Exercise (Minutes)' : 'Egzersiz (Dakika)',
           wellnessData.exerciseMinutes,
           (value) => updateValue('exerciseMinutes', value),
           '🏃‍♂️',
@@ -381,7 +381,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Stres Seviyesi */}
         {renderLevelSelector(
-          'Stres Seviyesi',
+          t('welcome') === 'Welcome' ? 'Stress Level' : 'Stres Seviyesi',
           wellnessData.stressLevel,
           (value) => updateValue('stressLevel', value),
           '🧘‍♀️',
@@ -390,7 +390,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Enerji Seviyesi */}
         {renderLevelSelector(
-          'Enerji Seviyesi',
+          t('welcome') === 'Welcome' ? 'Energy Level' : 'Enerji Seviyesi',
           wellnessData.energyLevel,
           (value) => updateValue('energyLevel', value),
           '⚡',
