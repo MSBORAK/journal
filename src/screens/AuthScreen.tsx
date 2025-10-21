@@ -328,8 +328,8 @@ export default function AuthScreen() {
           
           <Text style={dynamicStyles.subtitle}>
             {isLogin 
-              ? 'Günlüğünüze devam edin' 
-              : 'Günlük tutmaya başlayın'
+              ? (t('welcome') === 'Welcome' ? 'Continue your journal' : 'Günlüğünüze devam edin')
+              : (t('welcome') === 'Welcome' ? 'Start journaling' : 'Günlük tutmaya başlayın')
             }
           </Text>
 
