@@ -13,8 +13,8 @@ export const useHabits = (userId?: string) => {
   // Popüler alışkanlık şablonları
   const defaultHabits: Omit<Habit, 'id' | 'createdAt' | 'updatedAt'>[] = [
     {
-      title: 'Su İç',
-      description: 'Günde 8 bardak su iç',
+      title: 'Drink Water',
+      description: 'Drink 8 glasses of water daily',
       icon: '💧',
       color: '#3B82F6',
       category: 'health',
@@ -24,8 +24,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Egzersiz Yap',
-      description: 'Günde 30 dakika egzersiz',
+      title: 'Exercise',
+      description: '30 minutes of exercise daily',
       icon: '🏃‍♂️',
       color: '#10B981',
       category: 'health',
@@ -35,8 +35,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Kitap Oku',
-      description: 'Günde 20 dakika kitap oku',
+      title: 'Read Books',
+      description: 'Read for 20 minutes daily',
       icon: '📚',
       color: '#8B5CF6',
       category: 'learning',
@@ -46,8 +46,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Meditasyon',
-      description: 'Günde 10 dakika meditasyon',
+      title: 'Meditation',
+      description: '10 minutes of meditation daily',
       icon: '🧘‍♂️',
       color: '#F59E0B',
       category: 'mindfulness',
@@ -57,8 +57,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Erken Yat',
-      description: '23:00\'dan önce yat',
+      title: 'Early Sleep',
+      description: 'Sleep before 11:00 PM',
       icon: '😴',
       color: '#6B7280',
       category: 'health',
@@ -68,8 +68,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Sağlıklı Beslen',
-      description: 'Günde 3 ana öğün',
+      title: 'Healthy Eating',
+      description: '3 main meals daily',
       icon: '🥗',
       color: '#EF4444',
       category: 'health',
@@ -79,8 +79,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Yeni Şey Öğren',
-      description: 'Günde 15 dakika yeni bilgi',
+      title: 'Learn New Things',
+      description: '15 minutes of new knowledge daily',
       icon: '🎓',
       color: '#EC4899',
       category: 'learning',
@@ -90,8 +90,8 @@ export const useHabits = (userId?: string) => {
       isActive: true,
     },
     {
-      title: 'Telefon Kullanımı',
-      description: 'Günde 4 saatten az telefon kullan',
+      title: 'Phone Usage',
+      description: 'Use phone less than 4 hours daily',
       icon: '📱',
       color: '#14B8A6',
       category: 'productivity',
