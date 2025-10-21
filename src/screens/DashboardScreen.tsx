@@ -2339,7 +2339,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             {/* Rozetler */}
             {streakBadges.length > 0 && (
               <View style={dynamicStyles.modalSection}>
-                <Text style={dynamicStyles.modalSectionTitle}>🏆 Kazanılan Rozetler</Text>
+                <Text style={dynamicStyles.modalSectionTitle}>
+                  🏆 {t('welcome') === 'Welcome' ? 'Earned Badges' : 'Kazanılan Rozetler'}
+                </Text>
                 {streakBadges.map((badge, index) => (
                   <View key={index} style={dynamicStyles.streakBadgeCard}>
                     <Text style={dynamicStyles.streakBadgeIcon}>{badge.icon}</Text>
@@ -2565,7 +2567,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
             {/* Başarılar */}
             <View style={dynamicStyles.modalSection}>
-              <Text style={dynamicStyles.modalSectionTitle}>🏆 Başarılarım</Text>
+              <Text style={dynamicStyles.modalSectionTitle}>
+                🏆 {t('welcome') === 'Welcome' ? 'My Achievements' : 'Başarılarım'}
+              </Text>
               <View style={dynamicStyles.modalAchievementsContainer}>
                 <View style={dynamicStyles.modalAchievementCard}>
                   <Text style={dynamicStyles.modalAchievementIcon}>📔</Text>
@@ -2655,7 +2659,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           <View style={dynamicStyles.moodTextContainer}>
             <Text style={dynamicStyles.moodLabel}>
               {t('welcome') === 'Welcome' 
-                ? "Capture this moment" 
+                ? (t('welcome') === 'Welcome' ? "Capture this moment" : "Bu anı yakala") 
                 : "Bu anı yakala"
               }
             </Text>
@@ -2711,7 +2715,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             borderColor: currentTheme.colors.border,
           }
         ]}>
-            <Text style={dynamicStyles.motivationTitle}>{t('dashboard.dailyReflection')}</Text>
+            <Text style={dynamicStyles.motivationTitle}>
+              {t('welcome') === 'Welcome' ? 'Daily Reflection' : 'Günlük Yansıma'}
+            </Text>
             <Text style={dynamicStyles.motivationMessage}>
               {getMotivationMessage()}
             </Text>
@@ -2744,7 +2750,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           <View style={dynamicStyles.achievementsHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
               <Text style={dynamicStyles.achievementsIcon}>🏆</Text>
-              <Text style={dynamicStyles.achievementsTitle}>Başarılarım</Text>
+              <Text style={dynamicStyles.achievementsTitle}>
+                {t('welcome') === 'Welcome' ? 'My Achievements' : 'Başarılarım'}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={currentTheme.colors.secondary} />
           </View>
@@ -2754,19 +2762,25 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Text style={dynamicStyles.achievementStatNumber}>
                 {getAchievementStats().unlocked}
               </Text>
-              <Text style={dynamicStyles.achievementStatLabel}>Kazanılan</Text>
+              <Text style={dynamicStyles.achievementStatLabel}>
+                {t('welcome') === 'Welcome' ? 'Earned' : 'Kazanılan'}
+              </Text>
             </View>
             <View style={dynamicStyles.achievementStat}>
               <Text style={dynamicStyles.achievementStatNumber}>
                 {getAchievementStats().total}
               </Text>
-              <Text style={dynamicStyles.achievementStatLabel}>Toplam</Text>
+              <Text style={dynamicStyles.achievementStatLabel}>
+                {t('welcome') === 'Welcome' ? 'Total' : 'Toplam'}
+              </Text>
             </View>
             <View style={dynamicStyles.achievementStat}>
               <Text style={dynamicStyles.achievementStatNumber}>
                 {Math.round(getAchievementStats().completionRate)}%
               </Text>
-              <Text style={dynamicStyles.achievementStatLabel}>Tamamlanma</Text>
+              <Text style={dynamicStyles.achievementStatLabel}>
+                {t('welcome') === 'Welcome' ? 'Completion' : 'Tamamlanma'}
+              </Text>
             </View>
           </View>
 
@@ -2793,7 +2807,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             activeOpacity={0.8}
           >
             <Text style={dynamicStyles.achievementsButtonText}>
-              Tüm Başarıları Gör 🏆
+              {t('welcome') === 'Welcome' ? 'See All Achievements' : 'Tüm Başarıları Gör'} 🏆
             </Text>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -2820,7 +2834,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               borderColor: currentTheme.colors.border,
             }
           ]}>
-          <Text style={dynamicStyles.sectionTitle}>💡 Kişisel İçgörülerin</Text>
+          <Text style={dynamicStyles.sectionTitle}>
+            💡 {t('welcome') === 'Welcome' ? 'Your Personal Insights' : 'Kişisel İçgörülerin'}
+          </Text>
           {insights.map((insight, index) => (
             <View key={`${insight.type}-${index}`} style={[
               dynamicStyles.insightCard,
@@ -2883,7 +2899,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 fontWeight: 'bold',
                 color: currentTheme.colors.text,
                 textAlign: 'center',
-              }}>Hoşgeldin!</Text>
+              }}>{t('welcome')}</Text>
             </View>
             
             <Text style={{
