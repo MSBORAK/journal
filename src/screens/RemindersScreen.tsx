@@ -67,27 +67,27 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
 
   const emojiOptions = ['⏰', '💊', '🏥', '💧', '🏃‍♀️', '📚', '🍎', '😴', '🎯', '💝', '📅', '🎂', '👥', '🍽️', '💼', '📱', '🚗', '✈️', '🎉', '💡'];
   const categoryOptions = [
-    { value: 'general', label: 'Genel', emoji: '⏰' },
-    { value: 'medicine', label: 'İlaç', emoji: '💊' },
-    { value: 'appointment', label: 'Randevu', emoji: '📅' },
-    { value: 'birthday', label: 'Doğum Günü', emoji: '🎂' },
-    { value: 'meeting', label: 'Toplantı', emoji: '👥' },
+    { value: 'general', label: t('welcome') === 'Welcome' ? 'General' : 'Genel', emoji: '⏰' },
+    { value: 'medicine', label: t('welcome') === 'Welcome' ? 'Medicine' : 'İlaç', emoji: '💊' },
+    { value: 'appointment', label: t('welcome') === 'Welcome' ? 'Appointment' : 'Randevu', emoji: '📅' },
+    { value: 'birthday', label: t('welcome') === 'Welcome' ? 'Birthday' : 'Doğum Günü', emoji: '🎂' },
+    { value: 'meeting', label: t('welcome') === 'Welcome' ? 'Meeting' : 'Toplantı', emoji: '👥' },
     { value: 'health', label: t('welcome') === 'Welcome' ? 'Health' : 'Sağlık', emoji: '🏥' },
-    { value: 'exercise', label: 'Egzersiz', emoji: '🏃‍♀️' },
-    { value: 'meal', label: 'Yemek', emoji: '🍽️' },
+    { value: 'exercise', label: t('welcome') === 'Welcome' ? 'Exercise' : 'Egzersiz', emoji: '🏃‍♀️' },
+    { value: 'meal', label: t('welcome') === 'Welcome' ? 'Meal' : 'Yemek', emoji: '🍽️' },
     { value: 'personal', label: t('welcome') === 'Welcome' ? 'Personal' : 'Kişisel', emoji: '👤' },
     { value: 'work', label: t('welcome') === 'Welcome' ? 'Work' : 'İş', emoji: '💼' },
-    { value: 'study', label: 'Ders', emoji: '📚' },
-    { value: 'custom', label: 'Özel', emoji: '⭐' },
+    { value: 'study', label: t('welcome') === 'Welcome' ? 'Study' : 'Ders', emoji: '📚' },
+    { value: 'custom', label: t('welcome') === 'Welcome' ? 'Custom' : 'Özel', emoji: '⭐' },
   ];
   const priorityOptions = [
-    { value: 'low', label: 'Düşük', color: currentTheme.colors.success },
-    { value: 'medium', label: 'Orta', color: currentTheme.colors.primary },
-    { value: 'high', label: 'Yüksek', color: currentTheme.colors.danger },
+    { value: 'low', label: t('welcome') === 'Welcome' ? 'Low' : 'Düşük', color: currentTheme.colors.success },
+    { value: 'medium', label: t('welcome') === 'Welcome' ? 'Medium' : 'Orta', color: currentTheme.colors.primary },
+    { value: 'high', label: t('welcome') === 'Welcome' ? 'High' : 'Yüksek', color: currentTheme.colors.danger },
   ];
   const repeatOptions = [
-    { value: 'once', label: 'Tek Seferlik' },
-    { value: 'hourly', label: 'Saatlik' },
+    { value: 'once', label: t('welcome') === 'Welcome' ? 'Once' : 'Tek Seferlik' },
+    { value: 'hourly', label: t('welcome') === 'Welcome' ? 'Hourly' : 'Saatlik' },
     { value: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük' },
     { value: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık' },
     { value: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık' },
