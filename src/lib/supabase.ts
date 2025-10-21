@@ -65,7 +65,7 @@ export const updateEmail = async (newEmail: string) => {
     const { data, error } = await supabase.auth.updateUser({
       email: newEmail.toLowerCase().trim(),
     }, {
-      emailRedirectTo: 'daily://auth/callback?type=email_confirm',
+      emailRedirectTo: 'rhythm://auth/callback?type=email_confirm',
     });
     
     if (error) {

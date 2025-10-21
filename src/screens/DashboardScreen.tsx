@@ -567,7 +567,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     
     return [
       { emoji: '😊', label: 'Ruh Hali', score: moodScore, color: currentTheme.colors.primary },
-      { emoji: '✍️', label: 'Günlük', score: diaryScore, color: currentTheme.colors.secondary },
+      { emoji: '✍️', label: 'Rhythm', score: diaryScore, color: currentTheme.colors.secondary },
       { emoji: '⚡', label: 'Düzenlilik', score: regularityScore, color: currentTheme.colors.success },
     ];
   };
@@ -609,7 +609,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             title: 'Ruh Halini İyileştir',
             description: 'Kendini daha iyi hissetmek için günlük yazarken pozitif anılarını hatırla.'
           });
-        } else if (cat.label === 'Günlük') {
+        } else if (cat.label === 'Rhythm') {
           recommendations.push({
             icon: '📝',
             title: 'Daha Detaylı Yaz',

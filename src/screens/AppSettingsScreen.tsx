@@ -45,7 +45,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const showAbout = () => {
     showAlert(
       'ℹ️ Hakkında',
-      'Daily Diary App v1.0.0\n\n📱 Kapsamlı günlük yazma uygulaması:\n• Günlük yazma sistemi\n• Mood takibi ve analizi\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro timer ve odak modu\n• İstatistikler ve gelişim takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Offline çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com',
+      'Rhythm v1.0.0\n\n🎵 Ruhsal denge ve yaşam ritmi uygulaması:\n• Günlük yazma sistemi\n• Mood takibi ve analizi\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro timer ve odak modu\n• İstatistikler ve gelişim takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Offline çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com',
       'info'
     );
   };
@@ -69,8 +69,8 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const shareApp = async () => {
     try {
       await Share.share({
-        message: 'Daily Diary App - Günlük yazma alışkanlığı kazanın! 📱✨\n\nApp Store\'dan indirin: https://apps.apple.com/app/daily-diary-app/id1234567890',
-        title: 'Daily Diary App',
+        message: 'Rhythm - Ruhsal denge ve yaşam ritmi! 🎵✨\n\nApp Store\'dan indirin: https://apps.apple.com/app/rhythm/id1234567890',
+        title: 'Rhythm',
       });
     } catch (error) {
       showAlert('❌ Hata', 'Paylaşım sırasında hata oluştu', 'error');
