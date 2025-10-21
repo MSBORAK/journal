@@ -1042,8 +1042,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               <View style={dynamicStyles.frequencyContainer}>
                 {[
                   { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
-                  { key: 'weekly', label: 'Haftalık', emoji: '📆' },
-                  { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
+                  { key: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık', emoji: '📆' },
+                  { key: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık', emoji: '🗓️' },
                 ].map((freq) => (
                   <TouchableOpacity
                     key={freq.key}
@@ -1141,8 +1141,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               <View style={dynamicStyles.frequencyContainer}>
                 {[
                   { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
-                  { key: 'weekly', label: 'Haftalık', emoji: '📆' },
-                  { key: 'monthly', label: 'Aylık', emoji: '🗓️' },
+                  { key: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık', emoji: '📆' },
+                  { key: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık', emoji: '🗓️' },
                 ].map((freq) => (
                   <TouchableOpacity
                     key={freq.key}
