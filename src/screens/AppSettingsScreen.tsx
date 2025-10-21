@@ -250,7 +250,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Uygulama</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'App' : 'Uygulama'}</Text>
       </View>
 
       <ScrollView 
@@ -261,7 +261,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            📱 Uygulama bilgilerini ve destek kaynaklarını buradan yönetin.
+            📱 {t('welcome') === 'Welcome' ? 'Manage application information and support resources from here.' : 'Uygulama bilgilerini ve destek kaynaklarını buradan yönetin.'}
           </Text>
           <View style={dynamicStyles.versionBadge}>
             <Text style={dynamicStyles.versionBadgeText}>v1.0.0</Text>
@@ -272,17 +272,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
         {/* Uygulama Bilgileri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Uygulama Bilgileri</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Application Information' : 'Uygulama Bilgileri'}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="information-circle" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Hakkında</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'About' : 'Hakkında'}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Uygulama hakkında detaylı bilgileri görüntüleyin.
+              {t('welcome') === 'Welcome' ? 'View detailed information about the application.' : 'Uygulama hakkında detaylı bilgileri görüntüleyin.'}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
