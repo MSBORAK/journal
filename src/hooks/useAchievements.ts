@@ -237,8 +237,8 @@ export const useAchievements = (userId?: string) => {
     // Sağlık Başarıları
     {
       id: 'health_tracker_7',
-      title: 'Sağlıklı',
-      description: '7 gün üst üste sağlık takibi yaptın!',
+      title: t('welcome') === 'Welcome' ? 'Healthy' : 'Sağlıklı',
+      description: t('welcome') === 'Welcome' ? 'You tracked health for 7 consecutive days!' : '7 gün üst üste sağlık takibi yaptın!',
       icon: '💪',
       category: 'mood',
       requirement: { type: 'consecutive', value: 7 },
@@ -246,8 +246,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'wellness_master_30',
-      title: 'Wellness Ustası',
-      description: '30 gün üst üste sağlık takibi yaptın!',
+      title: t('welcome') === 'Welcome' ? 'Wellness Master' : 'Wellness Ustası',
+      description: t('welcome') === 'Welcome' ? 'You tracked health for 30 consecutive days!' : '30 gün üst üste sağlık takibi yaptın!',
       icon: '🌱',
       category: 'mood',
       requirement: { type: 'consecutive', value: 30 },
@@ -257,8 +257,8 @@ export const useAchievements = (userId?: string) => {
     // Hatırlatıcı Başarıları
     {
       id: 'reminder_master',
-      title: 'Hatırlatıcı Ustası',
-      description: '10 hatırlatıcı oluşturdun!',
+      title: t('welcome') === 'Welcome' ? 'Reminder Master' : 'Hatırlatıcı Ustası',
+      description: t('welcome') === 'Welcome' ? 'You created 10 reminders!' : '10 hatırlatıcı oluşturdun!',
       icon: '🔔',
       category: 'goals',
       requirement: { type: 'total', value: 10 },
@@ -268,8 +268,8 @@ export const useAchievements = (userId?: string) => {
     // Alışkanlık Başarıları
     {
       id: 'habit_starter',
-      title: 'Alışkanlık Başlangıcı',
-      description: 'İlk alışkanlığını tamamladın!',
+      title: t('welcome') === 'Welcome' ? 'Habit Beginner' : 'Alışkanlık Başlangıcı',
+      description: t('welcome') === 'Welcome' ? 'You completed your first habit!' : 'İlk alışkanlığını tamamladın!',
       icon: '🌟',
       category: 'goals',
       requirement: { type: 'total', value: 1 },
@@ -277,8 +277,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_streak_7',
-      title: 'Haftalık Alışkanlık',
-      description: 'Bir alışkanlığı 7 gün üst üste tamamladın!',
+      title: t('welcome') === 'Welcome' ? 'Weekly Habit' : 'Haftalık Alışkanlık',
+      description: t('welcome') === 'Welcome' ? 'You completed a habit for 7 consecutive days!' : 'Bir alışkanlığı 7 gün üst üste tamamladın!',
       icon: '🔥',
       category: 'streak',
       requirement: { type: 'streak', value: 7 },
@@ -286,8 +286,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_streak_30',
-      title: 'Aylık Alışkanlık Ustası',
-      description: 'Bir alışkanlığı 30 gün üst üste tamamladın!',
+      title: t('welcome') === 'Welcome' ? 'Monthly Habit Master' : 'Aylık Alışkanlık Ustası',
+      description: t('welcome') === 'Welcome' ? 'You completed a habit for 30 consecutive days!' : 'Bir alışkanlığı 30 gün üst üste tamamladın!',
       icon: '👑',
       category: 'streak',
       requirement: { type: 'streak', value: 30 },
@@ -295,8 +295,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_master_100',
-      title: 'Alışkanlık Efsanesi',
-      description: '100 alışkanlık tamamladın!',
+      title: t('welcome') === 'Welcome' ? 'Habit Legend' : 'Alışkanlık Efsanesi',
+      description: t('welcome') === 'Welcome' ? 'You completed 100 habits!' : '100 alışkanlık tamamladın!',
       icon: '🏆',
       category: 'goals',
       requirement: { type: 'total', value: 100 },
@@ -304,8 +304,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_perfect_week',
-      title: 'Mükemmel Hafta',
-      description: 'Bir hafta boyunca tüm alışkanlıklarını tamamladın!',
+      title: t('welcome') === 'Welcome' ? 'Perfect Week' : 'Mükemmel Hafta',
+      description: t('welcome') === 'Welcome' ? 'You completed all your habits for a week!' : 'Bir hafta boyunca tüm alışkanlıklarını tamamladın!',
       icon: '⭐',
       category: 'goals',
       requirement: { type: 'milestone', value: 7 },
@@ -315,8 +315,8 @@ export const useAchievements = (userId?: string) => {
     // Özel Başarılar
     {
       id: 'app_lover_30',
-      title: 'Uygulama Sevgilisi',
-      description: '30 gün uygulamayı kullandın!',
+      title: t('welcome') === 'Welcome' ? 'App Lover' : 'Uygulama Sevgilisi',
+      description: t('welcome') === 'Welcome' ? 'You used the app for 30 days!' : '30 gün uygulamayı kullandın!',
       icon: '💖',
       category: 'streak',
       requirement: { type: 'consecutive', value: 30 },
