@@ -1002,7 +1002,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Süre (dakika)</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Duration (minutes)' : 'Süre (dakika)'}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskEstimatedTime}
