@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { motivationService, MotivationData } from '../services/motivationService';
 import { soundService } from '../services/soundService';
 import * as Haptics from 'expo-haptics';
@@ -30,6 +31,7 @@ export default function MotivationCard({
   delay = 2000 
 }: MotivationCardProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const [motivation, setMotivation] = useState<MotivationData | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -236,7 +238,9 @@ export default function MotivationCard({
               color={currentTheme.colors.background + 'B3'} 
             />
             <Text style={styles.priorityText}>
-              {motivation.priority === 'high' ? 'Önemli' : motivation.priority === 'medium' ? 'Orta' : 'Bilgi'}
+              {motivation.priority === 'high' ? (t('welcome') === 'Welcome' ? 'Important' : 'Önemli') : 
+               motivation.priority === 'medium' ? (t('welcome') === 'Welcome' ? 'Medium' : 'Orta') : 
+               (t('welcome') === 'Welcome' ? 'Info' : 'Bilgi')}
             </Text>
           </View>
           
