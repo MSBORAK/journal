@@ -68,7 +68,27 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "thisWeek": "This Week",
-    "thisMonth": "This Month"
+    "thisMonth": "This Month",
+    "streakBadges": {
+      "threeDayFire": "3 Day Fire",
+      "threeDayFireDesc": "You wrote 3 days in a row!",
+      "weeklyChampion": "Weekly Champion",
+      "weeklyChampionDesc": "You wrote 7 days in a row!",
+      "twoWeekStar": "2 Week Star",
+      "twoWeekStarDesc": "You wrote 14 days in a row!",
+      "monthlyDiamond": "Monthly Diamond",
+      "monthlyDiamondDesc": "You wrote 30 days in a row!",
+      "hundredKing": "Hundred King",
+      "hundredKingDesc": "You wrote 100 days in a row!",
+      "yearlyLegend": "Yearly Legend",
+      "yearlyLegendDesc": "You wrote 365 days in a row!"
+    },
+    "tips": {
+      "improveMood": "Improve Your Mood",
+      "improveMoodDesc": "Remember your positive memories while writing your diary to feel better.",
+      "writeDetailed": "Write More Detailed",
+      "writeDetailedDesc": "Express your thoughts in more detail. Everything is important!"
+    }
   },
   "diary": {
     "writeDiary": "Write Diary",

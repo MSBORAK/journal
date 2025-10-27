@@ -507,12 +507,12 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     const longest = getLongestStreak();
     const badges = [];
     
-    if (streak >= 3) badges.push({ icon: '🔥', title: t('welcome') === 'Welcome' ? '3 Day Fire' : '3 Günlük Ateş', desc: t('welcome') === 'Welcome' ? 'You wrote 3 days in a row!' : '3 gün üst üste yazdın!' });
-    if (streak >= 7) badges.push({ icon: '🏆', title: t('welcome') === 'Welcome' ? 'Weekly Champion' : 'Haftalık Şampiyon', desc: t('welcome') === 'Welcome' ? 'You wrote 7 days in a row!' : '7 gün üst üste yazdın!' });
-    if (streak >= 14) badges.push({ icon: '⭐', title: t('welcome') === 'Welcome' ? '2 Week Star' : '2 Haftalık Yıldız', desc: t('welcome') === 'Welcome' ? 'You wrote 14 days in a row!' : '14 gün üst üste yazdın!' });
-    if (streak >= 30) badges.push({ icon: '💎', title: t('welcome') === 'Welcome' ? 'Monthly Diamond' : 'Aylık Elmas', desc: t('welcome') === 'Welcome' ? 'You wrote 30 days in a row!' : '30 gün üst üste yazdın!' });
-    if (streak >= 100) badges.push({ icon: '👑', title: t('welcome') === 'Welcome' ? 'Hundred King' : 'Yüzlük Kral', desc: t('welcome') === 'Welcome' ? 'You wrote 100 days in a row!' : '100 gün üst üste yazdın!' });
-    if (longest >= 365) badges.push({ icon: '🌟', title: t('welcome') === 'Welcome' ? 'Yearly Legend' : 'Yıllık Efsane', desc: t('welcome') === 'Welcome' ? 'You wrote 365 days in a row!' : '365 gün üst üste yazdın!' });
+    if (streak >= 3) badges.push({ icon: '🔥', title: t('dashboard.streakBadges.threeDayFire'), desc: t('dashboard.streakBadges.threeDayFireDesc') });
+    if (streak >= 7) badges.push({ icon: '🏆', title: t('dashboard.streakBadges.weeklyChampion'), desc: t('dashboard.streakBadges.weeklyChampionDesc') });
+    if (streak >= 14) badges.push({ icon: '⭐', title: t('dashboard.streakBadges.twoWeekStar'), desc: t('dashboard.streakBadges.twoWeekStarDesc') });
+    if (streak >= 30) badges.push({ icon: '💎', title: t('dashboard.streakBadges.monthlyDiamond'), desc: t('dashboard.streakBadges.monthlyDiamondDesc') });
+    if (streak >= 100) badges.push({ icon: '👑', title: t('dashboard.streakBadges.hundredKing'), desc: t('dashboard.streakBadges.hundredKingDesc') });
+    if (longest >= 365) badges.push({ icon: '🌟', title: t('dashboard.streakBadges.yearlyLegend'), desc: t('dashboard.streakBadges.yearlyLegendDesc') });
     
     return badges;
   };
@@ -606,14 +606,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         if (cat.label === 'Ruh Hali') {
           recommendations.push({
             icon: '🌈',
-            title: t('welcome') === 'Welcome' ? 'Improve Your Mood' : 'Ruh Halini İyileştir',
-            description: t('welcome') === 'Welcome' ? 'Remember your positive memories while writing your diary to feel better.' : 'Kendini daha iyi hissetmek için günlük yazarken pozitif anılarını hatırla.'
+            title: t('dashboard.tips.improveMood'),
+            description: t('dashboard.tips.improveMoodDesc')
           });
         } else if (cat.label === 'Rhythm') {
           recommendations.push({
             icon: '📝',
-            title: t('welcome') === 'Welcome' ? 'Write More Detailed' : 'Daha Detaylı Yaz',
-            description: t('welcome') === 'Welcome' ? 'Express your thoughts in more detail. Everything is important!' : 'Düşüncelerini daha detaylı ifade et. Her şey önemli!'
+            title: t('dashboard.tips.writeDetailed'),
+            description: t('dashboard.tips.writeDetailedDesc')
           });
         } else if (cat.label === 'Düzenlilik') {
           recommendations.push({

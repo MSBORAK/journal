@@ -68,7 +68,27 @@
     "today": "Bugün",
     "yesterday": "Dün",
     "thisWeek": "Bu Hafta",
-    "thisMonth": "Bu Ay"
+    "thisMonth": "Bu Ay",
+    "streakBadges": {
+      "threeDayFire": "3 Günlük Ateş",
+      "threeDayFireDesc": "3 gün üst üste yazdın!",
+      "weeklyChampion": "Haftalık Şampiyon",
+      "weeklyChampionDesc": "7 gün üst üste yazdın!",
+      "twoWeekStar": "2 Haftalık Yıldız",
+      "twoWeekStarDesc": "14 gün üst üste yazdın!",
+      "monthlyDiamond": "Aylık Elmas",
+      "monthlyDiamondDesc": "30 gün üst üste yazdın!",
+      "hundredKing": "Yüzlük Kral",
+      "hundredKingDesc": "100 gün üst üste yazdın!",
+      "yearlyLegend": "Yıllık Efsane",
+      "yearlyLegendDesc": "365 gün üst üste yazdın!"
+    },
+    "tips": {
+      "improveMood": "Ruh Halini İyileştir",
+      "improveMoodDesc": "Kendini daha iyi hissetmek için günlük yazarken pozitif anılarını hatırla.",
+      "writeDetailed": "Daha Detaylı Yaz",
+      "writeDetailedDesc": "Düşüncelerini daha detaylı ifade et. Her şey önemli!"
+    }
   },
   "diary": {
     "writeDiary": "Günlük Yaz",
