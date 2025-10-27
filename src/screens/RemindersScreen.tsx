@@ -94,8 +94,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
   ];
 
   const reminderTypeOptions = [
-    { value: 'today', label: 'Bugün İçin', emoji: '📅' },
-    { value: 'scheduled', label: 'Gelecek Tarih', emoji: '🗓️' },
+    { value: 'today', label: t('welcome') === 'Welcome' ? 'For Today' : 'Bugün İçin', emoji: '📅' },
+    { value: 'scheduled', label: t('welcome') === 'Welcome' ? 'Future Date' : 'Gelecek Tarih', emoji: '🗓️' },
   ];
 
   const stats = getReminderStats();
@@ -594,7 +594,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         await scheduleReminderNotification(
           savedReminder.id,
           savedReminder.emoji + ' ' + savedReminder.title,
-          savedReminder.description || 'Hatırlatıcı zamanı!',
+          savedReminder.description || (t('welcome') === 'Welcome' ? 'Reminder time!' : 'Hatırlatıcı zamanı!'),
           savedReminder.time,
           savedReminder.repeatType,
           savedReminder.category,
