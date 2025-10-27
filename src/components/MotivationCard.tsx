@@ -32,6 +32,51 @@ export default function MotivationCard({
 }: MotivationCardProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+
+  // Translation map for motivation titles and messages
+  const getTranslatedTitle = (title: string) => {
+    const translations: { [key: string]: string } = {
+      'Her Gün Yeni Bir Başlangıç! 🌅': t('welcome') === 'Welcome' ? 'Every Day a New Beginning! 🌅' : 'Her Gün Yeni Bir Başlangıç! 🌅',
+      'Hayallerine Çok Yakınsın! ✨': t('welcome') === 'Welcome' ? 'You\'re So Close to Your Dreams! ✨' : 'Hayallerine Çok Yakınsın! ✨',
+      'Yolun Yarısını Geçtin! 🌈': t('welcome') === 'Welcome' ? 'You\'ve Passed Halfway! 🌈' : 'Yolun Yarısını Geçtin! 🌈',
+      'Duygularını Dinlemek Güzel! 🎵': t('welcome') === 'Welcome' ? 'It\'s Beautiful to Listen to Your Feelings! 🎵' : 'Duygularını Dinlemek Güzel! 🎵',
+      'Işıl Işıl Parlıyorsun! ✨': t('welcome') === 'Welcome' ? 'You\'re Shining Brightly! ✨' : 'Işıl Işıl Parlıyorsun! ✨',
+      'Ruhun Huzurlu! 🌸': t('welcome') === 'Welcome' ? 'Your Soul is Peaceful! 🌸' : 'Ruhun Huzurlu! 🌸',
+      'Sen Bir Efsanesin! 🔥': t('welcome') === 'Welcome' ? 'You\'re a Legend! 🔥' : 'Sen Bir Efsanesin! 🔥',
+      'Harika Bir Ritm! ⭐': t('welcome') === 'Welcome' ? 'Amazing Rhythm! ⭐' : 'Harika Bir Ritm! ⭐',
+      'İçindeki Işık Parlıyor! ✨': t('welcome') === 'Welcome' ? 'The Light Within You is Shining! ✨' : 'İçindeki Işık Parlıyor! ✨',
+      'Her Gün Daha Güçlüsün! 🌱': t('welcome') === 'Welcome' ? 'You\'re Stronger Every Day! 🌱' : 'Her Gün Daha Güçlüsün! 🌱',
+      'Hayat Sana Gülüyor! 🌻': t('welcome') === 'Welcome' ? 'Life is Smiling at You! 🌻' : 'Hayat Sana Gülüyor! 🌻',
+      'Duygularına Değer Ver! 💖': t('welcome') === 'Welcome' ? 'Value Your Feelings! 💖' : 'Duygularına Değer Ver! 💖',
+      'Büyüyen Bir Ruh! 🦋': t('welcome') === 'Welcome' ? 'A Growing Soul! 🦋' : 'Büyüyen Bir Ruh! 🦋',
+      'Kendine Nazik Ol! 🌸': t('welcome') === 'Welcome' ? 'Be Kind to Yourself! 🌸' : 'Kendine Nazik Ol! 🌸',
+      'Yarınların Parlak! 🌅': t('welcome') === 'Welcome' ? 'Your Tomorrows are Bright! 🌅' : 'Yarınların Parlak! 🌅',
+      'Enerjin Çok Değerli! 💫': t('welcome') === 'Welcome' ? 'Your Energy is Very Valuable! 💫' : 'Enerjin Çok Değerli! 💫',
+      'Her Başarı Kutlanmalı! 🎊': t('welcome') === 'Welcome' ? 'Every Success Should be Celebrated! 🎊' : 'Her Başarı Kutlanmalı! 🎊',
+      'Anı Yaşa! 🌺': t('welcome') === 'Welcome' ? 'Live the Moment! 🌺' : 'Anı Yaşa! 🌺',
+      'İçsel Huzur! 🕊️': t('welcome') === 'Welcome' ? 'Inner Peace! 🕊️' : 'İçsel Huzur! 🕊️',
+      'Kendini Sev! 💕': t('welcome') === 'Welcome' ? 'Love Yourself! 💕' : 'Kendini Sev! 💕',
+      'Güzel Bir Ruhsun! 🌟': t('welcome') === 'Welcome' ? 'You\'re a Beautiful Soul! 🌟' : 'Güzel Bir Ruhsun! 🌟',
+      'Nefes Al, Rahatla! 🌬️': t('welcome') === 'Welcome' ? 'Breathe, Relax! 🌬️' : 'Nefes Al, Rahatla! 🌬️',
+      'Gülümse! 😊': t('welcome') === 'Welcome' ? 'Smile! 😊' : 'Gülümse! 😊',
+    };
+    return translations[title] || title;
+  };
+
+  const getTranslatedMessage = (message: string) => {
+    const translations: { [key: string]: string } = {
+      'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!': t('welcome') === 'Welcome' ? 'Sometimes clouds cover the sun, but the sun is always there. So is the light within you. Today will be even better!' : 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!',
+      'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!': t('welcome') === 'Welcome' ? 'Look how far you\'ve come! Every step makes you stronger. Keep going, you\'re amazing!' : 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!',
+      'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!': t('welcome') === 'Welcome' ? 'Every small step is the beginning of great changes. You\'re achieving amazing things!' : 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!',
+      'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!': t('welcome') === 'Welcome' ? 'Listening to the voice within makes you more peaceful. Keep listening to yourself!' : 'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!',
+      'Bu hafta içindeki ışık öyle güçlü ki, etrafına pozitif enerji saçıyorsun. Kendini hissettiğin gibi yaşamaya devam et!': t('welcome') === 'Welcome' ? 'This week the light within you is so strong that you\'re radiating positive energy around you. Keep living as you feel!' : 'Bu hafta içindeki ışık öyle güçlü ki, etrafına pozitif enerji saçıyorsun. Kendini hissettiğin gibi yaşamaya devam et!',
+      'İçindeki o güzel enerji çok değerli. Hayatın sana sunduğu bu güzel anları doya doya yaşa!': t('welcome') === 'Welcome' ? 'That beautiful energy within you is very valuable. Live these beautiful moments that life offers you to the fullest!' : 'İçindeki o güzel enerji çok değerli. Hayatın sana sunduğu bu güzel anları doya doya yaşa!',
+      'Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!': t('welcome') === 'Welcome' ? 'Look at the value you give yourself! How beautiful it is that you take time for yourself every day. You should be proud!' : 'Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!',
+      'Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!': t('welcome') === 'Welcome' ? 'Taking regular time for yourself is the most beautiful gift. You are very valuable and you deserve this!' : 'Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!',
+      'Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!': t('welcome') === 'Welcome' ? 'Every moment you dedicate to yourself nourishes your soul. You are very special and don\'t forget this!' : 'Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!',
+    };
+    return translations[message] || message;
+  };
   const [motivation, setMotivation] = useState<MotivationData | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,22 +270,10 @@ export default function MotivationCard({
       >
         <View style={styles.header}>
           <Text style={styles.emoji}>{motivation.emoji}</Text>
-          <Text style={styles.title}>
-            {motivation.title === 'Her Gün Yeni Bir Başlangıç! 🌅' ? (t('welcome') === 'Welcome' ? 'Every Day a New Beginning! 🌅' : 'Her Gün Yeni Bir Başlangıç! 🌅') :
-             motivation.title === 'Hayallerine Çok Yakınsın! ✨' ? (t('welcome') === 'Welcome' ? 'You\'re So Close to Your Dreams! ✨' : 'Hayallerine Çok Yakınsın! ✨') :
-             motivation.title === 'Yolun Yarısını Geçtin! 🌈' ? (t('welcome') === 'Welcome' ? 'You\'ve Passed Halfway! 🌈' : 'Yolun Yarısını Geçtin! 🌈') :
-             motivation.title === 'Duygularını Dinlemek Güzel! 🎵' ? (t('welcome') === 'Welcome' ? 'It\'s Beautiful to Listen to Your Feelings! 🎵' : 'Duygularını Dinlemek Güzel! 🎵') :
-             motivation.title}
-          </Text>
+          <Text style={styles.title}>{getTranslatedTitle(motivation.title)}</Text>
         </View>
         
-        <Text style={styles.message}>
-          {motivation.message === 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!' ? (t('welcome') === 'Welcome' ? 'Sometimes clouds cover the sun, but the sun is always there. So is the light within you. Today will be even better!' : 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!') :
-           motivation.message === 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!' ? (t('welcome') === 'Welcome' ? 'Look how far you\'ve come! Every step makes you stronger. Keep going, you\'re amazing!' : 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!') :
-           motivation.message === 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!' ? (t('welcome') === 'Welcome' ? 'Every small step is the beginning of great changes. You\'re achieving amazing things!' : 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!') :
-           motivation.message === 'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!' ? (t('welcome') === 'Welcome' ? 'Listening to the voice within makes you more peaceful. Keep listening to yourself!' : 'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!') :
-           motivation.message}
-        </Text>
+        <Text style={styles.message}>{getTranslatedMessage(motivation.message)}</Text>
         
         <View style={styles.footer}>
           <View style={styles.priorityIndicator}>
