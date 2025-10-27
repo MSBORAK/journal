@@ -15,6 +15,7 @@ interface LanguageContextType {
   t: (key: string) => string;
   supportedLanguages: Language[];
   isLoading: boolean;
+  isEnglish: boolean; // Helper to check if current language is English
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -68,12 +69,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     return getTranslationSync(key, currentLanguage);
   };
 
+  const isEnglish = currentLanguage === 'en';
+
   const value: LanguageContextType = {
     currentLanguage,
     setCurrentLanguage,
     t,
     supportedLanguages,
-    isLoading
+    isLoading,
+    isEnglish
   };
 
   return (

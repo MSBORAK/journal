@@ -759,7 +759,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       <View style={dynamicStyles.header}>
         <View style={{ width: 24 }} />
         <Text style={dynamicStyles.headerTitle}>
-          {t('welcome') === 'Welcome' ? 'Tasks & Reminders' : 'Görevler & Hatırlatıcılar'}
+          {t('tasks.tasksAndReminders')}
         </Text>
         <View style={{ width: 24 }} />
       </View>
@@ -772,26 +772,26 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         {/* Gün Özeti Kartı */}
         <View style={dynamicStyles.summaryCard}>
           <Text style={dynamicStyles.summaryTitle}>
-            🎯 {t('welcome') === 'Welcome' ? 'Today' : 'Bugün'}
+            🎯 {t('dashboard.today')}
           </Text>
           
           <View style={dynamicStyles.statsRow}>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{completedCount}/{todayTasks.length}</Text>
               <Text style={dynamicStyles.statLabel}>
-                {t('welcome') === 'Welcome' ? 'Tasks' : 'Görevler'}
+                {t('tasks.tasks')}
               </Text>
             </View>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{getTotalFocusTime()}</Text>
               <Text style={dynamicStyles.statLabel}>
-                {t('welcome') === 'Welcome' ? 'Focus' : 'Odaklanma'}
+                {t('health.focus')}
               </Text>
             </View>
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{getWorkTime()}</Text>
               <Text style={dynamicStyles.statLabel}>
-                {t('welcome') === 'Welcome' ? 'Work' : 'Çalışma'}
+                {t('health.work')}
               </Text>
             </View>
           </View>
@@ -803,7 +803,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                + {t('welcome') === 'Welcome' ? 'Add Task' : 'Görev Ekle'}
+                + {t('tasks.addTask')}
               </Text>
             </TouchableOpacity>
 
@@ -812,7 +812,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               onPress={handleAddReminder}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>+ {t('welcome') === 'Welcome' ? 'Add Reminder' : 'Hatırlatıcı Ekle'}</Text>
+              <Text style={dynamicStyles.actionButtonText}>+ {t('reminders.addReminder')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -820,15 +820,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         {/* Görevler Bölümü */}
         <View style={dynamicStyles.tasksSection}>
           <Text style={dynamicStyles.sectionTitle}>
-            📋 {t('welcome') === 'Welcome' ? 'My Tasks' : 'Görevlerim'}
+            📋 {t('tasks.tasks')}
           </Text>
           
           <View style={dynamicStyles.tabContainer}>
             {[
-              { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
-              { key: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık', emoji: '📆' },
-              { key: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık', emoji: '🗓️' },
-              { key: 'all', label: t('welcome') === 'Welcome' ? 'All' : 'Tümü', emoji: '📝' },
+              { key: 'daily', label: t('tasks.daily'), emoji: '📅' },
+              { key: 'weekly', label: t('tasks.weekly'), emoji: '📆' },
+              { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️' },
+              { key: 'all', label: t('tasks.all'), emoji: '📝' },
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
@@ -851,19 +851,10 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               <View style={dynamicStyles.emptyState}>
                 <Text style={dynamicStyles.emptyIcon}>📝</Text>
                 <Text style={dynamicStyles.emptyTitle}>
-                  {t('welcome') === 'Welcome' ? 'No tasks yet' : 'Henüz görev yok'}
+                  {t('tasks.noTasks')}
                 </Text>
                 <Text style={dynamicStyles.emptyMessage}>
-                  {t('welcome') === 'Welcome' 
-                    ? (activeTab === 'daily' ? 'Add a task for today' : 
-                       activeTab === 'weekly' ? 'Plan your weekly tasks' :
-                       activeTab === 'monthly' ? 'Set your monthly goals' :
-                       'Start by adding your first task')
-                    : (activeTab === 'daily' ? 'Bugün için görev ekleyin' : 
-                       activeTab === 'weekly' ? 'Haftalık görevlerinizi planlayın' :
-                       activeTab === 'monthly' ? 'Aylık hedeflerinizi belirleyin' :
-                       'İlk görevinizi ekleyerek başlayın')
-                  }
+                  {t('tasks.addFirstTask')}
                 </Text>
               </View>
             ) : (
@@ -932,7 +923,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         {/* Hatırlatıcılar Bölümü */}
         <View style={dynamicStyles.remindersSection}>
           <View style={dynamicStyles.remindersHeader}>
-            <Text style={dynamicStyles.sectionTitle}>🔔 {t('welcome') === 'Welcome' ? 'Upcoming Reminders' : 'Yaklaşan Hatırlatıcılar'}</Text>
+            <Text style={dynamicStyles.sectionTitle}>🔔 {t('reminders.reminders')}</Text>
             <TouchableOpacity
               style={dynamicStyles.toggleButton}
               onPress={() => setShowReminders(!showReminders)}
@@ -951,8 +942,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               {upcomingReminders.length === 0 ? (
                 <View style={dynamicStyles.emptyState}>
                   <Text style={dynamicStyles.emptyIcon}>🔔</Text>
-                  <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'No reminders yet' : 'Henüz hatırlatıcı yok'}</Text>
-                  <Text style={dynamicStyles.emptyMessage}>{t('welcome') === 'Welcome' ? 'Start by adding a reminder' : 'Hatırlatıcı ekleyerek başlayın'}</Text>
+                  <Text style={dynamicStyles.emptyTitle}>{t('reminders.noReminders')}</Text>
+                  <Text style={dynamicStyles.emptyMessage}>{t('reminders.addFirstReminder')}</Text>
                 </View>
               ) : (
                 upcomingReminders.slice(0, 3).map((reminder) => (
@@ -985,15 +976,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>📝 {t('welcome') === 'Welcome' ? 'Add New Task' : 'Yeni Görev Ekle'}</Text>
+            <Text style={dynamicStyles.modalTitle}>📝 {t('tasks.addTask')}</Text>
             
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Task Title' : 'Görev Başlığı'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('tasks.taskTitle')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskTitle}
                 onChangeText={setTaskTitle}
-                placeholder={t('welcome') === 'Welcome' ? 'Enter task title...' : 'Görev başlığını yazın...'}
+                placeholder={t('tasks.enterTaskTitle')}
                 placeholderTextColor={currentTheme.colors.muted}
                 autoCorrect={false}
                 autoCapitalize="sentences"
@@ -1002,7 +993,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Duration (minutes)' : 'Süre (dakika)'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('tasks.duration')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskEstimatedTime}
@@ -1016,7 +1007,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Date' : 'Tarih'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('tasks.dueDate')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskDate}
@@ -1027,7 +1018,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Time' : 'Saat'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('tasks.dueTime')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskTime}
@@ -1038,12 +1029,12 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Frequency' : 'Sıklık'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('tasks.frequency')}</Text>
               <View style={dynamicStyles.frequencyContainer}>
                 {[
-                  { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
-                  { key: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık', emoji: '📆' },
-                  { key: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık', emoji: '🗓️' },
+                  { key: 'daily', label: t('tasks.daily'), emoji: '📅' },
+                  { key: 'weekly', label: t('tasks.weekly'), emoji: '📆' },
+                  { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️' },
                 ].map((freq) => (
                   <TouchableOpacity
                     key={freq.key}
@@ -1073,7 +1064,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={() => setShowAddTaskModal(false)}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {t('welcome') === 'Welcome' ? 'Cancel' : 'İptal'}
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1081,7 +1072,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={handleSaveTask}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {t('welcome') === 'Welcome' ? 'Save' : 'Kaydet'}
+                  {t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1101,21 +1092,21 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>🔔 {t('welcome') === 'Welcome' ? 'Add New Reminder' : 'Yeni Hatırlatıcı Ekle'}</Text>
+            <Text style={dynamicStyles.modalTitle}>🔔 {t('reminders.addReminder')}</Text>
             
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Reminder Title' : 'Hatırlatıcı Başlığı'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('reminders.reminderTitle')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={reminderTitle}
                 onChangeText={setReminderTitle}
-                placeholder={t('welcome') === 'Welcome' ? 'Enter reminder title...' : 'Hatırlatıcı başlığını yazın...'}
+                placeholder={t('reminders.reminderTitle')}
                 placeholderTextColor={currentTheme.colors.muted}
               />
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Date' : 'Tarih'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('reminders.reminderDate')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={reminderDate}
@@ -1126,7 +1117,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Time' : 'Saat'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('reminders.reminderTime')}</Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={reminderTime}
@@ -1137,12 +1128,12 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('welcome') === 'Welcome' ? 'Frequency' : 'Sıklık'}</Text>
+              <Text style={dynamicStyles.inputLabel}>{t('tasks.frequency')}</Text>
               <View style={dynamicStyles.frequencyContainer}>
                 {[
-                  { key: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük', emoji: '📅' },
-                  { key: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık', emoji: '📆' },
-                  { key: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık', emoji: '🗓️' },
+                  { key: 'daily', label: t('tasks.daily'), emoji: '📅' },
+                  { key: 'weekly', label: t('tasks.weekly'), emoji: '📆' },
+                  { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️' },
                 ].map((freq) => (
                   <TouchableOpacity
                     key={freq.key}
@@ -1172,7 +1163,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={() => setShowAddReminderModal(false)}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {t('welcome') === 'Welcome' ? 'Cancel' : 'İptal'}
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1180,7 +1171,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={handleSaveReminder}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {t('welcome') === 'Welcome' ? 'Save' : 'Kaydet'}
+                  {t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
