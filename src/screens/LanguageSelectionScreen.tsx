@@ -6,21 +6,20 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { supportedLanguages } from '../services/languageService';
+import { supportedLanguages, Language } from '../services/languageService';
 
 interface LanguageSelectionScreenProps {
   navigation: any;
 }
 
-export default function LanguageSelectionScreen({ navigation }: LanguageSelectionScreenProps) {
+const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = ({ navigation }) => {
   const { currentTheme } = useTheme();
   const { t, setCurrentLanguage, currentLanguage } = useLanguage();
-  const [selectedLanguage, setSelectedLanguage] = useState(currentLanguage);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
 
   const handleLanguageSelect = async (languageCode: string) => {
     setSelectedLanguage(languageCode);
@@ -42,35 +41,30 @@ export default function LanguageSelectionScreen({ navigation }: LanguageSelectio
       paddingHorizontal: 20,
       paddingTop: 60,
       paddingBottom: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: currentTheme.colors.border + '30',
-    },
-    backButton: {
-      padding: 8,
-      marginRight: 12,
+      backgroundColor: currentTheme.colors.background,
     },
     headerTitle: {
-      fontSize: 20,
-      fontWeight: '700',
+      fontSize: 24,
+      fontWeight: 'bold',
       color: currentTheme.colors.text,
+      marginLeft: 16,
     },
     content: {
       flex: 1,
       paddingHorizontal: 20,
-      paddingTop: 30,
     },
     title: {
       fontSize: 28,
-      fontWeight: '700',
+      fontWeight: 'bold',
       color: currentTheme.colors.text,
-      marginBottom: 8,
       textAlign: 'center',
+      marginBottom: 8,
     },
     subtitle: {
       fontSize: 16,
       color: currentTheme.colors.secondary,
-      marginBottom: 40,
       textAlign: 'center',
+      marginBottom: 40,
       lineHeight: 24,
     },
     languageList: {
@@ -87,12 +81,12 @@ export default function LanguageSelectionScreen({ navigation }: LanguageSelectio
       borderWidth: 2,
       borderColor: 'transparent',
     },
-    languageItemSelected: {
+    selectedLanguageItem: {
       borderColor: currentTheme.colors.primary,
       backgroundColor: currentTheme.colors.primary + '10',
     },
-    languageFlag: {
-      fontSize: 24,
+    flag: {
+      fontSize: 32,
       marginRight: 16,
     },
     languageInfo: {
@@ -108,33 +102,31 @@ export default function LanguageSelectionScreen({ navigation }: LanguageSelectio
       fontSize: 14,
       color: currentTheme.colors.secondary,
     },
-    selectedIcon: {
+    checkIcon: {
       marginLeft: 12,
     },
     continueButton: {
       backgroundColor: currentTheme.colors.primary,
       paddingVertical: 16,
       paddingHorizontal: 32,
-      borderRadius: 24,
+      borderRadius: 16,
       alignItems: 'center',
       marginBottom: 20,
     },
     continueButtonText: {
       color: currentTheme.colors.background,
       fontSize: 18,
-      fontWeight: '700',
+      fontWeight: '600',
     },
   });
 
   return (
     <SafeAreaView style={dynamicStyles.container}>
-      <StatusBar barStyle={currentTheme.name === 'luxury' ? 'light-content' : 'dark-content'} />
-      
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <TouchableOpacity 
-          style={dynamicStyles.backButton}
+        <TouchableOpacity
           onPress={() => navigation.goBack()}
+          style={{ padding: 8 }}
         >
           <Ionicons 
             name="arrow-back" 
@@ -142,43 +134,48 @@ export default function LanguageSelectionScreen({ navigation }: LanguageSelectio
             color={currentTheme.colors.text} 
           />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('languageSettings')}</Text>
+        <Text style={dynamicStyles.headerTitle}>
+          {t('settings.language')}
+        </Text>
       </View>
 
-      {/* Content */}
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
-        <Text style={dynamicStyles.title}>
-          {currentLanguage === 'tr' ? 'Dil Seçimi' : 'Language Selection'}
-        </Text>
-        <Text style={dynamicStyles.subtitle}>
-          {currentLanguage === 'tr' 
-            ? 'Uygulamanın dilini seçin. Bu ayar daha sonra değiştirilebilir.'
-            : 'Choose your app language. This setting can be changed later.'
-          }
-        </Text>
+        {/* Title */}
+        <View style={{ marginBottom: 40 }}>
+          <Text style={dynamicStyles.title}>
+            {t('onboarding.selectLanguage')}
+          </Text>
+          <Text style={dynamicStyles.subtitle}>
+            Choose your preferred language for the app
+          </Text>
+        </View>
 
         {/* Language List */}
         <View style={dynamicStyles.languageList}>
-          {supportedLanguages.map((language) => (
+          {supportedLanguages.map((language: Language) => (
             <TouchableOpacity
               key={language.code}
               style={[
                 dynamicStyles.languageItem,
-                selectedLanguage === language.code && dynamicStyles.languageItemSelected
+                selectedLanguage === language.code && dynamicStyles.selectedLanguageItem,
               ]}
               onPress={() => handleLanguageSelect(language.code)}
             >
-              <Text style={dynamicStyles.languageFlag}>{language.flag}</Text>
+              <Text style={dynamicStyles.flag}>{language.flag}</Text>
               <View style={dynamicStyles.languageInfo}>
-                <Text style={dynamicStyles.languageName}>{language.name}</Text>
-                <Text style={dynamicStyles.languageNativeName}>{language.nativeName}</Text>
+                <Text style={dynamicStyles.languageName}>
+                  {language.name}
+                </Text>
+                <Text style={dynamicStyles.languageNativeName}>
+                  {language.nativeName}
+                </Text>
               </View>
               {selectedLanguage === language.code && (
-                <Ionicons 
-                  name="checkmark-circle" 
-                  size={24} 
+                <Ionicons
+                  name="checkmark-circle"
+                  size={24}
                   color={currentTheme.colors.primary}
-                  style={dynamicStyles.selectedIcon}
+                  style={dynamicStyles.checkIcon}
                 />
               )}
             </TouchableOpacity>
@@ -186,15 +183,17 @@ export default function LanguageSelectionScreen({ navigation }: LanguageSelectio
         </View>
 
         {/* Continue Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={dynamicStyles.continueButton}
           onPress={handleContinue}
         >
           <Text style={dynamicStyles.continueButtonText}>
-            {currentLanguage === 'tr' ? 'Devam Et' : 'Continue'}
+            {t('common.done')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
+
+export default LanguageSelectionScreen;

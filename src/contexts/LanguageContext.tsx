@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getTranslation, getCurrentLanguage, setLanguage, supportedLanguages, Language } from '../services/languageService';
+import { 
+  getTranslationSync, 
+  getCurrentLanguage, 
+  setLanguage, 
+  supportedLanguages, 
+  Language,
+  preloadTranslations 
+} from '../services/languageService';
 
 interface LanguageContextType {
   currentLanguage: string;
@@ -29,20 +36,19 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadLanguage();
+    initializeLanguage();
   }, []);
 
-  const loadLanguage = async () => {
+  const initializeLanguage = async () => {
     try {
-      const savedLanguage = await AsyncStorage.getItem('selectedLanguage');
-      if (savedLanguage) {
-        setCurrentLanguageState(savedLanguage);
-      } else {
-        // Default language
-        setCurrentLanguageState('tr');
-      }
+      // Preload all translations
+      await preloadTranslations();
+      
+      // Load saved language
+      const savedLanguage = await getCurrentLanguage();
+      setCurrentLanguageState(savedLanguage);
     } catch (error) {
-      console.error('Error loading language:', error);
+      console.error('Error initializing language:', error);
       setCurrentLanguageState('tr');
     } finally {
       setIsLoading(false);
@@ -51,16 +57,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   const setCurrentLanguage = async (language: string) => {
     try {
-      await AsyncStorage.setItem('selectedLanguage', language);
-      setCurrentLanguageState(language);
       await setLanguage(language);
+      setCurrentLanguageState(language);
     } catch (error) {
       console.error('Error setting language:', error);
     }
   };
 
   const t = (key: string): string => {
-    return getTranslation(key, currentLanguage);
+    return getTranslationSync(key, currentLanguage);
   };
 
   const value: LanguageContextType = {

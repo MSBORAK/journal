@@ -1,7 +1,9 @@
 /**
- * Çok Dilli Destek Servisi
- * Türkçe ve İngilizce dil desteği
+ * Professional i18n Service
+ * Turkish and English language support with JSON files
  */
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Language {
   code: string;
@@ -27,198 +29,100 @@ export const supportedLanguages: Language[] = [
 
 export const defaultLanguage = 'tr';
 
-// Dil çevirileri
-export const translations = {
-  tr: {
-    // Genel
-    appName: 'Rhythm',
-    appDescription: 'Ruhsal denge ve yaşam ritmi uygulaması',
-    
-    // Dashboard
-    welcome: 'Hoş Geldin',
-    dashboard: 'Ana Sayfa',
-    writeDiary: 'Günlük Yaz',
-    tasks: 'Görevler',
-    health: 'Sağlık',
-    statistics: 'İstatistikler',
-    settings: 'Ayarlar',
-    
-    // Mood
-    mood: 'Ruh Hali',
-    howAreYou: 'Nasıl hissediyorsun?',
-    veryBad: 'Çok Kötü',
-    bad: 'Kötü',
-    neutral: 'Nötr',
-    good: 'İyi',
-    veryGood: 'Çok İyi',
-    
-    // Tasks
-    tasksAndReminders: 'Görevler ve Hatırlatıcılar',
-    addTask: 'Görev Ekle',
-    addReminder: 'Hatırlatıcı Ekle',
-    completed: 'Tamamlandı',
-    pending: 'Bekliyor',
-    
-    // Health
-    healthScore: 'Sağlık Puanı',
-    wellnessTracking: 'Wellness Takibi',
-    waterGlasses: 'Su Bardakları',
-    exerciseMinutes: 'Egzersiz Dakikaları',
-    sleepHours: 'Uyku Saatleri',
-    
-    // Statistics
-    streak: 'Seri',
-    totalEntries: 'Toplam Giriş',
-    averageMood: 'Ortalama Ruh Hali',
-    
-    // Settings
-    accountSettings: 'Hesap Ayarları',
-    notificationSettings: 'Bildirim Ayarları',
-    themeSettings: 'Tema Ayarları',
-    languageSettings: 'Dil Ayarları',
-    
-    // Common
-    save: 'Kaydet',
-    cancel: 'İptal',
-    delete: 'Sil',
-    edit: 'Düzenle',
-    add: 'Ekle',
-    close: 'Kapat',
-    back: 'Geri',
-    next: 'İleri',
-    done: 'Tamam',
-    yes: 'Evet',
-    no: 'Hayır',
-    ok: 'Tamam',
-    error: 'Hata',
-    success: 'Başarılı',
-    loading: 'Yükleniyor...',
-    
-    // Auth
-    signIn: 'Giriş Yap',
-    signUp: 'Kayıt Ol',
-    email: 'E-posta',
-    password: 'Şifre',
-    noAccount: 'Hesabınız yok mu? Kayıt olun',
-    forgotPassword: 'Şifremi Unuttum',
-    
-    // Notifications
-    morningReminder: 'Sabah Hatırlatıcısı',
-    eveningReminder: 'Akşam Hatırlatıcısı',
-    dailySummary: 'Günlük Özet',
-    
-    // Themes
-    cozy: 'Cozy',
-    luxury: 'Luxury',
-    police: 'Police Blue',
-    forest: 'Forest',
-    sunset: 'Sunset',
-    ocean: 'Ocean',
-    lavender: 'Lavender'
-  },
-  
-  en: {
-    // General
-    appName: 'Rhythm',
-    appDescription: 'Spiritual balance and life rhythm app',
-    
-    // Dashboard
-    welcome: 'Welcome',
-    dashboard: 'Dashboard',
-    writeDiary: 'Write Diary',
-    tasks: 'Tasks',
-    health: 'Health',
-    statistics: 'Statistics',
-    settings: 'Settings',
-    
-    // Mood
-    mood: 'Mood',
-    howAreYou: 'How are you feeling?',
-    veryBad: 'Very Bad',
-    bad: 'Bad',
-    neutral: 'Neutral',
-    good: 'Good',
-    veryGood: 'Very Good',
-    
-    // Tasks
-    tasksAndReminders: 'Tasks and Reminders',
-    addTask: 'Add Task',
-    addReminder: 'Add Reminder',
-    completed: 'Completed',
-    pending: 'Pending',
-    
-    // Health
-    healthScore: 'Health Score',
-    wellnessTracking: 'Wellness Tracking',
-    waterGlasses: 'Water Glasses',
-    exerciseMinutes: 'Exercise Minutes',
-    sleepHours: 'Sleep Hours',
-    
-    // Statistics
-    streak: 'Streak',
-    totalEntries: 'Total Entries',
-    averageMood: 'Average Mood',
-    
-    // Settings
-    accountSettings: 'Account Settings',
-    notificationSettings: 'Notification Settings',
-    themeSettings: 'Theme Settings',
-    languageSettings: 'Language Settings',
-    
-    // Common
-    save: 'Save',
-    cancel: 'Cancel',
-    delete: 'Delete',
-    edit: 'Edit',
-    add: 'Add',
-    close: 'Close',
-    back: 'Back',
-    next: 'Next',
-    done: 'Done',
-    yes: 'Yes',
-    no: 'No',
-    ok: 'OK',
-    error: 'Error',
-    success: 'Success',
-    loading: 'Loading...',
-    
-    // Auth
-    signIn: 'Sign In',
-    signUp: 'Sign Up',
-    email: 'Email',
-    password: 'Password',
-    noAccount: 'Don\'t have an account? Sign up',
-    forgotPassword: 'Forgot Password',
-    
-    // Notifications
-    morningReminder: 'Morning Reminder',
-    eveningReminder: 'Evening Reminder',
-    dailySummary: 'Daily Summary',
-    
-    // Themes
-    cozy: 'Cozy',
-    luxury: 'Luxury',
-    police: 'Police Blue',
-    forest: 'Forest',
-    sunset: 'Sunset',
-    ocean: 'Ocean',
-    lavender: 'Lavender'
+// Translation cache
+let translationsCache: { [key: string]: any } = {};
+
+// Load translations from JSON files
+const loadTranslations = async (language: string): Promise<any> => {
+  try {
+    if (translationsCache[language]) {
+      return translationsCache[language];
+    }
+
+    // Import JSON files dynamically
+    let translations;
+    if (language === 'tr') {
+      translations = require('../locales/tr.json');
+    } else if (language === 'en') {
+      translations = require('../locales/en.json');
+    } else {
+      translations = require('../locales/tr.json'); // fallback to Turkish
+    }
+
+    translationsCache[language] = translations;
+    return translations;
+  } catch (error) {
+    console.error(`Error loading translations for ${language}:`, error);
+    // Fallback to Turkish
+    if (language !== 'tr') {
+      return loadTranslations('tr');
+    }
+    return {};
   }
 };
 
-export const getTranslation = (key: string, language: string = 'tr'): string => {
-  const lang = language as keyof typeof translations;
-  return translations[lang]?.[key as keyof typeof translations[typeof lang]] || key;
+// Get nested translation value using dot notation
+const getNestedValue = (obj: any, path: string): string => {
+  return path.split('.').reduce((current, key) => {
+    return current && current[key] !== undefined ? current[key] : undefined;
+  }, obj);
 };
 
-export const getCurrentLanguage = (): string => {
-  // AsyncStorage'dan dil tercihini al
-  // Şimdilik default olarak 'tr' döndür
-  return 'tr';
+export const getTranslation = async (key: string, language: string = 'tr'): Promise<string> => {
+  try {
+    const translations = await loadTranslations(language);
+    const value = getNestedValue(translations, key);
+    return value || key; // Return key if translation not found
+  } catch (error) {
+    console.error(`Error getting translation for key ${key}:`, error);
+    return key;
+  }
+};
+
+// Synchronous version for immediate use (uses cache)
+export const getTranslationSync = (key: string, language: string = 'tr'): string => {
+  try {
+    const translations = translationsCache[language];
+    if (!translations) {
+      return key;
+    }
+    const value = getNestedValue(translations, key);
+    return value || key;
+  } catch (error) {
+    console.error(`Error getting sync translation for key ${key}:`, error);
+    return key;
+  }
+};
+
+export const getCurrentLanguage = async (): Promise<string> => {
+  try {
+    const savedLanguage = await AsyncStorage.getItem('selectedLanguage');
+    return savedLanguage || defaultLanguage;
+  } catch (error) {
+    console.error('Error loading language:', error);
+    return defaultLanguage;
+  }
 };
 
 export const setLanguage = async (language: string): Promise<void> => {
-  // AsyncStorage'a dil tercihini kaydet
-  // Şimdilik sadece console.log
-  console.log(`Language set to: ${language}`);
+  try {
+    await AsyncStorage.setItem('selectedLanguage', language);
+    // Preload translations for the new language
+    await loadTranslations(language);
+    console.log(`Language set to: ${language}`);
+  } catch (error) {
+    console.error('Error setting language:', error);
+  }
+};
+
+// Preload all translations
+export const preloadTranslations = async (): Promise<void> => {
+  try {
+    await Promise.all([
+      loadTranslations('tr'),
+      loadTranslations('en')
+    ]);
+  } catch (error) {
+    console.error('Error preloading translations:', error);
+  }
 };
