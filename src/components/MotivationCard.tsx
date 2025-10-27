@@ -225,10 +225,20 @@ export default function MotivationCard({
       >
         <View style={styles.header}>
           <Text style={styles.emoji}>{motivation.emoji}</Text>
-          <Text style={styles.title}>{motivation.title}</Text>
+          <Text style={styles.title}>
+            {motivation.title === 'Her Gün Yeni Bir Başlangıç! 🌅' ? (t('welcome') === 'Welcome' ? 'Every Day a New Beginning! 🌅' : 'Her Gün Yeni Bir Başlangıç! 🌅') :
+             motivation.title === 'Hayallerine Çok Yakınsın! ✨' ? (t('welcome') === 'Welcome' ? 'You\'re So Close to Your Dreams! ✨' : 'Hayallerine Çok Yakınsın! ✨') :
+             motivation.title === 'Yolun Yarısını Geçtin! 🌈' ? (t('welcome') === 'Welcome' ? 'You\'ve Passed Halfway! 🌈' : 'Yolun Yarısını Geçtin! 🌈') :
+             motivation.title}
+          </Text>
         </View>
         
-        <Text style={styles.message}>{motivation.message}</Text>
+        <Text style={styles.message}>
+          {motivation.message === 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!' ? (t('welcome') === 'Welcome' ? 'Sometimes clouds cover the sun, but the sun is always there. So is the light within you. Today will be even better!' : 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!') :
+           motivation.message === 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!' ? (t('welcome') === 'Welcome' ? 'Look how far you\'ve come! Every step makes you stronger. Keep going, you\'re amazing!' : 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!') :
+           motivation.message === 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!' ? (t('welcome') === 'Welcome' ? 'Every small step is the beginning of great changes. You\'re achieving amazing things!' : 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!') :
+           motivation.message}
+        </Text>
         
         <View style={styles.footer}>
           <View style={styles.priorityIndicator}>

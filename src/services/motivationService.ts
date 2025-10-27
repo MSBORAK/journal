@@ -49,8 +49,8 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
   {
     id: 'mood_encouragement',
     type: 'mood_trend',
-    title: 'Her Gün Yeni Bir Başlangıç! 🌅',
-    message: 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!',
+    title: t('welcome') === 'Welcome' ? 'Every Day a New Beginning! 🌅' : 'Her Gün Yeni Bir Başlangıç! 🌅',
+    message: t('welcome') === 'Welcome' ? 'Sometimes clouds cover the sun, but the sun is always there. So is the light within you. Today will be even better!' : 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!',
     emoji: '💪',
     priority: 'high',
     conditions: {
