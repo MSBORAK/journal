@@ -811,7 +811,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   style={dynamicStyles.textInput}
                   value={formData.title}
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
-                  placeholder="Örn: İlaç iç, doktor randevusu, doğum günü..."
+                  placeholder={t('welcome') === 'Welcome' ? "E.g.: Take medicine, doctor appointment, birthday..." : "Örn: İlaç iç, doktor randevusu, doğum günü..."}
                   placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
@@ -878,7 +878,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   selectedDate={formData.date}
                   onDateSelect={(date) => setFormData({ ...formData, date })}
                   label="Tarih"
-                  placeholder="Hatırlatıcı tarihini seç"
+                  placeholder={t('welcome') === 'Welcome' ? "Select reminder date" : "Hatırlatıcı tarihini seç"}
                 />
               )}
 
