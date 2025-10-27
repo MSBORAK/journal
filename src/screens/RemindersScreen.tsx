@@ -67,35 +67,35 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
 
   const emojiOptions = ['⏰', '💊', '🏥', '💧', '🏃‍♀️', '📚', '🍎', '😴', '🎯', '💝', '📅', '🎂', '👥', '🍽️', '💼', '📱', '🚗', '✈️', '🎉', '💡'];
   const categoryOptions = [
-    { value: 'general', label: t('welcome') === 'Welcome' ? 'General' : 'Genel', emoji: '⏰' },
-    { value: 'medicine', label: t('welcome') === 'Welcome' ? 'Medicine' : 'İlaç', emoji: '💊' },
-    { value: 'appointment', label: t('welcome') === 'Welcome' ? 'Appointment' : 'Randevu', emoji: '📅' },
-    { value: 'birthday', label: t('welcome') === 'Welcome' ? 'Birthday' : 'Doğum Günü', emoji: '🎂' },
-    { value: 'meeting', label: t('welcome') === 'Welcome' ? 'Meeting' : 'Toplantı', emoji: '👥' },
-    { value: 'health', label: t('welcome') === 'Welcome' ? 'Health' : 'Sağlık', emoji: '🏥' },
-    { value: 'exercise', label: t('welcome') === 'Welcome' ? 'Exercise' : 'Egzersiz', emoji: '🏃‍♀️' },
-    { value: 'meal', label: t('welcome') === 'Welcome' ? 'Meal' : 'Yemek', emoji: '🍽️' },
-    { value: 'personal', label: t('welcome') === 'Welcome' ? 'Personal' : 'Kişisel', emoji: '👤' },
-    { value: 'work', label: t('welcome') === 'Welcome' ? 'Work' : 'İş', emoji: '💼' },
-    { value: 'study', label: t('welcome') === 'Welcome' ? 'Study' : 'Ders', emoji: '📚' },
-    { value: 'custom', label: t('welcome') === 'Welcome' ? 'Custom' : 'Özel', emoji: '⭐' },
+    { value: 'general', label: t('reminders.general'), emoji: '⏰' },
+    { value: 'medicine', label: t('reminders.medicine'), emoji: '💊' },
+    { value: 'appointment', label: t('reminders.appointment'), emoji: '📅' },
+    { value: 'birthday', label: t('reminders.birthday'), emoji: '🎂' },
+    { value: 'meeting', label: t('reminders.meeting'), emoji: '👥' },
+    { value: 'health', label: t('reminders.health'), emoji: '🏥' },
+    { value: 'exercise', label: t('reminders.exercise'), emoji: '🏃‍♀️' },
+    { value: 'meal', label: t('reminders.meal'), emoji: '🍽️' },
+    { value: 'personal', label: t('reminders.personal'), emoji: '👤' },
+    { value: 'work', label: t('reminders.work'), emoji: '💼' },
+    { value: 'study', label: t('reminders.study'), emoji: '📚' },
+    { value: 'custom', label: t('reminders.custom'), emoji: '⭐' },
   ];
   const priorityOptions = [
-    { value: 'low', label: t('welcome') === 'Welcome' ? 'Low' : 'Düşük', color: currentTheme.colors.success },
-    { value: 'medium', label: t('welcome') === 'Welcome' ? 'Medium' : 'Orta', color: currentTheme.colors.primary },
-    { value: 'high', label: t('welcome') === 'Welcome' ? 'High' : 'Yüksek', color: currentTheme.colors.danger },
+    { value: 'low', label: t('reminders.low'), color: currentTheme.colors.success },
+    { value: 'medium', label: t('reminders.medium'), color: currentTheme.colors.primary },
+    { value: 'high', label: t('reminders.high'), color: currentTheme.colors.danger },
   ];
   const repeatOptions = [
-    { value: 'once', label: t('welcome') === 'Welcome' ? 'Once' : 'Tek Seferlik' },
-    { value: 'hourly', label: t('welcome') === 'Welcome' ? 'Hourly' : 'Saatlik' },
-    { value: 'daily', label: t('welcome') === 'Welcome' ? 'Daily' : 'Günlük' },
-    { value: 'weekly', label: t('welcome') === 'Welcome' ? 'Weekly' : 'Haftalık' },
-    { value: 'monthly', label: t('welcome') === 'Welcome' ? 'Monthly' : 'Aylık' },
+    { value: 'once', label: t('reminders.once') },
+    { value: 'hourly', label: t('reminders.hourly') },
+    { value: 'daily', label: t('reminders.daily') },
+    { value: 'weekly', label: t('reminders.weekly') },
+    { value: 'monthly', label: t('reminders.monthly') },
   ];
 
   const reminderTypeOptions = [
-    { value: 'today', label: t('welcome') === 'Welcome' ? 'For Today' : 'Bugün İçin', emoji: '📅' },
-    { value: 'scheduled', label: t('welcome') === 'Welcome' ? 'Future Date' : 'Gelecek Tarih', emoji: '🗓️' },
+    { value: 'today', label: t('reminders.forToday'), emoji: '📅' },
+    { value: 'scheduled', label: t('reminders.futureDate'), emoji: '🗓️' },
   ];
 
   const stats = getReminderStats();
@@ -557,13 +557,13 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      showAlert(t('welcome') === 'Welcome' ? 'Error' : 'Hata', t('welcome') === 'Welcome' ? 'Title cannot be empty' : 'Başlık boş olamaz', 'error');
+      showAlert(t('common.error'), t('reminders.titleCannotBeEmpty'), 'error');
       return;
     }
 
     // Eğer gelecek tarih seçilmişse tarih kontrolü yap
     if (formData.reminderType === 'scheduled' && !formData.date) {
-      showAlert(t('welcome') === 'Welcome' ? 'Error' : 'Hata', t('welcome') === 'Welcome' ? 'You must select a date for future date' : 'Gelecek tarih için bir tarih seçmelisiniz', 'error');
+      showAlert(t('common.error'), t('reminders.mustSelectDate'), 'error');
       return;
     }
 
@@ -572,8 +572,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
         showAlert(
-          t('welcome') === 'Welcome' ? 'Notification Permission' : 'Bildirim İzni', 
-          t('welcome') === 'Welcome' ? 'Notification permission required for reminders' : 'Hatırlatıcılar için bildirim izni gerekli', 
+          t('reminders.notificationPermission'), 
+          t('reminders.notificationPermissionRequired'), 
           'warning'
         );
         return;
@@ -594,7 +594,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         await scheduleReminderNotification(
           savedReminder.id,
           savedReminder.emoji + ' ' + savedReminder.title,
-          savedReminder.description || (t('welcome') === 'Welcome' ? 'Reminder time!' : 'Hatırlatıcı zamanı!'),
+          savedReminder.description || t('reminders.reminderTime'),
           savedReminder.time,
           savedReminder.repeatType,
           savedReminder.category,
@@ -606,7 +606,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       resetForm();
     } catch (error) {
       console.error('Error saving reminder:', error);
-      showAlert(t('welcome') === 'Welcome' ? 'Error' : 'Hata', t('welcome') === 'Welcome' ? 'Reminder could not be saved' : 'Hatırlatıcı kaydedilemedi', 'error');
+      showAlert(t('common.error'), t('reminders.reminderNotSaved'), 'error');
     }
   };
 
@@ -631,8 +631,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     setPendingDeleteId(reminderId);
     setAlertConfig({
       visible: true,
-      title: t('welcome') === 'Welcome' ? 'Delete Reminder' : 'Hatırlatıcıyı Sil',
-      message: t('welcome') === 'Welcome' ? 'Are you sure you want to delete this reminder?' : 'Bu hatırlatıcıyı silmek istediğinizden emin misiniz?',
+      title: t('reminders.deleteReminder'),
+      message: t('reminders.confirmDeleteReminder'),
       type: 'warning',
     });
   };
@@ -654,7 +654,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>⏰ {t('welcome') === 'Welcome' ? 'Reminders' : 'Hatırlatıcılar'}</Text>
+        <Text style={dynamicStyles.headerTitle}>⏰ {t('reminders.reminders')}</Text>
         <TouchableOpacity 
           style={dynamicStyles.addButton}
           onPress={() => {
@@ -710,7 +710,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                         📅 {(() => {
                           const [year, month, day] = reminder.date.split('-').map(Number);
                           const date = new Date(year, month - 1, day);
-                          return date.toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', {
+                          return date.toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
@@ -811,7 +811,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   style={dynamicStyles.textInput}
                   value={formData.title}
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
-                  placeholder={t('welcome') === 'Welcome' ? "E.g.: Take medicine, doctor appointment, birthday..." : "Örn: İlaç iç, doktor randevusu, doğum günü..."}
+                  placeholder={t('reminders.examplePlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
@@ -878,7 +878,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   selectedDate={formData.date}
                   onDateSelect={(date) => setFormData({ ...formData, date })}
                   label="Tarih"
-                  placeholder={t('welcome') === 'Welcome' ? "Select reminder date" : "Hatırlatıcı tarihini seç"}
+                  placeholder={t('reminders.selectReminderDate')}
                 />
               )}
 

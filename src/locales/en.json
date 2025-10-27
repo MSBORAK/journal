@@ -164,6 +164,8 @@
     "birthday": "Birthday",
     "meeting": "Meeting",
     "health": "Health",
+    "exercise": "Exercise",
+    "meal": "Meal",
     "food": "Food",
     "personal": "Personal",
     "work": "Work",
@@ -183,7 +185,18 @@
     "selectReminderDate": "Select reminder date",
     "examplePlaceholder": "E.g.: Take medicine, doctor appointment, birthday...",
     "noReminders": "You haven't added any reminders yet",
-    "addFirstReminder": "Add your first reminder"
+    "addFirstReminder": "Add your first reminder",
+    "error": "Error",
+    "titleCannotBeEmpty": "Title cannot be empty",
+    "mustSelectDate": "You must select a date for future date",
+    "notificationPermission": "Notification Permission",
+    "notificationPermissionRequired": "Notification permission required for reminders",
+    "reminderTime": "Reminder time!",
+    "reminderNotSaved": "Reminder could not be saved",
+    "deleteReminder": "Delete Reminder",
+    "confirmDeleteReminder": "Are you sure you want to delete this reminder?",
+    "examplePlaceholder": "E.g.: Take medicine, doctor appointment, birthday...",
+    "selectReminderDate": "Select reminder date"
   },
   "health": {
     "health": "Health",

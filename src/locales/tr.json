@@ -164,6 +164,8 @@
     "birthday": "Doğum Günü",
     "meeting": "Toplantı",
     "health": "Sağlık",
+    "exercise": "Egzersiz",
+    "meal": "Yemek",
     "food": "Yemek",
     "personal": "Kişisel",
     "work": "İş",
@@ -183,7 +185,18 @@
     "selectReminderDate": "Hatırlatıcı tarihini seç",
     "examplePlaceholder": "Örn: İlaç iç, doktor randevusu, doğum günü...",
     "noReminders": "Henüz hatırlatıcı eklememişsin",
-    "addFirstReminder": "İlk hatırlatıcını ekle"
+    "addFirstReminder": "İlk hatırlatıcını ekle",
+    "error": "Hata",
+    "titleCannotBeEmpty": "Başlık boş olamaz",
+    "mustSelectDate": "Gelecek tarih için bir tarih seçmelisiniz",
+    "notificationPermission": "Bildirim İzni",
+    "notificationPermissionRequired": "Hatırlatıcılar için bildirim izni gerekli",
+    "reminderTime": "Hatırlatıcı zamanı!",
+    "reminderNotSaved": "Hatırlatıcı kaydedilemedi",
+    "deleteReminder": "Hatırlatıcıyı Sil",
+    "confirmDeleteReminder": "Bu hatırlatıcıyı silmek istediğinizden emin misiniz?",
+    "examplePlaceholder": "Örn: İlaç iç, doktor randevusu, doğum günü...",
+    "selectReminderDate": "Hatırlatıcı tarihini seç"
   },
   "health": {
     "health": "Sağlık",
