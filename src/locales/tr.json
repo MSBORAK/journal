@@ -52,8 +52,6 @@
     "resetPassword": "Şifremi Sıfırla",
     "changePassword": "Şifre Değiştir",
     "changeEmail": "E-posta Değiştir",
-    "emailSent": "E-posta Gönderildi",
-    "passwordResetSent": "Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.",
     "invalidCredentials": "Email veya şifre hatalı",
     "emailRequired": "E-posta gerekli",
     "passwordRequired": "Şifre gerekli",
