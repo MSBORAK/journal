@@ -1767,8 +1767,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     },
     { 
       icon: '💎', 
-      label: t('welcome') === 'Welcome' ? '100 Day Legend' : '100 Gün Efsanesi', 
-      status: stats.totalEntries >= 100 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : `${stats.totalEntries}/100 ${t('welcome') === 'Welcome' ? 'diaries' : 'günlük'}`,
+      label: t('statistics.hundredDayLegend'), 
+      status: stats.totalEntries >= 100 ? (t('statistics.completedCheck')) : `${stats.totalEntries}/100 ${t('statistics.diariesLabel')}`,
       completed: stats.totalEntries >= 100,
       color: '#ef4444'
     },
@@ -2117,14 +2117,14 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             >
               <Text style={dynamicStyles.journeyTitle}>🌅 {t('statistics.journeyStart')}</Text>
               <Text style={dynamicStyles.journeyDate}>
-                {firstEntry ? new Date(firstEntry.date).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', { 
+                {firstEntry ? new Date(firstEntry.date).toLocaleDateString(t('statistics.locale'), { 
                   day: 'numeric', 
                   month: 'long', 
                   year: 'numeric' 
-                }) : (t('welcome') === 'Welcome' ? 'Haven\'t started yet' : 'Henüz başlamadın')}
+                }) : (t('statistics.havenStartedYet'))}
               </Text>
               <Text style={dynamicStyles.journeyDuration}>
-                {daysSinceStart > 0 ? (t('welcome') === 'Welcome' ? ``${daysSinceStart} ${t('statistics.daysAgoStarted')}`` : `${daysSinceStart} gün önce başladın`) : (t('statistics.journeyNotStarted'))}
+                {daysSinceStart > 0 ? `${daysSinceStart} ${t('statistics.daysAgoStarted')}` : (t('statistics.journeyNotStarted'))}
               </Text>
               
               <View style={dynamicStyles.journeyActionContainer}>
