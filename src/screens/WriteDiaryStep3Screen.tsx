@@ -329,7 +329,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
           disabled={loading}
         >
           <Text style={dynamicStyles.saveButtonText}>
-            {loading ? (t('welcome') === 'Welcome' ? 'Saving...' : 'Kaydediliyor...') : (t('welcome') === 'Welcome' ? 'Save' : 'Kaydet')}
+            {loading ? t('mood.saving') : t('common.save')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -344,54 +344,54 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
           <Text style={dynamicStyles.progressText}>3/3</Text>
         </View>
 
-        <Text style={dynamicStyles.title}>{t('welcome') === 'Welcome' ? 'Final Touches' : 'Son Dokunuşlar'}</Text>
+        <Text style={dynamicStyles.title}>{t('mood.finalTouches')}</Text>
         <Text style={dynamicStyles.subtitle}>
-          {t('welcome') === 'Welcome' ? 'Add tags and save your diary' : 'Etiketler ekle ve günlüğünü kaydet'}
+          {t('mood.addTagsAndSave')}
         </Text>
 
         {/* Summary */}
         <View style={dynamicStyles.summarySection}>
-          <Text style={dynamicStyles.summaryTitle}>{t('welcome') === 'Welcome' ? 'Diary Summary' : 'Günlük Özeti'}</Text>
+          <Text style={dynamicStyles.summaryTitle}>{t('mood.diarySummary')}</Text>
           
           <View style={dynamicStyles.summaryItem}>
-            <Text style={dynamicStyles.summaryLabel}>{t('welcome') === 'Welcome' ? 'Title:' : 'Başlık:'}</Text>
+            <Text style={dynamicStyles.summaryLabel}>{t('mood.titleLabel')}</Text>
             <Text style={dynamicStyles.summaryValue}>{title}</Text>
           </View>
           
           <View style={dynamicStyles.summaryItem}>
             <Text style={dynamicStyles.summaryLabel}>Mood:</Text>
             <Text style={dynamicStyles.summaryValue}>
-              {mood === 1 && (t('welcome') === 'Welcome' ? '😔 Sad' : '😔 Üzgün')}
-              {mood === 2 && (t('welcome') === 'Welcome' ? '😐 Normal' : '😐 Normal')}
-              {mood === 3 && (t('welcome') === 'Welcome' ? '🫠 Tired' : '🫠 Yorgun')}
-              {mood === 4 && (t('welcome') === 'Welcome' ? '😎 Happy' : '😎 Mutlu')}
-              {mood === 5 && (t('welcome') === 'Welcome' ? '🤩 Amazing' : '🤩 Harika')}
+              {mood === 1 && t('mood.emojiSad')}
+              {mood === 2 && t('mood.emojiNormal')}
+              {mood === 3 && t('mood.emojiTired')}
+              {mood === 4 && t('mood.emojiHappy')}
+              {mood === 5 && t('mood.emojiAmazing')}
             </Text>
           </View>
           
           <View style={dynamicStyles.summaryItem}>
-            <Text style={dynamicStyles.summaryLabel}>{t('welcome') === 'Welcome' ? 'Answered Questions:' : 'Cevaplanan Sorular:'}</Text>
+            <Text style={dynamicStyles.summaryLabel}>{t('mood.answeredQuestions')}</Text>
             <Text style={dynamicStyles.summaryValue}>
               {Object.values(answers).filter((answer: any) => answer && answer.trim().length > 0).length}/4
             </Text>
           </View>
           
           <View style={dynamicStyles.summaryItem}>
-            <Text style={dynamicStyles.summaryLabel}>{t('welcome') === 'Welcome' ? 'Free Writing:' : 'Serbest Yazma:'}</Text>
+            <Text style={dynamicStyles.summaryLabel}>{t('mood.freeWriting')}</Text>
             <Text style={dynamicStyles.summaryValue}>
-              {freeWriting ? `${freeWriting.length} ${t('welcome') === 'Welcome' ? 'characters' : 'karakter'}` : (t('welcome') === 'Welcome' ? 'None' : 'Yok')}
+              {freeWriting ? `${freeWriting.length} ${t('mood.characters')}` : t('mood.none')}
             </Text>
           </View>
         </View>
 
         {/* Tags */}
         <View style={dynamicStyles.tagsSection}>
-          <Text style={dynamicStyles.label}>{t('welcome') === 'Welcome' ? 'Tags' : 'Etiketler'}</Text>
+          <Text style={dynamicStyles.label}>{t('mood.tags')}</Text>
           <TextInput
             style={dynamicStyles.tagInput}
             value={newTag}
             onChangeText={setNewTag}
-            placeholder={t('welcome') === 'Welcome' ? 'Add tag (e.g. #excitement, #project)' : 'Etiket ekle (örn: #heyecan, #proje)'}
+            placeholder={t('mood.addTag')}
             placeholderTextColor={currentTheme.colors.muted}
             onSubmitEditing={addTag}
             returnKeyType="done"
