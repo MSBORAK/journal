@@ -21,7 +21,9 @@
     "loading": "Yükleniyor...",
     "confirm": "Onayla",
     "warning": "Uyarı",
-    "info": "Bilgi"
+    "info": "Bilgi",
+    "hide": "Gizle",
+    "draw": "Çiz"
   },
   "navigation": {
     "dashboard": "Ana Sayfa",
