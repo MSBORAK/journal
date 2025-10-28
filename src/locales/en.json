@@ -122,6 +122,45 @@
     "noQuestionsAnswered": "No questions were answered or free writing was done in this diary entry.",
     "howAreYouFeeling": "How are you feeling?",
     "whatHappenedToday": "What happened today?",
+    "questions": {
+      "happiness": {
+        "title": "✨ What moment made you smile today?",
+        "placeholder": "Tell about that special moment that warmed your heart today..."
+      },
+      "gratitude": {
+        "title": "🌟 What 3 things are you grateful for today?",
+        "placeholder": "Remember and write about the beauties in your life..."
+      },
+      "accomplishment": {
+        "title": "🎉 What achievement are you proud of today?",
+        "placeholder": "Even if small, celebrate yourself! What did you do?"
+      },
+      "lesson": {
+        "title": "💎 What beautiful thing did you discover today?",
+        "placeholder": "What did you learn that excited you?"
+      },
+      "communication": {
+        "title": "💝 Who did you spend quality time with today?",
+        "placeholder": "Write about the loving moments you shared today..."
+      },
+      "energy": {
+        "title": "⚡ What made you feel alive today?",
+        "placeholder": "Moments that gave you strength and energy..."
+      },
+      "growth": {
+        "title": "🌱 What gift did you give yourself today?",
+        "placeholder": "How did you value yourself today?"
+      },
+      "emotion": {
+        "title": "🎨 What added color to your life today?",
+        "placeholder": "Share the colorful moments that made you happy..."
+      }
+    },
+    "tellAboutYourDay": "Tell About Your Day",
+    "canAnswerOrWrite": "You can answer guide questions or write freely",
+    "skipQuestions": "Skip Questions",
+    "newDiaryTitle": "New Diary",
+    "forwardButton": "Forward",
     "whatAreYouGratefulFor": "What are you grateful for?",
     "whatDidYouLearn": "What did you learn?",
     "freeWriting": "Free Writing",
