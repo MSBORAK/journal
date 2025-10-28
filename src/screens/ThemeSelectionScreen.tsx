@@ -29,6 +29,7 @@ const themeDescriptions: { [key: string]: string } = {
 
 export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScreenProps) {
   const { currentTheme, setTheme, themes } = useTheme();
+  const { t } = useLanguage();
   const [filter, setFilter] = useState<'cozy' | 'luxury'>('cozy');
 
   const dynamicStyles = StyleSheet.create({

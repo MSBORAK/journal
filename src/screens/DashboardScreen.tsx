@@ -53,7 +53,7 @@ interface DashboardScreenProps {
 const DashboardScreen = React.memo(function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   
   // Tooltips
   const tooltipManager = useTooltips('Dashboard');
@@ -2592,9 +2592,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.headerTitle}>{t('welcome')}! 🌟</Text>
         <Text style={dynamicStyles.headerSubtitle}>
-          {t('dashboard.headerSubtitle')."
-            : "Burası senin gizli dünyan - ruhunu dinlediğin, anlam bulduğun güvenli limanın. Her kelime, her hissiyat burada değerli. Seni bekleyen hikayeler var."
-          }
+          {t('dashboard.headerSubtitle')}
         </Text>
         <Text style={dynamicStyles.userGreeting}>
           {greeting} {displayName}
