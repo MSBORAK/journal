@@ -996,7 +996,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           borderWidth: 1,
                           borderColor: currentTheme.colors.border,
                         }}
-                        placeholder={activeTab === 'dreams' ? t('dreams.myDreamPlaceholder') : (t('welcome') === 'Welcome' ? "My goal..." : "Hedefim...")}
+                        placeholder={activeTab === 'dreams' ? t('dreams.myDreamPlaceholder') : t('dreams.myGoalPlaceholder')}
                         placeholderTextColor={currentTheme.colors.muted}
                         value={formData.title}
                         onChangeText={(text) => setFormData({ ...formData, title: text })}
