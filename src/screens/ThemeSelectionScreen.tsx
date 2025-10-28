@@ -170,7 +170,7 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'Theme Selection' : 'Tema Seçimi'}</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('settings.themeSelection')}</Text>
       </View>
 
       {/* Content */}
@@ -179,9 +179,9 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <Text style={dynamicStyles.title}>🎨 {t('welcome') === 'Welcome' ? 'Choose Theme' : 'Tema Seç'}</Text>
+        <Text style={dynamicStyles.title}>🎨 {t('settings.chooseTheme')}</Text>
         <Text style={dynamicStyles.subtitle}>
-          {t('welcome') === 'Welcome' ? 'Customize your app\'s appearance' : 'Uygulamanızın görünümünü kişiselleştirin'}
+          {t('settings.customizeAppearance')}
         </Text>
 
         {/* Style (Cozy / Luxury) quick selector */}
@@ -226,8 +226,7 @@ export default function ThemeSelectionScreen({ navigation }: ThemeSelectionScree
 
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            💡 {t('welcome') === 'Welcome' ? 'Tip: Your selected theme is applied instantly throughout the app.' : 'İpucu: Seçtiğiniz tema tüm uygulamada anında uygulanır.'} 
-            {t('welcome') === 'Welcome' ? 'Choose the theme that suits your eyes best for a more comfortable experience.' : 'Gözlerinize en uygun temayı seçerek daha konforlu bir deneyim yaşayın.'}
+            {t('settings.themeTipPart1')} {t('settings.themeTipPart2')}
           </Text>
         </View>
 
