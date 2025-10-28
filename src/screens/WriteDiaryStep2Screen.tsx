@@ -21,62 +21,62 @@ interface WriteDiaryStep2ScreenProps {
 const questions = (t: any) => [
   {
     id: 'happiness',
-    title: t('welcome') === 'Welcome' ? '✨ What moment made you smile today?' : '✨ Bugün seni gülümseten an neydi?',
-    placeholder: t('welcome') === 'Welcome' ? 'Tell about that special moment that warmed your heart today...' : 'Bugün kalbini ısıtan o özel anı anlat...',
+    title: t('diary.questions.happiness.title'),
+    placeholder: t('diary.questions.happiness.placeholder'),
     icon: '😊',
   },
   {
     id: 'gratitude',
-    title: t('welcome') === 'Welcome' ? '🌟 What 3 things are you grateful for today?' : '🌟 Bugün için şükrettiğin 3 şey?',
-    placeholder: t('welcome') === 'Welcome' ? 'Remember and write about the beauties in your life...' : 'Hayatındaki güzellikleri hatırla ve yaz...',
+    title: t('diary.questions.gratitude.title'),
+    placeholder: t('diary.questions.gratitude.placeholder'),
     icon: '🙏',
   },
   {
     id: 'accomplishment',
-    title: t('welcome') === 'Welcome' ? '🎉 What achievement are you proud of today?' : '🎉 Bugün gurur duyduğun başarın ne?',
-    placeholder: t('welcome') === 'Welcome' ? 'Even if small, celebrate yourself! What did you do?' : 'Küçük de olsa, kendini kutla! Ne yaptın?',
+    title: t('diary.questions.accomplishment.title'),
+    placeholder: t('diary.questions.accomplishment.placeholder'),
     icon: '🎯',
   },
   {
     id: 'lesson',
-    title: t('welcome') === 'Welcome' ? '💎 What beautiful thing did you discover today?' : '💎 Bugün keşfettiğin güzel bir şey?',
-    placeholder: t('welcome') === 'Welcome' ? 'What did you learn that excited you?' : 'Yeni öğrendiğin, seni heyecanlandıran neydi?',
+    title: t('diary.questions.lesson.title'),
+    placeholder: t('diary.questions.lesson.placeholder'),
     icon: '💡',
   },
   {
     id: 'communication',
-    title: t('welcome') === 'Welcome' ? '💝 Who did you spend quality time with today?' : '💝 Bugün kimle güzel vakit geçirdin?',
-    placeholder: t('welcome') === 'Welcome' ? 'Write about the loving moments you shared today...' : 'Bugün paylaştığın sevgi dolu anları yaz...',
+    title: t('diary.questions.communication.title'),
+    placeholder: t('diary.questions.communication.placeholder'),
     icon: '👥',
   },
   {
     id: 'energy',
-    title: t('welcome') === 'Welcome' ? '⚡ What made you feel alive today?' : '⚡ Bugün seni canlı hissettiren şey?',
-    placeholder: t('welcome') === 'Welcome' ? 'Moments that gave you strength and energy...' : 'Sana güç veren, canlandıran anlar...',
+    title: t('diary.questions.energy.title'),
+    placeholder: t('diary.questions.energy.placeholder'),
     icon: '🔋',
   },
   {
     id: 'growth',
-    title: t('welcome') === 'Welcome' ? '🌱 What gift did you give yourself today?' : '🌱 Bugün kendine verdiğin hediye ne?',
-    placeholder: t('welcome') === 'Welcome' ? 'How did you value yourself today?' : 'Kendine nasıl değer verdin bugün?',
+    title: t('diary.questions.growth.title'),
+    placeholder: t('diary.questions.growth.placeholder'),
     icon: '🌸',
   },
   {
     id: 'emotion',
-    title: t('welcome') === 'Welcome' ? '🎨 What added color to your life today?' : '🎨 Bugün hayatına renk katan şey ne?',
-    placeholder: t('welcome') === 'Welcome' ? 'Share the colorful moments that made you happy...' : 'Seni mutlu eden renkli anları paylaş...',
+    title: t('diary.questions.emotion.title'),
+    placeholder: t('diary.questions.emotion.placeholder'),
     icon: '🌈',
   },
   {
     id: 'tomorrow',
-    title: t('welcome') === 'Welcome' ? '🚀 What are you excited about for tomorrow?' : '🚀 Yarın için heyecanlandığın şey?',
-    placeholder: t('welcome') === 'Welcome' ? 'A reason to look forward to tomorrow with hope...' : 'Yarına umutla bakmak için bir neden...',
+    title: t('diary.questions.tomorrow.title'),
+    placeholder: t('diary.questions.tomorrow.placeholder'),
     icon: '✨',
   },
   {
     id: 'challenge',
-    title: t('welcome') === 'Welcome' ? '💪 When did you feel strong today?' : '💪 Bugün kendini güçlü hissettiğin an?',
-    placeholder: t('welcome') === 'Welcome' ? 'When did you say "I can do it" today?' : 'Bugün ne zaman "ben yapabilirim" dedin?',
+    title: t('diary.questions.challenge.title'),
+    placeholder: t('diary.questions.challenge.placeholder'),
     icon: '🏆',
   },
 ];
@@ -266,12 +266,12 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
         >
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>Yeni Günlük</Text>
+        <Text style={dynamicStyles.headerTitle}>t('diary.newDiaryTitle')</Text>
         <TouchableOpacity
           style={dynamicStyles.nextButton}
           onPress={handleNext}
         >
-          <Text style={dynamicStyles.nextButtonText}>İleri</Text>
+          <Text style={dynamicStyles.nextButtonText}>t('diary.forwardButton')</Text>
         </TouchableOpacity>
       </View>
 
@@ -285,13 +285,13 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
           <Text style={dynamicStyles.progressText}>2/3</Text>
         </View>
 
-        <Text style={dynamicStyles.title}>{t('welcome') === 'Welcome' ? 'Tell About Your Day' : 'Bugününü Anlat'}</Text>
+        <Text style={dynamicStyles.title}>{t('diary.tellAboutYourDay')}</Text>
         <Text style={dynamicStyles.subtitle}>
-          {t('welcome') === 'Welcome' ? 'You can answer guide questions or write freely' : 'Rehber soruları cevaplayabilir veya serbestçe yazabilirsin'}
+          {t('diary.canAnswerOrWrite')}
         </Text>
 
         <TouchableOpacity style={dynamicStyles.skipButton} onPress={handleSkip}>
-          <Text style={dynamicStyles.skipButtonText}>{t('welcome') === 'Welcome' ? 'Skip Questions' : 'Soruları Atla'}</Text>
+          <Text style={dynamicStyles.skipButtonText}>{t('diary.skipQuestions')}</Text>
         </TouchableOpacity>
 
         {questions(t).map((question) => (
@@ -318,16 +318,16 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
         <View style={dynamicStyles.questionContainer}>
           <View style={dynamicStyles.questionHeader}>
             <Text style={dynamicStyles.questionIcon}>📝</Text>
-            <Text style={dynamicStyles.questionTitle}>{t('welcome') === 'Welcome' ? 'Free Writing' : 'Serbest Yazma'}</Text>
+            <Text style={dynamicStyles.questionTitle}>{t('diary.freeWriting')}</Text>
           </View>
           <Text style={dynamicStyles.freeWritingDescription}>
-            {t('welcome') === 'Welcome' ? 'If you want, you can also write your own thoughts and feelings here...' : 'İstersen buraya da kendi düşüncelerini, hislerini yazabilirsin...'}
+            {t('diary.freeWritingDescription')}
           </Text>
           <TextInput
             style={[dynamicStyles.answerInput, { minHeight: 150 }]}
             value={freeWriting}
             onChangeText={setFreeWriting}
-            placeholder={t('welcome') === 'Welcome' ? 'What did you experience today? How did you feel? What are you thinking? You can write everything here...' : 'Bugün neler yaşadın? Nasıl hissettin? Ne düşünüyorsun? Buraya her şeyi yazabilirsin...'}
+            placeholder={t('diary.freeWritingPlaceholder')}
             placeholderTextColor={currentTheme.colors.muted}
             multiline
             autoCorrect={false}

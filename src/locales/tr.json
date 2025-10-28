@@ -120,6 +120,56 @@
     "noQuestionsAnswered": "Bu günlük girişinde herhangi bir soru cevaplanmamış veya serbest yazım yapılmamış.",
     "howAreYouFeeling": "Nasıl hissediyorsun?",
     "whatHappenedToday": "Bugün ne oldu?",
+    "questions": {
+      "happiness": {
+        "title": "✨ Bugün seni gülümseten an neydi?",
+        "placeholder": "Bugün kalbini ısıtan o özel anı anlat..."
+      },
+      "gratitude": {
+        "title": "🌟 Bugün için şükrettiğin 3 şey?",
+        "placeholder": "Hayatındaki güzellikleri hatırla ve yaz..."
+      },
+      "accomplishment": {
+        "title": "🎉 Bugün gurur duyduğun başarın ne?",
+        "placeholder": "Küçük de olsa, kendini kutla! Ne yaptın?"
+      },
+      "lesson": {
+        "title": "💎 Bugün keşfettiğin güzel bir şey?",
+        "placeholder": "Yeni öğrendiğin, seni heyecanlandıran neydi?"
+      },
+      "communication": {
+        "title": "💝 Bugün kimle güzel vakit geçirdin?",
+        "placeholder": "Bugün paylaştığın sevgi dolu anları yaz..."
+      },
+      "energy": {
+        "title": "⚡ Bugün seni canlı hissettiren şey?",
+        "placeholder": "Sana güç veren, canlandıran anlar..."
+      },
+      "growth": {
+        "title": "🌱 Bugün kendine verdiğin hediye ne?",
+        "placeholder": "Kendine nasıl değer verdin bugün?"
+      },
+      "emotion": {
+        "title": "🎨 Bugün hayatına renk katan şey ne?",
+        "placeholder": "Seni mutlu eden renkli anları paylaş..."
+      },
+      "tomorrow": {
+        "title": "🚀 Yarın için heyecanlandığın şey?",
+        "placeholder": "Yarına umutla bakmak için bir neden..."
+      },
+      "challenge": {
+        "title": "💪 Bugün kendini güçlü hissettiğin an?",
+        "placeholder": "Bugün ne zaman \"ben yapabilirim\" dedin?"
+      }
+    },
+    "freeWriting": "Serbest Yazma",
+    "freeWritingDescription": "İstersen buraya da kendi düşüncelerini, hislerini yazabilirsin...",
+    "freeWritingPlaceholder": "Bugün neler yaşadın? Nasıl hissettin? Ne düşünüyorsun? Buraya her şeyi yazabilirsin...",
+    "tellAboutYourDay": "Bugününü Anlat",
+    "canAnswerOrWrite": "Rehber soruları cevaplayabilir veya serbestçe yazabilirsin",
+    "skipQuestions": "Soruları Atla",
+    "newDiaryTitle": "Yeni Günlük",
+    "forwardButton": "İleri",
     "whatAreYouGratefulFor": "Neye şükrediyorsun?",
     "whatDidYouLearn": "Ne öğrendin?",
     "freeWriting": "Serbest Yazı",

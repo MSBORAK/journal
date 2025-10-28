@@ -154,8 +154,19 @@
       "emotion": {
         "title": "🎨 What added color to your life today?",
         "placeholder": "Share the colorful moments that made you happy..."
+      },
+      "tomorrow": {
+        "title": "🚀 What are you excited about for tomorrow?",
+        "placeholder": "A reason to look forward to tomorrow with hope..."
+      },
+      "challenge": {
+        "title": "💪 When did you feel strong today?",
+        "placeholder": "When did you say \"I can do it\" today?"
       }
     },
+    "freeWriting": "Free Writing",
+    "freeWritingDescription": "If you want, you can also write your own thoughts and feelings here...",
+    "freeWritingPlaceholder": "What did you experience today? How did you feel? What are you thinking? You can write everything here...",
     "tellAboutYourDay": "Tell About Your Day",
     "canAnswerOrWrite": "You can answer guide questions or write freely",
     "skipQuestions": "Skip Questions",
