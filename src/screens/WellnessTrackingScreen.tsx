@@ -343,15 +343,15 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       {/* Content */}
       <ScrollView style={dynamicStyles.content}>
         <Text style={dynamicStyles.title}>
-          {t('welcome') === 'Welcome' ? 'Daily Health Tracking' : 'Günlük Sağlık Takibi'}
+          {t('health.dailyHealthTracking')}
         </Text>
         <Text style={dynamicStyles.subtitle}>
-          {t('welcome') === 'Welcome' ? 'Record your health status for today and increase your wellness score' : 'Bugünkü sağlık durumunu kaydet ve wellness skorunu artır'}
+          {t('health.recordHealthStatus')}
         </Text>
 
         {/* Su İçme */}
         {renderCounter(
-          t('welcome') === 'Welcome' ? 'Water Intake' : 'Su İçme',
+          t('health.waterIntake'),
           wellnessData.waterGlasses,
           (value) => updateValue('waterGlasses', value),
           '💧',
@@ -363,7 +363,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Egzersiz */}
         {renderCounter(
-          t('welcome') === 'Welcome' ? 'Exercise (Minutes)' : 'Egzersiz (Dakika)',
+          t('health.exerciseMinutes'),
           wellnessData.exerciseMinutes,
           (value) => updateValue('exerciseMinutes', value),
           '🏃‍♂️',
@@ -381,7 +381,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Stres Seviyesi */}
         {renderLevelSelector(
-          t('welcome') === 'Welcome' ? 'Stress Level' : 'Stres Seviyesi',
+          t('health.stressLevel'),
           wellnessData.stressLevel,
           (value) => updateValue('stressLevel', value),
           '🧘‍♀️',
@@ -390,7 +390,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Enerji Seviyesi */}
         {renderLevelSelector(
-          t('welcome') === 'Welcome' ? 'Energy Level' : 'Enerji Seviyesi',
+          t('health.energyLevel'),
           wellnessData.energyLevel,
           (value) => updateValue('energyLevel', value),
           '⚡',

@@ -186,7 +186,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     },
     {
       id: 'language',
-      title: t('welcome') === 'Welcome' ? 'Language Selection' : 'Dil Seçimi',
+      title: t('settings.languageSelection'),
       subtitle: currentLanguage === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English',
       icon: 'language-outline',
       screen: 'LanguageSelection',
@@ -195,15 +195,15 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     {
       id: 'notifications',
       title: t('notificationSettings'),
-      subtitle: t('welcome') === 'Welcome' ? 'Daily reminders and notification settings' : 'Günlük hatırlatıcılar ve bildirim ayarları',
+      subtitle: t('settings.notificationSettingsDesc'),
       icon: 'notifications-outline',
       screen: 'NotificationSettings',
       color: '#f59e0b',
     },
     {
       id: 'achievements',
-      title: t('welcome') === 'Welcome' ? 'My Achievements' : 'Başarılarım',
-      subtitle: t('welcome') === 'Welcome' ? 'Badges and achievements' : 'Rozetler ve başarılarım',
+      title: t('settings.myAchievements'),
+      subtitle: t('settings.badgesAndAchievements'),
       icon: 'trophy-outline',
       screen: 'Achievements',
       color: '#FFD700',
@@ -211,23 +211,23 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     {
       id: 'account',
       title: t('accountSettings'),
-      subtitle: t('welcome') === 'Welcome' ? 'Profile, email and password settings' : 'Profil, e-posta ve şifre ayarları',
+      subtitle: t('settings.accountSettingsDesc'),
       icon: 'person-outline',
       screen: 'AccountSettings',
       color: '#10b981',
     },
     {
       id: 'language2',
-      title: t('welcome') === 'Welcome' ? 'Language Selection' : 'Dil Seçimi',
-      subtitle: t('welcome') === 'Welcome' ? 'Change app language' : 'Uygulama dilini değiştir',
+      title: t('settings.languageSelection'),
+      subtitle: t('settings.changeAppLanguage'),
       icon: 'language-outline',
       screen: 'LanguageSelection',
       color: '#3b82f6',
     },
     {
       id: 'app',
-      title: t('welcome') === 'Welcome' ? 'App Settings' : 'Uygulama Ayarları',
-      subtitle: t('welcome') === 'Welcome' ? 'Other app preferences' : 'Diğer uygulama tercihleri',
+      title: t('settings.appSettings'),
+      subtitle: t('settings.otherAppPreferences'),
       icon: 'settings-outline',
       screen: 'AppSettings',
       color: '#8b5cf6',
@@ -417,7 +417,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       >
         {/* Header */}
         <View style={dynamicStyles.header}>
-          <Text style={dynamicStyles.title}>⚙️ {t('welcome') === 'Welcome' ? 'Settings' : 'Ayarlar'}</Text>
+          <Text style={dynamicStyles.title}>⚙️ {t('settings.settings')}</Text>
 
           {/* User Card */}
           <View style={dynamicStyles.userCard}>
@@ -485,7 +485,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
 
         {/* App Version */}
         <View style={dynamicStyles.appVersion}>
-          <Text style={dynamicStyles.versionText}>{t('welcome') === 'Welcome' ? 'Rhythm v1.0.0' : 'Günlük v1.0.0'}</Text>
+          <Text style={dynamicStyles.versionText}>{t('settings.appVersion')}</Text>
         </View>
       </ScrollView>
 
