@@ -304,7 +304,11 @@
     "notificationPermissionRequired": "Hatırlatıcılar için bildirim izni gerekli",
     "reminderNotSaved": "Hatırlatıcı kaydedilemedi",
     "deleteReminder": "Hatırlatıcıyı Sil",
-    "confirmDeleteReminder": "Bu hatırlatıcıyı silmek istediğinizden emin misiniz?"
+    "confirmDeleteReminder": "Bu hatırlatıcıyı silmek istediğinizden emin misiniz?",
+    "editReminder": "Hatırlatıcıyı Düzenle",
+    "newReminder": "Yeni Hatırlatıcı",
+    "additionalInfoPlaceholder": "Ek bilgiler, notlar...",
+    "timeFormatPlaceholder": "HH:MM"
   },
   "health": {
     "health": "Sağlık",
