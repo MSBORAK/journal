@@ -81,9 +81,9 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
 
   const triggerCelebration = (type: 'dream' | 'goal' | 'promise', title: string) => {
     const messages = {
-      dream: t('welcome') === 'Welcome' ? 'You made your dream come true! You\'ve taken another step forward, you\'re amazing! 🌟' : 'Hayalini gerçekleştirdin! Bir adım daha ilerledin, harikasın! 🌟',
-      goal: t('welcome') === 'Welcome' ? 'You completed your goal! You should celebrate this success! 🚀' : 'Hedefini tamamladın! Bu başarıyı kutlamalısın! 🚀',
-      promise: t('welcome') === 'Welcome' ? 'Congratulations for keeping your promise! Your reliability is amazing! ✨' : 'Sözünü tuttuğun için tebrikler! Güvenilirliğin muhteşem! ✨'
+      dream: t('dreams.madeYourDreamComeTrue'),
+      goal: t('dreams.completedYourGoal'),
+      promise: t('dreams.keptYourPromise')
     };
     
     setCelebrationData({
@@ -111,7 +111,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
     if (!dateIso) return '';
     try {
       const d = new Date(dateIso);
-      return d.toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      return d.toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch {
       return '';
     }
@@ -134,8 +134,8 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           });
           
           await addDream({
-            title: t('welcome') === 'Welcome' ? "World Tour" : "Dünya Turu",
-            description: t('welcome') === 'Welcome' ? "Travel the world and discover different cultures" : "Tüm dünyayı gezmek ve farklı kültürleri tanımak",
+            title: t('dreams.worldTour'),
+            description: t('dreams.travelWorldDescription'),
             category: "travel",
             emoji: "🌍",
             isFavorite: false,
@@ -243,14 +243,14 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
         {activeTab === 'dreams' ? '🌟' : activeTab === 'goals' ? '🎯' : '🤝'}
       </Text>
       <Text style={dynamicStyles.emptyTitle}>
-        {activeTab === 'dreams' ? (t('welcome') === 'Welcome' ? 'Discover Your Dreams' : 'Hayallerini Keşfet') : 
-         activeTab === 'goals' ? (t('welcome') === 'Welcome' ? 'Set Your Goals' : 'Hedeflerini Belirle') : 
-         (t('welcome') === 'Welcome' ? 'Make a Promise to Yourself' : 'Kendine Söz Ver')}
+        {activeTab === 'dreams' ? t('dreams.discoverYourDreams') : 
+         activeTab === 'goals' ? t('dreams.setYourGoals') : 
+         t('dreams.makeAPromise')}
       </Text>
       <Text style={dynamicStyles.emptyMessage}>
-        {activeTab === 'dreams' ? (t('welcome') === 'Welcome' ? 'Make your dreams come true' : 'Hayallerin gerçeğe dönüşsün') : 
-         activeTab === 'goals' ? (t('welcome') === 'Welcome' ? 'Reach your goals' : 'Hedeflerine ulaş') : 
-         (t('welcome') === 'Welcome' ? 'Keep the promises you made to yourself' : 'Kendine verdiğin sözleri tut')}
+        {activeTab === 'dreams' ? t('dreams.makeYourDreamsComeTrue') : 
+         activeTab === 'goals' ? t('dreams.reachYourGoals') : 
+         t('dreams.keepYourPromises')}
       </Text>
     </View>
   );

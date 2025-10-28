@@ -307,6 +307,17 @@
     }
   },
   "dreams": {
+    "madeYourDreamComeTrue": "You made your dream come true! You've taken another step forward, you're amazing! 🌟",
+    "completedYourGoal": "You completed your goal! You should celebrate this success! 🚀",
+    "keptYourPromise": "Congratulations for keeping your promise! Your reliability is amazing! ✨",
+    "worldTour": "World Tour",
+    "travelWorldDescription": "Travel the world and discover different cultures",
+    "discoverYourDreams": "Discover Your Dreams",
+    "setYourGoals": "Set Your Goals",
+    "makeAPromise": "Make a Promise to Yourself",
+    "makeYourDreamsComeTrue": "Make your dreams come true",
+    "reachYourGoals": "Reach your goals",
+    "keepYourPromises": "Keep the promises you made to yourself",
     "dreams": "Dreams",
     "goals": "Goals",
     "addDream": "Add Dream",

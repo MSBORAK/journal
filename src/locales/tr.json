@@ -305,6 +305,17 @@
     }
   },
   "dreams": {
+    "madeYourDreamComeTrue": "Hayalini gerçekleştirdin! Bir adım daha ilerledin, harikasın! 🌟",
+    "completedYourGoal": "Hedefini tamamladın! Bu başarıyı kutlamalısın! 🚀",
+    "keptYourPromise": "Sözünü tuttuğun için tebrikler! Güvenilirliğin muhteşem! ✨",
+    "worldTour": "Dünya Turu",
+    "travelWorldDescription": "Tüm dünyayı gezmek ve farklı kültürleri tanımak",
+    "discoverYourDreams": "Hayallerini Keşfet",
+    "setYourGoals": "Hedeflerini Belirle",
+    "makeAPromise": "Kendine Söz Ver",
+    "makeYourDreamsComeTrue": "Hayallerin gerçeğe dönüşsün",
+    "reachYourGoals": "Hedeflerine ulaş",
+    "keepYourPromises": "Kendine verdiğin sözleri tut",
     "dreams": "Hayaller",
     "goals": "Hedefler",
     "addDream": "Hayal Ekle",
