@@ -101,6 +101,8 @@
   "diary": {
     "writeDiary": "Günlük Yaz",
     "newDiary": "Yeni Günlük",
+    "editDiary": "Günlüğü Düzenle",
+    "diaryContent": "Günlük İçeriği",
     "diaryHistory": "Geçmiş Günlükler",
     "pastDiaries": "Geçmiş Günlükler",
     "questions": "soru",
@@ -454,6 +456,10 @@
     "feedback": "Geri Bildirim",
     "rateApp": "Uygulamayı Değerlendir",
     "shareApp": "Uygulamayı Paylaş"
+  },
+  "onboarding": {
+    "continue": "Devam Et →",
+    "letsStart": "Başlayalım!"
   },
   "motivation": {
     "dailyReflection": "Günlük Yansıma",

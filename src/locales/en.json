@@ -103,6 +103,8 @@
   "diary": {
     "writeDiary": "Write Diary",
     "newDiary": "New Diary",
+    "editDiary": "Edit Diary",
+    "diaryContent": "Diary Content",
     "diaryHistory": "Diary History",
     "pastDiaries": "Past Diaries",
     "questions": "questions",
@@ -456,6 +458,10 @@
     "feedback": "Feedback",
     "rateApp": "Rate App",
     "shareApp": "Share App"
+  },
+  "onboarding": {
+    "continue": "Continue →",
+    "letsStart": "Let's Start!"
   },
   "motivation": {
     "dailyReflection": "Daily Reflection",

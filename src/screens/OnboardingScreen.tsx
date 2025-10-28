@@ -285,7 +285,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
         {currentStep < 2 ? (
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextButtonText}>{t('welcome') === 'Welcome' ? 'Continue →' : 'Devam Et →'}</Text>
+            <Text style={styles.nextButtonText}>{t('onboarding.continue')}</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.themeButtons}>
@@ -331,7 +331,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: t('welcome') === 'Welcome' ? 'Let\'s Start!' : 'Başlayalım!',
+          text: t('onboarding.letsStart'),
           onPress: () => {
             hideAlert();
             setTimeout(() => {
