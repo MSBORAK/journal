@@ -84,9 +84,9 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
 
   const emojiOptions = ['📝', '🏥', '💧', '🏃‍♀️', '📚', '🍎', '😴', '🎯', '💝', '⚡', '🌱', '💼'];
   const priorityOptions = [
-    { value: 'low', label: 'Düşük', color: currentTheme.colors.success },
-    { value: 'medium', label: 'Orta', color: currentTheme.colors.primary },
-    { value: 'high', label: 'Yüksek', color: currentTheme.colors.danger },
+    { value: 'low', label: t('common.low'), color: currentTheme.colors.success },
+    { value: 'medium', label: t('common.medium'), color: currentTheme.colors.primary },
+    { value: 'high', label: t('common.high'), color: currentTheme.colors.danger },
   ];
 
   const todayTasks = getTodayTasks();
@@ -555,7 +555,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      showAlert('❌ Hata', 'Başlık boş olamaz', 'error');
+      showAlert(t('common.error'), t('tasks.titleCannotBeEmpty'), 'error');
       return;
     }
 
@@ -579,7 +579,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       setShowAddModal(false);
       resetForm();
     } catch (error) {
-      showAlert('❌ Hata', 'Görev kaydedilemedi', 'error');
+      showAlert(t('common.error'), t('tasks.taskNotSaved'), 'error');
     }
   };
 
@@ -602,8 +602,8 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
 
   const handleDelete = (taskId: string) => {
     showAlert(
-      '🗑️ Görevi Sil',
-      'Bu görevi silmek istediğinizden emin misiniz?',
+      t('tasks.deleteTask'),
+      t('tasks.confirmDeleteTask'),
       'warning'
     );
   };
@@ -704,12 +704,12 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
           <View style={dynamicStyles.emptyState}>
             <Text style={dynamicStyles.emptyIcon}>📝</Text>
             <Text style={dynamicStyles.emptyTitle}>
-              {selectedCategory === 'all' ? 'Henüz görev yok' : 'Bu kategoride görev yok'}
+              {selectedCategory === 'all' ? t('tasks.noTasks') : t('tasks.noTasksInCategory')}
             </Text>
             <Text style={dynamicStyles.emptyMessage}>
               {selectedCategory === 'all' 
-                ? 'İlk görevinizi ekleyerek başlayın'
-                : 'Bu kategori için görev ekleyin'
+                ? t('tasks.addFirstTask')
+                : t('tasks.addTaskForCategory')
               }
             </Text>
           </View>
@@ -805,7 +805,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
           <View style={dynamicStyles.modalContent}>
             <View style={dynamicStyles.modalHeader}>
               <Text style={dynamicStyles.modalTitle}>
-                {editingTask ? 'Görev Düzenle' : 'Yeni Görev'}
+                {editingTask ? t('tasks.editTask') : t('tasks.newTask')}
               </Text>
               <TouchableOpacity
                 style={dynamicStyles.closeButton}
@@ -827,7 +827,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   style={dynamicStyles.textInput}
                   value={formData.title}
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
-                  placeholder="Görev başlığı"
+                  placeholder={t('tasks.taskTitlePlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
@@ -839,7 +839,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   style={[dynamicStyles.textInput, { height: 80, textAlignVertical: 'top' }]}
                   value={formData.description}
                   onChangeText={(text) => setFormData({ ...formData, description: text })}
-                  placeholder="İsteğe bağlı açıklama"
+                  placeholder={t('tasks.taskDescriptionPlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                   multiline
                 />
@@ -939,7 +939,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                 onPress={handleSave}
               >
                 <Text style={dynamicStyles.saveButtonText}>
-                  {editingTask ? 'Güncelle' : 'Kaydet'}
+                  {editingTask ? t('common.update') : t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
