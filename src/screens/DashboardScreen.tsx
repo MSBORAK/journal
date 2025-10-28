@@ -618,8 +618,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         } else if (cat.label === 'Düzenlilik') {
           recommendations.push({
             icon: '✅',
-            title: t('welcome') === 'Welcome' ? 'Complete Your Tasks' : 'Görevlerini Tamamla',
-            description: t('welcome') === 'Welcome' ? 'Start with small steps. Every completed task strengthens you!' : 'Küçük adımlarla başla. Her tamamlanan görev seni güçlendirir!'
+            title: t('dashboard.tips.completeTasks'),
+            description: t('dashboard.tips.completeTasksDesc')
           });
         }
       }
@@ -728,60 +728,60 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     // Basit pozitif mesajlar - rastgele seç
     const messages = [
       // Pozitif ve motive edici mesajlar
-      t('welcome') === 'Welcome' ? 'Your inner light is shining! ✨' : 'İçindeki ışık parıyor! ✨',
-      t('welcome') === 'Welcome' ? 'You are so valuable! 💎' : 'Sen çok değerlisin! 💎',
-      t('welcome') === 'Welcome' ? 'You are stronger every day! 🌱' : 'Her gün daha güçlüsün! 🌱',
-      t('welcome') === 'Welcome' ? 'Be kind to yourself! 🌸' : 'Kendine nazik ol! 🌸',
-      t('welcome') === 'Welcome' ? 'You are amazing! 🌟' : 'Sen harikasın! 🌟',
-      t('welcome') === 'Welcome' ? 'Breathe, relax! 🌬️' : 'Nefes al, rahatla! 🌬️',
-      t('welcome') === 'Welcome' ? 'Smile today! 😊' : 'Bugün gülümse! 😊',
-      t('welcome') === 'Welcome' ? 'Love yourself! 💕' : 'Kendini sev! 💕',
-      t('welcome') === 'Welcome' ? 'You have inner peace! 🕊️' : 'İçsel huzurun var! 🕊️',
-      t('welcome') === 'Welcome' ? 'You are a star! ⭐' : 'Sen bir yıldızsın! ⭐',
+      t('motivation.messages.innerLightShining'),
+      t('motivation.messages.youAreValuable'),
+      t('motivation.messages.strongerEveryDay'),
+      t('motivation.messages.beKindToYourself'),
+      t('motivation.messages.youAreAmazing'),
+      t('motivation.messages.breatheRelax'),
+      t('motivation.messages.smileToday'),
+      t('motivation.messages.loveYourself'),
+      t('motivation.messages.innerPeace'),
+      t('motivation.messages.youAreStar'),
       
       // Daha fazla pozitif mesaj
-      t('welcome') === 'Welcome' ? 'You are magnificent! 🌈' : 'Sen muhteşemsin! 🌈',
-      t('welcome') === 'Welcome' ? 'Life is smiling at you! 🌻' : 'Hayat sana gülüyor! 🌻',
-      t('welcome') === 'Welcome' ? 'You are special! ✨' : 'Sen özelsin! ✨',
-      t('welcome') === 'Welcome' ? 'Be at peace with yourself! 🕊️' : 'Kendinle barışık ol! 🕊️',
-      t('welcome') === 'Welcome' ? 'You are a light! 💡' : 'Sen bir ışıksın! 💡',
-      t('welcome') === 'Welcome' ? 'Today will be beautiful! 🌅' : 'Bugün güzel olacak! 🌅',
-      t('welcome') === 'Welcome' ? 'You are precious! 💖' : 'Sen değerlisin! 💖',
-      t('welcome') === 'Welcome' ? 'Your inner beauty is shining! 🌸' : 'İçindeki güzellik parıyor! 🌸',
-      t('welcome') === 'Welcome' ? 'You are a miracle! 🌟' : 'Sen bir mucizesin! 🌟',
-      t('welcome') === 'Welcome' ? 'Accept yourself! 🤲' : 'Kendini kabul et! 🤲',
-      t('welcome') === 'Welcome' ? 'You are beautiful! 🌺' : 'Sen güzelsin! 🌺',
-      t('welcome') === 'Welcome' ? 'Your inner love is great! 💝' : 'İçindeki sevgi büyük! 💝',
-      t('welcome') === 'Welcome' ? 'You are brave! 🦁' : 'Sen cesursun! 🦁',
-      t('welcome') === 'Welcome' ? 'Every day is a gift! 🎁' : 'Her gün bir hediye! 🎁',
-      t('welcome') === 'Welcome' ? 'You are successful! 🏆' : 'Sen başarılısın! 🏆',
-      t('welcome') === 'Welcome' ? 'You are a leader! 👑' : 'Sen bir lider! 👑',
+      t('motivation.messages.youAreMagnificent'),
+      t('motivation.messages.lifeSmiling'),
+      t('motivation.messages.youAreSpecial'),
+      t('motivation.messages.beAtPeace'),
+      t('motivation.messages.youAreLight'),
+      t('motivation.messages.todayBeautiful'),
+      t('motivation.messages.youArePrecious'),
+      t('motivation.messages.innerBeautyShining'),
+      t('motivation.messages.youAreMiracle'),
+      t('motivation.messages.acceptYourself'),
+      t('motivation.messages.youAreBeautiful'),
+      t('motivation.messages.innerLoveGreat'),
+      t('motivation.messages.youAreBrave'),
+      t('motivation.messages.everyDayGift'),
+      t('motivation.messages.youAreSuccessful'),
+      t('motivation.messages.youAreLeader'),
       
       // Kişisel gelişim
-      t('welcome') === 'Welcome' ? 'Discovering yourself is the greatest adventure! You are on this adventure! 🗺️' : 'Kendini keşfetmek en büyük macera! Sen bu maceradasın! 🗺️',
-      t('welcome') === 'Welcome' ? 'Listen to your inner story! It is very valuable! 📚' : 'İçindeki hikayeyi dinle! O çok değerli! 📚',
-      t('welcome') === 'Welcome' ? 'Knowing yourself is the greatest success! You are doing this! 🎯' : 'Kendini tanımak, en büyük başarı! Sen bunu yapıyorsun! 🎯',
-      t('welcome') === 'Welcome' ? 'Remember your past, plan your future, live today! 🕰️' : 'Geçmişini hatırla, geleceğini planla, bugünü yaşa! 🕰️',
+      t('motivation.messages.discoveringYourself'),
+      t('motivation.messages.listenInnerStory'),
+      t('motivation.messages.knowingYourself'),
+      t('motivation.messages.rememberPastPlanFuture'),
       
       // Cesaret verici ve iyileştirici
-      t('welcome') === 'Welcome' ? 'Challenges make you stronger! You are growing today too! 🌱' : 'Zorluklar seni güçlendirir! Bugün de büyüyorsun! 🌱',
-      t('welcome') === 'Welcome' ? 'Every day is an opportunity! What will you learn today? 🎓' : 'Her gün bir fırsat! Bugün ne öğreneceksin? 🎓',
-      t('welcome') === 'Welcome' ? 'You are change itself! You are renewing every day! 🌀' : 'Sen değişimin kendisisin! Her gün yenileniyorsun! 🌀',
-      t('welcome') === 'Welcome' ? 'The power within you is much greater than you think! 💪' : 'İçindeki güç, sandığından çok daha büyük! 💪',
-      t('welcome') === 'Welcome' ? 'Every challenge makes you stronger! 🛡️' : 'Her zorluk, seni daha da güçlü yapar! 🛡️',
-      t('welcome') === 'Welcome' ? 'Believe in yourself today! You can do it! 🌟' : 'Bugün de kendine inan! Sen başarabilirsin! 🌟',
-      t('welcome') === 'Welcome' ? 'Change can be scary, but you are brave! 🦁' : 'Değişim korkutucu olabilir, ama sen cesursun! 🦁',
+      t('motivation.messages.challengesMakeStronger'),
+      t('motivation.messages.everyDayOpportunity'),
+      t('motivation.messages.youAreChange'),
+      t('motivation.messages.powerWithin'),
+      t('motivation.messages.everyChallengeStronger'),
+      t('motivation.messages.believeInYourself'),
+      t('motivation.messages.changeCanBeScary'),
       
       // Modu düşük insanlar için anlamlı mesajlar
-      t('welcome') === 'Welcome' ? 'If today is tough, that\'s normal! You are strong! 💙' : 'Bugün zor geçiyorsa, bu normal! Sen güçlüsün! 💙',
-      t('welcome') === 'Welcome' ? 'Every day doesn\'t have to be the same! Today can be different! 🌈' : 'Her gün aynı olmak zorunda değil! Bugün farklı olabilir! 🌈',
-      t('welcome') === 'Welcome' ? 'Listen to yourself! What do you need? 🤗' : 'Kendini dinle! İhtiyacın olan şey ne? 🤗',
-      t('welcome') === 'Welcome' ? 'Even small steps today are enough! Every step is valuable! 👣' : 'Bugün küçük adımlar atsan da yeter! Her adım değerli! 👣',
-      t('welcome') === 'Welcome' ? 'Difficult times are temporary! You are permanent! ⏳' : 'Zor zamanlar geçici! Sen kalıcısın! ⏳',
-      t('welcome') === 'Welcome' ? 'Be compassionate to yourself! You are human! 💝' : 'Kendine şefkatli ol! Sen insansın! 💝',
-      t('welcome') === 'Welcome' ? 'Just breathing today is enough! You are good! 🌬️' : 'Bugün sadece nefes almak bile yeter! Sen iyisin! 🌬️',
-      t('welcome') === 'Welcome' ? 'You don\'t have to be at the same energy every day! 🌀' : 'Her gün aynı enerjide olmak zorunda değilsin! 🌀',
-      t('welcome') === 'Welcome' ? 'Rest today! Tomorrow will be better! 😴' : 'Bugün dinlen! Yarın daha iyi olacak! 😴',
+      t('motivation.messages.ifTodayTough'),
+      t('motivation.messages.everyDayDifferent'),
+      t('motivation.messages.listenToYourself'),
+      t('motivation.messages.evenSmallSteps'),
+      t('motivation.messages.difficultTimesTemporary'),
+      t('motivation.messages.beCompassionateToYourself'),
+      t('motivation.messages.justBreathingEnough'),
+      t('motivation.messages.notSameEnergyEveryDay'),
+      t('motivation.messages.restTodayTomorrowBetter'),
       t('welcome') === 'Welcome' ? 'You are valuable, no matter your mood! 💎' : 'Sen değerlisin, modun nasıl olursa olsun! 💎',
       t('welcome') === 'Welcome' ? 'Accept yourself without judgment! You are perfect! 🕊️' : 'Kendini yargılamadan kabul et! Sen mükemmelsin! 🕊️',
       t('welcome') === 'Welcome' ? 'Be happy with small things today! 🌸' : 'Bugün küçük şeylerle mutlu ol! 🌸',
@@ -1017,7 +1017,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
   // Premium minimalist tema sistemi - artık direkt kullanabiliriz
   const currentThemeColors = currentTheme;
-  
+
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
@@ -2327,14 +2327,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   <Text style={dynamicStyles.streakHeaderStatLabel}>En Uzun Seri</Text>
                 </View>
               </View>
-            </View>
+      </View>
 
             {/* Motivasyon Mesajı */}
             <View style={dynamicStyles.modalSection}>
               <View style={dynamicStyles.streakMessageCard}>
                 <Text style={dynamicStyles.streakMessageText}>{getStreakMessage()}</Text>
-              </View>
-            </View>
+        </View>
+        </View>
 
             {/* Rozetler */}
             {streakBadges.length > 0 && (
@@ -2348,9 +2348,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                     <View style={dynamicStyles.streakBadgeContent}>
                       <Text style={dynamicStyles.streakBadgeTitle}>{badge.title}</Text>
                       <Text style={dynamicStyles.streakBadgeDesc}>{badge.desc}</Text>
-                    </View>
+        </View>
                     <Ionicons name="checkmark-circle" size={28} color={currentTheme.colors.primary} />
-                  </View>
+      </View>
                 ))}
               </View>
             )}
@@ -2361,15 +2361,15 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <View style={dynamicStyles.streakTipCard}>
                 <Text style={dynamicStyles.streakTipIcon}>⏰</Text>
                 <Text style={dynamicStyles.streakTipText}>{t('welcome') === 'Welcome' ? 'Write diary at the same time every day' : 'Her gün aynı saatte günlük yaz'}</Text>
-              </View>
+            </View>
               <View style={dynamicStyles.streakTipCard}>
                 <Text style={dynamicStyles.streakTipIcon}>📝</Text>
                 <Text style={dynamicStyles.streakTipText}>Kısa da olsa bir şeyler yaz</Text>
-              </View>
+          </View>
               <View style={dynamicStyles.streakTipCard}>
                 <Text style={dynamicStyles.streakTipIcon}>🔔</Text>
                 <Text style={dynamicStyles.streakTipText}>Hatırlatıcıları aktif et</Text>
-              </View>
+        </View>
               <View style={dynamicStyles.streakTipCard}>
                 <Text style={dynamicStyles.streakTipIcon}>💪</Text>
                 <Text style={dynamicStyles.streakTipText}>Motivasyonunu yüksek tut!</Text>
@@ -2385,7 +2385,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   <Text style={dynamicStyles.streakGoalStatus}>
                     {getCurrentStreak() >= 3 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/3`}
                   </Text>
-                </View>
+            </View>
                 <View style={dynamicStyles.streakGoalBar}>
                   <View 
                     style={[
@@ -2393,8 +2393,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                       { width: `${Math.min((getCurrentStreak() / 3) * 100, 100)}%` }
                     ]}
                   />
-                </View>
-              </View>
+          </View>
+        </View>
 
               <View style={dynamicStyles.streakGoalCard}>
                 <View style={dynamicStyles.streakGoalHeader}>
@@ -2402,7 +2402,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   <Text style={dynamicStyles.streakGoalStatus}>
                     {getCurrentStreak() >= 7 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/7`}
                   </Text>
-                </View>
+          </View>
                 <View style={dynamicStyles.streakGoalBar}>
                   <View 
                     style={[
@@ -2410,7 +2410,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                       { width: `${Math.min((getCurrentStreak() / 7) * 100, 100)}%` }
                     ]}
                   />
-                </View>
+        </View>
               </View>
 
               <View style={dynamicStyles.streakGoalCard}>
@@ -2418,7 +2418,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   <Text style={dynamicStyles.streakGoalTitle}>{t('welcome') === 'Welcome' ? '30 Day Goal' : '30 Günlük Hedef'}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
                     {getCurrentStreak() >= 30 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/30`}
-                  </Text>
+        </Text>
                 </View>
                 <View style={dynamicStyles.streakGoalBar}>
                   <View 
@@ -2429,7 +2429,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   />
                 </View>
               </View>
-            </View>
+      </View>
 
             <View style={{ height: 40 }} />
           </ScrollView>
@@ -2455,14 +2455,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 style={dynamicStyles.modalCloseButton}
               >
                 <Ionicons name="close" size={28} color={currentTheme.colors.text} />
-              </TouchableOpacity>
+          </TouchableOpacity>
               <Text style={dynamicStyles.modalTitle}>🌟 Yaşam Haritası</Text>
               <View style={dynamicStyles.modalHeaderScore}>
                 <Text style={dynamicStyles.modalHeaderScoreNumber}>{getWellnessScore()}</Text>
                 <Text style={dynamicStyles.modalHeaderScoreLabel}>/100</Text>
               </View>
-            </View>
-
+        </View>
+        
             {/* Weekly Trend Chart */}
             <View style={dynamicStyles.modalSection}>
               <Text style={dynamicStyles.modalSectionTitle}>📈 {t('welcome') === 'Welcome' ? 'Weekly Trend' : 'Haftalık Trend'}</Text>
@@ -2470,32 +2470,32 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 {healthTrend.map((day, index) => (
                   <View key={index} style={dynamicStyles.trendChartBar}>
                     <View style={dynamicStyles.trendChartBarContainer}>
-                      <View 
-                        style={[
+            <View 
+              style={[
                           dynamicStyles.trendChartBarFill,
                           { 
                             height: `${day.score}%`,
                             backgroundColor: day.isToday ? currentTheme.colors.primary : currentTheme.colors.secondary
                           }
-                        ]}
-                      />
-                    </View>
+              ]} 
+            />
+          </View>
                     <Text style={[
                       dynamicStyles.trendChartLabel,
                       day.isToday && { color: currentTheme.colors.primary, fontWeight: 'bold' }
                     ]}>
                       {day.day}
-                    </Text>
+          </Text>
                     <Text style={dynamicStyles.trendChartScore}>{day.score}</Text>
                   </View>
                 ))}
               </View>
-            </View>
+        </View>
 
             {/* Wellness Takibi Yönlendirme */}
             <View style={dynamicStyles.modalSection}>
               <Text style={dynamicStyles.modalSectionTitle}>💪 Wellness Takibi</Text>
-              <TouchableOpacity 
+                <TouchableOpacity
                 style={dynamicStyles.wellnessRedirectCard}
                 onPress={() => {
                   setShowHealthModal(false);
@@ -2646,23 +2646,23 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
             {t('welcome') === 'Welcome' ? 'Express Yourself' : 'Kendini İfade Et'}
-          </Text>
-        </View>
+                    </Text>
+                  </View>
         
         <View style={dynamicStyles.moodContent}>
-          <View style={[
+                  <View style={[
             dynamicStyles.moodEmojiContainer,
             dynamicStyles.moodEmojiContainerDefault
-          ]}>
+                  ]}>
             <Text style={dynamicStyles.recentMood}>✍️</Text>
-          </View>
+                  </View>
           <View style={dynamicStyles.moodTextContainer}>
             <Text style={dynamicStyles.moodLabel}>
               {t('welcome') === 'Welcome' 
                 ? (t('welcome') === 'Welcome' ? "Capture this moment" : "Bu anı yakala") 
                 : "Bu anı yakala"
               }
-            </Text>
+              </Text>
             <Text style={dynamicStyles.moodSubtitle}>
               {t('welcome') === 'Welcome' 
                 ? "Your thoughts, your story" 
@@ -2673,7 +2673,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         </View>
         
         <View style={dynamicStyles.moodActionContainer}>
-          <TouchableOpacity
+            <TouchableOpacity 
             style={dynamicStyles.moodActionButton}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -2686,9 +2686,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Ionicons name="create-outline" size={18} color={currentTheme.colors.primary} />
               {' '}{t('writeDiary')}
             </Text>
-          </TouchableOpacity>
-        </View>
+            </TouchableOpacity>
           </View>
+      </View>
         </View>
       </Animated.View>
 
@@ -2721,7 +2721,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             <Text style={dynamicStyles.motivationMessage}>
               {getMotivationMessage()}
             </Text>
-        </View>
+          </View>
       </Animated.View>
 
       {/* Personality Card */}
@@ -2753,9 +2753,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Text style={dynamicStyles.achievementsTitle}>
                 {t('welcome') === 'Welcome' ? 'My Achievements' : 'Başarılarım'}
               </Text>
-            </View>
+                </View>
             <Ionicons name="chevron-forward" size={20} color={currentTheme.colors.secondary} />
-          </View>
+              </View>
 
           <View style={dynamicStyles.achievementsStats}>
             <View style={dynamicStyles.achievementStat}>
@@ -2765,7 +2765,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Text style={dynamicStyles.achievementStatLabel}>
                 {t('welcome') === 'Welcome' ? 'Earned' : 'Kazanılan'}
               </Text>
-            </View>
+          </View>
             <View style={dynamicStyles.achievementStat}>
               <Text style={dynamicStyles.achievementStatNumber}>
                 {getAchievementStats().total}
@@ -2773,7 +2773,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <Text style={dynamicStyles.achievementStatLabel}>
                 {t('welcome') === 'Welcome' ? 'Total' : 'Toplam'}
               </Text>
-            </View>
+        </View>
             <View style={dynamicStyles.achievementStat}>
               <Text style={dynamicStyles.achievementStatNumber}>
                 {Math.round(getAchievementStats().completionRate)}%
@@ -2795,10 +2795,10 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   { width: `${getAchievementStats().completionRate}%` }
                 ]} 
               />
-            </View>
+        </View>
           </View>
 
-          <TouchableOpacity 
+              <TouchableOpacity
             style={dynamicStyles.achievementsButton}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -2808,7 +2808,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           >
             <Text style={dynamicStyles.achievementsButtonText}>
               {t('welcome') === 'Welcome' ? 'See All Achievements' : 'Tüm Başarıları Gör'} 🏆
-            </Text>
+                  </Text>
           </TouchableOpacity>
         </TouchableOpacity>
       </Animated.View>
@@ -2836,7 +2836,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           ]}>
           <Text style={dynamicStyles.sectionTitle}>
             💡 {t('welcome') === 'Welcome' ? 'Your Personal Insights' : 'Kişisel İçgörülerin'}
-          </Text>
+                  </Text>
           {insights.map((insight, index) => (
             <View key={`${insight.type}-${index}`} style={[
               dynamicStyles.insightCard,
@@ -2851,12 +2851,12 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <View style={dynamicStyles.insightHeader}>
                 <Text style={dynamicStyles.insightIcon}>{insight.icon}</Text>
                 <Text style={dynamicStyles.insightTitle}>{insight.title}</Text>
-              </View>
+                </View>
               <Text style={dynamicStyles.insightDescription}>
                 {insight.description}
               </Text>
             </View>
-          ))}
+            ))}
           </View>
         </Animated.View>
       )}
@@ -2918,11 +2918,11 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>📝</Text>
                 <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Write a diary, listen to your soul' : 'Günlük yaz, ruhunu dinle'}</Text>
-              </View>
+          </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>🎯</Text>
                 <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Track your goals' : 'Hedeflerini takip et'}</Text>
-              </View>
+      </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>💖</Text>
                 <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Love and grow yourself' : 'Kendini sev ve büyüt'}</Text>
