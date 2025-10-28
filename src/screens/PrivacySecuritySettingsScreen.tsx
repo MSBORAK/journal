@@ -229,41 +229,40 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'Privacy & Security' : 'Gizlilik & Güvenlik'}</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('settings.privacySecurity')}</Text>
       </View>
 
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            🔒 {t('welcome') === 'Welcome' ? 'Your privacy and security are very important to us. You can learn how your data is protected' : 'Gizliliğiniz ve güvenliğiniz bizim için çok önemli. Verilerinizin nasıl korunduğunu'} 
-            {t('welcome') === 'Welcome' ? 'and used here.' : 've kullanıldığını buradan öğrenebilirsiniz.'}
+            🔒 {t('settings.privacySecurityInfo')} {t('settings.andUsedHere')}
           </Text>
           <View style={dynamicStyles.securityBadge}>
-            <Text style={dynamicStyles.securityBadgeText}>{t('welcome') === 'Welcome' ? '✅ Secure' : '✅ Güvenli'}</Text>
+            <Text style={dynamicStyles.securityBadgeText}>{t('settings.secure')}</Text>
           </View>
         </View>
 
         {/* Gizlilik */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Privacy' : 'Gizlilik'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.privacy')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="shield-checkmark" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Privacy Policy' : 'Gizlilik Politikası'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.privacyPolicy')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Learn how your data is collected, used, and protected.' : 'Verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu öğrenin.'}
+              {t('settings.learnDataProtection')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showPrivacyPolicy}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>{t('welcome') === 'Welcome' ? '📄 View' : '📄 Görüntüle'}</Text>
+              <Text style={dynamicStyles.actionButtonText}>{t('settings.view')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -272,17 +271,17 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="eye" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Data Transparency' : 'Veri Şeffaflığı'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.dataTransparency')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'See in detail which of your data is used and how.' : 'Hangi verilerinizin nasıl kullanıldığını detaylı olarak görün.'}
+              {t('settings.seeDataUsageDetails')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showDataTransparency}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>{t('welcome') === 'Welcome' ? '👁️ Details' : '👁️ Detaylar'}</Text>
+              <Text style={dynamicStyles.actionButtonText}>{t('settings.details')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -291,10 +290,10 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="download" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Download My Data' : 'Verilerimi İndir'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.downloadMyData')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Download and check all your personal data in JSON format.' : 'Tüm kişisel verilerinizi JSON formatında indirin ve kontrol edin.'}
+              {t('settings.downloadAllPersonalData')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -303,7 +302,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {loading ? (t('welcome') === 'Welcome' ? 'Downloading...' : 'İndiriliyor...') : (t('welcome') === 'Welcome' ? '📥 Download' : '📥 İndir')}
+                {loading ? t('settings.downloading') : t('settings.download')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -311,14 +310,14 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
 
         {/* Güvenlik */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Security' : 'Güvenlik'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.security')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="lock-closed" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Security Information' : 'Güvenlik Bilgileri'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.securityInformation')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
               Uygulamanızın güvenlik özelliklerini ve veri koruma yöntemlerini öğrenin.
