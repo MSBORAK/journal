@@ -416,11 +416,11 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] =>
  */
 export const getAllInsights = (entries: DiaryEntry[], t: any): Insight[] => {
   const allInsights = [
-    ...analyzeMood(entries),
-    ...analyzeWritingHabits(entries),
-    ...analyzeStreak(entries),
-    ...analyzeWords(entries),
-    ...analyzeAchievements(entries)
+    ...analyzeMood(entries, t),
+    ...analyzeWritingHabits(entries, t),
+    ...analyzeStreak(entries, t),
+    ...analyzeWords(entries, t),
+    ...analyzeAchievements(entries, t)
   ];
 
   // Önceliğe göre sırala
@@ -433,7 +433,7 @@ export const getAllInsights = (entries: DiaryEntry[], t: any): Insight[] => {
 /**
  * Öneriler Oluştur
  */
-export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
+export const generateSuggestions = (entries: DiaryEntry[], t: any): Insight[] => {
   const suggestions: Insight[] = [];
   
   if (entries.length === 0) {
