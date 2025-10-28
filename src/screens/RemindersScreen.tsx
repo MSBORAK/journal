@@ -789,7 +789,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
           <View style={dynamicStyles.modalContent}>
             <View style={dynamicStyles.modalHeader}>
               <Text style={dynamicStyles.modalTitle}>
-                {editingReminder ? 'Hatırlatıcı Düzenle' : 'Yeni Alarm'}
+                {editingReminder ? t('common.edit') + ' ' + t('reminders.reminders') : t('reminders.addReminder')}
               </Text>
               <TouchableOpacity
                 style={dynamicStyles.closeButton}
@@ -980,7 +980,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                 onPress={handleSave}
               >
                 <Text style={dynamicStyles.saveButtonText}>
-                  {editingReminder ? 'Güncelle' : 'Kaydet'}
+                  {editingReminder ? t('common.update') : t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1016,7 +1016,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         secondaryButton={
           alertConfig.type === 'warning' && pendingDeleteId
             ? {
-                text: 'İptal',
+                text: t('common.cancel'),
                 onPress: () => {
                   setPendingDeleteId(null);
                   hideAlert();
