@@ -225,6 +225,10 @@
   "health": {
     "health": "Health",
     "wellnessTracking": "Wellness Tracking",
+    "wellnessSaved": "💚 Saved!",
+    "wellnessSavedDesc": "Wellness data saved successfully. Your health status for today has been recorded!",
+    "wellnessError": "❌ Error",
+    "wellnessErrorDesc": "An error occurred while saving data. Please try again.",
     "healthScore": "Health Score",
     "waterGlasses": "Water Glasses",
     "exerciseMinutes": "Exercise Minutes",

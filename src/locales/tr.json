@@ -223,6 +223,10 @@
   "health": {
     "health": "Sağlık",
     "wellnessTracking": "Wellness Takibi",
+    "wellnessSaved": "💚 Kaydedildi!",
+    "wellnessSavedDesc": "Wellness verilerin başarıyla kaydedildi. Bugünkü sağlık durunun kaydedildi!",
+    "wellnessError": "❌ Hata",
+    "wellnessErrorDesc": "Veriler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
     "healthScore": "Sağlık Puanı",
     "waterGlasses": "Su Bardakları",
     "exerciseMinutes": "Egzersiz Dakikaları",

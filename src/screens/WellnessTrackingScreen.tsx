@@ -86,11 +86,11 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       setWellnessData(data);
       
       showAlert(
-        t('welcome') === 'Welcome' ? '💚 Saved!' : '💚 Kaydedildi!',
-        t('welcome') === 'Welcome' ? 'Wellness data saved successfully. Your health status for today has been recorded!' : 'Wellness verilerin başarıyla kaydedildi. Bugünkü sağlık durumun kaydedildi!',
+        t('health.wellnessSaved'),
+        t('health.wellnessSavedDesc'),
         'success',
         {
-          text: t('welcome') === 'Welcome' ? 'OK' : 'Tamam',
+          text: t('common.ok'),
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
@@ -98,11 +98,11 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
     } catch (error) {
       console.error('Error saving wellness data:', error);
       showAlert(
-        t('welcome') === 'Welcome' ? '❌ Error' : '❌ Hata',
-        t('welcome') === 'Welcome' ? 'An error occurred while saving data. Please try again.' : 'Veriler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        t('health.wellnessError'),
+        t('health.wellnessErrorDesc'),
         'error',
         {
-          text: t('welcome') === 'Welcome' ? 'OK' : 'Tamam',
+          text: t('common.ok'),
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
