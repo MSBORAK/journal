@@ -2592,8 +2592,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.headerTitle}>{t('welcome')}! 🌟</Text>
         <Text style={dynamicStyles.headerSubtitle}>
-          {t('welcome') === 'Welcome' 
-            ? "This is your secret world - your safe harbor where you listen to your soul and find meaning. Every word, every feeling is precious here. Stories are waiting for you."
+          {t('dashboard.headerSubtitle')."
             : "Burası senin gizli dünyan - ruhunu dinlediğin, anlam bulduğun güvenli limanın. Her kelime, her hissiyat burada değerli. Seni bekleyen hikayeler var."
           }
         </Text>
@@ -2634,7 +2633,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           >
         <View style={dynamicStyles.moodHeader}>
           <Text style={dynamicStyles.moodTitle}>
-            {t('welcome') === 'Welcome' ? 'Express Yourself' : 'Kendini İfade Et'}
+            {t('dashboard.expressYourself')}
                     </Text>
                   </View>
         
@@ -2647,16 +2646,10 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                   </View>
           <View style={dynamicStyles.moodTextContainer}>
             <Text style={dynamicStyles.moodLabel}>
-              {t('welcome') === 'Welcome' 
-                ? (t('welcome') === 'Welcome' ? "Capture this moment" : "Bu anı yakala") 
-                : "Bu anı yakala"
-              }
+              {t('dashboard.captureThisMomentLabel')}
               </Text>
             <Text style={dynamicStyles.moodSubtitle}>
-              {t('welcome') === 'Welcome' 
-                ? "Your thoughts, your story" 
-                : "Düşüncelerin, hikayen"
-              }
+              {t('dashboard.yourThoughtsYourStory')}
             </Text>
           </View>
         </View>
@@ -2705,7 +2698,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           }
         ]}>
             <Text style={dynamicStyles.motivationTitle}>
-              {t('welcome') === 'Welcome' ? 'Daily Reflection' : 'Günlük Yansıma'}
+              {t('dashboard.dailyReflectionLabel')}
             </Text>
             <Text style={dynamicStyles.motivationMessage}>
               {getMotivationMessage()}
@@ -2752,7 +2745,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 {getAchievementStats().unlocked}
               </Text>
               <Text style={dynamicStyles.achievementStatLabel}>
-                {t('welcome') === 'Welcome' ? 'Earned' : 'Kazanılan'}
+                {t('dashboard.earned')}
               </Text>
           </View>
             <View style={dynamicStyles.achievementStat}>
@@ -2760,7 +2753,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 {getAchievementStats().total}
               </Text>
               <Text style={dynamicStyles.achievementStatLabel}>
-                {t('welcome') === 'Welcome' ? 'Total' : 'Toplam'}
+                {t('dashboard.total')}
               </Text>
         </View>
             <View style={dynamicStyles.achievementStat}>
@@ -2768,14 +2761,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 {Math.round(getAchievementStats().completionRate)}%
               </Text>
               <Text style={dynamicStyles.achievementStatLabel}>
-                {t('welcome') === 'Welcome' ? 'Completion' : 'Tamamlanma'}
+                {t('dashboard.completion')}
               </Text>
             </View>
           </View>
 
           <View style={dynamicStyles.achievementsProgress}>
             <Text style={dynamicStyles.achievementsProgressText}>
-              {getAchievementStats().unlocked} / {getAchievementStats().total} {t('welcome') === 'Welcome' ? 'badges earned' : 'rozet kazandın'}
+              {getAchievementStats().unlocked} / {getAchievementStats().total} {t('dashboard.badgesEarned')}
             </Text>
             <View style={dynamicStyles.achievementsProgressBar}>
               <View 
@@ -2796,7 +2789,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             activeOpacity={0.8}
           >
             <Text style={dynamicStyles.achievementsButtonText}>
-              {t('welcome') === 'Welcome' ? 'See All Achievements' : 'Tüm Başarıları Gör'} 🏆
+              {t('dashboard.seeAllAchievements')} 🏆
                   </Text>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -2824,7 +2817,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             }
           ]}>
           <Text style={dynamicStyles.sectionTitle}>
-            💡 {t('welcome') === 'Welcome' ? 'Your Personal Insights' : 'Kişisel İçgörülerin'}
+            💡 {t('dashboard.yourPersonalInsights')}
                   </Text>
           {insights.map((insight, index) => (
             <View key={`${insight.type}-${index}`} style={[
@@ -2898,23 +2891,23 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               lineHeight: 24,
               marginBottom: 20,
             }}>
-              {t('welcome') === 'Welcome' ? 'Now this is your world! 🌟' : 'Artık burası senin dünyan! 🌟'}{'\n\n'}
-              {t('welcome') === 'Welcome' ? 'Your rules apply, your story will be written here.' : 'Senin kuralların geçerli, senin hikayen burada yazılacak.'}{'\n\n'}
-              {t('welcome') === 'Welcome' ? 'Are you ready to discover yourself a little more every day? ✨' : 'Her gün biraz daha kendini keşfetmeye hazır mısın? ✨'}
+              {t('dashboard.nowThisIsYourWorld')}{'\n\n'}
+              {t('dashboard.yourRulesApply')}{'\n\n'}
+              {t('dashboard.readyToDiscover')}
             </Text>
             
             <View style={{ width: '100%', marginBottom: 24 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>📝</Text>
-                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Write a diary, listen to your soul' : 'Günlük yaz, ruhunu dinle'}</Text>
+                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('dashboard.writeDiaryListenSoul')}</Text>
           </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>🎯</Text>
-                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Track your goals' : 'Hedeflerini takip et'}</Text>
+                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('dashboard.trackYourGoals')}</Text>
       </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 16 }}>
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>💖</Text>
-                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('welcome') === 'Welcome' ? 'Love and grow yourself' : 'Kendini sev ve büyüt'}</Text>
+                <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('dashboard.loveAndGrow')}</Text>
               </View>
             </View>
             
@@ -2940,7 +2933,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 fontSize: 16,
                 fontWeight: 'bold',
                 textAlign: 'center',
-              }}>{t('welcome') === 'Welcome' ? 'Great! Let\'s start 🚀' : 'Harika! Başlayalım 🚀'}</Text>
+              }}>{t('dashboard.greatLetsStart')}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
