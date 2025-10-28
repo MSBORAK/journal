@@ -173,7 +173,13 @@
     "diarySaved": "Günlük kaydedildi!",
     "questionsAnswered": "soru",
     "noDiaryEntries": "Henüz günlük yazmamışsın",
-    "startWriting": "Yazmaya başla"
+    "startWriting": "Yazmaya başla",
+    "titleAndContentRequired": "Lütfen başlık ve içerik girin. Günlük yazmak için her ikisi de gerekli.",
+    "userNotFound": "Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.",
+    "diaryNotSaved": "Günlük kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "titlePlaceholder": "Bugün nasıl geçti?",
+    "contentPlaceholder": "Bugün neler yaşadın? Nasıl hissettin? Ne öğrendin?",
+    "addTagPlaceholder": "Etiket ekle (örn: iş, aile, spor)"
   },
   "mood": {
     "mood": "Ruh Hali",

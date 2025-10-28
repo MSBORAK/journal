@@ -21,7 +21,9 @@
     "loading": "Loading...",
     "confirm": "Confirm",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "hide": "Hide",
+    "draw": "Draw"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -174,7 +176,13 @@
     "diarySaved": "Diary saved!",
     "questionsAnswered": "questions",
     "noDiaryEntries": "You haven't written any diary entries yet",
-    "startWriting": "Start writing"
+    "startWriting": "Start writing",
+    "titleAndContentRequired": "Please enter title and content. Both are required to write a diary entry.",
+    "userNotFound": "User not found. Please sign in again.",
+    "diaryNotSaved": "An error occurred while saving the diary. Please try again.",
+    "titlePlaceholder": "How was your day?",
+    "contentPlaceholder": "What did you experience today? How did you feel? What did you learn?",
+    "addTagPlaceholder": "Add tag (e.g: work, family, sports)"
   },
   "mood": {
     "mood": "Mood",

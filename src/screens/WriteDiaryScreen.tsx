@@ -73,11 +73,11 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
   });
 
   const moodOptions = [
-    { emoji: '😔', label: 'Üzgün', value: 1 },
-    { emoji: '😐', label: 'Normal', value: 2 },
-    { emoji: '🫠', label: 'Yorgun', value: 3 },
-    { emoji: '😎', label: 'Mutlu', value: 4 },
-    { emoji: '🤩', label: 'Harika', value: 5 },
+    { emoji: '😔', label: t('mood.sad'), value: 1 },
+    { emoji: '😐', label: t('mood.normal'), value: 2 },
+    { emoji: '🫠', label: t('mood.tired'), value: 3 },
+    { emoji: '😎', label: t('mood.happy'), value: 4 },
+    { emoji: '🤩', label: t('mood.amazing'), value: 5 },
   ];
 
   const addTag = () => {
@@ -117,10 +117,10 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
     if (!title.trim() || !content.trim()) {
       showAlert(
         '⚠️ Eksik Bilgi',
-        'Lütfen başlık ve içerik girin. Günlük yazmak için her ikisi de gerekli.',
+        t('diary.titleAndContentRequired'),
         'warning',
         {
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
@@ -131,10 +131,10 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
     if (!user) {
       showAlert(
         '❌ Hata',
-        'Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.',
+        t('diary.userNotFound'),
         'error',
         {
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
@@ -166,10 +166,10 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
     } catch (error) {
       showAlert(
         '❌ Kaydetme Hatası',
-        'Günlük kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        t('diary.diaryNotSaved'),
         'error',
         {
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }
@@ -191,7 +191,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
           disabled={loading}
         >
           <Text style={dynamicStyles.saveButtonText}>
-            {loading ? 'Kaydediliyor...' : 'Kaydet'}
+            {loading ? t('common.loading') : t('common.save')}
           </Text>
         </TouchableOpacity>
       ),
@@ -462,7 +462,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
               style={dynamicStyles.titleInput}
               value={title}
               onChangeText={setTitle}
-              placeholder="Bugün nasıl geçti?"
+              placeholder={t('diary.titlePlaceholder')}
               multiline={false}
               scrollEnabled={false}
               autoCorrect={false}
@@ -518,7 +518,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
               style={dynamicStyles.contentInput}
               value={content}
               onChangeText={setContent}
-              placeholder="Bugün neler yaşadın? Nasıl hissettin? Ne öğrendin?"
+              placeholder={t('diary.contentPlaceholder')}
               multiline={true}
               scrollEnabled={true}
               autoCorrect={true}
@@ -547,7 +547,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
                   color="#a855f7" 
                 />
                 <Text style={styles.drawingToggleText}>
-                  {showDrawing ? 'Gizle' : 'Çiz'}
+                  {showDrawing ? t('common.hide') : t('common.draw')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -629,7 +629,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
                 style={styles.tagInput}
                 value={newTag}
                 onChangeText={setNewTag}
-                placeholder="Etiket ekle (örn: iş, aile, spor)"
+                placeholder={t('diary.addTagPlaceholder')}
                 placeholderTextColor="#9ca3af"
                 onSubmitEditing={addTag}
                 returnKeyType="done"
