@@ -62,6 +62,7 @@
     "invalidEmail": "Invalid email address"
   },
   "dashboard": {
+    "howAreYou": "How are you feeling today?",
     "welcome": "Welcome",
     "earnedBadges": "Earned Badges",
     "writeDiarySameTime": "Write diary at the same time every day",

@@ -61,6 +61,7 @@
     "invalidEmail": "Geçersiz e-posta adresi"
   },
   "dashboard": {
+    "howAreYou": "Bugün kendini nasıl hissediyorsun?",
     "welcome": "Hoş Geldin",
     "earnedBadges": "Kazanılan Rozetler",
     "writeDiarySameTime": "Her gün aynı saatte günlük yaz",

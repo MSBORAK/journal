@@ -2590,14 +2590,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     >
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome')}! 🌟</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('dashboard.welcome')}! 🌟</Text>
         <Text style={dynamicStyles.headerSubtitle}>
           {t('dashboard.headerSubtitle')}
         </Text>
         <Text style={dynamicStyles.userGreeting}>
           {greeting} {displayName}
         </Text>
-        <Text style={dynamicStyles.userEmail}>{t('howAreYou')}</Text>
+        <Text style={dynamicStyles.userEmail}>{t('dashboard.howAreYou')}</Text>
       </View>
 
 
