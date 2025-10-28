@@ -46,30 +46,24 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
   const showAbout = () => {
     showAlert(
-      t('welcome') === 'Welcome' ? 'ℹ️ About' : 'ℹ️ Hakkında',
-      t('welcome') === 'Welcome' 
-        ? 'Rhythm v1.0.0\n\n🎵 Spiritual balance and life rhythm app:\n• Daily journaling system\n• Mood tracking and analysis\n• Dreams & goals dashboard\n• Tasks and reminders\n• Pomodoro timer and focus mode\n• Statistics and progress tracking\n• Personality card system\n• 7 different theme options\n• Offline working\n• Data backup\n\nDeveloper: MSESOFT\n© 2025\n\nContact: msesoftware1425@gmail.com'
-        : 'Rhythm v1.0.0\n\n🎵 Spiritual balance and life rhythm app:\n• Daily writing system\n• Mood tracking and analysis\n• Dreams & goals board\n• Tasks and reminders\n• Pomodoro timer and focus mode\n• Statistics and progress tracking\n• Personality card system\n• 7 different theme options\n• Offline working\n• Data backup\n\nDeveloper: MSESOFT\n© 2025\n\nContact: msesoftware1425@gmail.com',
+      t('settings.aboutTitle'),
+      t('settings.aboutContent'),
       'info'
     );
   };
 
   const showHelp = () => {
     showAlert(
-      t('welcome') === 'Welcome' ? '❓ Help & Support' : '❓ Yardım & Destek',
-      t('welcome') === 'Welcome' 
-        ? 'Frequently Asked Questions:\n\n❓ How can I write a diary?\n• Press the "Write Diary" button on the main page\n\n❓ How can I backup my data?\n• From Settings > Data & Backup section\n\n❓ How can I change the theme?\n• From Settings > Appearance section\n\n❓ How can I set notifications?\n• From Settings > Notifications section\n\nFor more help: msesoftware1425@gmail.com'
-        : 'Frequently Asked Questions:\n\n❓ How can I write a diary?\n• Press the "Write Diary" button on the main page\n\n❓ How do I backup my data?\n• From Settings > Data & Backup section\n\n❓ How do I change theme?\n• From Settings > Appearance section\n\n❓ How do I set notifications?\n• From Settings > Notifications section\n\nFor more help: msesoftware1425@gmail.com',
+      t('settings.helpSupportTitle'),
+      t('settings.helpSupportContent'),
       'info'
     );
   };
 
   const rateApp = () => {
     showAlert(
-      t('welcome') === 'Welcome' ? '⭐ Rate App' : '⭐ Uygulamayı Değerlendir',
-      t('welcome') === 'Welcome' 
-        ? 'If you like our app, you can support us by giving 5 stars on the App Store!\n\nYour rating is very valuable to us! 🌟'
-        : 'Uygulamamızı beğendiyseniz, App Store\'da 5 yıldız vererek bize destek olabilirsiniz!\n\nDeğerlendirmeniz bizim için çok değerli! 🌟',
+      t('settings.rateAppTitle'),
+      t('settings.rateAppContent'),
       'info'
     );
   };
@@ -77,15 +71,13 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
   const shareApp = async () => {
     try {
       await Share.share({
-        message: t('welcome') === 'Welcome' 
-          ? 'Rhythm - Spiritual balance and life rhythm! 🎵✨\n\nDownload from App Store: https://apps.apple.com/app/rhythm/id1234567890'
-          : 'Rhythm - Ruhsal denge ve yaşam ritmi! 🎵✨\n\nApp Store\'dan indirin: https://apps.apple.com/app/rhythm/id1234567890',
+        message: t('settings.shareAppMessage'),
         title: 'Rhythm',
       });
     } catch (error) {
       showAlert(
-        t('welcome') === 'Welcome' ? '❌ Error' : '❌ Hata', 
-        t('welcome') === 'Welcome' ? 'An error occurred during sharing' : 'Paylaşım sırasında hata oluştu', 
+        t('common.error'),
+        t('settings.shareError'),
         'error'
       );
     }
@@ -93,16 +85,16 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
   const contactSupport = () => {
     showAlert(
-      '📞 İletişim',
-      'Bizimle iletişime geçin:\n\n📧 Email: msesoftware1425@gmail.com\n💬 İnstagram: @msesoft\nSorularınız için 7/24 destek sağlıyoruz!',
+      t('settings.contactTitle'),
+      t('settings.contactContent'),
       'info'
     );
   };
 
   const showChangelog = () => {
     showAlert(
-      t('welcome') === 'Welcome' ? '📝 Changelog' : '📝 Değişiklik Günlüğü',
-      'Version 1.0.0 (2025):\n\n✨ New Features:\n• Daily writing system\n• Mood tracking\n• Statistics and analysis\n• Dreams & Goals board\n• Pomodoro timer\n• Theme system\n\n🐛 Fixes:\n• Performance improvements\n• UI/UX enhancements\n• Bug fixes\n\n🔮 Future Updates:\n• Cloud synchronization\n• More themes\n• Social features',
+      t('settings.changelogTitle'),
+      t('settings.changelogContent'),
       'info'
     );
   };
