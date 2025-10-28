@@ -88,9 +88,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updateProfile(user.uid, profileData);
       setShowProfileModal(false);
-      showAlert('✅ Başarılı', 'Profil bilgileriniz güncellendi!', 'success');
+      showAlert(t('settings.profileUpdated'), t('settings.profileUpdateSuccess'), 'success');
     } catch (error) {
-      showAlert('❌ Hata', 'Profil güncellenirken hata oluştu.', 'error');
+      showAlert(t('auth.error'), t('settings.profileUpdateFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -99,18 +99,18 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   const handleEmailUpdate = async () => {
     // Validasyonlar
     if (!newEmail) {
-      showAlert('⚠️ Uyarı', 'Email adresi giriniz!', 'warning');
+      showAlert(t('settings.warning'), t('settings.emailRequired'), 'warning');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail)) {
-      showAlert('⚠️ Uyarı', 'Geçerli bir email adresi giriniz!', 'warning');
+      showAlert(t('settings.warning'), t('settings.validEmailRequired'), 'warning');
       return;
     }
 
     if (newEmail.toLowerCase() === user?.email?.toLowerCase()) {
-      showAlert('⚠️ Uyarı', 'Yeni email adresi mevcut email adresinizle aynı olamaz!', 'warning');
+      showAlert(t('settings.warning'), t('settings.emailCannotBeSame'), 'warning');
       return;
     }
     
@@ -119,14 +119,14 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await updateEmail(newEmail);
       setShowEmailModal(false);
-      showAlert('✅ E-posta doğrulama gönderildi', 'Yeni e-posta adresinize doğrulama maili gönderildi. Lütfen email kutunuzu kontrol edin ve linke tıklayarak onaylayın.', 'success');
+      showAlert(t('settings.emailVerificationSent'), t('settings.checkEmailForVerification'), 'success');
       
       // Email güncelleme sonrası UI state'ini yenile
       setTimeout(async () => {
         await refreshUser();
       }, 1000);
     } catch (error: any) {
-      showAlert('❌ Hata', error.message || 'Email güncellenirken hata oluştu.', 'error');
+      showAlert(t('auth.error'), error.message || t('settings.emailUpdateFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -135,28 +135,28 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   const handlePasswordUpdate = async () => {
     // Validasyonlar
     if (!oldPassword) {
-      showAlert('⚠️ Uyarı', 'Mevcut şifrenizi giriniz!', 'warning');
+      showAlert(t('settings.warning'), t('settings.enterCurrentPasswordRequired'), 'warning');
       return;
     }
     
     if (!newPassword || newPassword.length < 6) {
-      showAlert('⚠️ Uyarı', 'Yeni şifre en az 6 karakter olmalıdır!', 'warning');
+      showAlert(t('settings.warning'), t('auth.passwordTooShort'), 'warning');
       return;
     }
     
     if (newPassword.length > 128) {
-      showAlert('⚠️ Uyarı', 'Şifre çok uzun. Maksimum 128 karakter olabilir!', 'warning');
+      showAlert(t('settings.warning'), t('settings.passwordTooLong'), 'warning');
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      showAlert('⚠️ Uyarı', 'Yeni şifreler eşleşmiyor!', 'warning');
+      showAlert(t('settings.warning'), t('auth.passwordsDoNotMatch'), 'warning');
       return;
     }
 
     // Eski ve yeni şifre aynıysa uyarı ver
     if (oldPassword === newPassword) {
-      showAlert('⚠️ Uyarı', 'Yeni şifre mevcut şifrenizle aynı olamaz!', 'warning');
+      showAlert(t('settings.warning'), t('settings.passwordCannotBeSame'), 'warning');
       return;
     }
     
@@ -174,9 +174,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       // UI state'ini güncelle (ChatGPT'nin önerdiği gibi)
       await refreshUser();
       
-      showAlert('✅ Başarılı', 'Şifreniz başarıyla güncellendi!', 'success');
+      showAlert(t('settings.success'), t('settings.passwordUpdated'), 'success');
     } catch (error: any) {
-      showAlert('❌ Hata', error.message || 'Şifre güncellenirken hata oluştu.', 'error');
+      showAlert(t('auth.error'), error.message || t('settings.passwordUpdateFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -541,7 +541,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               style={dynamicStyles.textInput}
               value={profileData.full_name}
               onChangeText={(text) => setProfileData({...profileData, full_name: text})}
-              placeholder="Adınızı girin"
+              placeholder={t('settings.enterYourName')}
               placeholderTextColor={currentTheme.colors.muted}
             />
             
@@ -550,7 +550,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               style={[dynamicStyles.textInput, { height: 80, textAlignVertical: 'top' }]}
               value={profileData.bio}
               onChangeText={(text) => setProfileData({...profileData, bio: text})}
-              placeholder="Kendinizden bahsedin..."
+              placeholder={t('settings.tellAboutYourself')}
               placeholderTextColor={currentTheme.colors.muted}
               multiline
             />
@@ -649,7 +649,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               style={dynamicStyles.textInput}
               value={oldPassword}
               onChangeText={setOldPassword}
-              placeholder="Mevcut şifrenizi girin"
+              placeholder={t('settings.enterCurrentPassword')}
               placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
               autoCapitalize="none"
@@ -660,7 +660,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               style={dynamicStyles.textInput}
               value={newPassword}
               onChangeText={setNewPassword}
-              placeholder="Yeni şifrenizi girin (min. 6 karakter)"
+              placeholder={t('settings.enterNewPassword')}
               placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
               autoCapitalize="none"
@@ -671,7 +671,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               style={dynamicStyles.textInput}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Yeni şifrenizi tekrar girin"
+              placeholder={t('settings.confirmNewPassword')}
               placeholderTextColor={currentTheme.colors.muted}
               secureTextEntry
               autoCapitalize="none"
@@ -709,7 +709,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}
