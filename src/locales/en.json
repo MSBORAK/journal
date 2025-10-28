@@ -337,6 +337,9 @@
     "addFirstGoal": "Add your first goal"
   },
   "achievements": {
+    "writing": "📝 Writing",
+    "tasks": "🎯 Tasks",
+    "health": "💪 Health",
     "achievements": "My Achievements",
     "unlocked": "Unlocked",
     "locked": "Locked",

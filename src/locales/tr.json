@@ -335,6 +335,9 @@
     "addFirstGoal": "İlk hedefini ekle"
   },
   "achievements": {
+    "writing": "📝 Yazma",
+    "tasks": "🎯 Görevler",
+    "health": "💪 Sağlık",
     "achievements": "Başarılarım",
     "unlocked": "Açıldı",
     "locked": "Kilitli",

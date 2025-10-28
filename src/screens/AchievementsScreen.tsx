@@ -98,9 +98,9 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
   const getCategoryLabel = (category: string) => {
     const labels = {
       streak: '🔥 Streak',
-      writing: t('welcome') === 'Welcome' ? '📝 Writing' : '📝 Yazma',
-      goals: t('welcome') === 'Welcome' ? '🎯 Tasks' : '🎯 Görevler',
-      mood: t('welcome') === 'Welcome' ? '💪 Health' : '💪 Sağlık',
+      writing: t('achievements.writing'),
+      goals: t('achievements.tasks'),
+      mood: t('achievements.health'),
     };
     return labels[category as keyof typeof labels] || category;
   };
@@ -507,7 +507,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
           {/* Unlocked Date */}
           {isUnlocked && (
             <Text style={dynamicStyles.progressText}>
-              {new Date(isUnlocked.unlockedAt).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR')}
+              {new Date(isUnlocked.unlockedAt).toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US')}
             </Text>
           )}
         </LinearGradient>
