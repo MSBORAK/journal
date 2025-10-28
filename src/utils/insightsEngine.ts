@@ -30,8 +30,8 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
   if (avgMood >= 4) {
     insights.push({
       type: 'mood',
-      title: 'Great Week! 😊',
-      description: `Your average mood in the last 7 days is ${avgMood.toFixed(1)}/5. You're doing great!`,
+      title: t('insights.greatWeek'),
+      description: t('insights.greatWeekDesc').replace('{avgMood}', avgMood.toFixed(1)),
       icon: '🎉',
       color: '#10b981',
       priority: 'high',
@@ -40,8 +40,8 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
   } else if (avgMood < 2.5) {
     insights.push({
       type: 'mood',
-      title: 'Tough Period 💙',
-      description: `The last few days have been a bit difficult. Take extra good care of yourself.`,
+      title: t('insights.toughPeriod'),
+      description: t('insights.toughPeriodDesc'),
       icon: '💙',
       color: '#3b82f6',
       priority: 'high',
@@ -57,8 +57,8 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
     if (secondHalf > firstHalf + 0.5) {
       insights.push({
         type: 'mood',
-        title: 'Rising Trend! 📈',
-        description: 'Your mood has been rising in recent days. Keep it up!',
+        title: t('insights.risingTrend'),
+        description: t('insights.risingTrendDesc'),
         icon: '📈',
         color: '#10b981',
         priority: 'medium'
@@ -66,8 +66,8 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
     } else if (secondHalf < firstHalf - 0.5) {
       insights.push({
         type: 'mood',
-        title: 'Pay Attention 💭',
-        description: 'Your mood has been declining recently. Would you like to think about why?',
+        title: t('insights.payAttention'),
+        description: t('insights.payAttentionDesc'),
         icon: '💭',
         color: '#f59e0b',
         priority: 'medium'
@@ -85,8 +85,8 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
   
   insights.push({
     type: 'pattern',
-    title: 'Your Happiest Day 🌟',
-    description: `You felt happiest on ${dayName} (${happiest.mood}/5)`,
+    title: t('insights.happiestDay'),
+    description: t('insights.happiestDayDesc').replace('{day}', dayName).replace('{mood}', happiest.mood.toString()),
     icon: '🌟',
     color: '#f59e0b',
     priority: 'low',
@@ -122,7 +122,7 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
   
   insights.push({
     type: 'habit',
-    title: 'Your Most Productive Hour ⏰',
+    title: t('insights.productiveHour'),
     description: `You usually write in the ${timeOfDay} (${mostActiveHour}:00)`,
     icon: '⏰',
     color: '#8b5cf6',
@@ -137,7 +137,7 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
   if (avgLength > 500) {
     insights.push({
       type: 'habit',
-      title: 'Detailed Writer! 📝',
+      title: t('insights.detailedWriter'),
       description: `You write an average of ${Math.round(avgLength)} characters. How much you share!`,
       icon: '📝',
       color: '#6366f1',
@@ -146,8 +146,8 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
   } else if (avgLength < 150) {
     insights.push({
       type: 'suggestion',
-      title: 'Open Up a Bit More 💭',
-      description: 'If you share more details, your insights will be richer',
+      title: t('insights.openUpMore'),
+      description: t('insights.openUpMoreDesc'),
       icon: '💭',
       color: '#3b82f6',
       priority: 'low'
@@ -172,8 +172,8 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
     if (weekendAvg > weekdayAvg + 0.5) {
       insights.push({
         type: 'pattern',
-        title: 'Weekend Happiness 🎉',
-        description: 'You are much happier on weekends. Pay attention to work-life balance!',
+        title: t('insights.weekendHappiness'),
+        description: t('insights.weekendHappinessDesc'),
         icon: '🎉',
         color: '#ec4899',
         priority: 'medium'
@@ -219,7 +219,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
     insights.push({
       type: 'streak',
       title: `${currentStreak} Day Streak! 🔥`,
-      description: 'Incredible discipline! Keep it up',
+      description: t('insights.streakIncredible'),
       icon: '🔥',
       color: '#ef4444',
       priority: 'high',
@@ -229,7 +229,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
     insights.push({
       type: 'streak',
       title: `${currentStreak} Days in a Row! ⭐`,
-      description: 'You\'re doing great! You can reach 7 days',
+      description: t('insights.streakDoingGreat'),
       icon: '⭐',
       color: '#f59e0b',
       priority: 'medium',
@@ -238,8 +238,8 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
   } else if (currentStreak === 0 && entries.length > 0) {
     insights.push({
       type: 'suggestion',
-      title: 'Start Again 💪',
-      description: 'Your streak is broken but it\'s okay. Start again today!',
+      title: t('insights.startAgain'),
+      description: t('insights.startAgainDesc'),
       icon: '💪',
       color: '#3b82f6',
       priority: 'medium'
@@ -273,7 +273,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
     insights.push({
       type: 'achievement',
       title: `Longest Streak: ${maxStreak} Days! 🏆`,
-      description: 'You can break this record again!',
+      description: t('insights.canBreakRecord'),
       icon: '🏆',
       color: '#f59e0b',
       priority: 'low',
@@ -315,7 +315,7 @@ export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
   if (topWords.length > 0) {
     insights.push({
       type: 'pattern',
-      title: 'Your Most Used Words 💬',
+      title: t('insights.mostUsedWords'),
       description: `You frequently use the words: ${topWords.slice(0, 3).join(', ')}`,
       icon: '💬',
       color: '#06b6d4',
@@ -334,8 +334,8 @@ export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
   if (positiveCount > negativeCount * 1.5) {
     insights.push({
       type: 'mood',
-      title: 'Positive Energy! ✨',
-      description: 'You use more positive words in your writings. Great!',
+      title: t('insights.positiveEnergy'),
+      description: t('insights.positiveEnergyDesc'),
       icon: '✨',
       color: '#10b981',
       priority: 'medium',
@@ -344,8 +344,8 @@ export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
   } else if (negativeCount > positiveCount * 1.5) {
     insights.push({
       type: 'suggestion',
-      title: 'Take Care of Yourself 💙',
-      description: 'Stressful words have increased recently. Take a breath.',
+      title: t('insights.takeCare'),
+      description: t('insights.takeCareDesc'),
       icon: '💙',
       color: '#3b82f6',
       priority: 'high',
@@ -366,8 +366,8 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] =>
   if (entries.length === 1) {
     insights.push({
       type: 'achievement',
-      title: 'Your First Diary! 🎉',
-      description: 'Congratulations! You\'ve started your journey',
+      title: t('insights.firstDiary'),
+      description: t('insights.firstDiaryDesc'),
       icon: '🎉',
       color: '#ec4899',
       priority: 'high'
@@ -399,7 +399,7 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] =>
   if (totalWords > 10000) {
     insights.push({
       type: 'achievement',
-      title: 'Word Master! 📚',
+      title: t('insights.wordMaster'),
       description: `You wrote ${totalWords.toLocaleString('en-US')} words! This would be a book`,
       icon: '📚',
       color: '#8b5cf6',
@@ -439,8 +439,8 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
   if (entries.length === 0) {
     suggestions.push({
       type: 'suggestion',
-      title: 'Write Your First Diary! 🌟',
-      description: 'Create your first diary to start your journey',
+      title: t('insights.writeFirstDiary'),
+      description: t('insights.writeFirstDiaryDesc'),
       icon: '🌟',
       color: '#3b82f6',
       priority: 'high'
@@ -457,7 +457,7 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
   if (daysSinceLastEntry >= 3) {
     suggestions.push({
       type: 'suggestion',
-      title: 'We Miss You! 💙',
+      title: t('insights.missYou'),
       description: `You haven't written for ${daysSinceLastEntry} days. Come back!`,
       icon: '💙',
       color: '#3b82f6',
@@ -471,8 +471,8 @@ export const generateSuggestions = (entries: DiaryEntry[]): Insight[] => {
     if (last7Days.length === 7) {
       suggestions.push({
         type: 'suggestion',
-        title: 'Regular Writing Goal 🎯',
-        description: 'Try writing every day, reach your 30-day goal!',
+        title: t('insights.regularGoal'),
+        description: t('insights.regularGoalDesc'),
         icon: '🎯',
         color: '#10b981',
         priority: 'medium'
