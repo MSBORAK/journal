@@ -101,7 +101,6 @@
     "personalityCard": "Kişilik Kartım",
     "achievements": "Başarılarım",
     "personalInsights": "Kişisel İçgörülerin",
-    "expressYourself": "Kendini İfade Et",
     "today": "Bugün",
     "yesterday": "Dün",
     "thisWeek": "Bu Hafta",
@@ -150,49 +149,7 @@
     "noQuestionsAnswered": "Bu günlük girişinde herhangi bir soru cevaplanmamış veya serbest yazım yapılmamış.",
     "howAreYouFeeling": "Nasıl hissediyorsun?",
     "whatHappenedToday": "Bugün ne oldu?",
-    "questions": {
-      "happiness": {
-        "title": "✨ Bugün seni gülümseten an neydi?",
-        "placeholder": "Bugün kalbini ısıtan o özel anı anlat..."
-      },
-      "gratitude": {
-        "title": "🌟 Bugün için şükrettiğin 3 şey?",
-        "placeholder": "Hayatındaki güzellikleri hatırla ve yaz..."
-      },
-      "accomplishment": {
-        "title": "🎉 Bugün gurur duyduğun başarın ne?",
-        "placeholder": "Küçük de olsa, kendini kutla! Ne yaptın?"
-      },
-      "lesson": {
-        "title": "💎 Bugün keşfettiğin güzel bir şey?",
-        "placeholder": "Yeni öğrendiğin, seni heyecanlandıran neydi?"
-      },
-      "communication": {
-        "title": "💝 Bugün kimle güzel vakit geçirdin?",
-        "placeholder": "Bugün paylaştığın sevgi dolu anları yaz..."
-      },
-      "energy": {
-        "title": "⚡ Bugün seni canlı hissettiren şey?",
-        "placeholder": "Sana güç veren, canlandıran anlar..."
-      },
-      "growth": {
-        "title": "🌱 Bugün kendine verdiğin hediye ne?",
-        "placeholder": "Kendine nasıl değer verdin bugün?"
-      },
-      "emotion": {
-        "title": "🎨 Bugün hayatına renk katan şey ne?",
-        "placeholder": "Seni mutlu eden renkli anları paylaş..."
-      },
-      "tomorrow": {
-        "title": "🚀 Yarın için heyecanlandığın şey?",
-        "placeholder": "Yarına umutla bakmak için bir neden..."
-      },
-      "challenge": {
-        "title": "💪 Bugün kendini güçlü hissettiğin an?",
-        "placeholder": "Bugün ne zaman \"ben yapabilirim\" dedin?"
-      }
-    },
-    "freeWriting": "Serbest Yazma",
+    "freeWriting": "Serbest Yazı",
     "freeWritingDescription": "İstersen buraya da kendi düşüncelerini, hislerini yazabilirsin...",
     "freeWritingPlaceholder": "Bugün neler yaşadın? Nasıl hissettin? Ne düşünüyorsun? Buraya her şeyi yazabilirsin...",
     "tellAboutYourDay": "Bugününü Anlat",
@@ -202,11 +159,9 @@
     "forwardButton": "İleri",
     "whatAreYouGratefulFor": "Neye şükrediyorsun?",
     "whatDidYouLearn": "Ne öğrendin?",
-    "freeWriting": "Serbest Yazı",
     "saveDiary": "Günlüğü Kaydet",
     "diarySaved": "Günlük kaydedildi!",
     "questionsAnswered": "soru",
-    "questions": "soru",
     "noDiaryEntries": "Henüz günlük yazmamışsın",
     "startWriting": "Yazmaya başla"
   },
@@ -284,7 +239,7 @@
     "reminderTitle": "Hatırlatıcı Başlığı",
     "reminderDescription": "Açıklama",
     "reminderDate": "Tarih",
-    "reminderTime": "Saat",
+    "reminderTime": "Hatırlatıcı zamanı!",
     "category": "Kategori",
     "priority": "Öncelik",
     "repeat": "Tekrar",
@@ -311,7 +266,6 @@
     "monthly": "Aylık",
     "forToday": "Bugün İçin",
     "futureDate": "Gelecek Tarih",
-    "reminderTime": "Hatırlatıcı zamanı!",
     "selectReminderDate": "Hatırlatıcı tarihini seç",
     "examplePlaceholder": "Örn: İlaç iç, doktor randevusu, doğum günü...",
     "noReminders": "Henüz hatırlatıcı eklememişsin",
@@ -321,12 +275,9 @@
     "mustSelectDate": "Gelecek tarih için bir tarih seçmelisiniz",
     "notificationPermission": "Bildirim İzni",
     "notificationPermissionRequired": "Hatırlatıcılar için bildirim izni gerekli",
-    "reminderTime": "Hatırlatıcı zamanı!",
     "reminderNotSaved": "Hatırlatıcı kaydedilemedi",
     "deleteReminder": "Hatırlatıcıyı Sil",
-    "confirmDeleteReminder": "Bu hatırlatıcıyı silmek istediğinizden emin misiniz?",
-    "examplePlaceholder": "Örn: İlaç iç, doktor randevusu, doğum günü...",
-    "selectReminderDate": "Hatırlatıcı tarihini seç"
+    "confirmDeleteReminder": "Bu hatırlatıcıyı silmek istediğinizden emin misiniz?"
   },
   "health": {
     "health": "Sağlık",
@@ -334,7 +285,7 @@
     "dailyHealthTracking": "Günlük Sağlık Takibi",
     "recordHealthStatus": "Bugünkü sağlık durumunu kaydet ve wellness skorunu artır",
     "waterIntake": "Su İçme",
-    "exerciseMinutes": "Egzersiz (Dakika)",
+    "exerciseMinutes": "Egzersiz Dakikaları",
     "stressLevel": "Stres Seviyesi",
     "energyLevel": "Enerji Seviyesi",
     "wellnessSaved": "💚 Kaydedildi!",
@@ -343,9 +294,7 @@
     "wellnessErrorDesc": "Veriler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
     "healthScore": "Sağlık Puanı",
     "waterGlasses": "Su Bardakları",
-    "exerciseMinutes": "Egzersiz Dakikaları",
     "sleepHours": "Uyku Saatleri",
-    "stressLevel": "Stres Seviyesi",
     "mood": "Ruh Hali",
     "energy": "Enerji",
     "focus": "Odaklanma",
@@ -450,7 +399,6 @@
     "sampleChart": "Örnek Grafik:",
     "moodTrendChart": "Mood Trend Grafiği",
     "hundredDayLegend": "100 Gün Efsanesi",
-    "completedCheck": "Tamamlandı ✅",
     "diariesLabel": "günlük",
     "locale": "tr-TR"
   },
@@ -541,19 +489,18 @@
   "settings": {
     "settings": "Ayarlar",
     "accountSettings": "Hesap Ayarları",
-    "notificationSettings": "Bildirim Ayarları",
+    "notificationSettings": "Bildirimler",
     "themeSettings": "Tema Ayarları",
     "languageSettings": "Dil Ayarları",
     "dataManagement": "Veri Yönetimi",
-    "privacySecurity": "Gizlilik ve Güvenlik",
-    "helpGuide": "Yardım ve Kılavuz",
+    "privacySecurity": "Gizlilik & Güvenlik",
+    "helpGuide": "Yardım & Kılavuz",
     "appSettings": "Uygulama Ayarları",
     "profile": "Profil",
     "changeEmail": "E-posta Değiştir",
     "changePassword": "Şifre Değiştir",
     "logout": "Çıkış Yap",
     "deleteAccount": "Hesap Sil",
-    "accountSettings": "Hesap Ayarları",
     "profileInformation": "Profil Bilgileri",
     "accountSecurity": "Hesap Güvenliği",
     "accountOperations": "Hesap İşlemleri",
@@ -627,15 +574,12 @@
     "currentThemeValue": "Şu anki tema: {name}",
     "soundEffectsOn": "Ses efektleri açık",
     "soundEffectsOff": "Ses efektleri kapalı",
-    "notificationSettings": "Bildirimler",
     "notificationSettingsDesc": "Günlük hatırlatıcılar ve bildirim ayarları",
     "myAchievements": "Başarılarım",
     "badgesAndAchievements": "Rozetler ve başarılarım",
     "accountSettingsDesc": "Profil, e-posta ve şifre ayarları",
     "changeAppLanguage": "Uygulama dilini değiştir",
-    "appSettings": "Uygulama Ayarları",
     "otherAppPreferences": "Diğer uygulama tercihleri",
-    "settings": "Ayarlar",
     "appVersion": "Günlük v1.0.0",
     "chooseTheme": "Tema Seç",
     "customizeAppearance": "Uygulamanızın görünümünü kişiselleştirin",
@@ -652,14 +596,13 @@
     "language": "Dil",
     "turkish": "Türkçe",
     "english": "English",
-    "dataBackup": "Veri Yedekleme",
+    "dataBackup": "Veri & Yedekleme",
     "exportData": "Veri Dışa Aktar",
     "importData": "Veri İçe Aktar",
     "cloudBackup": "Bulut Yedekleme",
     "restoreBackup": "Yedekten Geri Yükle",
     "clearAllData": "Tüm Verileri Temizle",
     "migrateToCloud": "Verileri Cloud'a Taşı",
-    "privacySecurity": "Gizlilik & Güvenlik",
     "privacySecurityInfo": "Gizliliğiniz ve güvenliğiniz bizim için çok önemli. Verilerinizin nasıl korunduğunu",
     "andUsedHere": "ve kullanıldığını buradan öğrenebilirsiniz.",
     "secure": "✅ Güvenli",
@@ -681,7 +624,6 @@
     "version": "Sürüm",
     "changelog": "Değişiklik Günlüğü",
     "help": "Yardım",
-    "helpGuide": "Yardım & Kılavuz",
     "startWithQuickSteps": "Kısa adımlarla başla, SSS ile hızlı cevapları bul.",
     "howToWriteDiary": "Günlük nasıl yazılır?",
     "diaryInstructions": "Ana sayfadaki \"Bugün Yaz\" butonuna bas, hislerini ve düşüncelerini yaz.",
@@ -718,7 +660,6 @@
     "feedback": "Geri Bildirim",
     "rateApp": "Uygulamayı Değerlendir",
     "shareApp": "Uygulamayı Paylaş",
-    "dataBackup": "Veri & Yedekleme",
     "backupAndManageData": "Verilerinizi güvenli bir şekilde yedekleyin ve yönetin. Tüm günlük yazılarınız,",
     "profileAndSettingsControlled": "profil bilgileriniz ve ayarlarınız buradan kontrol edilebilir.",
     "backupOperations": "Yedekleme İşlemleri",
@@ -733,7 +674,6 @@
     "dataRestore": "Veri Geri Yükleme",
     "restoreBackedUpData": "Yedeklenen verilerinizi cihazınıza geri yükleyin.",
     "restoreButton": "📥 Geri Yükle",
-    "dataManagement": "Veri Yönetimi",
     "downloadMyDataTitle": "Verilerimi İndir",
     "downloadPersonalDataJson": "Tüm kişisel verilerinizi JSON formatında indirin ve başka bir yerde saklayın.",
     "downloadingData": "İndiriliyor...",
@@ -790,7 +730,6 @@
     "viewTechnicalDetails": "Teknik detaylar ve sistem gereksinimlerini görüntüleyin.",
     "system": "Sistem",
     "ratingShare": "Değerlendirme & Paylaşım",
-    "version": "Sürüm",
     "rateUs": "App Store'da bizi değerlendirin!",
     "shareWithFriends": "Uygulamayı arkadaşlarınızla paylaşın!",
     "rate": "⭐ Değerlendir",
@@ -801,8 +740,6 @@
     "emailContact": "Bize e-posta gönderin",
     "date": "Tarih",
     "allRightsReserved": "Tüm hakları saklıdır.",
-    "changelog": "Değişiklik Günlüğü",
-    "about": "Hakkında",
     "ratingShareSection": "Değerlendirme & Paylaşım",
     "rateAppDescription": "App Store'da 5 yıldız vererek bize destek olun!",
     "rateAppButton": "⭐ Değerlendir",
@@ -812,8 +749,14 @@
     "developerSection": "Geliştirici"
   },
   "onboarding": {
-    "continue": "Devam Et →",
-    "letsStart": "Başlayalım!"
+    "welcome": "Hoş Geldin",
+    "getStarted": "Başlayalım",
+    "next": "İleri",
+    "skip": "Geç",
+    "finish": "Bitir",
+    "selectTheme": "Tema Seç",
+    "selectLanguage": "Dil Seç",
+    "readyToStart": "Başlamaya Hazır!"
   },
   "motivation": {
     "dailyReflection": "Günlük Yansıma",
@@ -974,15 +917,5 @@
     "breakTime": "Mola Süresi",
     "sessionsCompleted": "Tamamlanan Oturum",
     "totalFocusTime": "Toplam Odaklanma Süresi"
-  },
-  "onboarding": {
-    "welcome": "Hoş Geldin",
-    "getStarted": "Başlayalım",
-    "next": "İleri",
-    "skip": "Geç",
-    "finish": "Bitir",
-    "selectTheme": "Tema Seç",
-    "selectLanguage": "Dil Seç",
-    "readyToStart": "Başlamaya Hazır!"
   }
 }
