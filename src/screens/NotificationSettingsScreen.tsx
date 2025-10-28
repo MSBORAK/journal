@@ -131,8 +131,8 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       if (!settings.enabled) {
         await updateSetting('enabled', true);
         showAlert(
-          t('welcome') === 'Welcome' ? '🔔 Notifications Enabled' : '🔔 Bildirimler Açıldı',
-          'Uygulama bildirim ayarları etkinleştirildi. Artık bildirimler alabileceksin!',
+          t('settings.notificationsEnabled'),
+          t('settings.notificationsEnabledDesc'),
           'success'
         );
         return;
@@ -142,18 +142,14 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       const hasPermission = await requestNotificationPermissions();
       if (!hasPermission) {
         showAlert(
-          t('welcome') === 'Welcome' ? '⚠️ Permission Required' : '⚠️ İzin Gerekli',
-          t('welcome') === 'Welcome' 
-            ? 'System permission required for notifications. Please enable notification permission from settings.'
-            : 'Bildirimler için sistem izni gerekli. Lütfen ayarlardan bildirim iznini etkinleştirin.',
+          t('settings.permissionRequired'),
+          t('settings.systemPermissionRequiredDesc'),
           'warning'
         );
       } else {
         showAlert(
-          t('welcome') === 'Welcome' ? '🎉 Success!' : '🎉 Başarılı!',
-          t('welcome') === 'Welcome' 
-            ? 'Notification permission granted successfully! You can now receive daily reminders and motivation messages.'
-            : 'Bildirim izni başarıyla verildi! Artık günlük hatırlatıcılar ve motivasyon mesajları alabileceksin.',
+          t('settings.success'),
+          t('settings.permissionGrantedDesc'),
           'success'
         );
         await checkPermission();
@@ -387,7 +383,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? '🔔 Notifications' : '🔔 Bildirimler'}</Text>
+        <Text style={dynamicStyles.headerTitle}>🔔 {t('settings.notifications')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -395,9 +391,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         {/* Permission Card */}
           <View style={dynamicStyles.permissionCard}>
           <Text style={dynamicStyles.permissionIcon}>🔔</Text>
-          <Text style={dynamicStyles.permissionTitle}>{t('welcome') === 'Welcome' ? 'Notification Permission' : 'Bildirim İzni'}</Text>
+          <Text style={dynamicStyles.permissionTitle}>{t('settings.notificationPermission')}</Text>
           <Text style={dynamicStyles.permissionDescription}>
-            {t('welcome') === 'Welcome' ? 'Notification permission is required for daily reminders and motivation messages' : 'Günlük hatırlatıcılar ve motivasyon mesajları için bildirim izni gerekli'}
+            {t('settings.notificationPermissionRequired')}
           </Text>
           <View style={dynamicStyles.statusIndicator}>
             <View style={[
@@ -406,10 +402,10 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
             ]} />
             <Text style={dynamicStyles.statusText}>
               {permissionGranted 
-                ? (t('welcome') === 'Welcome' ? 'Permission Granted' : 'İzin Verildi')
+                ? t('settings.permissionGranted')
                 : !systemPermissionGranted 
-                  ? (t('welcome') === 'Welcome' ? 'System Permission Required' : 'Sistem İzni Gerekli')
-                  : (t('welcome') === 'Welcome' ? 'App Settings Disabled' : 'Uygulama Ayarları Kapalı')
+                  ? t('settings.systemPermissionRequired')
+                  : t('settings.appSettingsDisabled')
               }
             </Text>
           </View>
@@ -418,21 +414,21 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
             onPress={handlePermissionRequest}
           >
             <Text style={dynamicStyles.actionButtonText}>
-              {!settings.enabled ? (t('welcome') === 'Welcome' ? 'Enable Notifications' : 'Bildirimleri Aç') : (t('welcome') === 'Welcome' ? 'Grant Permission' : 'İzin Ver')}
+              {!settings.enabled ? t('settings.enableNotifications') : t('settings.grantPermission')}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Genel Ayarlar */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? '⚙️ General Settings' : '⚙️ Genel Ayarlar'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.generalSettings')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Notifications' : 'Bildirimler'}</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('settings.notifications')}</Text>
                 <Text style={dynamicStyles.settingDescription}>
-                  {t('welcome') === 'Welcome' ? 'Turn all notifications on/off' : 'Tüm bildirimleri aç/kapat'}
+                  {t('settings.turnAllNotifications')}
                 </Text>
               </View>
               <Switch
