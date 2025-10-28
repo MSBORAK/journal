@@ -158,14 +158,14 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               dynamicStyles.habitDescription,
               habit.todayCompleted && { color: currentTheme.colors.background, opacity: 0.9 }
             ]}>
-              {habit.description === 'Günde 8 bardak su iç' ? (t('welcome') === 'Welcome' ? 'Drink 8 glasses of water daily' : 'Günde 8 bardak su iç') :
-               habit.description === 'Günde 30 dakika egzersiz' ? (t('welcome') === 'Welcome' ? 'Exercise 30 minutes daily' : 'Günde 30 dakika egzersiz') :
-               habit.description === 'Günde 20 dakika kitap oku' ? (t('welcome') === 'Welcome' ? 'Read for 20 minutes daily' : 'Günde 20 dakika kitap oku') :
-               habit.description === 'Günde 10 dakika meditasyon' ? (t('welcome') === 'Welcome' ? '10 minutes of meditation daily' : 'Günde 10 dakika meditasyon') :
-               habit.description === 'Her gece 23:00\'da yat' ? (t('welcome') === 'Welcome' ? 'Sleep at 11 PM every night' : 'Her gece 23:00\'da yat') :
-               habit.description === 'Günde 3 öğün sağlıklı beslen' ? (t('welcome') === 'Welcome' ? 'Eat 3 healthy meals daily' : 'Günde 3 öğün sağlıklı beslen') :
-               habit.description === 'Günde 1 yeni şey öğren' ? (t('welcome') === 'Welcome' ? 'Learn 1 new thing daily' : 'Günde 1 yeni şey öğren') :
-               habit.description === 'Günde 2 saat telefon kullan' ? (t('welcome') === 'Welcome' ? 'Use phone 2 hours daily' : 'Günde 2 saat telefon kullan') :
+              {habit.description === 'Günde 8 bardak su iç' ? t('statistics.drink8Glasses') :
+               habit.description === 'Günde 30 dakika egzersiz' ? t('statistics.exercise30Minutes') :
+               habit.description === 'Günde 20 dakika kitap oku' ? t('statistics.read20Minutes') :
+               habit.description === 'Günde 10 dakika meditasyon' ? t('statistics.meditation10Minutes') :
+               habit.description === 'Her gece 23:00\'da yat' ? t('statistics.sleepAt11PM') :
+               habit.description === 'Günde 3 öğün sağlıklı beslen' ? t('statistics.eat3HealthyMeals') :
+               habit.description === 'Günde 1 yeni şey öğren' ? t('statistics.learn1NewThing') :
+               habit.description === 'Günde 2 saat telefon kullan' ? t('statistics.usePhone2Hours') :
                habit.description}
             </Text>
             
@@ -185,10 +185,10 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                 dynamicStyles.habitProgressText,
                 habit.todayCompleted && { color: currentTheme.colors.background }
               ]}>
-                {habit.todayValue} / {habit.target} {habit.unit === 'glasses' ? (t('welcome') === 'Welcome' ? 'glasses' : 'bardak') : 
-                 habit.unit === 'minutes' ? (t('welcome') === 'Welcome' ? 'min' : 'dk') : 
-                 habit.unit === 'times' ? (t('welcome') === 'Welcome' ? 'times' : 'kez') : 
-                 habit.unit === 'hours' ? (t('welcome') === 'Welcome' ? 'hours' : 'saat') : ''}
+                {habit.todayValue} / {habit.target} {habit.unit === 'glasses' ? t('statistics.glasses') : 
+                 habit.unit === 'minutes' ? t('statistics.min') : 
+                 habit.unit === 'times' ? t('statistics.times') : 
+                 habit.unit === 'hours' ? t('statistics.hours') : ''}
               </Text>
             </View>
 
@@ -198,7 +198,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                   dynamicStyles.habitStreakText,
                   habit.todayCompleted && { color: currentTheme.colors.background }
                 ]}>
-                  🔥 {streak.currentStreak} {t('welcome') === 'Welcome' ? 'day streak' : 'gün seri'}
+                  🔥 {streak.currentStreak} {t('statistics.dayStreak')}
                 </Text>
               </View>
             )}
@@ -222,19 +222,19 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             colors={[currentTheme.colors.primary + '20', currentTheme.colors.accent + '15']}
             style={dynamicStyles.progressGradient}
           >
-            <Text style={dynamicStyles.progressCardTitle}>📊 {t('welcome') === 'Welcome' ? 'Weekly Summary' : 'Haftalık Özet'}</Text>
+            <Text style={dynamicStyles.progressCardTitle}>📊 {t('statistics.weeklySummary')}</Text>
             <View style={dynamicStyles.progressStats}>
               <View style={dynamicStyles.progressStat}>
                 <Text style={dynamicStyles.progressStatNumber}>{weeklyStats.totalHabits}</Text>
-                <Text style={dynamicStyles.progressStatLabel}>{t('welcome') === 'Welcome' ? 'Active Habits' : 'Aktif Alışkanlık'}</Text>
+                <Text style={dynamicStyles.progressStatLabel}>{t('statistics.activeHabits')}</Text>
               </View>
               <View style={dynamicStyles.progressStat}>
                 <Text style={dynamicStyles.progressStatNumber}>{weeklyStats.totalCompletions}</Text>
-                <Text style={dynamicStyles.progressStatLabel}>{t('welcome') === 'Welcome' ? 'Completed' : 'Tamamlanan'}</Text>
+                <Text style={dynamicStyles.progressStatLabel}>{t('statistics.completed')}</Text>
               </View>
               <View style={dynamicStyles.progressStat}>
                 <Text style={dynamicStyles.progressStatNumber}>{Math.round(weeklyStats.completionRate)}%</Text>
-                <Text style={dynamicStyles.progressStatLabel}>{t('welcome') === 'Welcome' ? 'Success Rate' : 'Başarı Oranı'}</Text>
+                <Text style={dynamicStyles.progressStatLabel}>{t('statistics.successRate')}</Text>
               </View>
             </View>
           </LinearGradient>
@@ -246,7 +246,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             colors={[currentTheme.colors.accent + '20', currentTheme.colors.primary + '15']}
             style={dynamicStyles.progressGradient}
           >
-            <Text style={dynamicStyles.progressCardTitle}>🔥 {t('welcome') === 'Welcome' ? 'Longest Streaks' : 'En Uzun Seriler'}</Text>
+            <Text style={dynamicStyles.progressCardTitle}>🔥 {t('statistics.longestStreaks')}</Text>
             {streaks
               .sort((a, b) => b.currentStreak - a.currentStreak)
               .slice(0, 3)
@@ -257,17 +257,17 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     <Text style={dynamicStyles.streakIcon}>{habit.icon}</Text>
                     <View style={dynamicStyles.streakContent}>
                       <Text style={dynamicStyles.streakTitle}>
-                        {habit.title === 'Su İç' ? (t('welcome') === 'Welcome' ? 'Drink Water' : 'Su İç') :
-                         habit.title === 'Egzersiz Yap' ? (t('welcome') === 'Welcome' ? 'Exercise' : 'Egzersiz Yap') :
-                         habit.title === 'Kitap Oku' ? (t('welcome') === 'Welcome' ? 'Read Books' : 'Kitap Oku') :
-                         habit.title === 'Meditasyon Yap' ? (t('welcome') === 'Welcome' ? 'Meditation' : 'Meditasyon Yap') :
-                         habit.title === 'Erken Yat' ? (t('welcome') === 'Welcome' ? 'Early Sleep' : 'Erken Yat') :
-                         habit.title === 'Sağlıklı Beslen' ? (t('welcome') === 'Welcome' ? 'Healthy Eating' : 'Sağlıklı Beslen') :
-                         habit.title === 'Yeni Şey Öğren' ? (t('welcome') === 'Welcome' ? 'Learn New Things' : 'Yeni Şey Öğren') :
-                         habit.title === 'Telefon Kullanımı' ? (t('welcome') === 'Welcome' ? 'Phone Usage' : 'Telefon Kullanımı') :
+                        {habit.title === 'Su İç' ? t('statistics.drinkWater') :
+                         habit.title === 'Egzersiz Yap' ? t('statistics.exercise') :
+                         habit.title === 'Kitap Oku' ? t('statistics.readBooks') :
+                         habit.title === 'Meditasyon Yap' ? t('statistics.meditation') :
+                         habit.title === 'Erken Yat' ? t('statistics.earlySleep') :
+                         habit.title === 'Sağlıklı Beslen' ? t('statistics.healthyEating') :
+                         habit.title === 'Yeni Şey Öğren' ? t('statistics.learnNewThings') :
+                         habit.title === 'Telefon Kullanımı' ? t('statistics.phoneUsage') :
                          habit.title}
                       </Text>
-                      <Text style={dynamicStyles.streakNumber}>{streak.currentStreak} {t('welcome') === 'Welcome' ? 'days' : 'gün'}</Text>
+                      <Text style={dynamicStyles.streakNumber}>{streak.currentStreak} {t('statistics.days')}</Text>
                     </View>
                   </View>
                 ) : null;
@@ -1746,22 +1746,22 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
   const milestones = [
     { 
       icon: '✍️', 
-      label: t('welcome') === 'Welcome' ? 'First Diary' : 'İlk Günlük', 
-      status: entries.length > 0 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : (t('welcome') === 'Welcome' ? 'Haven\'t started yet' : 'Henüz başlamadın'),
+      label: t('statistics.firstDiary'), 
+      status: entries.length > 0 ? t('statistics.completedCheck') : t('statistics.havenStartedYet'),
       completed: entries.length > 0,
       color: '#4ade80'
     },
     { 
       icon: '🔥', 
-      label: t('welcome') === 'Welcome' ? '7 Day Streak' : '7 Gün Seri', 
-      status: stats.currentStreak >= 7 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : `${stats.currentStreak}/7 ${t('welcome') === 'Welcome' ? 'days' : 'gün'}`,
+      label: t('statistics.sevenDayStreak'), 
+      status: stats.currentStreak >= 7 ? t('statistics.completedCheck') : `${stats.currentStreak}/7 ${t('statistics.days')}`,
       completed: stats.currentStreak >= 7,
       color: '#f59e0b'
     },
     { 
       icon: '🎯', 
-      label: t('welcome') === 'Welcome' ? '30 Day Goal' : '30 Gün Hedefi', 
-      status: stats.totalEntries >= 30 ? (t('welcome') === 'Welcome' ? 'Completed ✅' : 'Tamamlandı ✅') : `${stats.totalEntries}/30 ${t('welcome') === 'Welcome' ? 'diaries' : 'günlük'}`,
+      label: t('statistics.thirtyDayGoal'), 
+      status: stats.totalEntries >= 30 ? t('statistics.completedCheck') : `${stats.totalEntries}/30 ${t('statistics.diaries')}`,
       completed: stats.totalEntries >= 30,
       color: '#8b5cf6'
     },
