@@ -230,6 +230,18 @@
     "times": "kez"
   },
   "statistics": {
+    "drinkWater": "Su İç",
+    "exercise": "Egzersiz Yap",
+    "readBooks": "Kitap Oku",
+    "meditation": "Meditasyon Yap",
+    "earlySleep": "Erken Yat",
+    "healthyEating": "Sağlıklı Beslen",
+    "learnNewThings": "Yeni Şey Öğren",
+    "phoneUsage": "Telefon Kullanımı",
+    "drink8Glasses": "Günde 8 bardak su iç",
+    "exercise30Minutes": "Günde 30 dakika egzersiz",
+    "read20Minutes": "Günde 20 dakika kitap oku",
+    "meditation10Minutes": "Günde 10 dakika meditasyon",
     "statistics": "İstatistikler",
     "streak": "Seri",
     "totalEntries": "Toplam Giriş",

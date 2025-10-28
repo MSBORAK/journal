@@ -144,14 +144,14 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               dynamicStyles.habitTitle,
               habit.todayCompleted && { color: currentTheme.colors.background }
             ]}>
-              {habit.title === 'Su İç' ? (t('welcome') === 'Welcome' ? 'Drink Water' : 'Su İç') :
-               habit.title === 'Egzersiz Yap' ? (t('welcome') === 'Welcome' ? 'Exercise' : 'Egzersiz Yap') :
-               habit.title === 'Kitap Oku' ? (t('welcome') === 'Welcome' ? 'Read Books' : 'Kitap Oku') :
-               habit.title === 'Meditasyon Yap' ? (t('welcome') === 'Welcome' ? 'Meditation' : 'Meditasyon Yap') :
-               habit.title === 'Erken Yat' ? (t('welcome') === 'Welcome' ? 'Early Sleep' : 'Erken Yat') :
-               habit.title === 'Sağlıklı Beslen' ? (t('welcome') === 'Welcome' ? 'Healthy Eating' : 'Sağlıklı Beslen') :
-               habit.title === 'Yeni Şey Öğren' ? (t('welcome') === 'Welcome' ? 'Learn New Things' : 'Yeni Şey Öğren') :
-               habit.title === 'Telefon Kullanımı' ? (t('welcome') === 'Welcome' ? 'Phone Usage' : 'Telefon Kullanımı') :
+              {habit.title === 'Su İç' ? t('statistics.drinkWater') :
+               habit.title === 'Egzersiz Yap' ? t('statistics.exercise') :
+               habit.title === 'Kitap Oku' ? t('statistics.readBooks') :
+               habit.title === 'Meditasyon Yap' ? t('statistics.meditation') :
+               habit.title === 'Erken Yat' ? t('statistics.earlySleep') :
+               habit.title === 'Sağlıklı Beslen' ? t('statistics.healthyEating') :
+               habit.title === 'Yeni Şey Öğren' ? t('statistics.learnNewThings') :
+               habit.title === 'Telefon Kullanımı' ? t('statistics.phoneUsage') :
                habit.title}
             </Text>
             <Text style={[

@@ -230,6 +230,18 @@
     "times": "times"
   },
   "statistics": {
+    "drinkWater": "Drink Water",
+    "exercise": "Exercise",
+    "readBooks": "Read Books",
+    "meditation": "Meditation",
+    "earlySleep": "Early Sleep",
+    "healthyEating": "Healthy Eating",
+    "learnNewThings": "Learn New Things",
+    "phoneUsage": "Phone Usage",
+    "drink8Glasses": "Drink 8 glasses of water daily",
+    "exercise30Minutes": "Exercise 30 minutes daily",
+    "read20Minutes": "Read for 20 minutes daily",
+    "meditation10Minutes": "10 minutes of meditation daily",
     "statistics": "Statistics",
     "streak": "Streak",
     "totalEntries": "Total Entries",
