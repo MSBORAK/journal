@@ -184,10 +184,8 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
 
   const handleDeleteAccount = () => {
     showAlert(
-      t('welcome') === 'Welcome' ? '⚠️ Delete Account' : '⚠️ Hesap Silme',
-      t('welcome') === 'Welcome' 
-        ? 'This action CANNOT be undone!\n\nData to be deleted:\n• All diary entries\n• Profile information\n• Statistics and insights\n• Usage history\n\nAre you sure?'
-        : 'Bu işlem GERİ ALINAMAZ!\n\nSilinecek veriler:\n• Tüm günlük yazıları\n• Profil bilgileri\n• İstatistikler ve içgörüler\n• Kullanım geçmişi\n\nEmin misiniz?',
+      `⚠️ ${t('settings.deleteAccount')}`,
+      `${t('settings.deleteAccountWarning')}\n\n${t('settings.dataToBeDeleted')}\n• ${t('settings.allDiaryEntries')}\n• ${t('settings.profileInformationData')}\n• ${t('settings.statisticsAndInsights')}\n• ${t('settings.usageHistory')}\n\n${t('settings.areYouSure')}`,
       'error'
     );
   };
