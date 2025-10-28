@@ -672,7 +672,18 @@
     "developerContact": "Developer & Contact",
     "developerInfo": "MSESOFT\n© 2025",
     "websiteLink": "Visit our website",
-    "emailContact": "Send us an email"
+    "emailContact": "Send us an email",
+    "date": "Date",
+    "allRightsReserved": "All rights reserved.",
+    "changelog": "Changelog",
+    "about": "About",
+    "ratingShareSection": "Rating & Sharing",
+    "rateAppDescription": "App Store'da 5 yıldız vererek bize destek olun!",
+    "rateAppButton": "⭐ Değerlendir",
+    "shareAppSection": "Arkadaşlarla Paylaş",
+    "shareAppDescription": "Uygulamayı arkadaşlarınızla paylaşın.",
+    "shareAppButton": "📤 Paylaş",
+    "developerSection": "Developer"
   },
   "onboarding": {
     "continue": "Continue →",

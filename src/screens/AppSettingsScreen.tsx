@@ -242,7 +242,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'App' : 'Uygulama'}</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('settings.app')}</Text>
       </View>
 
       <ScrollView 
@@ -253,7 +253,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            📱 {t('welcome') === 'Welcome' ? 'Manage application information and support resources from here.' : 'Uygulama bilgilerini ve destek kaynaklarını buradan yönetin.'}
+            📱 {t('settings.manageAppInfo')}
           </Text>
           <View style={dynamicStyles.versionBadge}>
             <Text style={dynamicStyles.versionBadgeText}>v1.0.0</Text>
@@ -264,24 +264,24 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
         {/* Uygulama Bilgileri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Application Information' : 'Uygulama Bilgileri'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.applicationInformation')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="information-circle" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'About' : 'Hakkında'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.about')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'View detailed information about the application.' : 'Uygulama hakkında detaylı bilgileri görüntüleyin.'}
+              {t('settings.viewAppDetails')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showAbout}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>ℹ️ {t('welcome') === 'Welcome' ? 'Information' : 'Bilgiler'}</Text>
+              <Text style={dynamicStyles.actionButtonText}>ℹ️ {t('settings.information')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -290,17 +290,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="document-text" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Changelog' : 'Değişiklik Günlüğü'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.changelog')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'View app update history and new features.' : 'Uygulamanın güncelleme geçmişini ve yeni özelliklerini görün.'}
+              {t('settings.viewUpdateHistory')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showChangelog}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>📝 {t('welcome') === 'Welcome' ? 'Diary' : 'Günlük'}</Text>
+              <Text style={dynamicStyles.actionButtonText}>📝 {t('settings.diary')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -309,17 +309,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="settings" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'System Information' : 'Sistem Bilgileri'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.systemInfoTitle')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'View technical details and system requirements.' : 'Teknik detaylar ve sistem gereksinimlerini görüntüleyin.'}
+              {t('settings.viewTechnicalDetails')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showSystemInfo}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>🔧 {t('welcome') === 'Welcome' ? 'System' : 'Sistem'}</Text>
+              <Text style={dynamicStyles.actionButtonText}>🔧 {t('settings.system')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -370,16 +370,16 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
         {/* Geliştirici Bilgileri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Developer' : 'Geliştirici'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.developer')}</Text>
           
           <View style={dynamicStyles.infoCard}>
             <Text style={dynamicStyles.infoText}>
-              👨‍💻 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Developer:' : 'Geliştirici:'}</Text> MSESOFT{'\n'}
+              👨‍💻 <Text style={{ fontWeight: '600' }}>{t('settings.developer') + ':'}</Text> MSESOFT{'\n'}
               📧 <Text style={{ fontWeight: '600' }}>Email:</Text> msesoftware1425@gmail.com{'\n'}
               🌐 <Text style={{ fontWeight: '600' }}>Website:</Text> www.msesoftware.com{'\n'}
-              📅 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Date:' : 'Tarih:'}</Text> 2025{'\n\n'}
+              📅 <Text style={{ fontWeight: '600' }}>{t('common.date') + ':'}</Text> 2025{'\n\n'}
               
-              {t('welcome') === 'Welcome' ? 'All rights reserved.' : 'Tüm hakları saklıdır.'}
+              {t('settings.allRightsReserved')}
             </Text>
           </View>
         </View>
