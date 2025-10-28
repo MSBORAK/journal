@@ -18,7 +18,7 @@ export interface Insight {
 /**
  * Mood Analizi
  */
-export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
+export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -99,7 +99,7 @@ export const analyzeMood = (entries: DiaryEntry[]): Insight[] => {
 /**
  * Yazma Alışkanlıkları Analizi
  */
-export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
+export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -187,7 +187,7 @@ export const analyzeWritingHabits = (entries: DiaryEntry[]): Insight[] => {
 /**
  * Streak (Ardışık Gün) Analizi
  */
-export const analyzeStreak = (entries: DiaryEntry[]): Insight[] => {
+export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -287,7 +287,7 @@ export const analyzeStreak = (entries: DiaryEntry[]): Insight[] => {
 /**
  * Kelime Analizi
  */
-export const analyzeWords = (entries: DiaryEntry[]): Insight[] => {
+export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -359,7 +359,7 @@ export const analyzeWords = (entries: DiaryEntry[]): Insight[] => {
 /**
  * Başarılar (Achievements)
  */
-export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
+export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] => {
   const insights: Insight[] = [];
 
   // First diary
@@ -414,7 +414,7 @@ export const analyzeAchievements = (entries: DiaryEntry[]): Insight[] => {
 /**
  * Tüm İçgörüleri Getir
  */
-export const getAllInsights = (entries: DiaryEntry[]): Insight[] => {
+export const getAllInsights = (entries: DiaryEntry[], t: any): Insight[] => {
   const allInsights = [
     ...analyzeMood(entries),
     ...analyzeWritingHabits(entries),

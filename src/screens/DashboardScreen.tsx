@@ -342,7 +342,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   // İçgörüleri hesapla
   useEffect(() => {
     if (entries.length > 0) {
-      const allInsights = getAllInsights(entries);
+      const allInsights = getAllInsights(entries, t);
       setInsights(allInsights.slice(0, 3)); // En önemli 3 içgörüyü göster
     }
   }, [entries]);
