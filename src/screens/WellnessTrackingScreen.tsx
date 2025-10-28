@@ -372,7 +372,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
 
         {/* Uyku */}
         {renderCounter(
-          'Uyku (Saat)',
+          t('health.sleep'),
           wellnessData.sleepHours,
           (value) => updateValue('sleepHours', value),
           '😴',
@@ -385,7 +385,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
           wellnessData.stressLevel,
           (value) => updateValue('stressLevel', value),
           '🧘‍♀️',
-          ['Çok Düşük', 'Düşük', 'Normal', 'Orta', 'Yüksek', 'Çok Yüksek', 'Aşırı', 'Kritik', 'Tehlikeli', 'Çok Tehlikeli']
+          [t('health.veryLow'), t('health.low'), t('health.normal'), t('health.medium'), t('health.high'), t('health.veryHigh'), t('health.extreme'), t('health.critical'), t('health.dangerous'), t('health.veryDangerous')]
         )}
 
         {/* Enerji Seviyesi */}
@@ -394,16 +394,16 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
           wellnessData.energyLevel,
           (value) => updateValue('energyLevel', value),
           '⚡',
-          ['Çok Düşük', 'Düşük', 'Normal', 'Orta', 'Yüksek', 'Çok Yüksek', 'Aşırı', 'Mükemmel', 'Süper', 'Epic']
+          [t('health.veryLow'), t('health.low'), t('health.normal'), t('health.medium'), t('health.high'), t('health.veryHigh'), t('health.extreme'), t('health.perfect'), t('health.super'), t('health.epic')]
         )}
 
         {/* Mood */}
         {renderLevelSelector(
-          'Genel Ruh Hali',
+          t('health.generalMood'),
           wellnessData.mood,
           (value) => updateValue('mood', value),
           '😊',
-          ['Çok Kötü', 'Kötü', 'Normal', 'İyi', 'Mükemmel']
+          [t('health.veryBad'), t('health.bad'), t('health.normal'), t('health.good'), t('health.perfect')]
         )}
 
         {/* Save Button */}
@@ -413,7 +413,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
           disabled={loading}
         >
           <Text style={dynamicStyles.saveButtonText}>
-            {loading ? 'Kaydediliyor...' : 'Verileri Kaydet'}
+            {loading ? t('common.loading') : t('health.saveWellnessData')}
           </Text>
         </TouchableOpacity>
 
