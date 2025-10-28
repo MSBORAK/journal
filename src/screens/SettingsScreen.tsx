@@ -170,16 +170,16 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
   const menuItems: MenuItem[] = [
     {
       id: 'theme',
-      title: t('welcome') === 'Welcome' ? 'Theme Selection' : 'Tema Seçimi',
-      subtitle: t('welcome') === 'Welcome' ? `Current theme: ${currentTheme.name}` : `Şu anki tema: ${currentTheme.name}`,
+      title: t('settings.themeSelection'),
+      subtitle: `${t('settings.currentTheme')}${currentTheme.name}`,
       icon: 'color-palette-outline',
       screen: 'ThemeSelection',
       color: currentTheme.colors.primary,
     },
     {
       id: 'sound',
-      title: t('welcome') === 'Welcome' ? 'Sound Effects' : 'Ses Efektleri',
-      subtitle: soundEnabled ? (t('welcome') === 'Welcome' ? 'Sound effects on' : 'Ses efektleri açık') : (t('welcome') === 'Welcome' ? 'Sound effects off' : 'Ses efektleri kapalı'),
+      title: t('settings.soundEffects'),
+      subtitle: soundEnabled ? t('settings.soundEffectsOn') : t('settings.soundEffectsOff'),
       icon: soundEnabled ? 'volume-high-outline' : 'volume-mute-outline',
       action: handleToggleSound,
       color: soundEnabled ? '#10b981' : '#6b7280',
