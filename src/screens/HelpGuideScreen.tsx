@@ -15,16 +15,16 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
   const { t } = useLanguage();
 
   const FAQ_ITEMS: { q: string; a: string }[] = [
-    { q: t('welcome') === 'Welcome' ? 'How to write a diary?' : 'Günlük nasıl yazılır?', a: t('welcome') === 'Welcome' ? 'Press the "Write Today" button on the main page, write your feelings and thoughts.' : 'Ana sayfadaki "Bugün Yaz" butonuna bas, hislerini ve düşüncelerini yaz.' },
-    { q: t('welcome') === 'Welcome' ? 'What is the difference between Dream and Goal?' : 'Hayal ve Hedef arasındaki fark nedir?', a: t('welcome') === 'Welcome' ? 'Dream is vision, goal is measurable step. Goals progress with milestones.' : 'Hayal vizyonundur, hedef ise ölçülebilir bir adımdır. Hedefler milestone ile ilerler.' },
-    { q: t('welcome') === 'Welcome' ? 'What are promises for?' : 'Sözler ne işe yarar?', a: t('welcome') === 'Welcome' ? 'Simple commitments you make to yourself. Increases confidence as you complete them.' : 'Kendine verdiğin basit taahhütlerdir. Tamamladıkça güvenini artırır.' },
-    { q: t('welcome') === 'Welcome' ? 'How do I set up notifications?' : 'Bildirimleri nasıl ayarlarım?', a: t('welcome') === 'Welcome' ? 'Manage morning/evening, silent hours and summary options from Settings > Notifications.' : 'Ayarlar > Bildirimler ekranından sabah/akşam, sessiz saatler ve özet seçeneklerini yönet.' },
-    { q: t('welcome') === 'Welcome' ? 'How does theme change?' : 'Tema nasıl değişir?', a: t('welcome') === 'Welcome' ? 'You can change it instantly via Settings > Theme Selection.' : 'Ayarlar > Tema Seçimi üzerinden anında değiştirebilirsin.' },
-    { q: t('welcome') === 'Welcome' ? 'What is Milestone?' : 'Milestone nedir?', a: t('welcome') === 'Welcome' ? 'Sub-tasks within goals. Percentage automatically increases as you mark them, mini celebration at 100%.' : 'Hedef içindeki alt görevlerdir. İşaretledikçe yüzde otomatik artar, yüzde 100 de mini kutlama olur.' },
-    { q: t('welcome') === 'Welcome' ? 'Will my data be lost?' : 'Verilerim kaybolur mu?', a: t('welcome') === 'Welcome' ? 'Data is stored on device; use "Data Backup" screen for regular backups.' : 'Veriler cihazında saklanır; düzenli yedekleme için "Veri Yedekleme" ekranını kullan.' },
-    { q: t('welcome') === 'Welcome' ? 'How is language changed?' : 'Dil nasıl değiştirilir?', a: t('welcome') === 'Welcome' ? 'Switch between Turkish/English via Settings > Language Selection.' : 'Ayarlar > Dil Seçimi üzerinden Türkçe/İngilizce arasında geçiş yap.' },
-    { q: t('welcome') === 'Welcome' ? 'Are motivation messages personal?' : 'Motivasyon mesajları kişisel mi?', a: t('welcome') === 'Welcome' ? 'Messages become dynamic according to your mood and goal trends.' : 'Ruh halin ve hedef trendlerine göre mesajlar dinamikleşir.' },
-    { q: t('welcome') === 'Welcome' ? 'I want to report a problem.' : 'Sorun bildirmek isterim.', a: t('welcome') === 'Welcome' ? 'You can reach us from Settings > Help & Support section.' : 'Ayarlar > Yardım & Destek bölümünden bize ulaşabilirsin.' },
+    { q: t('settings.howToWriteDiary'), a: t('settings.diaryInstructions') },
+    { q: t('settings.dreamVsGoal'), a: t('settings.dreamVsGoalAnswer') },
+    { q: t('settings.whatArePromisesFor'), a: t('settings.promisesAnswer') },
+    { q: t('settings.howToSetupNotifications'), a: t('settings.notificationsAnswer') },
+    { q: t('settings.howThemeChange'), a: t('settings.themeChangeAnswer') },
+    { q: t('settings.whatIsMilestone'), a: t('settings.milestoneAnswer') },
+    { q: t('settings.willDataBeLost'), a: t('settings.dataBackupAnswer') },
+    { q: t('settings.howLanguageChanged'), a: t('settings.languageChangeAnswer') },
+    { q: t('settings.areMessagesPersonal'), a: t('settings.messagesPersonalAnswer') },
+    { q: t('settings.wantToReportProblem'), a: t('settings.reportProblemAnswer') },
   ];
 
   const s = StyleSheet.create({
@@ -65,18 +65,18 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
     <View style={s.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={s.header}>
-          <Text style={s.title}>📘 {t('welcome') === 'Welcome' ? 'Help & Guide' : 'Yardım & Kılavuz'}</Text>
-          <Text style={s.subtitle}>{t('welcome') === 'Welcome' ? 'Start with quick steps, find quick answers with FAQ.' : 'Kısa adımlarla başla, SSS ile hızlı cevapları bul.'}</Text>
+          <Text style={s.title}>📘 {t('settings.helpGuide')}</Text>
+          <Text style={s.subtitle}>{t('settings.startWithQuickSteps')}</Text>
         </View>
 
         {/* Hızlı Başlangıç */}
         <View style={s.section}>
           <View style={s.card}>
             {[ 
-              { t: t('welcome') === 'Welcome' ? 'Write Diary' : 'Günlük Yaz', d: t('welcome') === 'Welcome' ? 'Touch "Write Today" on main page, note your feelings.' : 'Ana sayfada "Bugün Yaz"a dokun, hislerini not al.' },
-              { t: t('welcome') === 'Welcome' ? 'Add Dream/Goal' : 'Hayal/Hedef Ekle', d: t('welcome') === 'Welcome' ? 'Create new dream or goal from dreams screen.' : 'Hayaller ekranından yeni hayal ya da hedef oluştur.' },
-              { t: t('welcome') === 'Welcome' ? 'Mark Milestones' : 'Milestone İşaretle', d: t('welcome') === 'Welcome' ? 'Percentage automatically increases as you complete subtasks within goals.' : 'Hedef içindeki alt görevleri tamamladıkça yüzde otomatik artar.' },
-              { t: t('welcome') === 'Welcome' ? 'Set Notifications' : 'Bildirimleri Ayarla', d: t('welcome') === 'Welcome' ? 'Settings > Notifications: morning/evening, silent hours and summary.' : 'Ayarlar > Bildirimler: sabah/akşam, sessiz saatler ve özet.' },
+              { t: t('settings.writeDiary'), d: t('settings.diaryDescription') },
+              { t: t('settings.addDreamGoal'), d: t('settings.dreamGoalDescription') },
+              { t: t('settings.markMilestones'), d: t('settings.milestonesDescription') },
+              { t: t('settings.setNotifications'), d: t('settings.notificationsDescription') },
             ].map((sItem, i) => (
               <View key={i} style={s.stepRow}>
                 <View style={s.stepBadge}><Text style={s.stepBadgeText}>{i + 1}</Text></View>
@@ -102,8 +102,8 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
         {/* Yardım */}
         <View style={s.section}>
           <View style={s.card}>
-            <Text style={s.stepTitle}>{t('welcome') === 'Welcome' ? 'More Help' : 'Daha Fazla Yardım'}</Text>
-            <Text style={s.stepDesc}>{t('welcome') === 'Welcome' ? 'Contact us for issues, suggestions or support.' : 'Sorun, öneri veya destek için bizimle iletişime geç.'}</Text>
+            <Text style={s.stepTitle}>{t('settings.moreHelp')}</Text>
+            <Text style={s.stepDesc}>{t('settings.contactForSupport')}</Text>
             <TouchableOpacity
               style={s.actionButton}
               onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
