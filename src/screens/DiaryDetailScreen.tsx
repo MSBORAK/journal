@@ -232,7 +232,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'Diary Detail' : 'Günlük Detayı'}</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('diary.diaryDetail')}</Text>
       </View>
 
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
@@ -246,7 +246,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
           </View>
           
           <Text style={dynamicStyles.entryDate}>
-            {new Date(entry.date).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR', {
+            {new Date(entry.date).toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -297,9 +297,9 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
         {answeredQuestions.length === 0 && !entry.freeWriting && (
           <View style={dynamicStyles.emptyState}>
             <Text style={dynamicStyles.emptyIcon}>📝</Text>
-            <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'Question Not Answered' : 'Soru Cevaplanmamış'}</Text>
+            <Text style={dynamicStyles.emptyTitle}>{t('diary.questionNotAnswered')}</Text>
             <Text style={dynamicStyles.emptyMessage}>
-              {t('welcome') === 'Welcome' ? 'No questions were answered or free writing was done in this diary entry.' : 'Bu günlük girişinde herhangi bir soru cevaplanmamış veya serbest yazım yapılmamış.'}
+              {t('diary.noQuestionsAnswered')}
             </Text>
           </View>
         )}
