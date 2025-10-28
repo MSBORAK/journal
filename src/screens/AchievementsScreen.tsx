@@ -538,9 +538,9 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       >
         {/* Header */}
         <View style={dynamicStyles.header}>
-          <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? '🏆 My Achievements' : '🏆 Başarılarım'}</Text>
+          <Text style={dynamicStyles.headerTitle}>{t('achievements.myAchievements')}</Text>
           <Text style={dynamicStyles.headerSubtitle}>
-            {t('welcome') === 'Welcome' ? 'Discover your achievements and earn new badges!' : 'Başarılarını keşfet ve yeni rozetler kazan!'}
+            {t('achievements.discoverAchievements')}
           </Text>
         </View>
 
@@ -548,15 +548,15 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
         <View style={dynamicStyles.statsContainer}>
           <View style={dynamicStyles.statCard}>
             <Text style={dynamicStyles.statNumber}>{stats.unlocked}</Text>
-            <Text style={dynamicStyles.statLabel}>{t('welcome') === 'Welcome' ? 'Earned' : 'Kazanılan'}</Text>
+            <Text style={dynamicStyles.statLabel}>{t('achievements.earned')}</Text>
           </View>
           <View style={dynamicStyles.statCard}>
             <Text style={dynamicStyles.statNumber}>{stats.total}</Text>
-            <Text style={dynamicStyles.statLabel}>{t('welcome') === 'Welcome' ? 'Total' : 'Toplam'}</Text>
+            <Text style={dynamicStyles.statLabel}>{t('achievements.total')}</Text>
           </View>
           <View style={dynamicStyles.statCard}>
             <Text style={dynamicStyles.statNumber}>{Math.round(stats.completionRate)}%</Text>
-            <Text style={dynamicStyles.statLabel}>{t('welcome') === 'Welcome' ? 'Completion' : 'Tamamlanma'}</Text>
+            <Text style={dynamicStyles.statLabel}>{t('achievements.completion')}</Text>
           </View>
         </View>
 
@@ -568,7 +568,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
             activeOpacity={0.7}
           >
             <Text style={[dynamicStyles.tabText, activeTab === 'all' && dynamicStyles.activeTabText]}>
-              🏆 {t('welcome') === 'Welcome' ? 'All' : 'Tümü'}
+              🏆 {t('achievements.allAchievements')}
             </Text>
           </TouchableOpacity>
 
@@ -588,7 +588,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
             activeOpacity={0.7}
           >
             <Text style={[dynamicStyles.tabText, activeTab === 'writing' && dynamicStyles.activeTabText]}>
-              📝 {t('welcome') === 'Welcome' ? 'Writing' : 'Yazma'}
+              📝 {t('achievements.writingAchievements')}
             </Text>
           </TouchableOpacity>
 
@@ -598,7 +598,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
             activeOpacity={0.7}
           >
             <Text style={[dynamicStyles.tabText, activeTab === 'goals' && dynamicStyles.activeTabText]}>
-              🎯 {t('welcome') === 'Welcome' ? 'Tasks' : 'Görevler'}
+              🎯 {t('achievements.tasksAchievements')}
             </Text>
           </TouchableOpacity>
 
@@ -608,7 +608,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
             activeOpacity={0.7}
           >
             <Text style={[dynamicStyles.tabText, activeTab === 'mood' && dynamicStyles.activeTabText]}>
-              💪 {t('welcome') === 'Welcome' ? 'Health' : 'Sağlık'}
+              💪 {t('achievements.healthAchievements')}
             </Text>
           </TouchableOpacity>
         </View>
