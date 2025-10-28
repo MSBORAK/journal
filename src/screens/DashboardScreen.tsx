@@ -782,11 +782,11 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       t('motivation.messages.justBreathingEnough'),
       t('motivation.messages.notSameEnergyEveryDay'),
       t('motivation.messages.restTodayTomorrowBetter'),
-      t('welcome') === 'Welcome' ? 'You are valuable, no matter your mood! 💎' : 'Sen değerlisin, modun nasıl olursa olsun! 💎',
-      t('welcome') === 'Welcome' ? 'Accept yourself without judgment! You are perfect! 🕊️' : 'Kendini yargılamadan kabul et! Sen mükemmelsin! 🕊️',
-      t('welcome') === 'Welcome' ? 'Be happy with small things today! 🌸' : 'Bugün küçük şeylerle mutlu ol! 🌸',
-      t('welcome') === 'Welcome' ? 'Every day doesn\'t have to be the same! Difference is beautiful! 🌺' : 'Her gün aynı olmak zorunda değil! Farklılık güzel! 🌺',
-      t('welcome') === 'Welcome' ? 'Give yourself time! Everything will fall into place! ⏰' : 'Kendine zaman ver! Her şey yerli yerine gelecek! ⏰',
+      t('motivation.messages.valuableNoMatterMood'),
+      t('motivation.messages.acceptYourselfWithoutJudgment'),
+      t('motivation.messages.beHappySmallThings'),
+      t('motivation.messages.differenceBeautiful'),
+      t('motivation.messages.giveYourselfTime'),
       t('welcome') === 'Welcome' ? 'Just existing today is enough! You are special! ✨' : 'Bugün sadece var olmak bile yeter! Sen özelsin! ✨',
       
       // Sevgili ve pozitif
