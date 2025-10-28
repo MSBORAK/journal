@@ -240,31 +240,31 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
         >
           <Ionicons name="arrow-back" size={20} color={currentTheme.colors.primary} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>{t('welcome') === 'Welcome' ? 'Data & Backup' : 'Veri & Yedekleme'}</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('settings.dataBackup')}</Text>
       </View>
 
       <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            📱 {t('welcome') === 'Welcome' ? 'Back up and manage your data securely. All your diary entries,' : 'Verilerinizi güvenli bir şekilde yedekleyin ve yönetin. Tüm günlük yazılarınız,'} 
-            {t('welcome') === 'Welcome' ? 'profile information and settings can be controlled from here.' : 'profil bilgileriniz ve ayarlarınız buradan kontrol edilebilir.'}
+            📱 {t('settings.backupAndManageData')} 
+            {t('settings.profileAndSettingsControlled')}
           </Text>
         </View>
 
         {/* Yedekleme İşlemleri */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Backup Operations' : 'Yedekleme İşlemleri'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.backupOperations')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="cloud-upload-outline" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Move Data to Cloud' : 'Verileri Cloud\'a Taşı'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.moveDataToCloud')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Synchronize tasks and reminders on your phone across all devices by moving them to the cloud.' : 'Telefonundaki görevler ve hatırlatıcıları cloud\'a taşıyarak tüm cihazlarda senkronize et.'}
+              {t('settings.synchronizeTasksReminders')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -273,7 +273,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {isMigrating ? (t('welcome') === 'Welcome' ? 'Moving...' : 'Taşınıyor...') : (t('welcome') === 'Welcome' ? '☁️ Move to Cloud' : '☁️ Cloud\'a Taşı')}
+                {isMigrating ? t('settings.moving') : t('settings.moveToCloud')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -283,10 +283,10 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="cloud-upload" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Data Backup' : 'Veri Yedekleme'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.dataBackupTitle')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Securely back up your diaries and all your data to the Supabase cloud.' : 'Günlüklerinizi ve tüm verilerinizi Supabase bulutuna güvenli bir şekilde yedekleyin.'}
+              {t('settings.backupDiariesSecure')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -295,7 +295,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {loading ? (t('welcome') === 'Welcome' ? 'Backing up...' : 'Yedekleniyor...') : (t('welcome') === 'Welcome' ? '📤 Backup' : '📤 Yedekle')}
+                {loading ? t('settings.backingUp') : t('settings.backupButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -305,10 +305,10 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="cloud-download" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Data Restore' : 'Veri Geri Yükleme'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.dataRestore')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Restore your backed-up data to your device.' : 'Yedeklenen verilerinizi cihazınıza geri yükleyin.'}
+              {t('settings.restoreBackedUpData')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -317,7 +317,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {loading ? (t('welcome') === 'Welcome' ? 'Loading...' : 'Yükleniyor...') : (t('welcome') === 'Welcome' ? '📥 Restore' : '📥 Geri Yükle')}
+                {loading ? t('common.loading') : t('settings.restoreButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -325,17 +325,17 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
 
         {/* Veri Yönetimi */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Data Management' : 'Veri Yönetimi'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.dataManagement')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="download" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Download My Data' : 'Verilerimi İndir'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.downloadMyDataTitle')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Download all your personal data in JSON format and store it elsewhere.' : 'Tüm kişisel verilerinizi JSON formatında indirin ve başka bir yerde saklayın.'}
+              {t('settings.downloadPersonalDataJson')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -344,7 +344,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {loading ? (t('welcome') === 'Welcome' ? 'Downloading...' : 'İndiriliyor...') : (t('welcome') === 'Welcome' ? '📄 Download' : '📄 İndir')}
+                {loading ? t('settings.downloading') : t('settings.downloadButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -354,10 +354,10 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="trash" size={20} color="#EF4444" />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('welcome') === 'Welcome' ? 'Data Cleanup' : 'Veri Temizleme'}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.dataCleanup')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('welcome') === 'Welcome' ? 'Permanently delete all your data. This action cannot be undone!' : 'Tüm verilerinizi kalıcı olarak silin. Bu işlem geri alınamaz!'}
+              {t('settings.permanentlyDeleteAllData')}
             </Text>
             <TouchableOpacity
               style={[dynamicStyles.actionButton, dynamicStyles.dangerButton]}
@@ -366,7 +366,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {loading ? (t('welcome') === 'Welcome' ? 'Deleting...' : 'Siliniyor...') : (t('welcome') === 'Welcome' ? '🗑️ Clear' : '🗑️ Temizle')}
+                {loading ? t('settings.deleting') : t('settings.clearingButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -374,13 +374,13 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
 
         {/* Bilgilendirme */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('welcome') === 'Welcome' ? 'Important Information' : 'Önemli Bilgiler'}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.importantInformation')}</Text>
           
           <View style={dynamicStyles.infoCard}>
             <Text style={dynamicStyles.infoText}>
-              🔒 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Security:' : 'Güvenlik:'}</Text> {t('welcome') === 'Welcome' ? 'All your data is encrypted and stored on secure servers.' : 'Tüm verileriniz şifrelenir ve güvenli sunucularda saklanır.'}{'\n\n'}
-              💾 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Backup:' : 'Yedekleme:'}</Text> {t('welcome') === 'Welcome' ? 'Don\'t forget to back up your data regularly.' : 'Verilerinizi düzenli olarak yedeklemeyi unutmayın.'}{'\n\n'}
-              📱 <Text style={{ fontWeight: '600' }}>{t('welcome') === 'Welcome' ? 'Device Change:' : 'Cihaz Değişikliği:'}</Text> {t('welcome') === 'Welcome' ? 'Restore your data when switching to a new device.' : 'Yeni cihazınıza geçerken verilerinizi geri yükleyin.'}
+              🔒 <Text style={{ fontWeight: '600' }}>{t('settings.securityLabel')}</Text> {t('settings.dataEncryptedStored')}{'\n\n'}
+              💾 <Text style={{ fontWeight: '600' }}>{t('settings.backupLabel')}</Text> {t('settings.dontForgetBackup')}{'\n\n'}
+              📱 <Text style={{ fontWeight: '600' }}>{t('settings.deviceChangeLabel')}</Text> {t('settings.restoreDataWhenSwitching')}
             </Text>
           </View>
         </View>
