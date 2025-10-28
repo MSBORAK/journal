@@ -69,7 +69,8 @@
     "emailVerificationRequired": "Email adresinizi doğrulayın",
     "sending": "Gönderiliyor...",
     "send": "Gönder",
-    "unknownError": "Bir hata oluştu"
+    "unknownError": "Bir hata oluştu",
+    "enterEmail": "Email adresinizi girin"
   },
   "dashboard": {
     "howAreYou": "Bugün kendini nasıl hissediyorsun?",
@@ -244,6 +245,7 @@
     "taskTitlePlaceholder": "Görev başlığı",
     "taskDescriptionPlaceholder": "İsteğe bağlı açıklama",
     "titleCannotBeEmpty": "Başlık boş olamaz",
+    "dateFormatPlaceholder": "YYYY-MM-DD",
     "overdue": "Gecikmiş",
     "today": "Bugün",
     "tomorrow": "Yarın",

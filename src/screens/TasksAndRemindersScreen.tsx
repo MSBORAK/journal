@@ -1012,7 +1012,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 style={dynamicStyles.textInput}
                 value={taskDate}
                 onChangeText={setTaskDate}
-                placeholder="YYYY-MM-DD"
+                placeholder={t('tasks.dateFormatPlaceholder')}
                 placeholderTextColor={currentTheme.colors.muted}
               />
             </View>
@@ -1111,7 +1111,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 style={dynamicStyles.textInput}
                 value={reminderDate}
                 onChangeText={setReminderDate}
-                placeholder="YYYY-MM-DD"
+                placeholder={t('tasks.dateFormatPlaceholder')}
                 placeholderTextColor={currentTheme.colors.muted}
               />
             </View>

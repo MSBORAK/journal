@@ -823,7 +823,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   style={[dynamicStyles.textInput, { height: 80, textAlignVertical: 'top' }]}
                   value={formData.description}
                   onChangeText={(text) => setFormData({ ...formData, description: text })}
-                  placeholder="Ek bilgiler, notlar..."
+                  placeholder={t('reminders.additionalInfoPlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                   multiline
                 />
@@ -889,7 +889,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   style={dynamicStyles.timeInput}
                   value={formData.time}
                   onChangeText={(text) => setFormData({ ...formData, time: text })}
-                  placeholder="HH:MM"
+                  placeholder={t('reminders.timeFormatPlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                 />
               </View>
@@ -997,7 +997,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         primaryButton={
           alertConfig.type === 'warning' && pendingDeleteId
             ? {
-                text: 'Sil',
+                text: t('common.delete'),
                 onPress: () => {
                   if (pendingDeleteId) {
                     deleteReminder(pendingDeleteId);
@@ -1008,7 +1008,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                 style: 'danger',
               }
             : {
-                text: 'Tamam',
+                text: t('common.ok'),
                 onPress: hideAlert,
                 style: alertConfig.type === 'error' ? 'danger' : 'primary',
               }

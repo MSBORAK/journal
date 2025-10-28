@@ -70,7 +70,8 @@
     "emailVerificationRequired": "Please verify your email address",
     "sending": "Sending...",
     "send": "Send",
-    "unknownError": "An error occurred"
+    "unknownError": "An error occurred",
+    "enterEmail": "Enter your email address"
   },
   "dashboard": {
     "howAreYou": "How are you feeling today?",
@@ -245,6 +246,7 @@
     "taskTitlePlaceholder": "Task title",
     "taskDescriptionPlaceholder": "Optional description",
     "titleCannotBeEmpty": "Title cannot be empty",
+    "dateFormatPlaceholder": "YYYY-MM-DD",
     "overdue": "Overdue",
     "today": "Today",
     "tomorrow": "Tomorrow",

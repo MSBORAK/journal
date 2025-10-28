@@ -435,7 +435,7 @@ export default function AuthScreen() {
               style={dynamicStyles.modalInput}
               value={forgotPasswordEmail}
               onChangeText={setForgotPasswordEmail}
-              placeholder="Email adresinizi girin"
+              placeholder={t('auth.enterEmail')}
               placeholderTextColor={currentTheme.colors.muted}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -479,7 +479,7 @@ export default function AuthScreen() {
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}
