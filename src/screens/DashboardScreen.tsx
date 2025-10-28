@@ -2281,7 +2281,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   const streakBadges = getStreakBadges();
 
   const displayName = profile?.full_name || user?.displayName || user?.email || 'Sude';
-  const greeting = getGreetingMessage(getUserTimezone(), currentLanguage);
+  const greeting = getGreetingMessage(getUserTimezone(), currentLanguage as 'tr' | 'en');
 
   return (
     <>
