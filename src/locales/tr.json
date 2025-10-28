@@ -32,8 +32,16 @@
     "settings": "Ayarlar"
   },
   "auth": {
+    "warning": "⚠️ Uyarı",
+    "enterEmailForPasswordReset": "Şifre sıfırlama linki için email adresinizi giriniz.",
+    "emailSent": "✅ E-posta Gönderildi",
+    "passwordResetLinkSent": "Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.",
+    "error": "❌ Hata",
+    "passwordResetLinkNotSent": "Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.",
     "signIn": "Giriş Yap",
     "signUp": "Kayıt Ol",
+    "continueJournal": "Günlüğünüze devam edin",
+    "startJournaling": "Günlük tutmaya başlayın",
     "signOut": "Çıkış Yap",
     "email": "E-posta",
     "password": "Şifre",

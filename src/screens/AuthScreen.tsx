@@ -224,8 +224,8 @@ export default function AuthScreen() {
   const handleForgotPassword = async () => {
     if (!forgotPasswordEmail) {
       showAlert(
-        t('welcome') === 'Welcome' ? '⚠️ Warning' : '⚠️ Uyarı', 
-        t('welcome') === 'Welcome' ? 'Please enter your email address for password reset link.' : 'Şifre sıfırlama linki için email adresinizi giriniz.', 
+        t('auth.warning'), 
+        t('auth.enterEmailForPasswordReset'), 
         'warning'
       );
       return;
@@ -244,8 +244,8 @@ export default function AuthScreen() {
       setShowForgotPasswordModal(false);
       setForgotPasswordEmail('');
       showAlert(
-        t('welcome') === 'Welcome' ? '✅ Email Sent' : '✅ E-posta Gönderildi', 
-        t('welcome') === 'Welcome' ? 'Password reset link has been sent to your email address. Please check your inbox.' : 'Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.',
+        t('auth.emailSent'), 
+        t('auth.passwordResetLinkSent'),
         'success'
       );
     } catch (error: any) {
@@ -258,8 +258,8 @@ export default function AuthScreen() {
         showAlert('❌ Hata', 'Bu email adresi ile kayıtlı kullanıcı bulunamadı.', 'error');
       } else {
         showAlert(
-          t('welcome') === 'Welcome' ? '❌ Error' : '❌ Hata', 
-          t('welcome') === 'Welcome' ? 'Password reset link could not be sent. Please try again.' : 'Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.', 
+          t('auth.error'), 
+          t('auth.passwordResetLinkNotSent'), 
           'error'
         );
       }
@@ -323,13 +323,13 @@ export default function AuthScreen() {
           end={{ x: 1, y: 1 }}
         >
           <Text style={dynamicStyles.title}>
-            {isLogin ? (t('welcome') === 'Welcome' ? 'Sign In' : 'Giriş Yap') : (t('welcome') === 'Welcome' ? 'Sign Up' : 'Kayıt Ol')}
+            {isLogin ? t('auth.signIn') : t('auth.signUp')}
           </Text>
           
           <Text style={dynamicStyles.subtitle}>
             {isLogin 
-              ? (t('welcome') === 'Welcome' ? 'Continue your journal' : 'Günlüğünüze devam edin')
-              : (t('welcome') === 'Welcome' ? 'Start journaling' : 'Günlük tutmaya başlayın')
+            ? t('auth.continueJournal')
+            : t('auth.startJournaling')
             }
           </Text>
 

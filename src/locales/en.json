@@ -32,8 +32,16 @@
     "settings": "Settings"
   },
   "auth": {
+    "warning": "⚠️ Warning",
+    "enterEmailForPasswordReset": "Please enter your email address for password reset link.",
+    "emailSent": "✅ Email Sent",
+    "passwordResetLinkSent": "Password reset link has been sent to your email address. Please check your inbox.",
+    "error": "❌ Error",
+    "passwordResetLinkNotSent": "Password reset link could not be sent. Please try again.",
     "signIn": "Sign In",
     "signUp": "Sign Up",
+    "continueJournal": "Continue your journal",
+    "startJournaling": "Start journaling",
     "signOut": "Sign Out",
     "email": "Email",
     "password": "Password",
