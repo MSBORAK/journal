@@ -58,7 +58,16 @@
     "passwordRequired": "Şifre gerekli",
     "passwordTooShort": "Şifre en az 6 karakter olmalı",
     "passwordsDoNotMatch": "Şifreler eşleşmiyor",
-    "invalidEmail": "Geçersiz e-posta adresi"
+    "invalidEmail": "Geçersiz e-posta adresi",
+    "tooManyAttempts": "Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.",
+    "userNotFound": "Bu email adresi ile kayıtlı kullanıcı bulunamadı.",
+    "emailAndPasswordRequired": "Email ve şifre gereklidir",
+    "displayNameRequired": "Ad soyad gereklidir",
+    "accountCreated": "Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.",
+    "emailVerificationRequired": "Email adresinizi doğrulayın",
+    "sending": "Gönderiliyor...",
+    "send": "Gönder",
+    "unknownError": "Bir hata oluştu"
   },
   "dashboard": {
     "howAreYou": "Bugün kendini nasıl hissediyorsun?",
