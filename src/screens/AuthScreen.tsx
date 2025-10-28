@@ -251,11 +251,11 @@ export default function AuthScreen() {
     } catch (error: any) {
       const errorMessage = error?.message || '';
       if (errorMessage.toLowerCase().includes('rate limit')) {
-        showAlert('⚠️ Uyarı', 'Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.', 'warning');
+        showAlert(t('auth.warning'), t('auth.tooManyAttempts'), 'warning');
       } else if (errorMessage.toLowerCase().includes('invalid email')) {
-        showAlert('❌ Hata', 'Geçersiz email adresi.', 'error');
+        showAlert(t('auth.error'), t('auth.invalidEmail'), 'error');
       } else if (errorMessage.toLowerCase().includes('user not found')) {
-        showAlert('❌ Hata', 'Bu email adresi ile kayıtlı kullanıcı bulunamadı.', 'error');
+        showAlert(t('auth.error'), t('auth.userNotFound'), 'error');
       } else {
         showAlert(
           t('auth.error'), 
@@ -270,12 +270,12 @@ export default function AuthScreen() {
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      showToast('Email ve şifre gereklidir', 'error');
+      showToast(t('auth.emailAndPasswordRequired'), 'error');
       return;
     }
 
     if (!isLogin && !displayName) {
-      showToast('Ad soyad gereklidir', 'error');
+      showToast(t('auth.displayNameRequired'), 'error');
       return;
     }
 
@@ -285,18 +285,18 @@ export default function AuthScreen() {
         await signIn(email, password);
       } else {
         await signUp(email, password, displayName);
-        showToast('Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.', 'success');
+        showToast(t('auth.accountCreated'), 'success');
         setIsLogin(true);
         setDisplayName('');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Bir hata oluştu';
+      const errorMessage = error instanceof Error ? error.message : t('auth.unknownError');
       if (errorMessage.toLowerCase().includes('invalid login credentials')) {
-        showToast('Email veya şifre hatalı', 'error');
+        showToast(t('auth.invalidCredentials'), 'error');
       } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
-        showToast('Email adresinizi doğrulayın', 'error');
+        showToast(t('auth.emailVerificationRequired'), 'error');
       } else if (errorMessage.toLowerCase().includes('too many requests')) {
-        showToast('Çok fazla deneme. Lütfen bekleyin', 'error');
+        showToast(t('auth.tooManyAttempts'), 'error');
       } else {
         showToast(errorMessage, 'error');
       }
@@ -464,7 +464,7 @@ export default function AuthScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? 'Gönderiliyor...' : 'Gönder'}
+                  {loading ? t('auth.sending') : t('auth.send')}
                 </Text>
               </TouchableOpacity>
             </View>

@@ -59,7 +59,16 @@
     "passwordRequired": "Password is required",
     "passwordTooShort": "Password must be at least 6 characters",
     "passwordsDoNotMatch": "Passwords do not match",
-    "invalidEmail": "Invalid email address"
+    "invalidEmail": "Invalid email address",
+    "tooManyAttempts": "Too many attempts. Please wait a few minutes.",
+    "userNotFound": "User not found with this email address.",
+    "emailAndPasswordRequired": "Email and password are required",
+    "displayNameRequired": "Display name is required",
+    "accountCreated": "Your account has been created! You can now sign in.",
+    "emailVerificationRequired": "Please verify your email address",
+    "sending": "Sending...",
+    "send": "Send",
+    "unknownError": "An error occurred"
   },
   "dashboard": {
     "howAreYou": "How are you feeling today?",
