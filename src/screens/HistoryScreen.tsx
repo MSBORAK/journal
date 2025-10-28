@@ -358,12 +358,12 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
           <View style={dynamicStyles.entryMeta}>
             <View style={dynamicStyles.entryMetaLeft}>
               <Text style={dynamicStyles.entryDate}>
-                {new Date(item.date).toLocaleDateString(t('welcome') === 'Welcome' ? 'en-US' : 'tr-TR')}
+                {new Date(item.date).toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US')}
               </Text>
               {item.answers && (
                 <View style={dynamicStyles.questionsCount}>
                   <Text style={dynamicStyles.questionsCountText}>
-                    {Object.values(item.answers).filter(answer => answer && answer.trim() !== '').length} {t('welcome') === 'Welcome' ? 'questions' : 'soru'}
+                    {Object.values(item.answers).filter(answer => answer && answer.trim() !== '').length} {t('diary.questions')}
                   </Text>
                 </View>
               )}
@@ -393,7 +393,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       {/* Header */}
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.title}>
-          {t('welcome') === 'Welcome' ? 'Past Diaries' : 'Geçmiş Günlükler'}
+          {t('diary.pastDiaries')}
         </Text>
         
         {/* Search Bar */}
@@ -402,7 +402,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
             style={dynamicStyles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder={t('welcome') === 'Welcome' ? 'Search diary...' : 'Günlük ara...'}
+            placeholder={t('diary.searchDiary')}
             placeholderTextColor={currentTheme.colors.muted}
           />
         </View>
@@ -413,7 +413,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
         {/* Mood Filters */}
         <View style={dynamicStyles.filterSection}>
           <Text style={dynamicStyles.filterLabel}>
-            {t('welcome') === 'Welcome' ? 'Mood:' : 'Ruh Hali:'}
+            {t('diary.mood')}
           </Text>
           <View style={dynamicStyles.moodFilterContainer}>
             <TouchableOpacity
@@ -427,7 +427,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
                 dynamicStyles.tagFilterText,
                 selectedMood === null && dynamicStyles.selectedTagFilterText,
               ]}>
-                {t('welcome') === 'Welcome' ? 'All' : 'Tümü'}
+                {t('diary.all')}
               </Text>
             </TouchableOpacity>
             
@@ -465,7 +465,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
                     dynamicStyles.tagFilterText,
                     selectedTag === null && dynamicStyles.selectedTagFilterText,
                   ]}>
-                    {t('welcome') === 'Welcome' ? 'All' : 'Tümü'}
+                    {t('diary.all')}
                   </Text>
                 </TouchableOpacity>
                 
@@ -503,7 +503,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       {/* Results Count */}
       <View style={dynamicStyles.resultsInfo}>
         <Text style={dynamicStyles.resultsText}>
-          {filteredEntries.length} {t('welcome') === 'Welcome' ? 'diaries found' : 'günlük bulundu'}
+          {filteredEntries.length} {t('diary.diariesFound')}
         </Text>
       </View>
 
@@ -511,19 +511,19 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       {loading ? (
         <View style={dynamicStyles.emptyState}>
           <Ionicons name="hourglass-outline" size={64} color={currentTheme.colors.secondary} />
-          <Text style={dynamicStyles.emptyTitle}>{t('welcome') === 'Welcome' ? 'Loading...' : 'Yükleniyor...'}</Text>
+          <Text style={dynamicStyles.emptyTitle}>{t('diary.loading')}</Text>
           <Text style={dynamicStyles.emptyMessage}>
-            {t('welcome') === 'Welcome' ? 'Loading your diaries...' : 'Günlükleriniz getiriliyor'}
+            {t('diary.loadingYourDiaries')}
           </Text>
         </View>
       ) : filteredEntries.length === 0 ? (
         <View style={dynamicStyles.emptyState}>
           <Ionicons name="book-outline" size={64} color={currentTheme.colors.secondary} />
           <Text style={dynamicStyles.emptyTitle}>
-            {t('welcome') === 'Welcome' ? 'No diary found' : 'Günlük bulunamadı'}
+            {t('diary.noDiaryFound')}
           </Text>
           <Text style={dynamicStyles.emptyMessage}>
-            {t('welcome') === 'Welcome' ? 'Try changing your search criteria' : 'Arama kriterlerinizi değiştirmeyi deneyin'}
+            {t('diary.tryChangingSearch')}
           </Text>
         </View>
       ) : (
