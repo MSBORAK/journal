@@ -323,8 +323,8 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
             </Text>
           )}
           <Text style={dynamicStyles.cardMeta}>
-            {t('welcome') === 'Welcome' ? 'Written:' : 'Yazıldı:'} {formatDate(dream.createdAt)}
-            {dream.completedAt ? `  •  ${t('welcome') === 'Welcome' ? 'Completed:' : 'Tamamlandı:'} ${formatDate(dream.completedAt)}` : ''}
+            {t('dreams.written')} {formatDate(dream.createdAt)}
+            {dream.completedAt ? `  •  ${t('dreams.completedLabel')} ${formatDate(dream.completedAt)}` : ''}
           </Text>
         </View>
 
@@ -387,8 +387,8 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
             </Text>
           )}
           <Text style={dynamicStyles.cardMeta}>
-            {t('welcome') === 'Welcome' ? 'Written:' : 'Yazıldı:'} {formatDate(goal.createdAt)}
-            {goal.completedAt ? `  •  ${t('welcome') === 'Welcome' ? 'Completed:' : 'Tamamlandı:'} ${formatDate(goal.completedAt)}` : ''}
+            {t('dreams.written')} {formatDate(goal.createdAt)}
+            {goal.completedAt ? `  •  ${t('dreams.completedLabel')} ${formatDate(goal.completedAt)}` : ''}
           </Text>
         </View>
 
@@ -456,8 +456,8 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
             {promise.text}
           </Text>
           <Text style={dynamicStyles.cardMeta}>
-            {t('welcome') === 'Welcome' ? 'Written:' : 'Yazıldı:'} {formatDate(promise.createdAt)}
-            {promise.completedAt ? `  •  ${t('welcome') === 'Welcome' ? 'Completed:' : 'Tamamlandı:'} ${formatDate(promise.completedAt)}` : ''}
+            {t('dreams.written')} {formatDate(promise.createdAt)}
+            {promise.completedAt ? `  •  ${t('dreams.completedLabel')} ${formatDate(promise.completedAt)}` : ''}
           </Text>
         </View>
 
@@ -759,10 +759,10 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       {/* Header */}
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.headerTitle}>
-          ✨ {t('welcome') === 'Welcome' ? 'Dreams & Goals' : 'Hayaller & Hedefler'}
+          ✨ {t('dreams.dreamsAndGoals')}
         </Text>
         <Text style={dynamicStyles.headerSubtitle}>
-          {t('welcome') === 'Welcome' ? 'Guide your future, turn your dreams into reality' : 'Geleceğine yön ver, hayallerini gerçeğe dönüştür'}
+          {t('dreams.guideYourFuture')}
         </Text>
       </View>
 
@@ -773,7 +773,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           onPress={() => handleTabChange('dreams')}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'dreams' && dynamicStyles.activeTabText]}>
-            🌟 {t('welcome') === 'Welcome' ? 'Dreams' : 'Hayaller'}
+            🌟 {t('dreams.dreams')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -781,7 +781,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           onPress={() => handleTabChange('goals')}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'goals' && dynamicStyles.activeTabText]}>
-            🎯 {t('welcome') === 'Welcome' ? 'Goals' : 'Hedefler'}
+            🎯 {t('dreams.goals')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -789,7 +789,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           onPress={() => handleTabChange('promise')}
         >
           <Text style={[dynamicStyles.tabText, activeTab === 'promise' && dynamicStyles.activeTabText]}>
-            🤝 {t('welcome') === 'Welcome' ? 'Promise' : 'Söz'}
+            🤝 {t('dreams.promise')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -820,7 +820,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   }}
                 >
                   <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
-                  <Text style={dynamicStyles.addNewButtonText}>{t('welcome') === 'Welcome' ? 'Add New Dream' : 'Yeni Hayal Ekle'}</Text>
+                  <Text style={dynamicStyles.addNewButtonText}>{t('dreams.addNewDream')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -844,7 +844,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   }}
                 >
                   <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
-                  <Text style={dynamicStyles.addNewButtonText}>{t('welcome') === 'Welcome' ? 'Add New Goal' : 'Yeni Hedef Ekle'}</Text>
+                  <Text style={dynamicStyles.addNewButtonText}>{t('dreams.addNewGoal')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -868,7 +868,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   }}
                 >
                   <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
-                  <Text style={dynamicStyles.addNewButtonText}>{t('welcome') === 'Welcome' ? 'Make New Promise' : 'Yeni Söz Ver'}</Text>
+                  <Text style={dynamicStyles.addNewButtonText}>{t('dreams.makeNewPromise')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -923,9 +923,9 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   flex: 1,
                   textAlign: 'center',
                 }}>
-                  {activeTab === 'dreams' ? (t('welcome') === 'Welcome' ? '✨ New Dream' : '✨ Yeni Hayal') : 
-                   activeTab === 'goals' ? (t('welcome') === 'Welcome' ? '🎯 New Goal' : '🎯 Yeni Hedef') : 
-                   (t('welcome') === 'Welcome' ? '🤝 New Promise' : '🤝 Yeni Söz')}
+                  {activeTab === 'dreams' ? t('dreams.newDream') : 
+                   activeTab === 'goals' ? t('dreams.newGoal') : 
+                   t('dreams.newPromise')}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowAddModal(false)}
@@ -984,7 +984,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         color: currentTheme.colors.text,
                         marginBottom: 8,
                       }}>
-                        {t('welcome') === 'Welcome' ? 'Title *' : 'Başlık *'}
+                        {t('dreams.titleRequired')}
                       </Text>
                       <TextInput
                         style={{
@@ -996,7 +996,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           borderWidth: 1,
                           borderColor: currentTheme.colors.border,
                         }}
-                        placeholder={activeTab === 'dreams' ? (t('welcome') === 'Welcome' ? "My dream..." : "Hayalim...") : (t('welcome') === 'Welcome' ? "My goal..." : "Hedefim...")}
+                        placeholder={activeTab === 'dreams' ? t('dreams.myDreamPlaceholder') : (t('welcome') === 'Welcome' ? "My goal..." : "Hedefim...")}
                         placeholderTextColor={currentTheme.colors.muted}
                         value={formData.title}
                         onChangeText={(text) => setFormData({ ...formData, title: text })}
@@ -1010,7 +1010,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         color: currentTheme.colors.text,
                         marginBottom: 8,
                       }}>
-                        {t('welcome') === 'Welcome' ? 'Description' : 'Açıklama'}
+                        {t('dreams.descriptionLabel')}
                       </Text>
                       <TextInput
                         style={{
@@ -1024,7 +1024,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           borderWidth: 1,
                           borderColor: currentTheme.colors.border,
                         }}
-                        placeholder={t('welcome') === 'Welcome' ? "Detail your dream..." : "Hayalini detaylandır..."}
+                        placeholder={t('dreams.detailYourDream')}
                         placeholderTextColor={currentTheme.colors.muted}
                         value={formData.description}
                         onChangeText={(text) => setFormData({ ...formData, description: text })}
@@ -1057,7 +1057,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       fontWeight: '600',
                       color: currentTheme.colors.secondary,
                     }}>
-                      {t('welcome') === 'Welcome' ? 'Cancel' : 'İptal'}
+                      {t('dreams.cancelButton')}
                     </Text>
                   </TouchableOpacity>
                   
@@ -1076,7 +1076,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       fontWeight: '600',
                       color: currentTheme.colors.background,
                     }}>
-                      {t('welcome') === 'Welcome' ? 'Save' : 'Kaydet'}
+                      {t('dreams.saveButton')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1374,7 +1374,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           color: currentTheme.colors.text,
                           marginBottom: 8,
                         }}>
-                          {t('welcome') === 'Welcome' ? 'Title *' : 'Başlık *'}
+                          {t('dreams.titleRequired')}
                         </Text>
                         <TextInput
                           style={{
@@ -1407,7 +1407,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                             color: currentTheme.colors.text,
                             marginBottom: 8,
                           }}>
-                            {t('welcome') === 'Welcome' ? 'Description' : 'Açıklama'}
+                            {t('dreams.descriptionLabel')}
                           </Text>
                           <TextInput
                             style={{
@@ -1462,7 +1462,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       fontWeight: '600',
                       color: currentTheme.colors.secondary,
                     }}>
-                      {t('welcome') === 'Welcome' ? 'Cancel' : 'İptal'}
+                      {t('dreams.cancelButton')}
                     </Text>
                   </TouchableOpacity>
                   
@@ -1505,7 +1505,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       fontWeight: '600',
                       color: currentTheme.colors.background,
                     }}>
-                      {t('welcome') === 'Welcome' ? 'Save' : 'Kaydet'}
+                      {t('dreams.saveButton')}
                     </Text>
                   </TouchableOpacity>
                 </View>
