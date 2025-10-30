@@ -173,7 +173,7 @@ function MainTabs() {
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          title: t('dashboard.title'),
+          title: t('navigation.dashboard'),
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Dashboard', focused, color, size),
         }}
       />
@@ -181,7 +181,7 @@ function MainTabs() {
         name="DreamsGoals"
         component={DreamsGoalsScreen}
         options={{
-          title: t('welcome') === 'Welcome' ? 'Dreams' : 'Hayaller',
+          title: t('navigation.dreams'),
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('DreamsGoals', focused, color, size),
         }}
       />
@@ -189,7 +189,7 @@ function MainTabs() {
         name="Statistics"
         component={StatisticsScreen}
         options={{
-          title: t('welcome') === 'Welcome' ? 'Statistics' : 'İstatistikler',
+          title: t('navigation.statistics'),
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Statistics', focused, color, size),
         }}
       />
@@ -197,7 +197,7 @@ function MainTabs() {
         name="History"
         component={HistoryScreen}
         options={{
-          title: t('welcome') === 'Welcome' ? 'History' : 'Geçmiş',
+          title: t('navigation.history'),
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('History', focused, color, size),
         }}
       />
@@ -205,7 +205,7 @@ function MainTabs() {
         name="Tasks"
         component={TasksAndRemindersScreen}
         options={{
-          title: t('welcome') === 'Welcome' ? 'Tasks' : 'Görevler',
+          title: t('navigation.tasks'),
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Tasks', focused, color, size),
         }}
       />
@@ -213,7 +213,7 @@ function MainTabs() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          title: t('welcome') === 'Welcome' ? 'Settings' : 'Ayarlar',
+          title: t('navigation.settings'),
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('Settings', focused, color, size),
         }}
       />

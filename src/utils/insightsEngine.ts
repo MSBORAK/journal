@@ -18,7 +18,7 @@ export interface Insight {
 /**
  * Mood Analizi
  */
-export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
+export const analyzeMood = (entries: DiaryEntry[], t: any, locale: string): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -81,7 +81,7 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
   );
   
   const happyDate = new Date(happiest.createdAt);
-  const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][happyDate.getDay()];
+  const dayName = happyDate.toLocaleDateString(locale || 'en-US', { weekday: 'long' });
   
   insights.push({
     type: 'pattern',
@@ -99,7 +99,7 @@ export const analyzeMood = (entries: DiaryEntry[], t: any): Insight[] => {
 /**
  * Yazma Alışkanlıkları Analizi
  */
-export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] => {
+export const analyzeWritingHabits = (entries: DiaryEntry[], t: any, _locale: string): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -117,13 +117,13 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
   );
   
   const timeOfDay = parseInt(mostActiveHour) < 12 ? 'morning' :
-                    parseInt(mostActiveHour) < 17 ? 'afternoon' :
-                    parseInt(mostActiveHour) < 21 ? 'evening' : 'night';
+                   parseInt(mostActiveHour) < 17 ? 'afternoon' :
+                   parseInt(mostActiveHour) < 21 ? 'evening' : 'night';
   
   insights.push({
     type: 'habit',
     title: t('insights.productiveHour'),
-    description: `You usually write in the ${timeOfDay} (${mostActiveHour}:00)`,
+    description: t('insights.productiveHourDesc').replace('{hour}', `${mostActiveHour}:00`),
     icon: '⏰',
     color: '#8b5cf6',
     priority: 'medium',
@@ -138,7 +138,7 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
     insights.push({
       type: 'habit',
       title: t('insights.detailedWriter'),
-      description: `You write an average of ${Math.round(avgLength)} characters. How much you share!`,
+      description: t('insights.detailedWriterDesc'),
       icon: '📝',
       color: '#6366f1',
       priority: 'low'
@@ -187,7 +187,7 @@ export const analyzeWritingHabits = (entries: DiaryEntry[], t: any): Insight[] =
 /**
  * Streak (Ardışık Gün) Analizi
  */
-export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
+export const analyzeStreak = (entries: DiaryEntry[], t: any, _locale: string): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -287,7 +287,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any): Insight[] => {
 /**
  * Kelime Analizi
  */
-export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
+export const analyzeWords = (entries: DiaryEntry[], t: any, _locale: string): Insight[] => {
   const insights: Insight[] = [];
   
   if (entries.length === 0) return insights;
@@ -316,7 +316,7 @@ export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
     insights.push({
       type: 'pattern',
       title: t('insights.mostUsedWords'),
-      description: `You frequently use the words: ${topWords.slice(0, 3).join(', ')}`,
+      description: (t('insights.mostUsedWordsDesc') || '').replace('{words}', topWords.slice(0, 3).join(', ')),
       icon: '💬',
       color: '#06b6d4',
       priority: 'low',
@@ -359,7 +359,7 @@ export const analyzeWords = (entries: DiaryEntry[], t: any): Insight[] => {
 /**
  * Başarılar (Achievements)
  */
-export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] => {
+export const analyzeAchievements = (entries: DiaryEntry[], t: any, _locale: string): Insight[] => {
   const insights: Insight[] = [];
 
   // First diary
@@ -400,7 +400,9 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] =>
     insights.push({
       type: 'achievement',
       title: t('insights.wordMaster'),
-      description: `You wrote ${totalWords.toLocaleString('en-US')} words! This would be a book`,
+      description: t('insights.wordMasterDesc')
+        ? t('insights.wordMasterDesc').replace('{count}', totalWords.toLocaleString('en-US'))
+        : `${totalWords.toLocaleString('en-US')} words milestone!`,
       icon: '📚',
       color: '#8b5cf6',
       priority: 'medium',
@@ -414,13 +416,13 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any): Insight[] =>
 /**
  * Tüm İçgörüleri Getir
  */
-export const getAllInsights = (entries: DiaryEntry[], t: any): Insight[] => {
+export const getAllInsights = (entries: DiaryEntry[], t: any, locale: string): Insight[] => {
   const allInsights = [
-    ...analyzeMood(entries, t),
-    ...analyzeWritingHabits(entries, t),
-    ...analyzeStreak(entries, t),
-    ...analyzeWords(entries, t),
-    ...analyzeAchievements(entries, t)
+    ...analyzeMood(entries, t, locale),
+    ...analyzeWritingHabits(entries, t, locale),
+    ...analyzeStreak(entries, t, locale),
+    ...analyzeWords(entries, t, locale),
+    ...analyzeAchievements(entries, t, locale)
   ];
 
   // Önceliğe göre sırala
@@ -458,7 +460,7 @@ export const generateSuggestions = (entries: DiaryEntry[], t: any): Insight[] =>
     suggestions.push({
       type: 'suggestion',
       title: t('insights.missYou'),
-      description: `You haven't written for ${daysSinceLastEntry} days. Come back!`,
+      description: (t('insights.missYouDesc') || '').replace('{days}', daysSinceLastEntry.toString()),
       icon: '💙',
       color: '#3b82f6',
       priority: 'high'

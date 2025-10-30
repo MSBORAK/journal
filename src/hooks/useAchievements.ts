@@ -99,7 +99,7 @@ const calculateLevel = (wellnessScore: number): { level: number; experience: num
 };
 
 export const useAchievements = (userId?: string) => {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userStats, setUserStats] = useState<UserStats>({
     totalDiaryEntries: 0,
@@ -123,8 +123,8 @@ export const useAchievements = (userId?: string) => {
     // Streak Başarıları
     {
       id: 'first_streak_3',
-      title: t('welcome') === 'Welcome' ? 'Beginning' : 'Başlangıç',
-      description: t('welcome') === 'Welcome' ? 'You wrote a diary for 3 consecutive days!' : '3 gün üst üste günlük yazdın!',
+      title: currentLanguage === 'en' ? 'Beginning' : 'Başlangıç',
+      description: currentLanguage === 'en' ? 'You wrote a diary for 3 consecutive days!' : '3 gün üst üste günlük yazdın!',
       icon: '🔥',
       category: 'streak',
       requirement: { type: 'streak', value: 3 },
@@ -132,8 +132,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'streak_7',
-      title: t('welcome') === 'Welcome' ? 'Weekly Master' : 'Haftalık Usta',
-      description: t('welcome') === 'Welcome' ? 'You wrote a diary for 7 consecutive days!' : '7 gün üst üste günlük yazdın!',
+      title: currentLanguage === 'en' ? 'Weekly Master' : 'Haftalık Usta',
+      description: currentLanguage === 'en' ? 'You wrote a diary for 7 consecutive days!' : '7 gün üst üste günlük yazdın!',
       icon: '⭐',
       category: 'streak',
       requirement: { type: 'streak', value: 7 },
@@ -141,8 +141,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'streak_14',
-      title: t('welcome') === 'Welcome' ? 'Two-Week Hero' : 'İki Hafta Kahramanı',
-      description: t('welcome') === 'Welcome' ? 'You wrote a diary for 14 consecutive days!' : '14 gün üst üste günlük yazdın!',
+      title: currentLanguage === 'en' ? 'Two-Week Hero' : 'İki Hafta Kahramanı',
+      description: currentLanguage === 'en' ? 'You wrote a diary for 14 consecutive days!' : '14 gün üst üste günlük yazdın!',
       icon: '🏆',
       category: 'streak',
       requirement: { type: 'streak', value: 14 },
@@ -150,8 +150,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'streak_30',
-      title: t('welcome') === 'Welcome' ? 'Monthly Legend' : 'Aylık Efsane',
-      description: t('welcome') === 'Welcome' ? 'You wrote a diary for 30 consecutive days!' : '30 gün üst üste günlük yazdın!',
+      title: currentLanguage === 'en' ? 'Monthly Legend' : 'Aylık Efsane',
+      description: currentLanguage === 'en' ? 'You wrote a diary for 30 consecutive days!' : '30 gün üst üste günlük yazdın!',
       icon: '👑',
       category: 'streak',
       requirement: { type: 'streak', value: 30 },
@@ -159,8 +159,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'streak_100',
-      title: t('welcome') === 'Welcome' ? 'Hundred Day Legend' : 'Yüz Gün Efsanesi',
-      description: t('welcome') === 'Welcome' ? 'You wrote a diary for 100 consecutive days!' : '100 gün üst üste günlük yazdın!',
+      title: currentLanguage === 'en' ? 'Hundred Day Legend' : 'Yüz Gün Efsanesi',
+      description: currentLanguage === 'en' ? 'You wrote a diary for 100 consecutive days!' : '100 gün üst üste günlük yazdın!',
       icon: '💎',
       category: 'streak',
       requirement: { type: 'streak', value: 100 },
@@ -170,8 +170,8 @@ export const useAchievements = (userId?: string) => {
     // Yazma Başarıları
     {
       id: 'first_entry',
-      title: t('welcome') === 'Welcome' ? 'First Step' : 'İlk Adım',
-      description: t('welcome') === 'Welcome' ? 'You wrote your first diary entry!' : 'İlk günlük yazını yazdın!',
+      title: currentLanguage === 'en' ? 'First Step' : 'İlk Adım',
+      description: currentLanguage === 'en' ? 'You wrote your first diary entry!' : 'İlk günlük yazını yazdın!',
       icon: '📝',
       category: 'writing',
       requirement: { type: 'total', value: 1 },
@@ -179,8 +179,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'writer_10',
-      title: t('welcome') === 'Welcome' ? 'Writer' : 'Yazıcı',
-      description: t('welcome') === 'Welcome' ? 'You wrote 10 diary entries!' : '10 günlük yazısı yazdın!',
+      title: currentLanguage === 'en' ? 'Writer' : 'Yazıcı',
+      description: currentLanguage === 'en' ? 'You wrote 10 diary entries!' : '10 günlük yazısı yazdın!',
       icon: '✍️',
       category: 'writing',
       requirement: { type: 'total', value: 10 },
@@ -188,8 +188,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'diarist_50',
-      title: t('welcome') === 'Welcome' ? 'Diary Keeper' : 'Günlük Tutucu',
-      description: t('welcome') === 'Welcome' ? 'You wrote 50 diary entries!' : '50 günlük yazısı yazdın!',
+      title: currentLanguage === 'en' ? 'Diary Keeper' : 'Günlük Tutucu',
+      description: currentLanguage === 'en' ? 'You wrote 50 diary entries!' : '50 günlük yazısı yazdın!',
       icon: '📖',
       category: 'writing',
       requirement: { type: 'total', value: 50 },
@@ -197,8 +197,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'master_writer_100',
-      title: t('welcome') === 'Welcome' ? 'Author' : 'Yazar',
-      description: t('welcome') === 'Welcome' ? 'You wrote 100 diary entries!' : '100 günlük yazısı yazdın!',
+      title: currentLanguage === 'en' ? 'Author' : 'Yazar',
+      description: currentLanguage === 'en' ? 'You wrote 100 diary entries!' : '100 günlük yazısı yazdın!',
       icon: '📚',
       category: 'writing',
       requirement: { type: 'total', value: 100 },
@@ -208,8 +208,8 @@ export const useAchievements = (userId?: string) => {
     // Görev Başarıları
     {
       id: 'first_task',
-      title: t('welcome') === 'Welcome' ? 'Task Master' : 'Görevci',
-      description: t('welcome') === 'Welcome' ? 'You completed your first task!' : 'İlk görevini tamamladın!',
+      title: currentLanguage === 'en' ? 'Task Master' : 'Görevci',
+      description: currentLanguage === 'en' ? 'You completed your first task!' : 'İlk görevini tamamladın!',
       icon: '✅',
       category: 'goals',
       requirement: { type: 'total', value: 1 },
@@ -217,8 +217,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'productive_10',
-      title: t('welcome') === 'Welcome' ? 'Productive' : 'Üretken',
-      description: t('welcome') === 'Welcome' ? 'You completed 10 tasks!' : '10 görev tamamladın!',
+      title: currentLanguage === 'en' ? 'Productive' : 'Üretken',
+      description: currentLanguage === 'en' ? 'You completed 10 tasks!' : '10 görev tamamladın!',
       icon: '🎯',
       category: 'goals',
       requirement: { type: 'total', value: 10 },
@@ -226,8 +226,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'achiever_50',
-      title: t('welcome') === 'Welcome' ? 'Successful' : 'Başarılı',
-      description: t('welcome') === 'Welcome' ? 'You completed 50 tasks!' : '50 görev tamamladın!',
+      title: currentLanguage === 'en' ? 'Successful' : 'Başarılı',
+      description: currentLanguage === 'en' ? 'You completed 50 tasks!' : '50 görev tamamladın!',
       icon: '🏅',
       category: 'goals',
       requirement: { type: 'total', value: 50 },
@@ -237,8 +237,8 @@ export const useAchievements = (userId?: string) => {
     // Sağlık Başarıları
     {
       id: 'health_tracker_7',
-      title: t('welcome') === 'Welcome' ? 'Healthy' : 'Sağlıklı',
-      description: t('welcome') === 'Welcome' ? 'You tracked health for 7 consecutive days!' : '7 gün üst üste sağlık takibi yaptın!',
+      title: currentLanguage === 'en' ? 'Healthy' : 'Sağlıklı',
+      description: currentLanguage === 'en' ? 'You tracked health for 7 consecutive days!' : '7 gün üst üste sağlık takibi yaptın!',
       icon: '💪',
       category: 'mood',
       requirement: { type: 'consecutive', value: 7 },
@@ -246,8 +246,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'wellness_master_30',
-      title: t('welcome') === 'Welcome' ? 'Wellness Master' : 'Wellness Ustası',
-      description: t('welcome') === 'Welcome' ? 'You tracked health for 30 consecutive days!' : '30 gün üst üste sağlık takibi yaptın!',
+      title: currentLanguage === 'en' ? 'Wellness Master' : 'Wellness Ustası',
+      description: currentLanguage === 'en' ? 'You tracked health for 30 consecutive days!' : '30 gün üst üste sağlık takibi yaptın!',
       icon: '🌱',
       category: 'mood',
       requirement: { type: 'consecutive', value: 30 },
@@ -257,8 +257,8 @@ export const useAchievements = (userId?: string) => {
     // Hatırlatıcı Başarıları
     {
       id: 'reminder_master',
-      title: t('welcome') === 'Welcome' ? 'Reminder Master' : 'Hatırlatıcı Ustası',
-      description: t('welcome') === 'Welcome' ? 'You created 10 reminders!' : '10 hatırlatıcı oluşturdun!',
+      title: currentLanguage === 'en' ? 'Reminder Master' : 'Hatırlatıcı Ustası',
+      description: currentLanguage === 'en' ? 'You created 10 reminders!' : '10 hatırlatıcı oluşturdun!',
       icon: '🔔',
       category: 'goals',
       requirement: { type: 'total', value: 10 },
@@ -268,8 +268,8 @@ export const useAchievements = (userId?: string) => {
     // Alışkanlık Başarıları
     {
       id: 'habit_starter',
-      title: t('welcome') === 'Welcome' ? 'Habit Beginner' : 'Alışkanlık Başlangıcı',
-      description: t('welcome') === 'Welcome' ? 'You completed your first habit!' : 'İlk alışkanlığını tamamladın!',
+      title: currentLanguage === 'en' ? 'Habit Beginner' : 'Alışkanlık Başlangıcı',
+      description: currentLanguage === 'en' ? 'You completed your first habit!' : 'İlk alışkanlığını tamamladın!',
       icon: '🌟',
       category: 'goals',
       requirement: { type: 'total', value: 1 },
@@ -277,8 +277,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_streak_7',
-      title: t('welcome') === 'Welcome' ? 'Weekly Habit' : 'Haftalık Alışkanlık',
-      description: t('welcome') === 'Welcome' ? 'You completed a habit for 7 consecutive days!' : 'Bir alışkanlığı 7 gün üst üste tamamladın!',
+      title: currentLanguage === 'en' ? 'Weekly Habit' : 'Haftalık Alışkanlık',
+      description: currentLanguage === 'en' ? 'You completed a habit for 7 consecutive days!' : 'Bir alışkanlığı 7 gün üst üste tamamladın!',
       icon: '🔥',
       category: 'streak',
       requirement: { type: 'streak', value: 7 },
@@ -286,8 +286,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_streak_30',
-      title: t('welcome') === 'Welcome' ? 'Monthly Habit Master' : 'Aylık Alışkanlık Ustası',
-      description: t('welcome') === 'Welcome' ? 'You completed a habit for 30 consecutive days!' : 'Bir alışkanlığı 30 gün üst üste tamamladın!',
+      title: currentLanguage === 'en' ? 'Monthly Habit Master' : 'Aylık Alışkanlık Ustası',
+      description: currentLanguage === 'en' ? 'You completed a habit for 30 consecutive days!' : 'Bir alışkanlığı 30 gün üst üste tamamladın!',
       icon: '👑',
       category: 'streak',
       requirement: { type: 'streak', value: 30 },
@@ -295,8 +295,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_master_100',
-      title: t('welcome') === 'Welcome' ? 'Habit Legend' : 'Alışkanlık Efsanesi',
-      description: t('welcome') === 'Welcome' ? 'You completed 100 habits!' : '100 alışkanlık tamamladın!',
+      title: currentLanguage === 'en' ? 'Habit Legend' : 'Alışkanlık Efsanesi',
+      description: currentLanguage === 'en' ? 'You completed 100 habits!' : '100 alışkanlık tamamladın!',
       icon: '🏆',
       category: 'goals',
       requirement: { type: 'total', value: 100 },
@@ -304,8 +304,8 @@ export const useAchievements = (userId?: string) => {
     },
     {
       id: 'habit_perfect_week',
-      title: t('welcome') === 'Welcome' ? 'Perfect Week' : 'Mükemmel Hafta',
-      description: t('welcome') === 'Welcome' ? 'You completed all your habits for a week!' : 'Bir hafta boyunca tüm alışkanlıklarını tamamladın!',
+      title: currentLanguage === 'en' ? 'Perfect Week' : 'Mükemmel Hafta',
+      description: currentLanguage === 'en' ? 'You completed all your habits for a week!' : 'Bir hafta boyunca tüm alışkanlıklarını tamamladın!',
       icon: '⭐',
       category: 'goals',
       requirement: { type: 'milestone', value: 7 },
@@ -315,8 +315,8 @@ export const useAchievements = (userId?: string) => {
     // Özel Başarılar
     {
       id: 'app_lover_30',
-      title: t('welcome') === 'Welcome' ? 'App Lover' : 'Uygulama Sevgilisi',
-      description: t('welcome') === 'Welcome' ? 'You used the app for 30 days!' : '30 gün uygulamayı kullandın!',
+      title: currentLanguage === 'en' ? 'App Lover' : 'Uygulama Sevgilisi',
+      description: currentLanguage === 'en' ? 'You used the app for 30 days!' : '30 gün uygulamayı kullandın!',
       icon: '💖',
       category: 'streak',
       requirement: { type: 'consecutive', value: 30 },

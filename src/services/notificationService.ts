@@ -48,6 +48,8 @@ export interface NotificationSettings {
   enabled: boolean;
   morningEnabled: boolean;
   morningTime: string; // "09:00" formatında
+  lunchEnabled?: boolean;
+  lunchTime?: string; // "12:00" formatında
   eveningEnabled: boolean;
   eveningTime: string; // "21:00" formatında
   taskRemindersEnabled: boolean;
@@ -65,6 +67,8 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   enabled: true,
   morningEnabled: true,
   morningTime: '09:00',
+  lunchEnabled: true,
+  lunchTime: '12:00',
   eveningEnabled: true,
   eveningTime: '21:00',
   taskRemindersEnabled: true,
@@ -304,6 +308,33 @@ export const scheduleMorningNotification = async (): Promise<void> => {
 };
 
 /**
+ * Öğlen Bildirimi Planla
+ */
+export const scheduleLunchNotification = async (): Promise<void> => {
+  const settings = await loadNotificationSettings();
+
+  if (!settings.enabled || settings.lunchEnabled === false) return;
+
+  const [hour, minute] = (settings.lunchTime || '12:00').split(':').map(Number);
+
+  // Öğlen mesajı – zaman dilimine göre uygun selamlama
+  const message = getMessageByTimeOfDay(undefined, settings.timezone);
+
+  await Notifications.cancelScheduledNotificationAsync('lunch-reminder');
+  await scheduleNotification(
+    'lunch-reminder',
+    message.title,
+    message.body,
+    hour,
+    minute,
+    true,
+    'default'
+  );
+
+  console.log(`Lunch notification scheduled for ${hour}:${minute}`);
+};
+
+/**
  * Akşam Bildirimi Planla
  */
 export const scheduleEveningNotification = async (): Promise<void> => {
@@ -402,6 +433,7 @@ export const scheduleAllNotifications = async (): Promise<void> => {
 
   // Yeni bildirimleri planla
   await scheduleMorningNotification();
+  await scheduleLunchNotification();
   await scheduleEveningNotification();
   await scheduleDailySummaryNotification();
 

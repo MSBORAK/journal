@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { themes, ThemeName } from '../themes';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface CelebrationModalProps {
@@ -34,8 +35,27 @@ export default function CelebrationModal({
   themeName = 'dark'
 }: CelebrationModalProps) {
   const { currentTheme } = useTheme();
+  const { t } = useLanguage();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // Simple luminance check for dynamic theming
+  const hexToRgb = (hex: string) => {
+    const m = hex?.replace('#', '');
+    if (!m || (m.length !== 6 && m.length !== 3)) return { r: 0, g: 0, b: 0 };
+    const full = m.length === 3 ? m.split('').map(c => c + c).join('') : m;
+    const num = parseInt(full, 16);
+    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  };
+  const getLuminance = (hex: string) => {
+    const { r, g, b } = hexToRgb(hex || '#000000');
+    const [R, G, B] = [r, g, b].map(v => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  };
+  const isLightBg = getLuminance(currentTheme.colors.background || '#000000') > 0.5;
 
   useEffect(() => {
     if (visible) {
@@ -118,6 +138,12 @@ export default function CelebrationModal({
   };
 
   const getGradientColors = (): [string, string] => {
+    // Light themes: use card as base to avoid overly dark modal
+    if (isLightBg) {
+      const base = currentTheme.colors.card || '#FFFFFF';
+      const accent = (currentTheme.colors.primary || '#000000') + '40';
+      return [base, accent] as [string, string];
+    }
     const themeColors = getThemeColors();
     const colors = themeColors[type];
     return [colors[0], colors[1]] as [string, string];
@@ -130,7 +156,7 @@ export default function CelebrationModal({
       <Animated.View 
         style={[
           styles.overlay,
-          { opacity: fadeAnim }
+          { opacity: fadeAnim, backgroundColor: isLightBg ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.7)' }
         ]}
       >
         {/* Konfeti Efekti */}
@@ -139,7 +165,10 @@ export default function CelebrationModal({
           origin={{ x: width / 2, y: -10 }}
           fadeOut
           autoStart
-          colors={['#FF6B6B', '#4ECDC4', '#45B7D1', '#9B5CFF', '#FFD93D', '#6BCF7F']}
+          colors={[
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#9B5CFF', '#FFD93D', '#6BCF7F',
+            '#F38BA0', '#78DEC7', '#6A67CE', '#F9A826'
+          ]}
         />
 
         {/* Modal Container */}
@@ -156,7 +185,12 @@ export default function CelebrationModal({
             colors={getGradientColors()}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.gradientBackground}
+            style={[
+              styles.gradientBackground,
+              {
+                backgroundColor: isLightBg ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.75)'
+              }
+            ]}
           >
             {/* Floating Elements */}
             <View style={styles.floatingElements}>
@@ -174,15 +208,24 @@ export default function CelebrationModal({
               </View>
               <View style={styles.titleContainer}>
                 <Text style={styles.titleEmoji}>🎉</Text>
-                <Text style={styles.title}>Congratulations!</Text>
+              <Text style={[
+                styles.title,
+                { 
+                  color: isLightBg ? (currentTheme.colors.text || '#1F2937') : '#FFFFFF',
+                  textShadowColor: isLightBg ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'
+                }
+              ]}>{t('common.congratulations') || 'Congratulations!'}</Text>
               </View>
             </View>
 
             {/* Message */}
             <View style={styles.content}>
-              <View style={styles.messageCard}>
-                <Text style={styles.messageTitle}>"{title}"</Text>
-                <Text style={styles.message}>{message}</Text>
+              <View style={[styles.messageCard, { 
+                backgroundColor: isLightBg ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.22)',
+                borderColor: isLightBg ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.28)'
+              }]}>
+                <Text style={[styles.messageTitle, { color: isLightBg ? (currentTheme.colors.text || '#111827') : '#FFFFFF' }]}>"{title}"</Text>
+                <Text style={[styles.message, { color: isLightBg ? (currentTheme.colors.text || '#111827') : '#FFFFFF' }]}>{message}</Text>
               </View>
             </View>
 
@@ -193,12 +236,12 @@ export default function CelebrationModal({
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.1)']}
+                colors={[currentTheme.colors.primary + '55', currentTheme.colors.primary + '33']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.closeButtonGradient}
               >
-                <Text style={styles.closeButtonText}>Close ✨</Text>
+                <Text style={[styles.closeButtonText, { color: isLightBg ? (currentTheme.colors.text || '#111827') : '#FFFFFF' }]}>{(t('common.close') || 'Close') + ' ✨'}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </LinearGradient>

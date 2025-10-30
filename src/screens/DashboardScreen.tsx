@@ -332,7 +332,16 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     const initializeNotifications = async () => {
       const hasPermission = await requestNotificationPermissions();
       if (hasPermission) {
-        await scheduleAllNotifications();
+        try {
+          const last = await AsyncStorage.getItem('notificationsScheduledAt');
+          const today = new Date().toDateString();
+          if (last !== today) {
+            await scheduleAllNotifications();
+            await AsyncStorage.setItem('notificationsScheduledAt', today);
+          }
+        } catch {
+          await scheduleAllNotifications();
+        }
       }
     };
 
@@ -340,12 +349,16 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   }, []);
 
   // İçgörüleri hesapla
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
+
   useEffect(() => {
     if (entries.length > 0) {
-      const allInsights = getAllInsights(entries, t);
+      const allInsights = getAllInsights(entries, t, locale);
       setInsights(allInsights.slice(0, 3)); // En önemli 3 içgörüyü göster
+    } else {
+      setInsights([]);
     }
-  }, [entries]);
+  }, [entries, t, locale]);
 
   // Wellness verilerini yükle
   useEffect(() => {
@@ -353,11 +366,13 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   }, []);
 
   // İlk kullanıcı kontrolü - hoşgeldin mesajı
+  const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(true);
   useEffect(() => {
     const checkFirstTimeUser = async () => {
       try {
         const isFirstTime = await AsyncStorage.getItem('hasSeenWelcome');
         if (!isFirstTime) {
+          setHasSeenWelcome(false);
           // 1 saniye bekle ki sayfa yüklensin
           setTimeout(() => {
             setShowWelcomeModal(true);
@@ -948,24 +963,24 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     let selectedMessages = messages;
     
     if (moodValue >= 5) {
-      // Harika ruh hali - çok pozitif mesajlar
+      // Harika ruh hali - çok pozitif mesajlar (i18n)
       selectedMessages = [
-        'Bu enerjiyi koru! Sen muhteşemsin! 🌟',
-        'Bu mutluluğu dünyaya yay! Pozitif enerji bulaşıcıdır! ☀️',
-        'Bugün senin günün! Bu anı yaşa! 🎉',
-        'Bu pozitif enerjiyi kullan, hayallerine adım at! 🚀',
-        'Sen harikasın! Bu enerjiyle her şeyi başarabilirsin! 💪',
-        'Bu enerjiyle devam et! Sen doğru yoldasın! 🌈',
-        'Sen muhteşemsin! Bugün de bunu hatırla! 🌈',
+        t('motivation.messages.youAreAmazing'),
+        t('motivation.messages.youAreStarShineToday'),
+        t('motivation.messages.followYourDreamsOneMoreStep'),
+        t('motivation.messages.believeInYourselfCanDoIt'),
+        t('motivation.messages.successPreparationOpportunity'),
+        t('motivation.messages.todayBeautiful'),
+        t('motivation.messages.youAreMagnificentRemember'),
       ];
     } else if (moodValue === 4) {
-      // Mutlu ruh hali - pozitif mesajlar
+      // Mutlu ruh hali - pozitif mesajlar (i18n)
       selectedMessages = [
-        'Bu enerjiyle devam et! Sen doğru yoldasın! 🌈',
-        'Güzel bir gün geçiriyorsun! Böyle devam et! ✨',
-        'Bu pozitiflik seni güzel yerlere götürecek! 🦋',
-        'Bugün de kendini sevmeye devam et! 💕',
-        'Bu enerjiyi kullan, hedeflerine odaklan! 🎯',
+        t('motivation.messages.todayBeautiful'),
+        t('motivation.messages.youAreAmazing'),
+        t('motivation.messages.believeInYourself'),
+        t('motivation.messages.loveYourself'),
+        t('motivation.messages.youAreSuccessful'),
         t('motivation.messages.thinkPositiveTodayBeautiful'),
         t('motivation.messages.youAreMagnificentRemember'),
       ];
@@ -2664,7 +2679,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           >
             <Text style={dynamicStyles.moodActionText}>
               <Ionicons name="create-outline" size={18} color={currentTheme.colors.primary} />
-              {' '}{t('writeDiary')}
+              {' '}{t('diary.writeDiary')}
             </Text>
             </TouchableOpacity>
           </View>
@@ -2672,7 +2687,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         </View>
       </Animated.View>
 
-      {/* Motivation Message */}
+      {/* Motivation Message (hide for first-time until welcome dismissed) */}
+      {(!showWelcomeModal && hasSeenWelcome) && (
       <Animated.View
         style={{
           opacity: fadeAnims.motivation,
@@ -2703,6 +2719,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             </Text>
           </View>
       </Animated.View>
+      )}
 
       {/* Personality Card */}
       <PersonalityCard />
@@ -2879,7 +2896,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 fontWeight: 'bold',
                 color: currentTheme.colors.text,
                 textAlign: 'center',
-              }}>{t('welcome')}</Text>
+              }}>{t('dashboard.welcome')}</Text>
             </View>
             
             <Text style={{
@@ -2913,6 +2930,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setShowWelcomeModal(false);
+                setHasSeenWelcome(true);
+                AsyncStorage.setItem('hasSeenWelcome', 'true').catch(() => {});
               }}
               style={{
                 backgroundColor: currentTheme.colors.primary,
@@ -2949,12 +2968,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       />
     )}
 
-    {/* Motivation Card */}
-    <MotivationCard 
-      userId={user?.uid}
-      autoShow={true}
-      delay={3000}
-    />
+    {/* Motivation Card (hide for first-time until welcome dismissed) */}
+    {(!showWelcomeModal && hasSeenWelcome) && (
+      <MotivationCard 
+        userId={user?.uid}
+        autoShow={true}
+        delay={3000}
+      />
+    )}
 
     </>
   );

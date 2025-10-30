@@ -30,7 +30,8 @@ interface DreamsGoalsScreenProps {
 const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: DreamsGoalsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const {
     dreams,
     goals,
@@ -111,7 +112,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
     if (!dateIso) return '';
     try {
       const d = new Date(dateIso);
-      return d.toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch {
       return '';
     }
@@ -286,6 +287,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           { borderColor: dream.isFavorite ? getFavoriteColor() : currentTheme.colors.border }
         ]}
       >
+        {/* removed accent band */}
 
         <View style={dynamicStyles.cardHeader}>
           <View style={dynamicStyles.cardIconContainer}>
@@ -564,6 +566,8 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       backgroundColor: 'transparent',
       borderWidth: 1,
     },
+    glassCard: {},
+    accentBand: {},
     cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',

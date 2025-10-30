@@ -121,7 +121,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       console.error('❌ Error details:', JSON.stringify(error));
       // Hata olursa eski ayarlara geri dön
       setSettings(settings);
-      showAlert('❌ Hata', 'Ayarlar kaydedilemedi. Lütfen tekrar deneyin.', 'error');
+      showAlert(t('settings.error'), t('settings.reminderNotSaved'), 'error');
     }
   };
 
@@ -156,7 +156,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       }
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
-      showAlert('❌ Hata', 'Bildirim izni alınamadı. Lütfen tekrar deneyin.', 'error');
+      showAlert(t('settings.error'), t('settings.notificationPermissionRequired'), 'error');
     }
   };
 
@@ -371,7 +371,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
   if (loading) {
     return (
       <View style={[dynamicStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: currentTheme.colors.text }}>Yükleniyor...</Text>
+        <Text style={{ color: currentTheme.colors.text }}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -557,9 +557,9 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           </View>
         </View>
 
-        {/* Diğer Bildirimler */}
+        {/* Other Notifications */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>📋 Diğer Bildirimler</Text>
+          <Text style={dynamicStyles.sectionTitle}>📋 {t('settings.otherNotificationsTitle')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
@@ -678,13 +678,13 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
             {settings.quietHoursEnabled && (
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={dynamicStyles.settingTitle}>Başlangıç</Text>
+                  <Text style={dynamicStyles.settingTitle}>{t('settings.silentStart')}</Text>
                   <View style={dynamicStyles.timeContainer}>
                     <Text style={dynamicStyles.timeText}>{settings.quietStartTime}</Text>
                   </View>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={dynamicStyles.settingTitle}>Bitiş</Text>
+                  <Text style={dynamicStyles.settingTitle}>{t('settings.silentEnd')}</Text>
                   <View style={dynamicStyles.timeContainer}>
                     <Text style={dynamicStyles.timeText}>{settings.quietEndTime}</Text>
                   </View>
@@ -703,7 +703,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}

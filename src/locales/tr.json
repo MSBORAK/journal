@@ -23,7 +23,8 @@
     "warning": "Uyarı",
     "info": "Bilgi",
     "hide": "Gizle",
-    "draw": "Çiz"
+    "draw": "Çiz",
+    "congratulations": "Tebrikler!"
   },
   "navigation": {
     "dashboard": "Ana Sayfa",
@@ -182,7 +183,49 @@
     "diaryNotSaved": "Günlük kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
     "titlePlaceholder": "Bugün nasıl geçti?",
     "contentPlaceholder": "Bugün neler yaşadın? Nasıl hissettin? Ne öğrendin?",
-    "addTagPlaceholder": "Etiket ekle (örn: iş, aile, spor)"
+    "addTagPlaceholder": "Etiket ekle (örn: iş, aile, spor)",
+    "guidedQuestions": {
+      "happiness": {
+        "title": "Bugün seni ne gülümsetti?",
+        "placeholder": "Seni mutlu eden bir anı yaz…"
+      },
+      "gratitude": {
+        "title": "Bugün neye şükrediyorsun?",
+        "placeholder": "Şükrettiğin şeyleri yaz…"
+      },
+      "accomplishment": {
+        "title": "Bugün ne başardın?",
+        "placeholder": "Tamamladığın bir iş ya da kaydettiğin ilerleme…"
+      },
+      "lesson": {
+        "title": "Bugün ne öğrendin?",
+        "placeholder": "Küçük bir ders, farkındalık ya da içgörü…"
+      },
+      "communication": {
+        "title": "Bugün kiminle bağ kurdun?",
+        "placeholder": "Anlamlı bir sohbet ya da etkileşim…"
+      },
+      "energy": {
+        "title": "Bugün enerjin nasıldı?",
+        "placeholder": "Düşük/yüksek enerji anları, etkileyen şeyler…"
+      },
+      "growth": {
+        "title": "Gelişimin için ne yaptın?",
+        "placeholder": "Alışkanlıkların, hedeflerin veya hayallerin için küçük bir adım…"
+      },
+      "emotion": {
+        "title": "Bugün hangi duygu hâkimdi?",
+        "placeholder": "Duygunun adını ve nedenini yaz…"
+      },
+      "tomorrow": {
+        "title": "Yarın ne yapacaksın?",
+        "placeholder": "Yarın için küçük bir plan veya niyet…"
+      },
+      "challenge": {
+        "title": "Bugün seni ne zorladı?",
+        "placeholder": "Bir zorluğu ve nasıl baş ettiğini anlat…"
+      }
+    }
   },
   "mood": {
     "mood": "Ruh Hali",
@@ -320,7 +363,7 @@
     "stressLevel": "Stres Seviyesi",
     "energyLevel": "Enerji Seviyesi",
     "wellnessSaved": "💚 Kaydedildi!",
-    "wellnessSavedDesc": "Wellness verilerin başarıyla kaydedildi. Bugünkü sağlık durunun kaydedildi!",
+    "wellnessSavedDesc": "Wellness verilerin başarıyla kaydedildi. Bugünkü sağlık durumun kaydedildi!",
     "wellnessError": "❌ Hata",
     "wellnessErrorDesc": "Veriler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
     "healthScore": "Sağlık Puanı",
@@ -348,7 +391,7 @@
     "veryDangerous": "Çok Tehlikeli",
     "perfect": "Mükemmel",
     "super": "Süper",
-    "epic": "Epic",
+    "epic": "Epik",
     "veryBad": "Çok Kötü",
     "bad": "Kötü",
     "good": "İyi"
@@ -516,7 +559,8 @@
     "progress": "İlerleme",
     "unlockDate": "Açılma Tarihi",
     "noAchievements": "Henüz başarı kazanmamışsın",
-    "keepGoing": "Devam et!"
+    "keepGoing": "Devam et!",
+    "unknown": "Bilinmiyor"
   },
   "personality": {
     "personalityCard": "Kişilik Kartım",
@@ -556,11 +600,13 @@
     "updateAccountPassword": "Hesap şifrenizi güncelleyin. Güvenli bir şifre seçin.",
     "updateAccountEmail": "Hesap email adresinizi değiştirin. Yeni email adresinize doğrulama maili gönderilecek.",
     "manageAccountInfo": "Hesap bilgilerinizi buradan yönetebilirsiniz. Profil bilgilerinizi güncelleyin,",
-    "changeEmailPassword": "email ve şifre değiştinte veya hesabınızı silin.",
+    "changeEmailPassword": "email ve şifre değiştirin veya hesabınızı silin.",
     "updateNameAndBio": "Adınızı ve bio bilginizi güncelleyin.",
     "edit": "Düzenle",
     "change": "Değiştir",
     "logOutSecurely": "Hesabınızdan güvenli bir şekilde çıkış yapın.",
+      "resetMotivationHistoryTitle": "Motivasyon Geçmişini Sıfırla",
+      "resetMotivationHistorySubtitle": "Motivasyon mesajlarını tekrar göster",
     "deleteAccountWarning": "Bu işlem GERİ ALINAMAZ!",
     "dataToBeDeleted": "Silinecek veriler:",
     "allDiaryEntries": "Tüm günlük yazıları",
@@ -590,7 +636,7 @@
     "passwordCannotBeSame": "Yeni şifre mevcut şifrenizle aynı olamaz!",
     "passwordUpdated": "Şifreniz başarıyla güncellendi!",
     "warning": "⚠️ Uyarı",
-    "success": "✅ Başarılı",
+    
     "notifications": "Bildirimler",
     "notificationsEnabled": "🔔 Bildirimler Açıldı",
     "permissionRequired": "⚠️ İzin Gerekli",
@@ -644,7 +690,7 @@
     "accountSettingsDesc": "Profil, e-posta ve şifre ayarları",
     "changeAppLanguage": "Uygulama dilini değiştir",
     "otherAppPreferences": "Diğer uygulama tercihleri",
-    "appVersion": "Günlük v1.0.0",
+    "appVersion": "Rhythm v1.0.0",
     "chooseTheme": "Tema Seç",
     "customizeAppearance": "Uygulamanızın görünümünü kişiselleştirin",
     "themeTipPart1": "💡 İpucu: Seçtiğiniz tema tüm uygulamada anında uygulanır.",
@@ -683,6 +729,13 @@
     "download": "📥 İndir",
     "security": "Güvenlik",
     "securityInformation": "Güvenlik Bilgileri",
+      "secureCloudTitle": "Güvenli Bulut",
+      "secureCloudDesc": "Verileriniz güvenli Supabase sunucularında saklanır.",
+      "accessControlTitle": "Erişim Kontrolü",
+      "accessControlDesc": "Verilerinize yalnızca siz erişebilirsiniz, üçüncü taraflar erişemez.",
+      "active": "Aktif",
+      "contactTitle": "İletişim",
+      "contactContent": "Gizlilik veya güvenlik için bize ulaşın:\n\n📧 Email: msesoftware1425@gmail.com\n🛡️ Güvenlik: msesoftware1425@gmail.com\n📞 Destek: msesoftware1425@gmail.com",
     "termsOfService": "Hizmet Şartları",
     "about": "Hakkında",
     "version": "Sürüm",
@@ -769,7 +822,7 @@
     "deviceChangeLabel": "Cihaz Değişikliği:",
     "restoreDataWhenSwitching": "Yeni cihazınıza geçerken verilerinizi geri yükleyin.",
     "aboutTitle": "ℹ️ Hakkında",
-    "aboutContent": "Rhythm v1.0.0\n\n🎵 Spiritual balance and life rhythm app:\n• Daily writing system\n• Mood tracking and analysis\n• Dreams & goals board\n• Tasks and reminders\n• Pomodoro timer and focus mode\n• Statistics and progress tracking\n• Personality card system\n• 7 different theme options\n• Offline working\n• Data backup\n\nDeveloper: MSESOFT\n© 2025\n\nContact: msesoftware1425@gmail.com",
+    "aboutContent": "Rhythm v1.0.0\n\n🎵 Ruhsal denge ve yaşam ritmi uygulaması:\n• Günlük yazma sistemi\n• Ruh hali takibi ve analiz\n• Hayaller & hedefler panosu\n• Görevler ve hatırlatıcılar\n• Pomodoro zamanlayıcı ve odak modu\n• İstatistikler ve ilerleme takibi\n• Kişilik kartı sistemi\n• 7 farklı tema seçeneği\n• Çevrimdışı çalışma\n• Veri yedekleme\n\nGeliştirici: MSESOFT\n© 2025\n\nİletişim: msesoftware1425@gmail.com",
     "helpSupportTitle": "❓ Yardım & Destek",
     "helpSupportContent": "Sıkça Sorulan Sorular:\n\n❓ Günlük nasıl yazılır?\n• Ana sayfadaki \"Günlük Yaz\" butonuna bas\n\n❓ Verilerimi nasıl yedeklerim?\n• Ayarlar > Veri & Yedekleme bölümünden\n\n❓ Temayı nasıl değiştiririm?\n• Ayarlar > Görünüm bölümünden\n\n❓ Bildirimleri nasıl ayarlarım?\n• Ayarlar > Bildirimler bölümünden\n\nDaha fazla yardım için: msesoftware1425@gmail.com",
     "rateAppTitle": "⭐ Uygulamayı Değerlendir",
@@ -862,7 +915,7 @@
       "valueYourself": "Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!",
       "regularTime": "Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!",
       "nourishSoul": "Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!",
-      "innerLightShining": "İçindeki ışık parıyor! ✨",
+      "innerLightShining": "İçindeki ışık parlıyor! ✨",
       "youAreValuable": "Sen çok değerlisin! 💎",
       "strongerEveryDay": "Her gün daha güçlüsün! 🌱",
       "beKindToYourself": "Kendine nazik ol! 🌸",
@@ -879,7 +932,7 @@
       "youAreLight": "Sen bir ışıksın! 💡",
       "todayBeautiful": "Bugün güzel olacak! 🌅",
       "youArePrecious": "Sen değerlisin! 💖",
-      "innerBeautyShining": "İçindeki güzellik parıyor! 🌸",
+      "innerBeautyShining": "İçindeki güzellik parlıyor! 🌸",
       "youAreMiracle": "Sen bir mucizesin! 🌟",
       "acceptYourself": "Kendini kabul et! 🤲",
       "youAreBeautiful": "Sen güzelsin! 🌺",
@@ -966,6 +1019,9 @@
   },
   "focus": {
     "focusMode": "Odaklanma Modu",
+    "screenTitle": "Odaklanma Zamanı",
+    "subtitle": "Bu an sadece senin... Huzurla odaklan 🕯️",
+    "minuteAbbr": "dk",
     "work": "Çalışma",
     "break": "Mola",
     "start": "Başlat",
@@ -973,6 +1029,12 @@
     "resume": "Devam Et",
     "stop": "Durdur",
     "reset": "Sıfırla",
+    "focusing": "Odaklanıyor...",
+    "paused": "Duraklatıldı",
+    "quitTitle": "Odaklanmayı Bırak?",
+    "quitMessage": "Yarıda bırakmak istediğinden emin misin?",
+    "quit": "Bırak",
+    "continue": "Devam Et",
     "timeRemaining": "Kalan Süre",
     "sessionComplete": "Oturum Tamamlandı",
     "takeBreak": "Mola Zamanı",
@@ -980,7 +1042,20 @@
     "focusTime": "Odaklanma Süresi",
     "breakTime": "Mola Süresi",
     "sessionsCompleted": "Tamamlanan Oturum",
-    "totalFocusTime": "Toplam Odaklanma Süresi"
+    "totalFocusTime": "Toplam Odaklanma Süresi",
+    "completedTitle": "Odaklanma Tamamlandı! 🎉",
+    "completedQuestion": "Odaklandığın şey neydi?",
+    "completedPlaceholder": "Örn: Proje raporu yazmak...",
+    "howDoYouFeel": "Kendini nasıl hissediyorsun?",
+    "complete": "Tamamla",
+    "moods": {
+      "happy": "Mutlu",
+      "calm": "Sakin",
+      "strong": "Güçlü",
+      "focused": "Odaklı",
+      "energetic": "Enerjik",
+      "peaceful": "Huzurlu"
+    }
   },
   "insights": {
     "greatWeek": "Harika Hafta! 😊",
@@ -1007,6 +1082,7 @@
     "startAgainDesc": "Serin kırıldı ama sorun değil. Bugün yeniden başla!",
     "canBreakRecord": "Bu rekoru tekrar kırabilirsin!",
     "mostUsedWords": "En Çok Kullandığın Kelimeler 💬",
+    "mostUsedWordsDesc": "Sıklıkla şu kelimeleri kullanıyorsun: {words}",
     "positiveEnergy": "Pozitif Enerji! ✨",
     "positiveEnergyDesc": "Yazılarında daha pozitif kelimeler kullanıyorsun. Harika!",
     "takeCare": "Kendine İyi Bak 💙",
@@ -1014,9 +1090,11 @@
     "firstDiary": "İlk Günlüğün! 🎉",
     "firstDiaryDesc": "Tebrikler! Yolculuğuna başladın",
     "wordMaster": "Kelime Ustası! 📚",
+    "wordMasterDesc": "Toplam {count} kelime yazdın! Bu bir kitap eder",
     "writeFirstDiary": "İlk Günlüğünü Yaz! 🌟",
     "writeFirstDiaryDesc": "Yolculuğuna başlamak için ilk günlüğünü oluştur",
     "missYou": "Seni Özledik! 💙",
+    "missYouDesc": "{days} gündür yazmadın. Geri dön!",
     "regularGoal": "Düzenli Yazma Hedefi 🎯",
     "regularGoalDesc": "Her gün yazmayı dene, 30 günlük hedefine ulaş!"
   }

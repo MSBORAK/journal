@@ -16,6 +16,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useDiary } from '../hooks/useDiary';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
+import { QUESTION_ORDER } from '../constants/diaryQuestions';
 
 interface WriteDiaryStep3ScreenProps {
   navigation: any;
@@ -222,34 +223,10 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
   };
 
   const generateContent = () => {
-    const contentParts = [];
-    
-    // Rehber sorular cevapları
-    if (answers.happiness) {
-      contentParts.push(`Bugün beni en çok mutlu eden şey: ${answers.happiness}`);
-    }
-    
-    if (answers.lesson) {
-      contentParts.push(`Bugün öğrendiklerim: ${answers.lesson}`);
-    }
-    
-    if (answers.communication) {
-      contentParts.push(`İletişim deneyimim: ${answers.communication}`);
-    }
-    
-    if (answers.challenge) {
-      contentParts.push(`Karşılaştığım zorluklar: ${answers.challenge}`);
-    }
-    
-    // Serbest yazma
-    if (freeWriting) {
-      if (contentParts.length > 0) {
-        contentParts.push('\n---\n'); // Ayırıcı
-      }
-      contentParts.push(freeWriting);
-    }
-    
-    return contentParts.join('\n\n');
+    // Artık rehber soruların özetini metne eklemiyoruz.
+    // Yalnızca serbest yazımı kaydediyoruz; sorular ayrı listede gösterilecek.
+    const text = (freeWriting || '').trim();
+    return text;
   };
 
   const handleSave = async () => {
@@ -372,7 +349,9 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
           <View style={dynamicStyles.summaryItem}>
             <Text style={dynamicStyles.summaryLabel}>{t('mood.answeredQuestions')}</Text>
             <Text style={dynamicStyles.summaryValue}>
-              {Object.values(answers).filter((answer: any) => answer && answer.trim().length > 0).length}/4
+              {Object.entries(answers || {})
+                .filter(([key, value]: any) => QUESTION_ORDER.includes(key as any) && value && String(value).trim().length > 0)
+                .length}/{QUESTION_ORDER.length}
             </Text>
           </View>
           

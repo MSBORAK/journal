@@ -28,7 +28,8 @@ interface WriteDiaryScreenProps {
 export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   // const { fontConfig } = useFont(); // Kaldırıldı
   const { addEntry, updateEntry } = useDiary(user?.uid);
 
@@ -605,7 +606,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
                             ]} 
                           />
                           <Text style={styles.doodleInfo}>
-                            {new Date(doodle.timestamp).toLocaleTimeString('tr-TR', { 
+                            {new Date(doodle.timestamp).toLocaleTimeString(locale, { 
                               hour: '2-digit', 
                               minute: '2-digit' 
                             })}
@@ -661,7 +662,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
           <View style={dynamicStyles.inputContainer}>
             <Text style={dynamicStyles.label}>Tarih</Text>
             <Text style={styles.dateText}>
-              {new Date(existingEntry?.date || new Date()).toLocaleDateString('tr-TR', {
+              {new Date(existingEntry?.date || new Date()).toLocaleDateString(locale, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',

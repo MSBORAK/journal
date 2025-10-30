@@ -502,7 +502,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               onPress={handleSignOut}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>🚪 Çıkış Yap</Text>
+              <Text style={dynamicStyles.actionButtonText}>🚪 {t('settings.logout')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -511,17 +511,15 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="trash" size={20} color="#EF4444" />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Hesabı Sil</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.deleteAccount')}</Text>
             </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Hesabınızı ve tüm verilerinizi kalıcı olarak silin. Bu işlem geri alınamaz!
-            </Text>
+            <Text style={dynamicStyles.settingDescription}>{t('settings.deleteAccountWarning')}</Text>
             <TouchableOpacity
               style={[dynamicStyles.actionButton, dynamicStyles.dangerButton]}
               onPress={handleDeleteAccount}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>🗑️ Hesabı Sil</Text>
+              <Text style={dynamicStyles.actionButtonText}>🗑️ {t('settings.deleteAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>

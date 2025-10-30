@@ -31,7 +31,8 @@ interface RemindersScreenProps {
 const RemindersScreen = React.memo(function RemindersScreen({ navigation }: RemindersScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const { 
     reminders, 
     loading, 
@@ -710,7 +711,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                         📅 {(() => {
                           const [year, month, day] = reminder.date.split('-').map(Number);
                           const date = new Date(year, month - 1, day);
-                          return date.toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US', {
+                          return date.toLocaleDateString(locale, {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'

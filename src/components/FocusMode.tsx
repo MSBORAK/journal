@@ -76,19 +76,19 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
 
   // Duration options
   const durations = [
-    { label: t('welcome') === 'Welcome' ? '15 min' : '15 dk', value: 15 },
-    { label: t('welcome') === 'Welcome' ? '25 min' : '25 dk', value: 25 },
-    { label: t('welcome') === 'Welcome' ? '45 min' : '45 dk', value: 45 },
+    { label: `15 ${t('focus.minuteAbbr')}`, value: 15 },
+    { label: `25 ${t('focus.minuteAbbr')}`, value: 25 },
+    { label: `45 ${t('focus.minuteAbbr')}`, value: 45 },
   ];
 
   // Mood options
   const moods = [
-    { emoji: '😊', label: 'Mutlu' },
-    { emoji: '😌', label: 'Sakin' },
-    { emoji: '💪', label: 'Güçlü' },
-    { emoji: '🎯', label: 'Odaklı' },
-    { emoji: '✨', label: 'Enerjik' },
-    { emoji: '🧘', label: 'Huzurlu' },
+    { emoji: '😊', label: t('focus.moods.happy') },
+    { emoji: '😌', label: t('focus.moods.calm') },
+    { emoji: '💪', label: t('focus.moods.strong') },
+    { emoji: '🎯', label: t('focus.moods.focused') },
+    { emoji: '✨', label: t('focus.moods.energetic') },
+    { emoji: '🧘', label: t('focus.moods.peaceful') },
   ];
 
   // Handle duration change
@@ -118,11 +118,11 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
     
     setAlertConfig({
       visible: true,
-      title: 'Tebrikler! 🎉',
-      message: 'Odaklanma seansını başarıyla tamamladın. Harika iş çıkardın!',
+      title: t('focus.completedTitle'),
+      message: t('focus.sessionComplete'),
       type: 'success',
       primaryButton: {
-        text: 'Tamam',
+        text: t('common.ok') || 'OK',
         onPress: () => {
           setAlertConfig({ ...alertConfig, visible: false });
           onClose();
@@ -138,11 +138,11 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
     if (isActive && !isPaused) {
       setAlertConfig({
         visible: true,
-        title: t('welcome') === 'Welcome' ? 'Quit Focus?' : 'Odaklanmayı Bırak?',
-        message: t('welcome') === 'Welcome' ? 'Are you sure you want to quit?' : 'Yarıda bırakmak istediğinden emin misin?',
+        title: t('focus.quitTitle'),
+        message: t('focus.quitMessage'),
         type: 'warning',
         primaryButton: {
-          text: t('welcome') === 'Welcome' ? 'Quit' : 'Bırak',
+          text: t('focus.quit'),
           onPress: () => {
             setAlertConfig({ ...alertConfig, visible: false });
             resetTimer();
@@ -153,7 +153,7 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
           style: 'danger',
         },
         secondaryButton: {
-          text: 'Devam Et',
+          text: t('focus.continue'),
           onPress: () => setAlertConfig({ ...alertConfig, visible: false }),
           style: 'secondary',
         },
@@ -426,9 +426,9 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
 
           {!showReflection ? (
             <View style={dynamicStyles.content}>
-              <Text style={dynamicStyles.title}>{t('welcome') === 'Welcome' ? 'Focus Time' : 'Odaklanma Zamanı'}</Text>
+              <Text style={dynamicStyles.title}>{t('focus.screenTitle')}</Text>
               <Text style={dynamicStyles.subtitle}>
-                {t('welcome') === 'Welcome' ? 'This moment is only yours... Focus peacefully 🕯️' : 'Bu an sadece senin... Huzurla odaklan 🕯️'}
+                {t('focus.subtitle')}
               </Text>
 
               {/* Duration Selector */}
@@ -483,7 +483,7 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
                   <Text style={dynamicStyles.timeText}>{formatTime(timeLeft)}</Text>
                   {isActive && (
                     <Text style={dynamicStyles.statusText}>
-                      {isPaused ? 'Duraklatıldı' : 'Odaklanıyor...'}
+                      {isPaused ? t('focus.paused') : t('focus.focusing')}
                     </Text>
                   )}
                 </View>
@@ -497,7 +497,7 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
                     onPress={startTimer}
                   >
                     <Text style={[dynamicStyles.buttonText, dynamicStyles.primaryButtonText]}>
-                      {t('welcome') === 'Welcome' ? 'Start' : 'Başlat'}
+                      {t('focus.start')}
                     </Text>
                   </TouchableOpacity>
                 ) : (
@@ -507,14 +507,14 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
                       onPress={isPaused ? startTimer : pauseTimer}
                     >
                       <Text style={[dynamicStyles.buttonText, dynamicStyles.primaryButtonText]}>
-                        {isPaused ? 'Devam' : 'Duraklat'}
+                        {isPaused ? t('focus.resume') : t('focus.pause')}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={dynamicStyles.controlButton}
                       onPress={resetTimer}
                     >
-                      <Text style={dynamicStyles.buttonText}>Sıfırla</Text>
+                      <Text style={dynamicStyles.buttonText}>{t('focus.reset')}</Text>
                     </TouchableOpacity>
                   </>
                 )}
@@ -522,16 +522,12 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
             </View>
           ) : (
             <View style={dynamicStyles.reflectionContainer}>
-              <Text style={dynamicStyles.reflectionTitle}>
-                Odaklanma Tamamlandı! 🎉
-              </Text>
+              <Text style={dynamicStyles.reflectionTitle}>{t('focus.completedTitle')}</Text>
 
-              <Text style={dynamicStyles.reflectionLabel}>
-                Odaklandığın şey neydi?
-              </Text>
+              <Text style={dynamicStyles.reflectionLabel}>{t('focus.completedQuestion')}</Text>
               <TextInput
                 style={dynamicStyles.reflectionInput}
-                placeholder="Örn: Proje raporu yazmak..."
+                placeholder={t('focus.completedPlaceholder')}
                 placeholderTextColor={currentTheme.colors.muted}
                 value={focusSubject}
                 onChangeText={setFocusSubject}
@@ -539,9 +535,7 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
               />
 
               <View style={dynamicStyles.moodContainer}>
-                <Text style={dynamicStyles.reflectionLabel}>
-                  Kendini nasıl hissediyorsun?
-                </Text>
+                <Text style={dynamicStyles.reflectionLabel}>{t('focus.howDoYouFeel')}</Text>
                 <View style={dynamicStyles.moodGrid}>
                   {moods.map((mood) => (
                     <TouchableOpacity
@@ -563,7 +557,7 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
                 style={dynamicStyles.submitButton}
                 onPress={handleReflectionSubmit}
               >
-                <Text style={dynamicStyles.submitButtonText}>Tamamla</Text>
+                <Text style={dynamicStyles.submitButtonText}>{t('focus.complete')}</Text>
               </TouchableOpacity>
             </View>
           )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DailyTask, TaskProgress, TaskCategory, TaskAchievement } from '../types';
 
@@ -8,6 +9,7 @@ const CATEGORIES_STORAGE_KEY = '@task_categories';
 const ACHIEVEMENTS_STORAGE_KEY = '@task_achievements';
 
 export const useTasks = (userId?: string) => {
+  const { currentLanguage } = useLanguage();
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [progress, setProgress] = useState<TaskProgress[]>([]);
   const [categories, setCategories] = useState<TaskCategory[]>([]);
@@ -197,7 +199,7 @@ export const useTasks = (userId?: string) => {
         completionRate: dayProgress?.completionRate || 0,
         completedTasks: dayProgress?.completedTasks || 0,
         totalTasks: dayProgress?.totalTasks || 0,
-        day: date.toLocaleDateString('tr-TR', { weekday: 'short' })
+        day: date.toLocaleDateString((currentLanguage === 'tr' ? 'tr-TR' : 'en-US'), { weekday: 'short' })
       });
     }
     

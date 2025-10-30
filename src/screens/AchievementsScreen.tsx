@@ -28,7 +28,8 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function AchievementsScreen({ navigation }: AchievementsScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const {
     achievements,
     userStats,
@@ -507,7 +508,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
           {/* Unlocked Date */}
           {isUnlocked && (
             <Text style={dynamicStyles.progressText}>
-              {new Date(isUnlocked.unlockedAt).toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US')}
+              {new Date(isUnlocked.unlockedAt).toLocaleDateString(locale)}
             </Text>
           )}
         </LinearGradient>
@@ -520,7 +521,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
   if (loading) {
     return (
       <View style={[dynamicStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: currentTheme.colors.text }}>Yükleniyor...</Text>
+        <Text style={{ color: currentTheme.colors.text }}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -640,9 +641,9 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
                   {selectedAchievement?.description}
                 </Text>
                 <Text style={dynamicStyles.modalDate}>
-                  Kazanıldı: {selectedAchievement?.unlockedAt ? 
-                    new Date(selectedAchievement.unlockedAt).toLocaleDateString('tr-TR') : 
-                    'Bilinmiyor'
+                  {t('achievements.unlockDate')}: {selectedAchievement?.unlockedAt ? 
+                    new Date(selectedAchievement.unlockedAt).toLocaleDateString(locale) : 
+                    t('achievements.unknown')
                   }
                 </Text>
               </View>
@@ -651,7 +652,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
                 style={dynamicStyles.modalCloseButton}
                 onPress={() => setShowDetailModal(false)}
               >
-                <Text style={dynamicStyles.modalCloseText}>✨ Harika!</Text>
+                <Text style={dynamicStyles.modalCloseText}>✨ {t('achievements.keepGoing')}</Text>
               </TouchableOpacity>
             </View>
           </View>

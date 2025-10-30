@@ -325,26 +325,26 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         </View>
 
 
-        {/* Değerlendirme & Paylaşım */}
+        {/* Rate & Share */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Değerlendirme & Paylaşım</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.rateAndShare')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="star" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Uygulamayı Değerlendir</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.rateAppTitle')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              App Store'da 5 yıldız vererek bize destek olun!
+              {t('settings.rateAppDescription')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={rateApp}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>⭐ Değerlendir</Text>
+              <Text style={dynamicStyles.actionButtonText}>⭐ {t('settings.rateAppButton')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -353,17 +353,17 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="share" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Arkadaşlarla Paylaş</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.shareAppSection')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              Uygulamayı arkadaşlarınızla paylaşın.
+              {t('settings.shareAppDescription')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={shareApp}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>📤 Paylaş</Text>
+              <Text style={dynamicStyles.actionButtonText}>📤 {t('settings.shareAppButton')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -392,7 +392,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}

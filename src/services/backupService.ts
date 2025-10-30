@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
-import * as FileSystem from 'expo-file-system';
+// Use legacy API to avoid SDK 52 deprecation error for writeAsStringAsync
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DataSyncService } from './dataSyncService';

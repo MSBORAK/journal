@@ -24,9 +24,28 @@ interface HistoryScreenProps {
 export default function HistoryScreen({ navigation }: HistoryScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const { entries, loading, getEntriesByTag, getEntriesByMood } = useDiary(user?.uid);
   
+  // Compute simple luminance to adapt badge colors for light/dark themes
+  const hexToRgb = (hex: string) => {
+    const m = hex?.replace('#', '');
+    if (!m || (m.length !== 6 && m.length !== 3)) return { r: 0, g: 0, b: 0 };
+    const full = m.length === 3 ? m.split('').map(c => c + c).join('') : m;
+    const num = parseInt(full, 16);
+    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  };
+  const getLuminance = (hex: string) => {
+    const { r, g, b } = hexToRgb(hex || '#000000');
+    const [R, G, B] = [r, g, b].map(v => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  };
+  const isLightBg = getLuminance(currentTheme.colors.background || '#000000') > 0.5;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -268,14 +287,16 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       gap: 12,
     },
     questionsCount: {
-      backgroundColor: currentTheme.colors.accent,
+      backgroundColor: isLightBg ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.18)',
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isLightBg ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.28)',
     },
     questionsCountText: {
       fontSize: 11,
-      color: currentTheme.colors.primary,
+      color: isLightBg ? (currentTheme.colors.text) : '#FFFFFF',
       fontWeight: '600',
     },
     emptyState: {
@@ -358,7 +379,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
           <View style={dynamicStyles.entryMeta}>
             <View style={dynamicStyles.entryMetaLeft}>
               <Text style={dynamicStyles.entryDate}>
-                {new Date(item.date).toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US')}
+                {new Date(item.date).toLocaleDateString(locale)}
               </Text>
               {item.answers && (
                 <View style={dynamicStyles.questionsCount}>

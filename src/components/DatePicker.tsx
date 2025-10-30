@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface DatePickerProps {
@@ -31,6 +32,8 @@ export default function DatePicker({
   maxDate,
 }: DatePickerProps) {
   const { currentTheme } = useTheme();
+  const { currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const [showModal, setShowModal] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -60,7 +63,7 @@ export default function DatePicker({
       days,
       firstDay,
       lastDay,
-      monthName: firstDay.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })
+      monthName: firstDay.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
     };
   }, [currentMonth]);
 
@@ -75,11 +78,11 @@ export default function DatePicker({
     const dateUTC = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     
     if (dateUTC.getTime() === todayUTC.getTime()) {
-      return 'Bugün';
+      return locale.startsWith('tr') ? 'Bugün' : 'Today';
     } else if (dateUTC.getTime() === tomorrowUTC.getTime()) {
-      return 'Yarın';
+      return locale.startsWith('tr') ? 'Yarın' : 'Tomorrow';
     } else {
-      return date.toLocaleDateString('tr-TR', {
+      return date.toLocaleDateString(locale, {
         day: 'numeric',
         month: 'long',
         year: 'numeric',

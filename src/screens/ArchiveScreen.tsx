@@ -32,7 +32,8 @@ const moodOptions = [
 
 export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const { user } = useAuth();
   const { entries } = useDiary(user?.uid);
   
@@ -95,7 +96,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
   };
 
   const getCurrentMonth = () => {
-    return currentDate.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
+    return currentDate.toLocaleDateString(locale, { year: 'numeric', month: 'long' });
   };
 
   const getDaysInMonth = () => {
@@ -278,7 +279,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
                 </View>
               </View>
               <Text style={dynamicStyles.entryDate}>
-                {new Date(item.date).toLocaleDateString('tr-TR')}
+                {new Date(item.date).toLocaleDateString(locale)}
               </Text>
               <Text style={dynamicStyles.entryContent} numberOfLines={2}>
                 {item.content}

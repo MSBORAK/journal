@@ -21,62 +21,62 @@ interface WriteDiaryStep2ScreenProps {
 const questions = (t: any) => [
   {
     id: 'happiness',
-    title: t('diary.questions.happiness.title'),
-    placeholder: t('diary.questions.happiness.placeholder'),
+    title: t('diary.guidedQuestions.happiness.title'),
+    placeholder: t('diary.guidedQuestions.happiness.placeholder'),
     icon: '😊',
   },
   {
     id: 'gratitude',
-    title: t('diary.questions.gratitude.title'),
-    placeholder: t('diary.questions.gratitude.placeholder'),
+    title: t('diary.guidedQuestions.gratitude.title'),
+    placeholder: t('diary.guidedQuestions.gratitude.placeholder'),
     icon: '🙏',
   },
   {
     id: 'accomplishment',
-    title: t('diary.questions.accomplishment.title'),
-    placeholder: t('diary.questions.accomplishment.placeholder'),
+    title: t('diary.guidedQuestions.accomplishment.title'),
+    placeholder: t('diary.guidedQuestions.accomplishment.placeholder'),
     icon: '🎯',
   },
   {
     id: 'lesson',
-    title: t('diary.questions.lesson.title'),
-    placeholder: t('diary.questions.lesson.placeholder'),
+    title: t('diary.guidedQuestions.lesson.title'),
+    placeholder: t('diary.guidedQuestions.lesson.placeholder'),
     icon: '💡',
   },
   {
     id: 'communication',
-    title: t('diary.questions.communication.title'),
-    placeholder: t('diary.questions.communication.placeholder'),
+    title: t('diary.guidedQuestions.communication.title'),
+    placeholder: t('diary.guidedQuestions.communication.placeholder'),
     icon: '👥',
   },
   {
     id: 'energy',
-    title: t('diary.questions.energy.title'),
-    placeholder: t('diary.questions.energy.placeholder'),
+    title: t('diary.guidedQuestions.energy.title'),
+    placeholder: t('diary.guidedQuestions.energy.placeholder'),
     icon: '🔋',
   },
   {
     id: 'growth',
-    title: t('diary.questions.growth.title'),
-    placeholder: t('diary.questions.growth.placeholder'),
+    title: t('diary.guidedQuestions.growth.title'),
+    placeholder: t('diary.guidedQuestions.growth.placeholder'),
     icon: '🌸',
   },
   {
     id: 'emotion',
-    title: t('diary.questions.emotion.title'),
-    placeholder: t('diary.questions.emotion.placeholder'),
+    title: t('diary.guidedQuestions.emotion.title'),
+    placeholder: t('diary.guidedQuestions.emotion.placeholder'),
     icon: '🌈',
   },
   {
     id: 'tomorrow',
-    title: t('diary.questions.tomorrow.title'),
-    placeholder: t('diary.questions.tomorrow.placeholder'),
+    title: t('diary.guidedQuestions.tomorrow.title'),
+    placeholder: t('diary.guidedQuestions.tomorrow.placeholder'),
     icon: '✨',
   },
   {
     id: 'challenge',
-    title: t('diary.questions.challenge.title'),
-    placeholder: t('diary.questions.challenge.placeholder'),
+    title: t('diary.guidedQuestions.challenge.title'),
+    placeholder: t('diary.guidedQuestions.challenge.placeholder'),
     icon: '🏆',
   },
 ];
@@ -266,12 +266,12 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
         >
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>t('diary.newDiaryTitle')</Text>
+        <Text style={dynamicStyles.headerTitle}>{t('diary.newDiaryTitle')}</Text>
         <TouchableOpacity
           style={dynamicStyles.nextButton}
           onPress={handleNext}
         >
-          <Text style={dynamicStyles.nextButtonText}>t('diary.forwardButton')</Text>
+          <Text style={dynamicStyles.nextButtonText}>{t('diary.forwardButton')}</Text>
         </TouchableOpacity>
       </View>
 

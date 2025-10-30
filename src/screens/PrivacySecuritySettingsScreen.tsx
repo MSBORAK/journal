@@ -54,9 +54,9 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await BackupService.downloadUserData(user.uid);
-      showAlert('✅ Başarılı', 'Verileriniz JSON formatında indirildi!');
+      showAlert(t('settings.success'), t('settings.downloadAllPersonalData'));
     } catch (error) {
-      showAlert('❌ Hata', 'İndirme sırasında hata oluştu: ' + error);
+      showAlert(t('settings.error'), t('settings.shareError'));
     } finally {
       setLoading(false);
     }
@@ -64,32 +64,32 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
 
   const showPrivacyPolicy = () => {
     showAlert(
-      '🔒 Gizlilik Politikası',
-      'Gizlilik Politikamız:\n\n• Günlük verileriniz sadece sizin cihazınızda ve Supabase bulutunda saklanır\n• Verileriniz üçüncü taraflarla paylaşılmaz\n• Tüm verileriniz şifrelenir\n• İstediğiniz zaman verilerinizi silebilirsiniz\n• Anonim istatistikler için verileriniz anonimleştirilir\n\nDetaylı bilgi için: msesoftware1425@gmail.com',
+      t('settings.privacyPolicy'),
+      t('settings.learnDataProtection'),
       'info'
     );
   };
 
   const showDataTransparency = () => {
     showAlert(
-      '👁️ Veri Şeffaflığı',
-      'Verileriniz nasıl kullanılıyor:\n\n📝 Günlük Yazıları:\n• Sadece sizin erişiminizde\n• İstatistikler için analiz edilir\n• Anonimleştirilmiş içgörüler oluşturulur\n\n📊 Kullanım İstatistikleri:\n• Giriş yapma zamanları\n• Yazma alışkanlıkları\n• Genel uygulama kullanımı\n\n🔐 Güvenlik:\n• Tüm veriler şifrelenir\n• Supabase RLS ile korunur\n• Sadece siz erişebilirsiniz',
+      t('settings.dataTransparency'),
+      t('settings.seeDataUsageDetails'),
       'info'
     );
   };
 
   const showTermsOfService = () => {
     showAlert(
-      '📋 Kullanım Koşulları',
-      'Kullanım Koşulları:\n\n• Uygulamayı yasal amaçlarla kullanın\n• Başkalarının haklarını ihlal etmeyin\n• Spam veya kötüye kullanım yapmayın\n• Verilerinizi güvenli tutun\n• Yasal sorumluluğunuz bulunmaktadır\n\nDetaylı bilgi için: terms@dailydiary.app',
+      t('settings.termsOfService'),
+      t('settings.viewAppDetails'),
       'info'
     );
   };
 
   const showSecurityInfo = () => {
     showAlert(
-      '🛡️ Güvenlik Bilgileri',
-      'Güvenlik Özelliklerimiz:\n\n🔐 Şifreleme:\n• End-to-end şifreleme\n• AES-256 güvenlik\n• SSL/TLS bağlantılar\n\n🔑 Kimlik Doğrulama:\n• Email doğrulama\n• Güvenli giriş\n• Oturum yönetimi\n\n📱 Cihaz Güvenliği:\n• Biyometrik giriş\n• Güvenli depolama\n• Otomatik çıkış',
+      t('settings.securityInformation'),
+      t('settings.securityInformation'),
       'info'
     );
   };
@@ -319,15 +319,13 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               </View>
               <Text style={dynamicStyles.settingTitle}>{t('settings.securityInformation')}</Text>
             </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Uygulamanızın güvenlik özelliklerini ve veri koruma yöntemlerini öğrenin.
-            </Text>
+            <Text style={dynamicStyles.settingDescription}>{t('settings.viewTechnicalDetails')}</Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showSecurityInfo}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>🛡️ Güvenlik</Text>
+              <Text style={dynamicStyles.actionButtonText}>{t('settings.security')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -336,11 +334,9 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="document-text" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Kullanım Koşulları</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.termsOfService')}</Text>
             </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Uygulama kullanım koşullarını ve kullanıcı sorumluluklarını okuyun.
-            </Text>
+              <Text style={dynamicStyles.settingDescription}>{t('settings.viewUpdateHistory')}</Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={showTermsOfService}
@@ -353,20 +349,20 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
 
         {/* Güvenlik Durumu */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>Güvenlik Durumu</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.security')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="checkmark-circle" size={20} color="#10B981" />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Veri Şifreleme</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.security')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
               Tüm verileriniz end-to-end şifreleme ile korunuyor.
             </Text>
             <View style={dynamicStyles.securityBadge}>
-              <Text style={dynamicStyles.securityBadgeText}>✅ Aktif</Text>
+              <Text style={dynamicStyles.securityBadgeText}>✅</Text>
             </View>
           </View>
 
@@ -375,13 +371,11 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="cloud-done" size={20} color="#10B981" />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Güvenli Bulut</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.secureCloudTitle')}</Text>
             </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Verileriniz güvenli Supabase sunucularında saklanıyor.
-            </Text>
+            <Text style={dynamicStyles.settingDescription}>{t('settings.secureCloudDesc')}</Text>
             <View style={dynamicStyles.securityBadge}>
-              <Text style={dynamicStyles.securityBadgeText}>✅ Aktif</Text>
+              <Text style={dynamicStyles.securityBadgeText}>✅ {t('settings.active')}</Text>
             </View>
           </View>
 
@@ -390,28 +384,21 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="shield-checkmark" size={20} color="#10B981" />
               </View>
-              <Text style={dynamicStyles.settingTitle}>Erişim Kontrolü</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.accessControlTitle')}</Text>
             </View>
-            <Text style={dynamicStyles.settingDescription}>
-              Sadece siz verilerinize erişebilirsiniz, üçüncü taraflar erişemez.
-            </Text>
+            <Text style={dynamicStyles.settingDescription}>{t('settings.accessControlDesc')}</Text>
             <View style={dynamicStyles.securityBadge}>
-              <Text style={dynamicStyles.securityBadgeText}>✅ Aktif</Text>
+              <Text style={dynamicStyles.securityBadgeText}>✅ {t('settings.active')}</Text>
             </View>
           </View>
         </View>
 
-        {/* İletişim */}
+        {/* Contact */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>İletişim</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.contactTitle')}</Text>
           
           <View style={dynamicStyles.infoCard}>
-            <Text style={dynamicStyles.infoText}>
-              🔐 Gizlilik veya güvenlik konularında sorularınız varsa bizimle iletişime geçin:{'\n\n'}
-              📧 Email: msesoftware1425@gmail.com{'\n'}
-              🛡️ Güvenlik: msesoftware1425@gmail.com{'\n'}
-              📞 Destek: msesoftware1425@gmail.com
-            </Text>
+            <Text style={dynamicStyles.infoText}>{t('settings.contactContent')}</Text>
           </View>
         </View>
       </ScrollView>
@@ -423,7 +410,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}

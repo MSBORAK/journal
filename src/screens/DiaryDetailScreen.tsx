@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,9 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DiaryEntry } from '../types';
+import { useGuidedQuestions, QUESTION_ORDER } from '../constants/diaryQuestions';
 
 const { width } = Dimensions.get('window');
 
@@ -26,21 +28,28 @@ interface DiaryDetailScreenProps {
 
 export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScreenProps) {
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const { entry } = route.params;
+  const [questionsExpanded, setQuestionsExpanded] = useState<boolean>(false);
 
-  const questions = [
-    { id: 'happiness', label: '✨ Bugün seni gülümseten an neydi?' },
-    { id: 'gratitude', label: '🌟 Bugün için şükrettiğin 3 şey?' },
-    { id: 'accomplishment', label: '🎉 Bugün gurur duyduğun başarın ne?' },
-    { id: 'lesson', label: '💎 Bugün keşfettiğin güzel bir şey?' },
-    { id: 'communication', label: '💝 Bugün kimle güzel vakit geçirdin?' },
-    { id: 'energy', label: '⚡ Bugün seni canlı hissettiren şey?' },
-    { id: 'growth', label: '🌱 Bugün kendine verdiğin hediye ne?' },
-    { id: 'emotion', label: '🎨 Bugün hayatına renk katan şey ne?' },
-    { id: 'tomorrow', label: '🚀 Yarın için heyecanlandığın şey?' },
-    { id: 'challenge', label: '💪 Bugün kendini güçlü hissettiğin an?' },
-  ];
+  useEffect(() => {
+    const loadPref = async () => {
+      try {
+        const val = await AsyncStorage.getItem('diaryDetail_questionsExpanded');
+        if (val !== null) setQuestionsExpanded(val === 'true');
+      } catch {}
+    };
+    loadPref();
+  }, []);
+
+  const toggleQuestions = async () => {
+    const next = !questionsExpanded;
+    setQuestionsExpanded(next);
+    try { await AsyncStorage.setItem('diaryDetail_questionsExpanded', next ? 'true' : 'false'); } catch {}
+  };
+
+  const guidedQuestions = useGuidedQuestions();
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -52,7 +61,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
       alignItems: 'center',
       paddingHorizontal: 20,
       paddingVertical: 16,
-      backgroundColor: currentTheme.colors.card,
+      backgroundColor: currentTheme.colors.background,
       borderBottomWidth: 1,
       borderBottomColor: currentTheme.colors.border,
     },
@@ -215,6 +224,18 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
   };
 
   const answeredQuestions = entry.answers ? Object.entries(entry.answers).filter(([_, answer]) => answer && answer.trim() !== '') : [];
+  const freeWritingText = (entry.freeWriting || '').trim();
+  const isPlaceholderFreeWriting = ['şuan yok', 'yok', 'none', 'no', 'not available', '-', '—', '--']
+    .includes(freeWritingText.toLowerCase());
+  const isFreeWritingDuplicatedInContent = freeWritingText.length > 0 && (entry.content || '').toLowerCase().includes(freeWritingText.toLowerCase());
+  const shouldShowFreeWriting = freeWritingText.length > 0 && !isPlaceholderFreeWriting && !isFreeWritingDuplicatedInContent;
+
+  const aqLabelRaw = t('diary.answeredQuestions');
+  const aqLabel = aqLabelRaw && aqLabelRaw.includes('.') ? (currentLanguage === 'tr' ? 'Cevaplanan Sorular' : 'Answered Questions') : aqLabelRaw;
+  const contentText = (entry.content || '').trim();
+  const colonLineCount = contentText.split('\n').filter(l => l.includes(':')).length;
+  const looksLikeGuidedSummary = colonLineCount >= 3; // e.g., multiple "Label: answer" lines
+  const shouldShowEntryContent = (answeredQuestions.length === 0) && !looksLikeGuidedSummary;
   
   // Debug log
   console.log('DiaryDetailScreen Debug:');
@@ -246,7 +267,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
           </View>
           
           <Text style={dynamicStyles.entryDate}>
-            {new Date(entry.date).toLocaleDateString(t('common.hello') === 'Merhaba' ? 'tr-TR' : 'en-US', {
+            {new Date(entry.date).toLocaleDateString(locale, {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -254,7 +275,9 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
             })}
           </Text>
           
-          <Text style={dynamicStyles.entryContent}>{entry.content}</Text>
+          {shouldShowEntryContent && (
+            <Text style={dynamicStyles.entryContent}>{entry.content}</Text>
+          )}
           
           {entry.tags && entry.tags.length > 0 && (
             <View style={dynamicStyles.tagsContainer}>
@@ -270,14 +293,16 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
         {/* Answered Questions */}
         {answeredQuestions.length > 0 && (
           <View style={dynamicStyles.questionsContainer}>
-            <Text style={dynamicStyles.sectionTitle}>
-              📝 Cevaplanan Sorular ({answeredQuestions.length})
-            </Text>
-            {answeredQuestions.map(([questionId, answer]) => {
-              const question = questions.find(q => q.id === questionId);
+            <TouchableOpacity onPress={toggleQuestions} activeOpacity={0.8} style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
+              <Text style={dynamicStyles.sectionTitle}>📝 {aqLabel} ({answeredQuestions.length})</Text>
+              <Ionicons name={questionsExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={currentTheme.colors.secondary} />
+            </TouchableOpacity>
+            {questionsExpanded && QUESTION_ORDER.filter(id => answeredQuestions.some(([q]) => q === id)).map((questionId) => {
+              const answer = answeredQuestions.find(([q]) => q === questionId)?.[1] as string;
+              const question = guidedQuestions.find(q => q.id === questionId);
               return (
                 <View key={questionId} style={dynamicStyles.questionCard}>
-                  <Text style={dynamicStyles.questionLabel}>{question?.label}</Text>
+                  <Text style={dynamicStyles.questionLabel}>{question?.title}</Text>
                   <Text style={dynamicStyles.questionAnswer}>{answer}</Text>
                 </View>
               );
@@ -286,10 +311,10 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
         )}
 
         {/* Free Writing */}
-        {entry.freeWriting && entry.freeWriting.trim() !== '' && (
+        {shouldShowFreeWriting && (
           <View style={dynamicStyles.freeWritingCard}>
-            <Text style={dynamicStyles.freeWritingLabel}>✍️ Serbest Yazım</Text>
-            <Text style={dynamicStyles.freeWritingContent}>{entry.freeWriting}</Text>
+            <Text style={dynamicStyles.freeWritingLabel}>✍️ {t('diary.freeWriting')}</Text>
+            <Text style={dynamicStyles.freeWritingContent}>{freeWritingText}</Text>
           </View>
         )}
 

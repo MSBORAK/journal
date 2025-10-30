@@ -160,11 +160,12 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
   };
 
   const handleResetMotivation = async () => {
-    showAlert(
-      '🎯 Motivasyon Geçmişini Sıfırla',
-      'Tüm motivasyon mesajlarının geçmişini sıfırlamak istediğinizden emin misiniz?',
-      'warning'
-    );
+    setAlertConfig({
+      visible: true,
+      title: t('settings.resetMotivationHistoryTitle'),
+      message: t('settings.resetMotivationHistorySubtitle'),
+      type: 'warning',
+    });
   };
 
   const menuItems: MenuItem[] = [
@@ -194,7 +195,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     },
     {
       id: 'notifications',
-      title: t('notificationSettings'),
+      title: t('settings.notificationSettings'),
       subtitle: t('settings.notificationSettingsDesc'),
       icon: 'notifications-outline',
       screen: 'NotificationSettings',
@@ -210,7 +211,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     },
     {
       id: 'account',
-      title: t('accountSettings'),
+      title: t('settings.accountSettings'),
       subtitle: t('settings.accountSettingsDesc'),
       icon: 'person-outline',
       screen: 'AccountSettings',
@@ -234,40 +235,40 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     },
     {
       id: 'privacy',
-      title: 'Gizlilik ve Güvenlik',
-      subtitle: 'Gizlilik tercihleri ve güvenlik ayarları',
+      title: t('settings.privacySecurity'),
+      subtitle: t('settings.privacySecurityInfo'),
       icon: 'shield-checkmark-outline',
       screen: 'PrivacySecuritySettings',
       color: '#f59e0b',
     },
     {
       id: 'data-backup',
-      title: 'Veri Yönetimi',
-      subtitle: 'Cloud\'a taşı, yedekle ve senkronize et',
+      title: t('settings.dataManagement'),
+      subtitle: t('settings.backupAndManageData'),
       icon: 'cloud-upload-outline',
       screen: 'DataBackupSettings',
       color: '#06b6d4',
     },
     {
       id: 'help',
-      title: 'Yardım & Kılavuz',
-      subtitle: 'Hızlı başlangıç ve SSS',
+      title: t('settings.helpGuide'),
+      subtitle: t('settings.startWithQuickSteps'),
       icon: 'help-buoy-outline',
       screen: 'HelpGuide',
       color: currentTheme.colors.primary,
     },
     {
       id: 'motivation',
-      title: 'Motivasyon Geçmişini Sıfırla',
-      subtitle: 'Motivasyon mesajlarını tekrar göster',
+      title: t('settings.resetMotivationHistoryTitle'),
+      subtitle: t('settings.resetMotivationHistorySubtitle'),
       icon: 'refresh-circle-outline',
       action: handleResetMotivation,
       color: '#f59e0b',
     },
     {
       id: 'logout',
-      title: 'Çıkış Yap',
-      subtitle: 'Hesabınızdan güvenli bir şekilde çıkın',
+      title: t('settings.logout'),
+      subtitle: t('settings.logOutSecurely'),
       icon: 'log-out-outline',
       action: handleSignOut,
       color: '#ef4444',
@@ -496,15 +497,27 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: alertConfig.title.includes('Çıkış Yap') ? 'Evet, Çıkış Yap' : 'Tamam',
-          onPress: alertConfig.title.includes('Çıkış Yap') ? confirmSignOut : hideAlert,
+          text: alertConfig.title.includes(t('settings.logout'))
+            ? t('common.yes') || 'Yes'
+            : alertConfig.title.includes(t('settings.resetMotivationHistoryTitle'))
+              ? t('common.yes') || 'Yes'
+              : t('common.ok'),
+          onPress: alertConfig.title.includes(t('settings.logout'))
+            ? confirmSignOut
+            : alertConfig.title.includes(t('settings.resetMotivationHistoryTitle'))
+              ? async () => { await motivationService.resetMotivationHistory(user?.uid); hideAlert(); }
+              : hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}
-        secondaryButton={alertConfig.title.includes('Çıkış Yap') ? {
-          text: 'İptal',
-          onPress: hideAlert,
-          style: 'secondary',
-        } : undefined}
+        secondaryButton={
+          alertConfig.title.includes(t('settings.logout')) || alertConfig.title.includes(t('settings.resetMotivationHistoryTitle'))
+            ? {
+                text: t('common.no') || 'No',
+                onPress: hideAlert,
+                style: 'secondary',
+              }
+            : undefined
+        }
         onClose={hideAlert}
       />
     </SafeAreaView>

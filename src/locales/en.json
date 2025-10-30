@@ -23,7 +23,8 @@
     "warning": "Warning",
     "info": "Info",
     "hide": "Hide",
-    "draw": "Draw"
+    "draw": "Draw",
+    "congratulations": "Congratulations!"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -183,7 +184,49 @@
     "diaryNotSaved": "An error occurred while saving the diary. Please try again.",
     "titlePlaceholder": "How was your day?",
     "contentPlaceholder": "What did you experience today? How did you feel? What did you learn?",
-    "addTagPlaceholder": "Add tag (e.g: work, family, sports)"
+    "addTagPlaceholder": "Add tag (e.g: work, family, sports)",
+    "guidedQuestions": {
+      "happiness": {
+        "title": "What made you smile today?",
+        "placeholder": "Write about a moment that made you happy…"
+      },
+      "gratitude": {
+        "title": "What are you grateful for today?",
+        "placeholder": "Write the things you feel grateful for…"
+      },
+      "accomplishment": {
+        "title": "What did you accomplish today?",
+        "placeholder": "Describe a task you completed or progress you made…"
+      },
+      "lesson": {
+        "title": "What did you learn today?",
+        "placeholder": "Write a small lesson, awareness or insight…"
+      },
+      "communication": {
+        "title": "Who did you connect with today?",
+        "placeholder": "Write about a meaningful conversation or interaction…"
+      },
+      "energy": {
+        "title": "How was your energy today?",
+        "placeholder": "Low/high energy moments, what affected it…"
+      },
+      "growth": {
+        "title": "What did you do for your growth?",
+        "placeholder": "A small step for your habits, goals or dreams…"
+      },
+      "emotion": {
+        "title": "Which feeling dominated today?",
+        "placeholder": "Name the feeling and why you think it appeared…"
+      },
+      "tomorrow": {
+        "title": "What will you do tomorrow?",
+        "placeholder": "A small plan or intention for tomorrow…"
+      },
+      "challenge": {
+        "title": "What challenged you today?",
+        "placeholder": "Describe a difficulty and how you handled it…"
+      }
+    }
   },
   "mood": {
     "mood": "Mood",
@@ -517,7 +560,8 @@
     "progress": "Progress",
     "unlockDate": "Unlock Date",
     "noAchievements": "You haven't earned any achievements yet",
-    "keepGoing": "Keep going!"
+    "keepGoing": "Keep going!",
+    "unknown": "Unknown"
   },
   "personality": {
     "personalityCard": "My Personality Card",
@@ -562,6 +606,8 @@
     "edit": "Edit",
     "change": "Change",
     "logOutSecurely": "Log out securely from your account.",
+      "resetMotivationHistoryTitle": "Reset Motivation History",
+      "resetMotivationHistorySubtitle": "Show motivation messages again",
     "deleteAccountWarning": "This action CANNOT be undone!",
     "dataToBeDeleted": "Data to be deleted:",
     "allDiaryEntries": "All diary entries",
@@ -623,6 +669,9 @@
     "soundEffectsOn": "Sound effects on",
     "soundEffectsOff": "Sound effects off",
     "notificationSettingsDesc": "Daily reminders and notification settings",
+      "otherNotificationsTitle": "Other Notifications",
+      "silentStart": "Start",
+      "silentEnd": "End",
     "myAchievements": "My Achievements",
     "badgesAndAchievements": "Badges and achievements",
     "accountSettingsDesc": "Profile, email and password settings",
@@ -667,6 +716,13 @@
     "download": "📥 Download",
     "security": "Security",
     "securityInformation": "Security Information",
+      "secureCloudTitle": "Secure Cloud",
+      "secureCloudDesc": "Your data is stored on secure Supabase servers.",
+      "accessControlTitle": "Access Control",
+      "accessControlDesc": "Only you can access your data; third parties cannot.",
+      "active": "Active",
+      "contactTitle": "Contact",
+      "contactContent": "Contact us for privacy or security questions:\n\n📧 Email: msesoftware1425@gmail.com\n🛡️ Security: msesoftware1425@gmail.com\n📞 Support: msesoftware1425@gmail.com",
     "termsOfService": "Terms of Service",
     "about": "About",
     "version": "Version",
@@ -789,11 +845,11 @@
     "date": "Date",
     "allRightsReserved": "All rights reserved.",
     "ratingShareSection": "Rating & Sharing",
-    "rateAppDescription": "App Store'da 5 yıldız vererek bize destek olun!",
-    "rateAppButton": "⭐ Değerlendir",
-    "shareAppSection": "Arkadaşlarla Paylaş",
-    "shareAppDescription": "Uygulamayı arkadaşlarınızla paylaşın.",
-    "shareAppButton": "📤 Paylaş",
+    "rateAppDescription": "Support us by giving 5 stars on the App Store!",
+    "rateAppButton": "⭐ Rate",
+    "shareAppSection": "Share with Friends",
+    "shareAppDescription": "Share the app with your friends.",
+    "shareAppButton": "📤 Share",
     "developerSection": "Developer"
   },
   "onboarding": {
@@ -950,6 +1006,9 @@
   },
   "focus": {
     "focusMode": "Focus Mode",
+    "screenTitle": "Focus Time",
+    "subtitle": "This moment is only yours... Focus peacefully 🕯️",
+    "minuteAbbr": "min",
     "work": "Work",
     "break": "Break",
     "start": "Start",
@@ -957,6 +1016,12 @@
     "resume": "Resume",
     "stop": "Stop",
     "reset": "Reset",
+    "focusing": "Focusing...",
+    "paused": "Paused",
+    "quitTitle": "Quit Focus?",
+    "quitMessage": "Are you sure you want to quit?",
+    "quit": "Quit",
+    "continue": "Continue",
     "timeRemaining": "Time Remaining",
     "sessionComplete": "Session Complete",
     "takeBreak": "Time for a Break",
@@ -964,7 +1029,20 @@
     "focusTime": "Focus Time",
     "breakTime": "Break Time",
     "sessionsCompleted": "Sessions Completed",
-    "totalFocusTime": "Total Focus Time"
+    "totalFocusTime": "Total Focus Time",
+    "completedTitle": "Focus Completed! 🎉",
+    "completedQuestion": "What were you focusing on?",
+    "completedPlaceholder": "E.g., Write project report...",
+    "howDoYouFeel": "How do you feel?",
+    "complete": "Complete",
+    "moods": {
+      "happy": "Happy",
+      "calm": "Calm",
+      "strong": "Strong",
+      "focused": "Focused",
+      "energetic": "Energetic",
+      "peaceful": "Peaceful"
+    }
   },
   "insights": {
     "greatWeek": "Great Week! 😊",
@@ -991,6 +1069,7 @@
     "startAgainDesc": "Your streak is broken but it's okay. Start again today!",
     "canBreakRecord": "You can break this record again!",
     "mostUsedWords": "Your Most Used Words 💬",
+    "mostUsedWordsDesc": "You frequently use the words: {words}",
     "positiveEnergy": "Positive Energy! ✨",
     "positiveEnergyDesc": "You use more positive words in your writings. Great!",
     "takeCare": "Take Care of Yourself 💙",
@@ -998,9 +1077,11 @@
     "firstDiary": "Your First Diary! 🎉",
     "firstDiaryDesc": "Congratulations! You've started your journey",
     "wordMaster": "Word Master! 📚",
+    "wordMasterDesc": "You wrote {count} words! This would be a book",
     "writeFirstDiary": "Write Your First Diary! 🌟",
     "writeFirstDiaryDesc": "Create your first diary to start your journey",
     "missYou": "We Miss You! 💙",
+    "missYouDesc": "You haven't written for {days} days. Come back!",
     "regularGoal": "Regular Writing Goal 🎯",
     "regularGoalDesc": "Try writing every day, reach your 30-day goal!"
   }
