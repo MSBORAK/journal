@@ -14,7 +14,10 @@ import {
   celebrationMessages,
   missingYouMessages,
   motivationalMessages,
-  weekendMessages
+  weekendMessages,
+  morningMessages,
+  afternoonMessages,
+  eveningMessages
 } from '../constants/notifications';
 import { 
   getUserTimezone, 
@@ -279,7 +282,7 @@ export const scheduleMorningNotification = async (): Promise<void> => {
     return;
   }
 
-  // Hafta içi/sonu mesaj kontrolü - ekstra güvenlik
+  // Hafta içi/sonu mesaj kontrolü
   const isWeekendForMessage = isWeekendLocal(settings.timezone);
   let message;
   
@@ -288,12 +291,11 @@ export const scheduleMorningNotification = async (): Promise<void> => {
     message = getRandomMessage(weekendMessages);
     console.log('✅ Weekend message selected for weekend day');
   } else {
-    // Hafta içi mesajları sadece hafta içi gösterilsin
-    message = getMessageByTimeOfDay(undefined, settings.timezone);
-    console.log('✅ Weekday message selected for weekday');
+    // Sabah bildirimi için sabah mesajları kullan (şu anki saat değil, bildirim zamanı)
+    message = getRandomMessage(morningMessages);
+    console.log('✅ Morning message selected for weekday morning notification');
   }
 
-  await Notifications.cancelScheduledNotificationAsync('morning-reminder');
   await scheduleNotification(
     'morning-reminder',
     message.title,
@@ -317,10 +319,9 @@ export const scheduleLunchNotification = async (): Promise<void> => {
 
   const [hour, minute] = (settings.lunchTime || '12:00').split(':').map(Number);
 
-  // Öğlen mesajı – zaman dilimine göre uygun selamlama
-  const message = getMessageByTimeOfDay(undefined, settings.timezone);
+  // Öğlen bildirimi için öğlen mesajları kullan (şu anki saat değil, bildirim zamanı)
+  const message = getRandomMessage(afternoonMessages);
 
-  await Notifications.cancelScheduledNotificationAsync('lunch-reminder');
   await scheduleNotification(
     'lunch-reminder',
     message.title,
@@ -362,29 +363,20 @@ export const scheduleEveningNotification = async (): Promise<void> => {
     return;
   }
 
-  // Hafta içi/sonu mesaj kontrolü - ekstra güvenlik
+  // Hafta içi/sonu mesaj kontrolü
   const isWeekendForMessage = isWeekendLocal(settings.timezone);
   let message;
-  
-  console.log('🔍 Evening notification message selection:', {
-    isWeekendForMessage,
-    timezone: settings.timezone,
-    currentTime: new Date().toLocaleString()
-  });
   
   if (isWeekendForMessage) {
     // Hafta sonu mesajları sadece hafta sonu gösterilsin
     message = getRandomMessage(weekendMessages);
     console.log('✅ Weekend message selected for weekend day (evening)');
   } else {
-    // Hafta içi mesajları sadece hafta içi gösterilsin
-    message = getMessageByTimeOfDay(undefined, settings.timezone);
-    console.log('✅ Weekday message selected for weekday (evening)');
+    // Akşam bildirimi için akşam mesajları kullan (şu anki saat değil, bildirim zamanı)
+    message = getRandomMessage(eveningMessages);
+    console.log('✅ Evening message selected for weekday evening notification');
   }
-  
-  console.log('📱 Selected message:', message);
 
-  await Notifications.cancelScheduledNotificationAsync('evening-reminder');
   await scheduleNotification(
     'evening-reminder',
     message.title,
@@ -410,7 +402,6 @@ export const scheduleDailySummaryNotification = async (): Promise<void> => {
   const hour = 22;
   const minute = 0;
 
-  await Notifications.cancelScheduledNotificationAsync('daily-summary');
   await scheduleNotification(
     'daily-summary',
     '📊 Günlük Özet',
@@ -599,7 +590,8 @@ export const scheduleReminderNotification = async (
   time: string, // "HH:MM" formatında
   repeatType: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly',
   category: string = 'default',
-  date?: string // "YYYY-MM-DD" formatında - gelecek tarih için
+  date?: string, // "YYYY-MM-DD" formatında - gelecek tarih için
+  repeatDays?: number[] // 0-6 (Pazar-Pazartesi) - haftalık hatırlatıcılar için
 ): Promise<string> => {
   const [hour, minute] = time.split(':').map(Number);
   let trigger: Notifications.CalendarTriggerInput;
@@ -655,14 +647,28 @@ export const scheduleReminderNotification = async (
       break;
     
     case 'weekly':
-      // Her hafta (Pazartesi)
-      trigger = {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        weekday: 1, // Pazartesi
-        hour,
-        minute,
-        repeats: true,
-      };
+      // Her hafta - repeatDays varsa belirtilen günlerde, yoksa Pazartesi
+      if (repeatDays && repeatDays.length > 0) {
+        // Her gün için ayrı bildirim planla (haftalık tekrar için)
+        // İlk günü al ve o günde planla (tekrarlar her hafta aynı günde olur)
+        const firstDay = repeatDays[0];
+        trigger = {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          weekday: firstDay + 1, // 0=Pazar için 1, 1=Pazartesi için 2, ... 6=Cumartesi için 7
+          hour,
+          minute,
+          repeats: true,
+        };
+      } else {
+        // Varsayılan: Pazartesi
+        trigger = {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          weekday: 2, // Pazartesi (1=Monday -> 2 in CalendarTriggerInput)
+          hour,
+          minute,
+          repeats: true,
+        };
+      }
       break;
     
     case 'monthly':

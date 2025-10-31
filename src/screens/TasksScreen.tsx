@@ -104,9 +104,60 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
     });
   }, [todayTasks, completedCount, completionRate]);
 
+  // Get tasks filtered by activeTab (daily, weekly, monthly, future)
+  const getFilteredTasksByTab = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayDate = new Date(today);
+    const weekStart = new Date(todayDate);
+    weekStart.setDate(todayDate.getDate() - todayDate.getDay()); // Pazar günü
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekEndStr = weekEnd.toISOString().split('T')[0];
+    const monthStart = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1);
+    const monthStartStr = monthStart.toISOString().split('T')[0];
+    const monthEnd = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0);
+    const monthEndStr = monthEnd.toISOString().split('T')[0];
+
+    let tabFilteredTasks = tasks;
+    
+    switch (activeTab) {
+      case 'daily':
+        // Bugünün görevleri - date alanı bugün olan görevler
+        tabFilteredTasks = tasks.filter(task => task.date === today);
+        break;
+      case 'weekly':
+        // Bu haftanın görevleri - date alanı bu hafta içinde olan görevler
+        tabFilteredTasks = tasks.filter(task => {
+          const taskDate = task.date || task.createdAt?.split('T')[0] || '';
+          return taskDate >= weekStartStr && taskDate <= weekEndStr;
+        });
+        break;
+      case 'monthly':
+        // Bu ayın görevleri - date alanı bu ay içinde olan görevler
+        tabFilteredTasks = tasks.filter(task => {
+          const taskDate = task.date || task.createdAt?.split('T')[0] || '';
+          return taskDate >= monthStartStr && taskDate <= monthEndStr;
+        });
+        break;
+      case 'future':
+        // Gelecek görevler - date veya dueDate alanı bugünden sonra olan ve tamamlanmamış görevler
+        tabFilteredTasks = tasks.filter(task => {
+          const taskDate = task.dueDate || task.date || task.createdAt?.split('T')[0] || '';
+          return taskDate > today && !task.isCompleted;
+        });
+        break;
+      default:
+        tabFilteredTasks = tasks.filter(task => task.date === today);
+    }
+    
+    return tabFilteredTasks;
+  };
+
+  const tabFilteredTasks = getFilteredTasksByTab();
   const filteredTasks = selectedCategory === 'all' 
-    ? todayTasks 
-    : todayTasks.filter(task => task.category === selectedCategory);
+    ? tabFilteredTasks 
+    : tabFilteredTasks.filter(task => task.category === selectedCategory);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -560,10 +611,47 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
     }
 
     try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Determine the task date based on taskType and selectedDate
+      let taskDate = today; // Default to today
+      let dueDate: string | undefined = undefined;
+      let dueTime: string | undefined = undefined;
+      let frequency: 'daily' | 'weekly' | 'monthly' | 'once' = 'once';
+
+      if (formData.taskType === 'future' && formData.selectedDate) {
+        // Future task - use selectedDate as dueDate
+        dueDate = formData.selectedDate;
+        taskDate = formData.selectedDate;
+        if (formData.selectedWeek) {
+          // If there's a selected time, parse it
+          const [hours, minutes] = formData.selectedWeek.split(':');
+          if (hours && minutes) {
+            dueTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+          }
+        }
+      } else if (formData.taskType === 'weekly' && formData.selectedWeek) {
+        // Weekly task - use selectedWeek as the start of the week
+        // For weekly, we'll use today's date but mark frequency as weekly
+        frequency = 'weekly';
+        taskDate = today;
+      } else if (formData.taskType === 'monthly' && formData.selectedMonth) {
+        // Monthly task - use selectedMonth
+        frequency = 'monthly';
+        taskDate = today;
+      } else if (formData.taskType === 'daily') {
+        // Daily task
+        frequency = 'daily';
+        taskDate = today;
+      }
+
       const taskData = {
         ...formData,
         estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : undefined,
-        date: new Date().toISOString().split('T')[0],
+        date: taskDate,
+        frequency: frequency,
+        dueDate: dueDate,
+        dueTime: dueTime,
       };
 
       if (editingTask) {
@@ -683,15 +771,21 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       {/* Stats */}
       <View style={dynamicStyles.statsContainer}>
         <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statNumber}>{todayTasks.length}</Text>
+          <Text style={dynamicStyles.statNumber}>{tabFilteredTasks.length}</Text>
           <Text style={dynamicStyles.statLabel}>Toplam</Text>
         </View>
         <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statNumber}>{completedCount}</Text>
+          <Text style={dynamicStyles.statNumber}>
+            {tabFilteredTasks.filter(t => t.isCompleted).length}
+          </Text>
           <Text style={dynamicStyles.statLabel}>Tamamlanan</Text>
         </View>
         <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statNumber}>{completionRate}%</Text>
+          <Text style={dynamicStyles.statNumber}>
+            {tabFilteredTasks.length > 0 
+              ? Math.round((tabFilteredTasks.filter(t => t.isCompleted).length / tabFilteredTasks.length) * 100)
+              : 0}%
+          </Text>
           <Text style={dynamicStyles.statLabel}>Oran</Text>
         </View>
       </View>
@@ -912,9 +1006,69 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                 </View>
               </View>
 
+              {/* Task Type */}
+              <View style={dynamicStyles.formGroup}>
+                <Text style={dynamicStyles.formLabel}>Görev Tipi</Text>
+                <View style={dynamicStyles.optionGrid}>
+                  {[
+                    { value: 'daily', label: t('tasks.daily') || 'Günlük' },
+                    { value: 'weekly', label: t('tasks.weekly') || 'Haftalık' },
+                    { value: 'monthly', label: t('tasks.monthly') || 'Aylık' },
+                    { value: 'future', label: t('tasks.future') || 'Gelecek' },
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      style={[
+                        dynamicStyles.optionButton,
+                        formData.taskType === option.value && dynamicStyles.selectedOptionButton
+                      ]}
+                      onPress={() => setFormData({ ...formData, taskType: option.value as any })}
+                    >
+                      <Text style={[
+                        dynamicStyles.optionText,
+                        formData.taskType === option.value && dynamicStyles.selectedOptionText
+                      ]}>
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Due Date - For future tasks */}
+              {formData.taskType === 'future' && (
+                <View style={dynamicStyles.formGroup}>
+                  <Text style={dynamicStyles.formLabel}>Bitiş Tarihi</Text>
+                  <TextInput
+                    style={dynamicStyles.textInput}
+                    value={formData.selectedDate}
+                    onChangeText={(text) => setFormData({ ...formData, selectedDate: text })}
+                    placeholder="YYYY-MM-DD (örn: 2024-12-25)"
+                    placeholderTextColor={currentTheme.colors.muted}
+                  />
+                </View>
+              )}
+
+              {/* Due Time - For future tasks */}
+              {formData.taskType === 'future' && (
+                <View style={dynamicStyles.formGroup}>
+                  <Text style={dynamicStyles.formLabel}>Bitiş Saati (opsiyonel)</Text>
+                  <TextInput
+                    style={dynamicStyles.textInput}
+                    value={formData.selectedWeek}
+                    onChangeText={(text) => setFormData({ ...formData, selectedWeek: text })}
+                    placeholder="HH:MM (örn: 14:30)"
+                    placeholderTextColor={currentTheme.colors.muted}
+                  />
+                </View>
+              )}
+
               {/* Estimated Time */}
               <View style={dynamicStyles.formGroup}>
                 <Text style={dynamicStyles.formLabel}>Tahmini Süre (dakika)</Text>
+                <Text style={[dynamicStyles.formLabel, { fontSize: 12, marginTop: -4, marginBottom: 4, opacity: 0.7 }]}>
+                  Bu görevi tamamlamak için ne kadar süre gerekiyor?
+                </Text>
                 <TextInput
                   style={dynamicStyles.textInput}
                   value={formData.estimatedTime}

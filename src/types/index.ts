@@ -161,11 +161,14 @@ export interface DailyTask {
   emoji: string;
   isCompleted: boolean;
   completedAt?: string;
-  date: string; // YYYY-MM-DD format
+  date: string; // YYYY-MM-DD format - görevin planlandığı/tamamlanması gereken tarih
   createdAt: string;
   updatedAt: string;
   priority: 'low' | 'medium' | 'high';
-  estimatedTime?: number; // dakika
+  estimatedTime?: number; // dakika - görevi tamamlamak için tahmini süre
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'once'; // Görev tekrar tipi
+  dueDate?: string; // YYYY-MM-DD format - son tamamlanma tarihi (gelecek görevler için)
+  dueTime?: string; // HH:MM format - son tamamlanma saati (gelecek görevler için)
   // Akıllı Entegrasyon
   linkedReminderId?: string; // Bağlı hatırlatıcı ID'si
   hasReminder?: boolean; // Hatırlatıcı var mı?

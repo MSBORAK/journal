@@ -65,6 +65,26 @@ export const useReminders = (userId?: string) => {
     await saveReminders(newReminders);
     console.log('Reminders saved to storage');
     
+    // Eğer hatırlatıcı aktifse bildirimi planla
+    if (newReminder.isActive) {
+      try {
+        await scheduleReminderNotification(
+          newReminder.id,
+          newReminder.emoji + ' ' + newReminder.title,
+          newReminder.description || 'Hatırlatıcı zamanı!',
+          newReminder.time,
+          newReminder.repeatType,
+          newReminder.category,
+          newReminder.date, // Gelecek tarih için
+          newReminder.repeatDays // Haftalık hatırlatıcılar için günler
+        );
+        console.log('✅ Hatırlatıcı bildirimi planlandı:', newReminder.id);
+      } catch (error) {
+        console.error('❌ Hatırlatıcı bildirimi planlanırken hata:', error);
+        // Bildirim planlanamasa bile hatırlatıcı kaydedildi
+      }
+    }
+    
     return newReminder;
   };
 
@@ -109,7 +129,9 @@ export const useReminders = (userId?: string) => {
           reminder.description || 'Hatırlatıcı zamanı!',
           reminder.time,
           reminder.repeatType,
-          reminder.category
+          reminder.category,
+          reminder.date, // Gelecek tarih için
+          reminder.repeatDays // Haftalık hatırlatıcılar için günler
         );
       } else {
         // Hatırlatıcı pasif edildi - bildirimi iptal et
@@ -194,6 +216,18 @@ export const useReminders = (userId?: string) => {
     return reminders.filter(reminder => {
       if (!reminder.isActive) return false;
       
+      // Tarih aralığı hatırlatıcıları kontrol et (description'da "Bitiş: YYYY-MM-DD" formatı)
+      if (reminder.description && reminder.description.startsWith('Bitiş: ')) {
+        const endDateStr = reminder.description.replace('Bitiş: ', '');
+        const startDateStr = reminder.date || todayString;
+        
+        // Bugün başlangıç ve bitiş tarihleri arasında mı?
+        if (todayString >= startDateStr && todayString <= endDateStr) {
+          return true;
+        }
+        return false;
+      }
+      
       // Eğer planlı hatırlatıcı ise ve bugün için değilse dahil etme
       if (reminder.reminderType === 'scheduled' && reminder.date) {
         return reminder.date === todayString;
@@ -201,6 +235,7 @@ export const useReminders = (userId?: string) => {
       
       switch (reminder.repeatType) {
         case 'daily':
+          // Günlük hatırlatıcı - her zaman true
           return true;
         case 'weekly':
           return reminder.repeatDays?.includes(dayOfWeek) || false;

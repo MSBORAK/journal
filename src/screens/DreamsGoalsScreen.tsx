@@ -198,13 +198,13 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
   const handleSave = async () => {
     if (activeTab === 'promise') {
       if (!formData.promiseText.trim()) {
-        showAlert('Hata', 'Lütfen bir söz yazın', 'error');
+        showAlert(t('common.error'), t('dreams.pleaseWritePromise'), 'error');
         return;
       }
       await addPromise(formData.promiseText);
     } else {
       if (!formData.title.trim()) {
-        showAlert('Hata', 'Lütfen bir başlık yazın', 'error');
+        showAlert(t('common.error'), t('dreams.pleaseWriteTitle'), 'error');
         return;
       }
       if (activeTab === 'dreams') {
@@ -253,6 +253,20 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
          activeTab === 'goals' ? t('dreams.reachYourGoals') : 
          t('dreams.keepYourPromises')}
       </Text>
+      <TouchableOpacity
+        style={dynamicStyles.addNewButton}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          setShowAddModal(true);
+        }}
+      >
+        <Ionicons name="add-circle-outline" size={28} color={currentTheme.colors.primary} />
+        <Text style={dynamicStyles.addNewButtonText}>
+          {activeTab === 'dreams' ? t('dreams.addNewDream') : 
+           activeTab === 'goals' ? t('dreams.addNewGoal') : 
+           t('dreams.makeNewPromise')}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -470,7 +484,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
             { backgroundColor: promise.isCompleted ? currentTheme.colors.card : currentTheme.colors.background }
           ]} />
           <Text style={dynamicStyles.statusText}>
-            {promise.isCompleted ? 'Tamamlandı' : 'Devam Ediyor'}
+            {promise.isCompleted ? t('dreams.completed') : t('dreams.inProgress')}
           </Text>
         </View>
       </View>
@@ -957,7 +971,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       color: currentTheme.colors.text,
                       marginBottom: 8,
                     }}>
-                      Kendine bir söz ver
+                      {t('dreams.promiseLabelNew')}
                     </Text>
                     <TextInput
                       style={{
@@ -971,7 +985,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         borderWidth: 1,
                         borderColor: currentTheme.colors.border,
                       }}
-                      placeholder="Örnek: Her gün 10 dakika meditasyon yapacağım..."
+                      placeholder={t('dreams.promisePlaceholder')}
                       placeholderTextColor={currentTheme.colors.muted}
                       value={formData.promiseText}
                       onChangeText={(text) => setFormData({ ...formData, promiseText: text })}
@@ -1228,7 +1242,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   fontWeight: '600',
                   color: currentTheme.colors.secondary,
                 }}>
-                  Kapat
+                  {t('common.close')}
                 </Text>
               </TouchableOpacity>
               
@@ -1258,7 +1272,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   fontWeight: '600',
                   color: currentTheme.colors.background,
                 }}>
-                  Düzenle
+                  {t('common.edit')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1312,7 +1326,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                   flex: 1,
                   textAlign: 'center',
                 }}>
-                  ✏️ Düzenle
+                  {t('dreams.editTitle')}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowEditModal(false)}
@@ -1341,7 +1355,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         color: currentTheme.colors.text,
                         marginBottom: 8,
                       }}>
-                        Sözün *
+                        {t('dreams.promiseLabel')}
                       </Text>
                       <TextInput
                         style={{
@@ -1355,7 +1369,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           borderWidth: 1,
                           borderColor: currentTheme.colors.border,
                         }}
-                        placeholder="Sözünü yaz..."
+                        placeholder={t('dreams.promisePlaceholder')}
                         placeholderTextColor={currentTheme.colors.muted}
                         value={formData.promiseText}
                         onChangeText={(text) => {
@@ -1493,7 +1507,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                       } catch (error) {
                         console.error('Error updating item:', error);
-                        showAlert('Hata', 'Güncelleme sırasında bir hata oluştu', 'error');
+                        showAlert(t('common.error'), t('dreams.updateError'), 'error');
                       }
                     }}
                     style={{
@@ -1526,7 +1540,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
         message={alertConfig.message}
         type={alertConfig.type}
         primaryButton={{
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: hideAlert,
           style: alertConfig.type === 'error' ? 'danger' : 'primary',
         }}

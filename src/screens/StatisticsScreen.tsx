@@ -144,28 +144,28 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               dynamicStyles.habitTitle,
               habit.todayCompleted && { color: currentTheme.colors.background }
             ]}>
-              {habit.title === 'Su İç' ? t('statistics.drinkWater') :
-               habit.title === 'Egzersiz Yap' ? t('statistics.exercise') :
-               habit.title === 'Kitap Oku' ? t('statistics.readBooks') :
-               habit.title === 'Meditasyon Yap' ? t('statistics.meditation') :
-               habit.title === 'Erken Yat' ? t('statistics.earlySleep') :
-               habit.title === 'Sağlıklı Beslen' ? t('statistics.healthyEating') :
-               habit.title === 'Yeni Şey Öğren' ? t('statistics.learnNewThings') :
-               habit.title === 'Telefon Kullanımı' ? t('statistics.phoneUsage') :
+              {(habit.title === 'Su İç' || habit.title === 'Drink Water') ? t('statistics.drinkWater') :
+               (habit.title === 'Egzersiz Yap' || habit.title === 'Exercise') ? t('statistics.exercise') :
+               (habit.title === 'Kitap Oku' || habit.title === 'Read Books') ? t('statistics.readBooks') :
+               (habit.title === 'Meditasyon Yap' || habit.title === 'Meditation') ? t('statistics.meditation') :
+               (habit.title === 'Erken Yat' || habit.title === 'Early Sleep') ? t('statistics.earlySleep') :
+               (habit.title === 'Sağlıklı Beslen' || habit.title === 'Healthy Eating') ? t('statistics.healthyEating') :
+               (habit.title === 'Yeni Şey Öğren' || habit.title === 'Learn New Things') ? t('statistics.learnNewThings') :
+               (habit.title === 'Telefon Kullanımı' || habit.title === 'Phone Usage') ? t('statistics.phoneUsage') :
                habit.title}
             </Text>
             <Text style={[
               dynamicStyles.habitDescription,
               habit.todayCompleted && { color: currentTheme.colors.background, opacity: 0.9 }
             ]}>
-              {habit.description === 'Günde 8 bardak su iç' ? t('statistics.drink8Glasses') :
-               habit.description === 'Günde 30 dakika egzersiz' ? t('statistics.exercise30Minutes') :
-               habit.description === 'Günde 20 dakika kitap oku' ? t('statistics.read20Minutes') :
-               habit.description === 'Günde 10 dakika meditasyon' ? t('statistics.meditation10Minutes') :
-               habit.description === 'Her gece 23:00\'da yat' ? t('statistics.sleepAt11PM') :
-               habit.description === 'Günde 3 öğün sağlıklı beslen' ? t('statistics.eat3HealthyMeals') :
-               habit.description === 'Günde 1 yeni şey öğren' ? t('statistics.learn1NewThing') :
-               habit.description === 'Günde 2 saat telefon kullan' ? t('statistics.usePhone2Hours') :
+              {(habit.description === 'Günde 8 bardak su iç' || habit.description === 'Drink 8 glasses of water daily') ? t('statistics.drink8Glasses') :
+               (habit.description === 'Günde 30 dakika egzersiz' || habit.description === '30 minutes of exercise daily') ? t('statistics.exercise30Minutes') :
+               (habit.description === 'Günde 20 dakika kitap oku' || habit.description === 'Read for 20 minutes daily') ? t('statistics.read20Minutes') :
+               (habit.description === 'Günde 10 dakika meditasyon' || habit.description === '10 minutes of meditation daily') ? t('statistics.meditation10Minutes') :
+               (habit.description === 'Her gece 23:00\'da yat' || habit.description === 'Sleep before 11:00 PM') ? t('statistics.sleepAt11PM') :
+               (habit.description === 'Günde 3 öğün sağlıklı beslen' || habit.description === '3 main meals daily') ? t('statistics.eat3HealthyMeals') :
+               (habit.description === 'Günde 1 yeni şey öğren' || habit.description === '15 minutes of new knowledge daily') ? t('statistics.learn1NewThing') :
+               (habit.description === 'Günde 2 saat telefon kullan' || habit.description === 'Use phone less than 4 hours daily') ? t('statistics.usePhone2Hours') :
                habit.description}
             </Text>
             
@@ -257,14 +257,14 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                     <Text style={dynamicStyles.streakIcon}>{habit.icon}</Text>
                     <View style={dynamicStyles.streakContent}>
                       <Text style={dynamicStyles.streakTitle}>
-                        {habit.title === 'Su İç' ? t('statistics.drinkWater') :
-                         habit.title === 'Egzersiz Yap' ? t('statistics.exercise') :
-                         habit.title === 'Kitap Oku' ? t('statistics.readBooks') :
-                         habit.title === 'Meditasyon Yap' ? t('statistics.meditation') :
-                         habit.title === 'Erken Yat' ? t('statistics.earlySleep') :
-                         habit.title === 'Sağlıklı Beslen' ? t('statistics.healthyEating') :
-                         habit.title === 'Yeni Şey Öğren' ? t('statistics.learnNewThings') :
-                         habit.title === 'Telefon Kullanımı' ? t('statistics.phoneUsage') :
+                        {(habit.title === 'Su İç' || habit.title === 'Drink Water') ? t('statistics.drinkWater') :
+                         (habit.title === 'Egzersiz Yap' || habit.title === 'Exercise') ? t('statistics.exercise') :
+                         (habit.title === 'Kitap Oku' || habit.title === 'Read Books') ? t('statistics.readBooks') :
+                         (habit.title === 'Meditasyon Yap' || habit.title === 'Meditation') ? t('statistics.meditation') :
+                         (habit.title === 'Erken Yat' || habit.title === 'Early Sleep') ? t('statistics.earlySleep') :
+                         (habit.title === 'Sağlıklı Beslen' || habit.title === 'Healthy Eating') ? t('statistics.healthyEating') :
+                         (habit.title === 'Yeni Şey Öğren' || habit.title === 'Learn New Things') ? t('statistics.learnNewThings') :
+                         (habit.title === 'Telefon Kullanımı' || habit.title === 'Phone Usage') ? t('statistics.phoneUsage') :
                          habit.title}
                       </Text>
                       <Text style={dynamicStyles.streakNumber}>{streak.currentStreak} {t('statistics.days')}</Text>
@@ -379,12 +379,34 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
   };
 
 
-  // Mood data calculation
+  // Mood data calculation - filtered by selected period
   const moodData = useMemo(() => {
     const moodCounts: { [key: string]: number } = {};
     
-    // Eğer entries boşsa, örnek veri göster
-    if (entries.length === 0) {
+    // Filter entries by selected period
+    const now = new Date();
+    const filteredEntries = entries.filter(entry => {
+      const entryDate = new Date(entry.date);
+      switch (selectedPeriod) {
+        case 'week':
+          const weekAgo = new Date(now);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return entryDate >= weekAgo;
+        case 'month':
+          const monthAgo = new Date(now);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          return entryDate >= monthAgo;
+        case 'year':
+          const yearAgo = new Date(now);
+          yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+          return entryDate >= yearAgo;
+        default:
+          return true;
+      }
+    });
+    
+    // Eğer filtrelenmiş entries boşsa, örnek veri göster
+    if (filteredEntries.length === 0) {
       return [
         { mood: '4', count: 8, percentage: 40, emoji: '😎', color: currentTheme.colors.success },
         { mood: '3', count: 6, percentage: 30, emoji: '🫠', color: currentTheme.colors.secondary },
@@ -393,8 +415,8 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       ];
     }
 
-    // Gerçek veri hesaplama
-    entries.forEach(entry => {
+    // Gerçek veri hesaplama - filtrelenmiş entries üzerinden
+    filteredEntries.forEach(entry => {
       if (entry.mood) {
         moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
       }
@@ -440,7 +462,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 4); // Show top 4 moods
-  }, [entries]);
+  }, [entries, selectedPeriod, currentTheme.colors]);
 
   // Other data calculations
   // İlk entry'yi bul (en eski tarihli)
@@ -1075,29 +1097,36 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     // Line Chart Styles
     lineChartContainer: {
       marginBottom: 20,
+      paddingHorizontal: 8,
     },
     lineChartGrid: {
       flexDirection: 'row',
-      height: 80,
+      height: 160,
       marginBottom: 12,
     },
     yAxisContainer: {
-      width: 40,
+      width: 45,
       justifyContent: 'space-between',
-      paddingRight: 8,
+      paddingRight: 12,
+      paddingTop: 4,
+      paddingBottom: 4,
     },
     yAxisLabel: {
-      fontSize: 10,
+      fontSize: 11,
       color: currentTheme.colors.secondary,
       textAlign: 'right',
+      fontWeight: '600',
     },
     chartArea: {
       flex: 1,
       position: 'relative',
       backgroundColor: currentTheme.colors.background,
-      borderRadius: 8,
+      borderRadius: 12,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
+      overflow: 'hidden',
+      padding: 12,
+      marginLeft: 4,
     },
     lineChartLine: {
       position: 'absolute',
@@ -1106,41 +1135,46 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     },
     lineChartPoint: {
       position: 'absolute',
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      borderWidth: 2,
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      borderWidth: 3,
       borderColor: 'white',
-      shadowColor: 'rgba(0, 0, 0, 0.3)',
+      shadowColor: 'rgba(0, 0, 0, 0.2)',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 4,
+      shadowOpacity: 0.4,
+      shadowRadius: 6,
+      elevation: 5,
     },
     lineChartEmoji: {
       position: 'absolute',
-      fontSize: 16,
+      fontSize: 18,
       fontWeight: 'bold',
     },
     lineChartPercent: {
       position: 'absolute',
-      fontSize: 10,
-      fontWeight: '600',
+      fontSize: 11,
+      fontWeight: '700',
       color: currentTheme.colors.text,
       backgroundColor: currentTheme.colors.background,
-      paddingHorizontal: 4,
-      paddingVertical: 2,
-      borderRadius: 4,
-      borderWidth: 1,
+      paddingHorizontal: 6,
+      paddingVertical: 3,
+      borderRadius: 6,
+      borderWidth: 1.5,
       borderColor: currentTheme.colors.border,
+      shadowColor: 'rgba(0, 0, 0, 0.1)',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+      elevation: 2,
     },
     gridLine: {
       position: 'absolute',
-      left: 0,
-      right: 0,
+      left: 12,
+      right: 12,
       height: 1,
       backgroundColor: currentTheme.colors.border,
-      opacity: 0.3,
+      opacity: 0.25,
     },
     xAxisContainer: {
       flexDirection: 'row',
@@ -1891,67 +1925,6 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               >
               {activeTab === 'stats' && (
                 <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
-                  <View style={dynamicStyles.healthInfoContainer}>
-                    <Text style={dynamicStyles.healthInfoText}>
-                      📊 {t('statistics.moodDistribution')}
-                    </Text>
-                    <Text style={{
-                      fontSize: 14,
-                      color: currentTheme.colors.secondary,
-                      marginTop: 8,
-                      fontStyle: 'italic',
-                      textAlign: 'center',
-                    }}>
-                      {moodData.length > 0 && moodData[0].percentage > 50 
-                        ? (t('statistics.greatDayKeepEnergy'))
-                        : (t('statistics.everyDayDifferent'))
-                      }
-                    </Text>
-            </View>
-
-                  {/* Simple Mood Distribution */}
-                  <View style={{
-                    backgroundColor: currentTheme.colors.card,
-                    borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
-                    shadowColor: currentTheme.colors.shadow,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 3,
-                  }}>
-                    <Text style={dynamicStyles.chartTitle}>📊 {t('statistics.moodDistributionTitle')}</Text>
-                    <View style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-around',
-                      marginTop: 20,
-                    }}>
-                      {moodData.map((mood, index) => (
-                        <View key={index} style={{
-                          alignItems: 'center',
-                          flex: 1,
-                        }}>
-                          <View style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 25,
-                            backgroundColor: mood.color,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            marginBottom: 8,
-                          }}>
-                            <Text style={{ fontSize: 24 }}>{mood.emoji}</Text>
-            </View>
-                          <Text style={{
-                            fontSize: 12,
-                            color: currentTheme.colors.text,
-                            fontWeight: 'bold',
-                          }}>{mood.percentage}%</Text>
-            </View>
-                      ))}
-        </View>
-      </View>
 
                   {/* Simple Mood Progress Bar */}
                   <View style={{
@@ -2216,8 +2189,24 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                       <View style={dynamicStyles.chartArea}>
                         <View style={dynamicStyles.lineChartLine}>
                           {moodData.map((mood, index) => {
-                            const x = (index / (moodData.length - 1)) * 200;
-                            const y = 60 - (mood.percentage / 100) * 60;
+                            // Grafik alanı boyutları (padding çıkarılmış)
+                            const chartWidth = 220;
+                            const chartHeight = 136;
+                            const padding = 12;
+                            
+                            // X pozisyonu: grafik genişliği boyunca eşit dağılım, padding dahil
+                            const xPos = padding + (index / Math.max(1, moodData.length - 1)) * chartWidth;
+                            const x = Math.max(padding + 8, Math.min(xPos, padding + chartWidth - 8));
+                            
+                            // Y pozisyonu: 100% üstte (y=padding), 0% altta (y=padding+chartHeight)
+                            const yPos = padding + chartHeight - (mood.percentage / 100) * chartHeight;
+                            const y = Math.max(padding, Math.min(yPos, padding + chartHeight));
+                            
+                            // Emoji ve yüzde pozisyonları: grafik sınırları içinde
+                            const emojiLeft = Math.max(padding, Math.min(x - 12, padding + chartWidth - 24));
+                            const emojiTop = Math.max(padding + 2, Math.min(y + 18, padding + chartHeight - 22));
+                            const percentLeft = Math.max(padding, Math.min(x - 18, padding + chartWidth - 36));
+                            const percentTop = Math.max(padding - 2, Math.min(y - 28, padding + chartHeight - 18));
                             return (
                               <View key={index}>
                                 <View 
@@ -2230,10 +2219,10 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                                     }
                                   ]} 
                                 />
-                                <Text style={[dynamicStyles.lineChartEmoji, { left: x - 10, top: y + 20 }]}>
+                                <Text style={[dynamicStyles.lineChartEmoji, { left: emojiLeft, top: emojiTop }]}>
                                   {mood.emoji}
                 </Text>
-                                <Text style={[dynamicStyles.lineChartPercent, { left: x - 15, top: y - 25 }]}>
+                                <Text style={[dynamicStyles.lineChartPercent, { left: percentLeft, top: percentTop }]}>
                                   {mood.percentage}%
                 </Text>
               </View>
@@ -2241,27 +2230,16 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
                           })}
               </View>
                         
-                        {/* Grid Lines */}
-                        <View style={dynamicStyles.gridLine} />
-                        <View style={[dynamicStyles.gridLine, { top: 15 }]} />
-                        <View style={[dynamicStyles.gridLine, { top: 30 }]} />
-                        <View style={[dynamicStyles.gridLine, { top: 45 }]} />
-                        <View style={[dynamicStyles.gridLine, { top: 60 }]} />
-              </View>
-            </View>
-                    
-                    {/* X-axis labels */}
-                    <View style={dynamicStyles.xAxisContainer}>
-                      {moodData.map((mood, index) => (
-                        <Text key={index} style={dynamicStyles.xAxisLabel}>
-                          {mood.emoji}
-                        </Text>
-                      ))}
-          </View>
-        </View>
-                  
-                  {/* Pie chart removed per request to avoid duplication */}
-      </View>
+                        {/* Grid Lines - 100%, 75%, 50%, 25%, 0% */}
+                        <View style={[dynamicStyles.gridLine, { top: 12 }]} />
+                        <View style={[dynamicStyles.gridLine, { top: 12 + 34 }]} />
+                        <View style={[dynamicStyles.gridLine, { top: 12 + 68 }]} />
+                        <View style={[dynamicStyles.gridLine, { top: 12 + 102 }]} />
+                        <View style={[dynamicStyles.gridLine, { top: 12 + 136 }]} />
+                      </View>
+                    </View>
+                  </View>
+                </View>
               )}
             </LinearGradient>
           </TouchableOpacity>

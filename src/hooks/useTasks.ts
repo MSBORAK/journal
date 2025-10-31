@@ -148,7 +148,8 @@ export const useTasks = (userId?: string) => {
   const getTodayTasks = () => {
     const today = new Date().toISOString().split('T')[0];
     return tasks.filter(task => {
-      const taskDate = new Date(task.createdAt).toISOString().split('T')[0];
+      // Use task.date if available, otherwise use createdAt date
+      const taskDate = task.date || new Date(task.createdAt).toISOString().split('T')[0];
       return taskDate === today;
     });
   };

@@ -33,47 +33,137 @@ export default function MotivationCard({
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
 
-  // Translation map for motivation titles and messages
-  const getTranslatedTitle = (title: string) => {
+  // Translation map for motivation titles and messages - using message ID for i18n keys
+  const getTranslatedTitle = (title: string, messageId?: string) => {
+    // Use message ID to get i18n key if available
+    if (messageId) {
+      const idToKeyMap: { [key: string]: string } = {
+        'mood_excellent_week': 'motivation.titles.shiningBrightly',
+        'mood_good_week': 'motivation.titles.peacefulSoul',
+        'mood_encouragement': 'motivation.titles.newBeginning',
+        'goal_almost_there': 'motivation.titles.closeToDreams',
+        'goal_good_progress': 'motivation.titles.halfwayThere',
+        'streak_amazing': 'motivation.titles.legend',
+        'streak_good': 'motivation.titles.amazingRhythm',
+        'general_encouragement_1': 'motivation.titles.innerLightShining',
+        'general_encouragement_2': 'motivation.titles.strongerEveryDay',
+        'reflection_insight': 'motivation.titles.listenToFeelings',
+        'gratitude_practice': 'motivation.titles.lifeSmiling',
+        'emotional_awareness': 'motivation.titles.valueFeelings',
+        'growth_mindset': 'motivation.titles.growingSoul',
+        'self_compassion': 'motivation.titles.beKind',
+        'future_planning': 'motivation.titles.brightTomorrow',
+        'energy_awareness': 'motivation.titles.valuableEnergy',
+        'communication_skills': 'motivation.titles.connectionsEmpower',
+        'accomplishment_celebration': 'motivation.titles.celebrateSuccess',
+        'mindful_living': 'motivation.titles.liveMoment',
+        'peace_within': 'motivation.titles.innerPeace',
+        'self_love': 'motivation.titles.loveYourself',
+        'beautiful_soul': 'motivation.titles.beautifulSoul',
+        'breathe_relax': 'motivation.titles.breatheRelax',
+        'smile_today': 'motivation.titles.smile',
+      };
+      
+      const i18nKey = idToKeyMap[messageId];
+      if (i18nKey) {
+        const translated = t(i18nKey);
+        if (translated !== i18nKey) return translated; // Only return if translation exists
+      }
+    }
+    
+    // Fallback to string-based translation
     const translations: { [key: string]: string } = {
-      'Her Gün Yeni Bir Başlangıç! 🌅': t('welcome') === 'Welcome' ? 'Every Day a New Beginning! 🌅' : 'Her Gün Yeni Bir Başlangıç! 🌅',
-      'Hayallerine Çok Yakınsın! ✨': t('welcome') === 'Welcome' ? 'You\'re So Close to Your Dreams! ✨' : 'Hayallerine Çok Yakınsın! ✨',
-      'Yolun Yarısını Geçtin! 🌈': t('welcome') === 'Welcome' ? 'You\'ve Passed Halfway! 🌈' : 'Yolun Yarısını Geçtin! 🌈',
-      'Duygularını Dinlemek Güzel! 🎵': t('welcome') === 'Welcome' ? 'It\'s Beautiful to Listen to Your Feelings! 🎵' : 'Duygularını Dinlemek Güzel! 🎵',
-      'Işıl Işıl Parlıyorsun! ✨': t('welcome') === 'Welcome' ? 'You\'re Shining Brightly! ✨' : 'Işıl Işıl Parlıyorsun! ✨',
-      'Ruhun Huzurlu! 🌸': t('welcome') === 'Welcome' ? 'Your Soul is Peaceful! 🌸' : 'Ruhun Huzurlu! 🌸',
-      'Sen Bir Efsanesin! 🔥': t('welcome') === 'Welcome' ? 'You\'re a Legend! 🔥' : 'Sen Bir Efsanesin! 🔥',
-      'Harika Bir Ritm! ⭐': t('welcome') === 'Welcome' ? 'Amazing Rhythm! ⭐' : 'Harika Bir Ritm! ⭐',
-      'İçindeki Işık Parlıyor! ✨': t('welcome') === 'Welcome' ? 'The Light Within You is Shining! ✨' : 'İçindeki Işık Parlıyor! ✨',
-      'Her Gün Daha Güçlüsün! 🌱': t('welcome') === 'Welcome' ? 'You\'re Stronger Every Day! 🌱' : 'Her Gün Daha Güçlüsün! 🌱',
-      'Hayat Sana Gülüyor! 🌻': t('welcome') === 'Welcome' ? 'Life is Smiling at You! 🌻' : 'Hayat Sana Gülüyor! 🌻',
-      'Duygularına Değer Ver! 💖': t('welcome') === 'Welcome' ? 'Value Your Feelings! 💖' : 'Duygularına Değer Ver! 💖',
-      'Büyüyen Bir Ruh! 🦋': t('welcome') === 'Welcome' ? 'A Growing Soul! 🦋' : 'Büyüyen Bir Ruh! 🦋',
-      'Kendine Nazik Ol! 🌸': t('welcome') === 'Welcome' ? 'Be Kind to Yourself! 🌸' : 'Kendine Nazik Ol! 🌸',
-      'Yarınların Parlak! 🌅': t('welcome') === 'Welcome' ? 'Your Tomorrows are Bright! 🌅' : 'Yarınların Parlak! 🌅',
-      'Enerjin Çok Değerli! 💫': t('welcome') === 'Welcome' ? 'Your Energy is Very Valuable! 💫' : 'Enerjin Çok Değerli! 💫',
-      'Her Başarı Kutlanmalı! 🎊': t('welcome') === 'Welcome' ? 'Every Success Should be Celebrated! 🎊' : 'Her Başarı Kutlanmalı! 🎊',
-      'Anı Yaşa! 🌺': t('welcome') === 'Welcome' ? 'Live the Moment! 🌺' : 'Anı Yaşa! 🌺',
-      'İçsel Huzur! 🕊️': t('welcome') === 'Welcome' ? 'Inner Peace! 🕊️' : 'İçsel Huzur! 🕊️',
-      'Kendini Sev! 💕': t('welcome') === 'Welcome' ? 'Love Yourself! 💕' : 'Kendini Sev! 💕',
-      'Güzel Bir Ruhsun! 🌟': t('welcome') === 'Welcome' ? 'You\'re a Beautiful Soul! 🌟' : 'Güzel Bir Ruhsun! 🌟',
-      'Nefes Al, Rahatla! 🌬️': t('welcome') === 'Welcome' ? 'Breathe, Relax! 🌬️' : 'Nefes Al, Rahatla! 🌬️',
-      'Gülümse! 😊': t('welcome') === 'Welcome' ? 'Smile! 😊' : 'Gülümse! 😊',
+      'Her Gün Yeni Bir Başlangıç! 🌅': t('motivation.titles.newBeginning'),
+      'Hayallerine Çok Yakınsın! ✨': t('motivation.titles.closeToDreams'),
+      'Yolun Yarısını Geçtin! 🌈': t('motivation.titles.passedHalfway'),
+      'Duygularını Dinlemek Güzel! 🎵': t('motivation.titles.listenToFeelings'),
+      'Işıl Işıl Parlıyorsun! ✨': t('motivation.titles.shiningBrightly'),
+      'Ruhun Huzurlu! 🌸': t('motivation.titles.peacefulSoul'),
+      'Sen Bir Efsanesin! 🔥': t('motivation.titles.legend'),
+      'Harika Bir Ritm! ⭐': t('motivation.titles.amazingRhythm'),
+      'İçindeki Işık Parlıyor! ✨': t('motivation.titles.innerLightShining'),
+      'Her Gün Daha Güçlüsün! 🌱': t('motivation.titles.strongerEveryDay'),
+      'Hayat Sana Gülüyor! 🌻': t('motivation.titles.lifeSmiling'),
+      'Duygularına Değer Ver! 💖': t('motivation.titles.valueFeelings'),
+      'Büyüyen Bir Ruh! 🦋': t('motivation.titles.growingSoul'),
+      'Kendine Nazik Ol! 🌸': t('motivation.titles.beKind'),
+      'Yarınların Parlak! 🌅': t('motivation.titles.brightTomorrow'),
+      'Enerjin Çok Değerli! 💫': t('motivation.titles.valuableEnergy'),
+      'Her Başarı Kutlanmalı! 🎊': t('motivation.titles.celebrateSuccess'),
+      'Anı Yaşa! 🌺': t('motivation.titles.liveMoment'),
+      'İçsel Huzur! 🕊️': t('motivation.titles.innerPeace'),
+      'Kendini Sev! 💕': t('motivation.titles.loveYourself'),
+      'Güzel Bir Ruhsun! 🌟': t('motivation.titles.beautifulSoul'),
+      'Nefes Al, Rahatla! 🌬️': t('motivation.titles.breatheRelax'),
+      'Gülümse! 😊': t('motivation.titles.smile'),
+      'Connections Empower You! 🤝': t('motivation.titles.connectionsEmpower'),
     };
     return translations[title] || title;
   };
 
-  const getTranslatedMessage = (message: string) => {
+  const getTranslatedMessage = (message: string, messageId?: string) => {
+    // Use message ID to get i18n key if available
+    if (messageId) {
+      const idToKeyMap: { [key: string]: string } = {
+        'mood_excellent_week': 'motivation.messages.strongLight',
+        'mood_good_week': 'motivation.messages.beautifulEnergy',
+        'mood_encouragement': 'motivation.messages.cloudsAndSun',
+        'goal_almost_there': 'motivation.messages.lookHowFar',
+        'goal_good_progress': 'motivation.messages.smallSteps',
+        'streak_amazing': 'motivation.messages.valueYourself',
+        'streak_good': 'motivation.messages.regularTime',
+        'general_encouragement_1': 'motivation.messages.nourishSoul',
+        'general_encouragement_2': 'motivation.messages.strongerEveryDay',
+        'reflection_insight': 'motivation.messages.listenToVoice',
+        'gratitude_practice': 'motivation.messages.gratitudePractice',
+        'emotional_awareness': 'motivation.messages.emotionalAwareness',
+        'growth_mindset': 'motivation.messages.growthMindset',
+        'self_compassion': 'motivation.messages.treatYourselfAsYouWould',
+        'future_planning': 'motivation.messages.futurePlanning',
+        'energy_awareness': 'motivation.messages.energyAwareness',
+        'communication_skills': 'motivation.messages.communicationSkills',
+        'accomplishment_celebration': 'motivation.messages.accomplishmentCelebration',
+        'mindful_living': 'motivation.messages.mindfulLiving',
+        'peace_within': 'motivation.messages.peaceWithin',
+        'self_love': 'motivation.messages.selfLove',
+        'beautiful_soul': 'motivation.messages.beautifulSoul',
+        'breathe_relax': 'motivation.messages.breatheRelax',
+        'smile_today': 'motivation.messages.smileToday',
+      };
+      
+      const i18nKey = idToKeyMap[messageId];
+      if (i18nKey) {
+        const translated = t(i18nKey);
+        if (translated !== i18nKey) return translated; // Only return if translation exists
+      }
+    }
+    
+    // Fallback to string-based translation
     const translations: { [key: string]: string } = {
-      'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!': t('welcome') === 'Welcome' ? 'Sometimes clouds cover the sun, but the sun is always there. So is the light within you. Today will be even better!' : 'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!',
-      'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!': t('welcome') === 'Welcome' ? 'Look how far you\'ve come! Every step makes you stronger. Keep going, you\'re amazing!' : 'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!',
-      'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!': t('welcome') === 'Welcome' ? 'Every small step is the beginning of great changes. You\'re achieving amazing things!' : 'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!',
-      'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!': t('welcome') === 'Welcome' ? 'Listening to the voice within makes you more peaceful. Keep listening to yourself!' : 'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!',
-      'Bu hafta içindeki ışık öyle güçlü ki, etrafına pozitif enerji saçıyorsun. Kendini hissettiğin gibi yaşamaya devam et!': t('welcome') === 'Welcome' ? 'This week the light within you is so strong that you\'re radiating positive energy around you. Keep living as you feel!' : 'Bu hafta içindeki ışık öyle güçlü ki, etrafına pozitif enerji saçıyorsun. Kendini hissettiğin gibi yaşamaya devam et!',
-      'İçindeki o güzel enerji çok değerli. Hayatın sana sunduğu bu güzel anları doya doya yaşa!': t('welcome') === 'Welcome' ? 'That beautiful energy within you is very valuable. Live these beautiful moments that life offers you to the fullest!' : 'İçindeki o güzel enerji çok değerli. Hayatın sana sunduğu bu güzel anları doya doya yaşa!',
-      'Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!': t('welcome') === 'Welcome' ? 'Look at the value you give yourself! How beautiful it is that you take time for yourself every day. You should be proud!' : 'Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!',
-      'Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!': t('welcome') === 'Welcome' ? 'Taking regular time for yourself is the most beautiful gift. You are very valuable and you deserve this!' : 'Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!',
-      'Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!': t('welcome') === 'Welcome' ? 'Every moment you dedicate to yourself nourishes your soul. You are very special and don\'t forget this!' : 'Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!',
+      'Bazen bulutlar güneşi örter ama güneş hep oradadır. Senin içindeki ışık da öyle. Bugün daha güzel olacak!': t('motivation.messages.cloudsAndSun'),
+      'Bak ne kadar yol kattettin! Her adım seni daha güçlü yapıyor. Devam et, sen harikasın!': t('motivation.messages.lookHowFar'),
+      'Her küçük adım büyük değişimlerin başlangıcı. Sen harika şeyler başarıyorsun!': t('motivation.messages.smallSteps'),
+      'İçindeki sese kulak vermek seni daha huzurlu yapıyor. Kendini dinlemeye devam et!': t('motivation.messages.listenToVoice'),
+      'Bu hafta içindeki ışık öyle güçlü ki, etrafına pozitif enerji saçıyorsun. Kendini hissettiğin gibi yaşamaya devam et!': t('motivation.messages.strongLight'),
+      'İçindeki o güzel enerji çok değerli. Hayatın sana sunduğu bu güzel anları doya doya yaşa!': t('motivation.messages.beautifulEnergy'),
+      'Kendine verdiğin değere bak! Her gün kendine zaman ayırman ne kadar güzel. Gurur duymalısın!': t('motivation.messages.valueYourself'),
+      'Kendine düzenli zaman ayırmak en güzel hediye. Sen çok değerlisin ve bunu hak ediyorsun!': t('motivation.messages.regularTime'),
+      'Kendine ayırdığın her an, ruhunu besliyor. Sen çok özelsin ve bunu unutma!': t('motivation.messages.nourishSoul'),
+      'En sevdiğin insana davrandığın gibi kendine de davran. Sen de şefkat hak ediyorsun!': t('motivation.messages.treatYourselfAsYouWould'),
+      'Bazen fark etmesen de her gün biraz daha güçleniyorsun. Kendine inan, sen muhteşemsin!': t('motivation.messages.strongerEveryDay'),
+      'Şükretmek kalbi ferahlatır. İşte şu an sahip olduğun her şey bir nimet. Hayattan keyif al!': t('motivation.messages.gratitudePractice'),
+      'Her duygun seni sen yapan şeylerden biri. Onları kabul et, onlarla barış. Çok güzelsin!': t('motivation.messages.emotionalAwareness'),
+      'Her yeni gün, yeni bir sen olmak için bir fırsat. Sen sürekli dönüşüyorsun ve bu çok güzel!': t('motivation.messages.growthMindset'),
+      'Her yeni gün yeni umutlar, yeni başlangıçlar demek. Hayallerine adım adım yaklaşıyorsun!': t('motivation.messages.futurePlanning'),
+      'Kendini yorma, dinlenmeyi bil. Enerjini korumak seni daha mutlu yapar. Kendine iyi bak!': t('motivation.messages.energyAwareness'),
+      'The beautiful connections you build with people enrich your life. Share with love!': t('motivation.messages.communicationSkills'),
+      'Küçük de olsa her adımın önemli! Kendini kutlamayı unutma, sen harikasın!': t('motivation.messages.accomplishmentCelebration'),
+      'Şu an burada olmak ne güzel değil mi? Her anın tadını çıkar, yaşamın güzelliğini hisset!': t('motivation.messages.mindfulLiving'),
+      'Huzur dışarıda değil, içinde. Kendine zaman ayırarak içindeki huzuru büyütüyorsun. Ne güzel!': t('motivation.messages.peaceWithin'),
+      'Sen bu dünyada bir tanesin. Kendini olduğun gibi kabul et ve sev. Çok değerlisin!': t('motivation.messages.selfLove'),
+      'İçindeki güzellik her geçen gün daha çok parlıyor. Kendini olduğun gibi yaşa!': t('motivation.messages.beautifulSoul'),
+      'Derin bir nefes al. Omuzlarını gevşet. Her şey yoluna girecek. Sen harikasın!': t('motivation.messages.breatheRelax'),
+      'Bugün mutlu olman için sana bir neden: Sen varsın! Hayatın güzel sürprizlerle dolu!': t('motivation.messages.smileToday'),
     };
     return translations[message] || message;
   };
@@ -270,10 +360,10 @@ export default function MotivationCard({
       >
         <View style={styles.header}>
           <Text style={styles.emoji}>{motivation.emoji}</Text>
-          <Text style={styles.title}>{getTranslatedTitle(motivation.title)}</Text>
+          <Text style={styles.title}>{getTranslatedTitle(motivation.title, motivation.id)}</Text>
         </View>
         
-        <Text style={styles.message}>{getTranslatedMessage(motivation.message)}</Text>
+        <Text style={styles.message}>{getTranslatedMessage(motivation.message, motivation.id)}</Text>
         
         <View style={styles.footer}>
           <View style={styles.priorityIndicator}>

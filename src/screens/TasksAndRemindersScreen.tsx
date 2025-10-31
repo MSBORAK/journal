@@ -51,12 +51,14 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     loading: remindersLoading,
     addReminder,
     getTodayReminders,
+    deleteReminder,
   } = useReminders(user?.uid);
 
   // State
-  const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('daily');
+  const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'monthly' | 'future' | 'all'>('daily');
   const [showReminders, setShowReminders] = useState(true);
   const [fadeAnim] = useState(new Animated.Value(1));
+  const [toggleAnim] = useState(new Animated.Value(0)); // Toggle animation
   const { 
     setShowFocusMode, 
     showFocusMode, 
@@ -80,19 +82,32 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const [taskEstimatedTime, setTaskEstimatedTime] = useState('15');
   const [taskDate, setTaskDate] = useState(new Date().toISOString().split('T')[0]);
   const [taskTime, setTaskTime] = useState('09:00');
+  const [taskHasReminder, setTaskHasReminder] = useState(false); // Görev için hatırlatıcı ekle
+  
+  // Toggle animasyonunu taskHasReminder'a göre güncelle
+  useEffect(() => {
+    Animated.spring(toggleAnim, {
+      toValue: taskHasReminder ? 1 : 0,
+      useNativeDriver: true,
+      tension: 150,
+      friction: 8,
+    }).start();
+  }, [taskHasReminder, toggleAnim]);
   
   // Reminder form states
   const [reminderTitle, setReminderTitle] = useState('');
-  const [reminderFrequency, setReminderFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [reminderType, setReminderType] = useState<'daily' | 'dateRange'>('daily'); // Günlük veya tarih aralığı
   const [reminderTime, setReminderTime] = useState('09:00');
-  const [reminderDate, setReminderDate] = useState(new Date().toISOString().split('T')[0]);
+  const [reminderStartDate, setReminderStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [reminderEndDate, setReminderEndDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Computed values
   const todayTasks = getTodayTasks();
   const completedCount = getTodayCompletedCount();
   const completionRate = todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
   const todayReminders = getTodayReminders();
-  const upcomingReminders = reminders.filter(r => r.isActive);
+  // Hatırlatıcılar kısmında sadece gerçek hatırlatıcıları göster (görev hatırlatıcıları hariç)
+  const upcomingReminders = reminders.filter(r => r.isActive && !r.isTaskReminder);
 
   // Animation for tab switching
   const animateTabSwitch = () => {
@@ -110,16 +125,41 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     ]).start();
   };
 
-  const handleTabChange = (tab: 'daily' | 'weekly' | 'monthly' | 'all') => {
+  const handleTabChange = (tab: 'daily' | 'weekly' | 'monthly' | 'future' | 'all') => {
     animateTabSwitch();
     setActiveTab(tab);
   };
 
   const handleTaskComplete = async (taskId: string) => {
     try {
+      // Görevle bağlantılı hatırlatıcıyı bul ve iptal et
+      const linkedReminder = reminders.find(r => r.linkedTaskId === taskId);
+      if (linkedReminder) {
+        try {
+          await deleteReminder(linkedReminder.id);
+          console.log('✅ Görev hatırlatıcısı iptal edildi:', linkedReminder.id);
+        } catch (reminderError) {
+          console.error('Hatırlatıcı iptal edilirken hata:', reminderError);
+        }
+      }
+      
       await toggleTaskCompletion(taskId);
       await soundService.playSuccess();
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      
+      // Tebrik mesajları
+      const celebrationMessages = [
+        { emoji: '🎉', text: 'Harika iş çıkardın!', subtext: 'Kendinle gurur duyabilirsin 🌟' },
+        { emoji: '✨', text: 'Tebrikler!', subtext: 'Bir adım daha ilerledin 💪' },
+        { emoji: '🌟', text: 'Mükemmel!', subtext: 'Bu enerjiyle devam et 🚀' },
+        { emoji: '💫', text: 'Süper!', subtext: 'Her tamamladığın görev seni güçlendiriyor ✨' },
+        { emoji: '🎊', text: 'Harika!', subtext: 'Küçük adımlar büyük değişiklikler yaratır 🌸' },
+      ];
+      const randomCelebration = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+      
+      // TODO: Celebration modal ekle
+      console.log('🎉 Görev tamamlandı:', randomCelebration);
+      
       // TODO: Add confetti animation
     } catch (error) {
       console.error('Error completing task:', error);
@@ -127,6 +167,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   };
 
   const handleAddTask = () => {
+    setTaskHasReminder(false);
+    toggleAnim.setValue(0);
     setShowAddTaskModal(true);
   };
 
@@ -135,31 +177,125 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   };
 
   const handleSaveTask = async () => {
-    if (!taskTitle.trim()) {
+    // Basit validation - sadece boş kontrolü
+    const trimmedTitle = taskTitle.trim();
+    if (!trimmedTitle || trimmedTitle.length === 0) {
       console.log('Task title is empty');
       return;
     }
     
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Mantık: Tarih gelecekse tek seferlik, bugün/geçmişse sıklık seçimi geçerli
+    let taskDateValue = taskDate;
+    let dueDate: string | undefined = undefined;
+    let dueTime: string | undefined = undefined;
+    let frequency: 'daily' | 'weekly' | 'monthly' | 'once' = 'once';
+    
+    // Gelecek bir tarih girildiyse → Tek seferlik görev
+    if (taskDate > today) {
+      dueDate = taskDate;
+      dueTime = taskTime;
+      taskDateValue = taskDate;
+      frequency = 'once'; // Gelecek tarihli görevler her zaman tek seferlik
+    } 
+    // Bugün veya geçmiş tarih → Sıklık seçimine göre
+    else {
+      taskDateValue = today; // Bugünden itibaren başlat
+      frequency = taskFrequency; // Kullanıcının seçtiği sıklık
+    }
+    
     console.log('Saving task:', {
-      title: taskTitle.trim(),
+      title: trimmedTitle,
       category: taskCategory,
       estimatedTime: parseInt(taskEstimatedTime),
       emoji: '📝',
-      date: taskDate,
+      date: taskDateValue,
       priority: 'medium',
+      frequency: frequency,
+      dueDate: dueDate,
+      dueTime: dueTime,
     });
     
     try {
       const newTask = await addTask({
-        title: taskTitle.trim(),
+        title: trimmedTitle,
         category: taskCategory as 'health' | 'personal' | 'work' | 'custom' | 'hobby',
         estimatedTime: parseInt(taskEstimatedTime),
         emoji: '📝',
-        date: taskDate,
+        date: taskDateValue,
         priority: 'medium',
+        frequency: frequency,
+        dueDate: dueDate,
+        dueTime: dueTime,
       });
       
       console.log('Task saved successfully:', newTask);
+      
+      // Eğer hatırlatıcı seçildiyse, görev için hatırlatıcı oluştur
+      if (taskHasReminder && newTask) {
+        try {
+          // Hatırlatıcı mesajı - daha duygusal ve kişisel
+          const reminderMessages = [
+            `Biraz vakit ayırmaya ne dersin? 🌸`,
+            `Zaman geldi — "${taskTitle.trim()}" seni bekliyor. 💫`,
+            `Kendin için bir an ayır — "${taskTitle.trim()}" hazır! ✨`,
+            `Hatırlatıcı: "${taskTitle.trim()}" için zamanı geldi. 🌟`,
+            `Seni güçlendirecek bir şey var: "${taskTitle.trim()}" 💪`,
+          ];
+          const randomMessage = reminderMessages[Math.floor(Math.random() * reminderMessages.length)];
+          
+          let reminderDateValue: string | undefined = undefined;
+          let reminderType: 'today' | 'scheduled' = 'today';
+          
+          // Görev gelecek tarihli ise hatırlatıcı da gelecek tarihli olsun
+          if (dueDate && dueDate > today) {
+            reminderDateValue = dueDate;
+            reminderType = 'scheduled';
+          }
+          
+          // Hatırlatıcı sıklığı görev sıklığına göre belirle
+          let reminderRepeatType: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly' = 'daily';
+          let reminderRepeatDays: number[] | undefined = undefined;
+          
+          // Görev tarihine göre haftanın gününü belirle
+          const taskDateObj = new Date(dueDate || taskDateValue);
+          const dayOfWeek = taskDateObj.getDay(); // 0 = Pazar, 1 = Pazartesi, ..., 6 = Cumartesi
+          
+          if (frequency === 'weekly') {
+            reminderRepeatType = 'weekly';
+            reminderRepeatDays = [dayOfWeek];
+          } else if (frequency === 'monthly') {
+            reminderRepeatType = 'monthly';
+          } else if (frequency === 'daily') {
+            reminderRepeatType = 'daily';
+          } else {
+            reminderRepeatType = 'once';
+          }
+          
+          // Hatırlatıcıyı oluştur
+          const reminder = await addReminder({
+            title: trimmedTitle,
+            description: randomMessage,
+            time: dueTime || taskTime,
+            date: reminderDateValue,
+            emoji: '📝',
+            isActive: true,
+            category: 'work',
+            priority: 'medium',
+            repeatType: reminderRepeatType,
+            repeatDays: reminderRepeatDays,
+            reminderType: reminderType,
+            linkedTaskId: newTask.id,
+            isTaskReminder: true,
+          });
+          
+          console.log('✅ Görev hatırlatıcısı oluşturuldu:', reminder);
+        } catch (reminderError) {
+          console.error('Görev hatırlatıcısı oluşturulurken hata:', reminderError);
+          // Hatırlatıcı oluşturulamasa bile görev kaydedildi
+        }
+      }
       
       // Reset form
       setTaskTitle('');
@@ -168,6 +304,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       setTaskEstimatedTime('15');
       setTaskDate(new Date().toISOString().split('T')[0]);
       setTaskTime('09:00');
+      setTaskHasReminder(false);
       setShowAddTaskModal(false);
       
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -182,33 +319,65 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       return;
     }
     
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Basit mantık: Günlük veya Tarih aralığı
+    let reminderTypeValue: 'today' | 'scheduled' = 'today';
+    let repeatType: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly' = 'daily';
+    let startDate: string | undefined = undefined;
+    let endDate: string | undefined = undefined;
+    
+    if (reminderType === 'daily') {
+      // Günlük hatırlatıcı - her gün aynı saatte
+      reminderTypeValue = 'today';
+      repeatType = 'daily';
+      startDate = undefined; // Başlangıç yok, sürekli
+      endDate = undefined; // Bitiş yok, sürekli
+    } else if (reminderType === 'dateRange') {
+      // Tarih aralığı hatırlatıcı - başlangıç ve bitiş tarihi arasında her gün
+      if (reminderEndDate < reminderStartDate) {
+        console.error('Bitiş tarihi başlangıç tarihinden önce olamaz');
+        return;
+      }
+      
+      reminderTypeValue = reminderStartDate > today ? 'scheduled' : 'today';
+      repeatType = 'daily';
+      startDate = reminderStartDate;
+      endDate = reminderEndDate;
+    }
+    
     console.log('Saving reminder:', {
       title: reminderTitle.trim(),
-      frequency: reminderFrequency,
       time: reminderTime,
-      date: reminderDate,
+      reminderType: reminderType,
+      startDate: startDate,
+      endDate: endDate,
+      repeatType: repeatType,
     });
     
     try {
       const newReminder = await addReminder({
         title: reminderTitle.trim(),
         time: reminderTime,
-        date: reminderDate,
+        date: startDate, // Başlangıç tarihi (tarih aralığı için)
         emoji: '🔔',
         isActive: true,
         category: 'general',
         priority: 'medium',
-        repeatType: 'once',
-        reminderType: 'scheduled',
+        repeatType: repeatType,
+        reminderType: reminderTypeValue,
+        // Tarih aralığı için bitiş tarihini description'a veya custom field'a kaydedebiliriz
+        description: endDate ? `Bitiş: ${endDate}` : undefined,
       });
       
       console.log('Reminder saved successfully:', newReminder);
       
       // Reset form
       setReminderTitle('');
-      setReminderFrequency('daily');
+      setReminderType('daily');
       setReminderTime('09:00');
-      setReminderDate(new Date().toISOString().split('T')[0]);
+      setReminderStartDate(new Date().toISOString().split('T')[0]);
+      setReminderEndDate(new Date().toISOString().split('T')[0]);
       setShowAddReminderModal(false);
       
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -251,6 +420,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         console.log('Returning monthly tasks:', monthlyTasks.length);
         console.log('Monthly tasks:', monthlyTasks);
         return monthlyTasks;
+      case 'future':
+        // Gelecek görevler - date veya dueDate alanı bugünden sonra olan ve tamamlanmamış görevler
+        const todayStr = new Date().toISOString().split('T')[0];
+        const futureTasks = tasks.filter(task => {
+          const taskDate = task.dueDate || task.date || task.createdAt?.split('T')[0] || '';
+          return taskDate > todayStr && !task.isCompleted;
+        });
+        console.log('Returning future tasks:', futureTasks.length);
+        return futureTasks;
       case 'all':
         console.log('Returning all tasks:', tasks.length);
         return tasks;
@@ -404,24 +582,29 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       flexDirection: 'row',
       backgroundColor: currentTheme.colors.card,
       borderRadius: 16,
-      padding: 4,
+      padding: 3,
+      paddingHorizontal: 2,
       marginBottom: 20,
+      alignItems: 'center',
     },
     tab: {
       flex: 1,
-      paddingVertical: 12,
-      paddingHorizontal: 8,
+      paddingVertical: 6,
+      paddingHorizontal: 1,
       alignItems: 'center',
+      justifyContent: 'center',
       borderRadius: 12,
+      minWidth: 0,
     },
     activeTab: {
       backgroundColor: currentTheme.colors.primary,
     },
     tabText: {
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: '500',
       color: currentTheme.colors.secondary,
       fontFamily: 'Poppins_500Medium',
+      textAlign: 'center',
     },
     activeTabText: {
       color: currentTheme.colors.background,
@@ -779,7 +962,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             <View style={dynamicStyles.statItem}>
               <Text style={dynamicStyles.statNumber}>{completedCount}/{todayTasks.length}</Text>
               <Text style={dynamicStyles.statLabel}>
-                {t('tasks.tasks')}
+                {t('navigation.tasks')}
               </Text>
             </View>
             <View style={dynamicStyles.statItem}>
@@ -820,7 +1003,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         {/* Görevler Bölümü */}
         <View style={dynamicStyles.tasksSection}>
           <Text style={dynamicStyles.sectionTitle}>
-            📋 {t('tasks.tasks')}
+            📋 {t('navigation.tasks')}
           </Text>
           
           <View style={dynamicStyles.tabContainer}>
@@ -828,7 +1011,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               { key: 'daily', label: t('tasks.daily'), emoji: '📅' },
               { key: 'weekly', label: t('tasks.weekly'), emoji: '📆' },
               { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️' },
-              { key: 'all', label: t('tasks.all'), emoji: '📝' },
+              { key: 'future', label: t('tasks.future'), emoji: '🎯' },
+              { key: 'all', label: t('tasks.all'), emoji: '' },
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
@@ -836,11 +1020,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 onPress={() => handleTabChange(tab.key as any)}
                 activeOpacity={0.7}
               >
-                <Text style={[
-                  dynamicStyles.tabText, 
-                  activeTab === tab.key && dynamicStyles.activeTabText
-                ]}>
-                  {tab.emoji} {tab.label}
+                <Text 
+                  style={[
+                    dynamicStyles.tabText, 
+                    activeTab === tab.key && dynamicStyles.activeTabText
+                  ]} 
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {tab.emoji ? `${tab.emoji} ` : ''}{tab.label}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -860,15 +1048,17 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             ) : (
               <>
                 {/* Bekleyen Görevler */}
-                {pendingTasks.length > 0 && (
+                {pendingTasks.filter(t => t.title && t.title.trim().length > 0).length > 0 && (
                   <View>
                     <Text style={dynamicStyles.subsectionTitle}>🔄 Bekleyen Görevler</Text>
-                    {pendingTasks.map((task) => (
+                    {pendingTasks.filter(t => t.title && t.title.trim().length > 0).map((task) => (
                       <View key={task.id} style={dynamicStyles.taskCard}>
                         <View style={dynamicStyles.taskLeft}>
                           <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
                           <View style={dynamicStyles.taskContent}>
-                            <Text style={dynamicStyles.taskTitle}>{task.title}</Text>
+                            <Text style={dynamicStyles.taskTitle}>
+                              {task.title?.trim() || 'İsimsiz Görev'}
+                            </Text>
                             <Text style={dynamicStyles.taskDetails}>
                               {task.category} • {task.estimatedTime || '15 dk'}
                             </Text>
@@ -888,15 +1078,17 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 )}
 
                 {/* Tamamlanan Görevler */}
-                {completedTasks.length > 0 && (
+                {completedTasks.filter(t => t.title && t.title.trim().length > 0).length > 0 && (
                   <View>
                     <Text style={dynamicStyles.subsectionTitle}>✅ Tamamlanan Görevler</Text>
-                    {completedTasks.map((task) => (
+                    {completedTasks.filter(t => t.title && t.title.trim().length > 0).map((task) => (
                       <View key={task.id} style={[dynamicStyles.taskCard, dynamicStyles.completedTaskCard]}>
                         <View style={dynamicStyles.taskLeft}>
                           <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
                           <View style={dynamicStyles.taskContent}>
-                            <Text style={[dynamicStyles.taskTitle, dynamicStyles.completedTaskTitle]}>{task.title}</Text>
+                            <Text style={[dynamicStyles.taskTitle, dynamicStyles.completedTaskTitle]}>
+                              {task.title?.trim() || 'İsimsiz Görev'}
+                            </Text>
                             <Text style={[dynamicStyles.taskDetails, dynamicStyles.completedTaskDetails]}>
                               {task.category} • {task.estimatedTime || '15 dk'}
                             </Text>
@@ -974,10 +1166,18 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         <KeyboardAvoidingView 
           style={dynamicStyles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>📝 {t('tasks.addTask')}</Text>
             
+            <ScrollView
+              style={{ maxHeight: 400 }}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
             <View style={dynamicStyles.inputGroup}>
               <Text style={dynamicStyles.inputLabel}>{t('tasks.taskTitle')}</Text>
               <TextInput
@@ -994,6 +1194,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
 
             <View style={dynamicStyles.inputGroup}>
               <Text style={dynamicStyles.inputLabel}>{t('tasks.duration')}</Text>
+              <Text style={{ fontSize: 12, color: currentTheme.colors.muted, marginBottom: 4 }}>
+                Görevi tamamlamak için tahmini süre (dakika)
+              </Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskEstimatedTime}
@@ -1008,6 +1211,14 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
 
             <View style={dynamicStyles.inputGroup}>
               <Text style={dynamicStyles.inputLabel}>{t('tasks.dueDate')}</Text>
+              <Text style={{ fontSize: 12, color: currentTheme.colors.muted, marginBottom: 4 }}>
+                {(() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  return taskDate > today 
+                    ? 'Gelecek tarih seçtiniz → Tek seferlik görev olacak' 
+                    : 'Bugün veya geçmiş tarih → Sıklık seçebilirsiniz';
+                })()}
+              </Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskDate}
@@ -1019,6 +1230,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
 
             <View style={dynamicStyles.inputGroup}>
               <Text style={dynamicStyles.inputLabel}>{t('tasks.dueTime')}</Text>
+              <Text style={{ fontSize: 12, color: currentTheme.colors.muted, marginBottom: 4 }}>
+                {t('tasks.dueTimeDescription')}
+              </Text>
               <TextInput
                 style={dynamicStyles.textInput}
                 value={taskTime}
@@ -1028,36 +1242,139 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               />
             </View>
 
+            {/* Sıklık seçimi - sadece bugün/geçmiş tarih için aktif */}
+            {(() => {
+              const today = new Date().toISOString().split('T')[0];
+              return taskDate <= today;
+            })() && (
+              <View style={dynamicStyles.inputGroup}>
+                <Text style={dynamicStyles.inputLabel}>{t('tasks.frequency')}</Text>
+                <Text style={{ fontSize: 12, color: currentTheme.colors.muted, marginBottom: 8 }}>
+                  Görev ne sıklıkla tekrarlansın?
+                </Text>
+                <View style={dynamicStyles.frequencyContainer}>
+                  {[
+                    { key: 'daily', label: t('tasks.daily'), emoji: '📅', description: 'Her gün' },
+                    { key: 'weekly', label: t('tasks.weekly'), emoji: '📆', description: 'Her hafta' },
+                    { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️', description: 'Her ay' },
+                  ].map((freq) => (
+                    <TouchableOpacity
+                      key={freq.key}
+                      style={[
+                        dynamicStyles.frequencyButton,
+                        taskFrequency === freq.key && dynamicStyles.frequencyButtonActive
+                      ]}
+                      onPress={() => setTaskFrequency(freq.key as any)}
+                    >
+                      <Text style={dynamicStyles.frequencyButtonEmoji}>
+                        {freq.emoji}
+                      </Text>
+                      <Text style={[
+                        dynamicStyles.frequencyButtonText,
+                        taskFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
+                      ]}>
+                        {freq.label}
+                      </Text>
+                      <Text style={{
+                        fontSize: 10,
+                        color: currentTheme.colors.muted,
+                        marginTop: 2,
+                        opacity: taskFrequency === freq.key ? 1 : 0.6
+                      }}>
+                        {freq.description}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+            
+            {/* Gelecek tarih uyarısı */}
+            {(() => {
+              const today = new Date().toISOString().split('T')[0];
+              return taskDate > today;
+            })() && (
+              <View style={{
+                backgroundColor: currentTheme.colors.primary + '15',
+                padding: 12,
+                borderRadius: 8,
+                marginBottom: 16,
+                borderLeftWidth: 3,
+                borderLeftColor: currentTheme.colors.primary,
+              }}>
+                <Text style={{
+                  color: currentTheme.colors.primary,
+                  fontSize: 13,
+                  fontWeight: '600',
+                }}>
+                  ℹ️ Gelecek tarih seçtiniz
+                </Text>
+                <Text style={{
+                  color: currentTheme.colors.muted,
+                  fontSize: 12,
+                  marginTop: 4,
+                }}>
+                  Bu görev tek seferlik olacak (sadece seçilen tarihte)
+                </Text>
+              </View>
+            )}
+
+            {/* Hatırlatıcı Ekle Toggle */}
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('tasks.frequency')}</Text>
-              <View style={dynamicStyles.frequencyContainer}>
-                {[
-                  { key: 'daily', label: t('tasks.daily'), emoji: '📅' },
-                  { key: 'weekly', label: t('tasks.weekly'), emoji: '📆' },
-                  { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️' },
-                ].map((freq) => (
-                  <TouchableOpacity
-                    key={freq.key}
-                    style={[
-                      dynamicStyles.frequencyButton,
-                      taskFrequency === freq.key && dynamicStyles.frequencyButtonActive
-                    ]}
-                    onPress={() => setTaskFrequency(freq.key as any)}
-                  >
-                    <Text style={dynamicStyles.frequencyButtonEmoji}>
-                      {freq.emoji}
-                    </Text>
-                    <Text style={[
-                      dynamicStyles.frequencyButtonText,
-                      taskFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
-                    ]}>
-                      {freq.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={dynamicStyles.inputLabel}>Hatırlatıcı Ekle</Text>
+                  <Text style={{ fontSize: 12, color: currentTheme.colors.muted, marginTop: 4 }}>
+                    Görev için otomatik hatırlatıcı oluştur
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    width: 50,
+                    height: 30,
+                    borderRadius: 15,
+                    backgroundColor: taskHasReminder ? currentTheme.colors.primary : currentTheme.colors.border,
+                    justifyContent: 'center',
+                    paddingHorizontal: 3,
+                  }}
+                  onPress={() => {
+                    setTaskHasReminder(!taskHasReminder);
+                    Animated.spring(toggleAnim, {
+                      toValue: !taskHasReminder ? 1 : 0,
+                      useNativeDriver: true,
+                      tension: 150,
+                      friction: 8,
+                    }).start();
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Animated.View
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      backgroundColor: 'white',
+                      transform: [
+                        {
+                          translateX: toggleAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 20],
+                          }),
+                        },
+                      ],
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 3,
+                      elevation: 3,
+                    }}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
 
+            </ScrollView>
+            
             <View style={dynamicStyles.modalButtons}>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
@@ -1076,7 +1393,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 </Text>
               </TouchableOpacity>
             </View>
-            </View>
+          </View>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -1090,10 +1407,18 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         <KeyboardAvoidingView 
           style={dynamicStyles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <View style={dynamicStyles.modalContent}>
             <Text style={dynamicStyles.modalTitle}>🔔 {t('reminders.addReminder')}</Text>
             
+            <ScrollView
+              style={{ maxHeight: 400 }}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+            >
             <View style={dynamicStyles.inputGroup}>
               <Text style={dynamicStyles.inputLabel}>{t('reminders.reminderTitle')}</Text>
               <TextInput
@@ -1106,14 +1431,38 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('reminders.reminderDate')}</Text>
-              <TextInput
-                style={dynamicStyles.textInput}
-                value={reminderDate}
-                onChangeText={setReminderDate}
-                placeholder={t('tasks.dateFormatPlaceholder')}
-                placeholderTextColor={currentTheme.colors.muted}
-              />
+              <Text style={dynamicStyles.inputLabel}>Hatırlatıcı Tipi</Text>
+              <View style={dynamicStyles.frequencyContainer}>
+                {[
+                  { key: 'daily', label: 'Günlük', emoji: '📅', description: 'Her gün aynı saatte' },
+                  { key: 'dateRange', label: 'Tarih Aralığı', emoji: '📆', description: 'İki tarih arasında her gün' },
+                ].map((type) => (
+                  <TouchableOpacity
+                    key={type.key}
+                    style={[
+                      dynamicStyles.frequencyButton,
+                      reminderType === type.key && dynamicStyles.frequencyButtonActive
+                    ]}
+                    onPress={() => setReminderType(type.key as any)}
+                  >
+                    <Text style={dynamicStyles.frequencyButtonEmoji}>
+                      {type.emoji}
+                    </Text>
+                    <Text style={[
+                      dynamicStyles.frequencyButtonText,
+                      reminderType === type.key && dynamicStyles.frequencyButtonTextActive
+                    ]}>
+                      {type.label}
+                    </Text>
+                    <Text style={[
+                      dynamicStyles.frequencyButtonText,
+                      { fontSize: 9, marginTop: 2, opacity: 0.7 }
+                    ]}>
+                      {type.description}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             <View style={dynamicStyles.inputGroup}>
@@ -1127,36 +1476,33 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               />
             </View>
 
-            <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>{t('tasks.frequency')}</Text>
-              <View style={dynamicStyles.frequencyContainer}>
-                {[
-                  { key: 'daily', label: t('tasks.daily'), emoji: '📅' },
-                  { key: 'weekly', label: t('tasks.weekly'), emoji: '📆' },
-                  { key: 'monthly', label: t('tasks.monthly'), emoji: '🗓️' },
-                ].map((freq) => (
-                  <TouchableOpacity
-                    key={freq.key}
-                    style={[
-                      dynamicStyles.frequencyButton,
-                      reminderFrequency === freq.key && dynamicStyles.frequencyButtonActive
-                    ]}
-                    onPress={() => setReminderFrequency(freq.key as any)}
-                  >
-                    <Text style={dynamicStyles.frequencyButtonEmoji}>
-                      {freq.emoji}
-                    </Text>
-                    <Text style={[
-                      dynamicStyles.frequencyButtonText,
-                      reminderFrequency === freq.key && dynamicStyles.frequencyButtonTextActive
-                    ]}>
-                      {freq.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            {reminderType === 'dateRange' && (
+              <>
+                <View style={dynamicStyles.inputGroup}>
+                  <Text style={dynamicStyles.inputLabel}>Başlangıç Tarihi</Text>
+                  <TextInput
+                    style={dynamicStyles.textInput}
+                    value={reminderStartDate}
+                    onChangeText={setReminderStartDate}
+                    placeholder={t('tasks.dateFormatPlaceholder')}
+                    placeholderTextColor={currentTheme.colors.muted}
+                  />
+                </View>
 
+                <View style={dynamicStyles.inputGroup}>
+                  <Text style={dynamicStyles.inputLabel}>Bitiş Tarihi</Text>
+                  <TextInput
+                    style={dynamicStyles.textInput}
+                    value={reminderEndDate}
+                    onChangeText={setReminderEndDate}
+                    placeholder={t('tasks.dateFormatPlaceholder')}
+                    placeholderTextColor={currentTheme.colors.muted}
+                  />
+                </View>
+              </>
+            )}
+            </ScrollView>
+            
             <View style={dynamicStyles.modalButtons}>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
@@ -1175,7 +1521,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 </Text>
               </TouchableOpacity>
             </View>
-            </View>
+          </View>
         </KeyboardAvoidingView>
       </Modal>
 

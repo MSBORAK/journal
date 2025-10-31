@@ -324,7 +324,9 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       lineHeight: 24,
     },
     clearFiltersButton: {
-      backgroundColor: currentTheme.colors.accent,
+      backgroundColor: isLightBg 
+        ? (currentTheme.colors.primary + '15')
+        : (currentTheme.colors.primary + '25'),
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 20,
@@ -332,11 +334,13 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       marginTop: 8,
       flexDirection: 'row',
       alignItems: 'center',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '30',
     },
     clearFiltersText: {
       fontSize: 14,
       color: currentTheme.colors.primary,
-      fontWeight: '500',
+      fontWeight: '600',
       marginLeft: 4,
     },
     listContainer: {
@@ -516,7 +520,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
         {(selectedMood !== null || selectedTag !== null || searchQuery.length > 0) && (
           <TouchableOpacity style={dynamicStyles.clearFiltersButton} onPress={clearFilters}>
             <Ionicons name="close" size={16} color={currentTheme.colors.primary} />
-            <Text style={dynamicStyles.clearFiltersText}>Filtreleri Temizle</Text>
+            <Text style={dynamicStyles.clearFiltersText}>{t('diary.clearFilters')}</Text>
           </TouchableOpacity>
         )}
       </View>
