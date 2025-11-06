@@ -199,7 +199,7 @@ export const afternoonMessages: NotificationMessage[] = [
   }
 ];
 
-// AKŞAM MESAJLARI (16:00 - 21:00)
+// AKŞAM MESAJLARI (16:00 - 21:00) - Günlük yazılmışsa
 export const eveningMessages: NotificationMessage[] = [
   {
     title: "Akşam oldu 🌙",
@@ -253,6 +253,115 @@ export const eveningMessages: NotificationMessage[] = [
   }
 ];
 
+// AKŞAM MESAJLARI (Günlük yazılmamışsa) - Bağlılık artırıcı mesajlar
+export const eveningReminderMessages: NotificationMessage[] = [
+  // Türkçe
+  {
+    title: "Neden yazmadın? 😔",
+    body: "Bugünü yazmayı unuttun mu? Beni unuttun mu?",
+    emoji: "😔"
+  },
+  {
+    title: "Beni unuttun mu? 💔",
+    body: "Bugün hiç yazmadın, seni özledim. Bir şeyler paylaşır mısın?",
+    emoji: "💔"
+  },
+  {
+    title: "Neredesin? 🤔",
+    body: "Bugün hiç görünmedin. Her şey yolunda mı? Yazmak istersen buradayım",
+    emoji: "🤔"
+  },
+  {
+    title: "Bugünü unutma! 📝",
+    body: "Bugün hiç yazmadın. Birkaç kelime bile olsa yazsan olmaz mı?",
+    emoji: "📝"
+  },
+  {
+    title: "Seni özledim 💙",
+    body: "Bugün yazmamışsın. Her şey yolunda mı? Ben buradayım",
+    emoji: "💙"
+  },
+  {
+    title: "Uzun zamandır yoktun ⏰",
+    body: "Bugün hiç yazmadın. Ben seni bekliyorum, gel yazalım",
+    emoji: "⏰"
+  },
+  {
+    title: "Seni bekliyorum 🌻",
+    body: "Bugün hiç görünmedin. Yazmak istersen kapım açık",
+    emoji: "🌻"
+  },
+  {
+    title: "Bir şeyler yazalım mı? ✍️",
+    body: "Bugün hiç yazmadın. Birlikte bir şeyler yazalım mı?",
+    emoji: "✍️"
+  },
+  {
+    title: "Neden gelmiyorsun? 😢",
+    body: "Bugün hiç yazmadın. Beni unuttun mu? Hadi gel, yazalım",
+    emoji: "😢"
+  },
+  {
+    title: "Yazmak ister misin? 💭",
+    body: "Bugün hiç yazmadın. Yazmak istersen buradayım, seni bekliyorum",
+    emoji: "💭"
+  }
+];
+
+// AKŞAM MESAJLARI (Günlük yazılmamışsa) - Bağlılık artırıcı mesajlar (İngilizce)
+export const eveningReminderMessagesEN: NotificationMessage[] = [
+  {
+    title: "Why didn't you write? 😔",
+    body: "Did you forget to write today? Did you forget me?",
+    emoji: "😔"
+  },
+  {
+    title: "Did you forget me? 💔",
+    body: "You didn't write at all today, I missed you. Would you like to share something?",
+    emoji: "💔"
+  },
+  {
+    title: "Where are you? 🤔",
+    body: "I haven't seen you today. Is everything okay? I'm here if you want to write",
+    emoji: "🤔"
+  },
+  {
+    title: "Don't forget today! 📝",
+    body: "You didn't write today. Could you write a few words at least?",
+    emoji: "📝"
+  },
+  {
+    title: "I missed you 💙",
+    body: "You didn't write today. Is everything okay? I'm here",
+    emoji: "💙"
+  },
+  {
+    title: "You've been gone for a while ⏰",
+    body: "You didn't write today. I'm waiting for you, come let's write",
+    emoji: "⏰"
+  },
+  {
+    title: "I'm waiting for you 🌻",
+    body: "I haven't seen you today. My door is open if you want to write",
+    emoji: "🌻"
+  },
+  {
+    title: "Want to write something? ✍️",
+    body: "You didn't write today. Want to write something together?",
+    emoji: "✍️"
+  },
+  {
+    title: "Why aren't you coming? 😢",
+    body: "You didn't write today. Did you forget me? Come on, let's write",
+    emoji: "😢"
+  },
+  {
+    title: "Do you want to write? 💭",
+    body: "You didn't write today. I'm here if you want to write, I'm waiting for you",
+    emoji: "💭"
+  }
+];
+
 // GECE MESAJLARI (21:00 - 23:00) - Sessiz saatlerden önce
 export const nightMessages: NotificationMessage[] = [
   {
@@ -279,6 +388,216 @@ export const nightMessages: NotificationMessage[] = [
     title: "Rahat uyu zzz",
     body: "Bugünü yazdıysan, rahat uyu. Yazmadıysan yarın başla!",
     emoji: "💤"
+  }
+];
+
+// MORNING MESSAGES (07:00 - 11:00) - English
+export const morningMessagesEN: NotificationMessage[] = [
+  {
+    title: "Good Morning ☀️",
+    body: "A new day, a new page. How are you feeling today?",
+    emoji: "☀️"
+  },
+  {
+    title: "Beautiful morning 🌅",
+    body: "Grab yourself a coffee and share your thoughts",
+    emoji: "🌅"
+  },
+  {
+    title: "Welcome 💙",
+    body: "What awaits you today? Discover by writing",
+    emoji: "💙"
+  },
+  {
+    title: "Morning energy ✨",
+    body: "The best ideas come in the morning. Write yours!",
+    emoji: "✨"
+  },
+  {
+    title: "A new beginning 🌸",
+    body: "How much time will you set aside for yourself today?",
+    emoji: "🌸"
+  },
+  {
+    title: "Good morning beautiful 🌻",
+    body: "Would you like to record your mood today?",
+    emoji: "🌻"
+  },
+  {
+    title: "Morning magic 🪄",
+    body: "Take 5 minutes for yourself, plan your day",
+    emoji: "🪄"
+  },
+  {
+    title: "A peaceful day 🕊️",
+    body: "Take a deep breath and start today",
+    emoji: "🕊️"
+  },
+  {
+    title: "Hello beautiful person 💚",
+    body: "Writing in the morning makes you happier",
+    emoji: "💚"
+  },
+  {
+    title: "Time for gratitude 🙏",
+    body: "What are you grateful for today? Write and remember",
+    emoji: "🙏"
+  }
+];
+
+// AFTERNOON MESSAGES (11:00 - 16:00) - English
+export const afternoonMessagesEN: NotificationMessage[] = [
+  {
+    title: "Hello 🌼",
+    body: "You're in the middle of your day. How's it going?",
+    emoji: "🌼"
+  },
+  {
+    title: "A little break 🌿",
+    body: "Take some time for yourself, write your thoughts",
+    emoji: "🌿"
+  },
+  {
+    title: "Lunch break ☕",
+    body: "Take a breath, think about your day, share",
+    emoji: "☕"
+  },
+  {
+    title: "Take a break 💭",
+    body: "A great time to write what's on your mind",
+    emoji: "💭"
+  },
+  {
+    title: "Return to yourself 🧘",
+    body: "Take 5 minutes for yourself in the hustle and bustle",
+    emoji: "🧘"
+  },
+  {
+    title: "Midday 🌞",
+    body: "How did the morning go? Record your memories",
+    emoji: "🌞"
+  },
+  {
+    title: "Time to rest 🪴",
+    body: "Write something to relax your mind",
+    emoji: "🪴"
+  },
+  {
+    title: "Are you at ease? 💚",
+    body: "Would you like to talk about your feelings?",
+    emoji: "💚"
+  }
+];
+
+// EVENING MESSAGES (16:00 - 21:00) - When diary is written - English
+export const eveningMessagesEN: NotificationMessage[] = [
+  {
+    title: "Evening has come 🌙",
+    body: "How was your day? Would you like to share?",
+    emoji: "🌙"
+  },
+  {
+    title: "End of the day 🌆",
+    body: "A great time to write your thoughts for today",
+    emoji: "🌆"
+  },
+  {
+    title: "Time for peace ✨",
+    body: "Come back to yourself before ending the day",
+    emoji: "✨"
+  },
+  {
+    title: "Good evening 💜",
+    body: "Would you like to record what you experienced today?",
+    emoji: "💜"
+  },
+  {
+    title: "Evening reflection 🌠",
+    body: "What made you happy today?",
+    emoji: "🌠"
+  },
+  {
+    title: "Close the day 📔",
+    body: "Writing will relax your mind",
+    emoji: "📔"
+  },
+  {
+    title: "A calm evening 🕯️",
+    body: "Take care of yourself, note today",
+    emoji: "🕯️"
+  },
+  {
+    title: "Before midnight 🌃",
+    body: "Don't forget to record your feelings today",
+    emoji: "🌃"
+  },
+  {
+    title: "Before bed 💙",
+    body: "One last thought, one last note",
+    emoji: "💙"
+  },
+  {
+    title: "Daily summary 📝",
+    body: "Tell today in 3 sentences",
+    emoji: "📝"
+  }
+];
+
+// NIGHT MESSAGES (21:00 - 23:00) - Before quiet hours - English
+export const nightMessagesEN: NotificationMessage[] = [
+  {
+    title: "Good night 🌙",
+    body: "Would you like to note today before bed?",
+    emoji: "🌙"
+  },
+  {
+    title: "Last reminder ✨",
+    body: "If you couldn't write today, I'll be here tomorrow",
+    emoji: "✨"
+  },
+  {
+    title: "Night silence 🌌",
+    body: "The deepest thoughts come at night",
+    emoji: "🌌"
+  },
+  {
+    title: "Time to sleep 😴",
+    body: "Clear your mind for a peaceful sleep",
+    emoji: "😴"
+  },
+  {
+    title: "Sleep well zzz",
+    body: "If you wrote today, sleep well. If not, start tomorrow!",
+    emoji: "💤"
+  }
+];
+
+// WEEKEND MESSAGES - English
+export const weekendMessagesEN: NotificationMessage[] = [
+  {
+    title: "Weekend! 🎉",
+    body: "A great day to take time for yourself",
+    emoji: "🎉"
+  },
+  {
+    title: "Rest day 🛋️",
+    body: "Think about your week, plan next week",
+    emoji: "🛋️"
+  },
+  {
+    title: "Weekend peace ☕",
+    body: "No rush, write your thoughts comfortably",
+    emoji: "☕"
+  },
+  {
+    title: "Sunday vibes 🌸",
+    body: "Would you like to summarize your week?",
+    emoji: "🌸"
+  },
+  {
+    title: "Saturday reflection 🌅",
+    body: "What did you experience this week? Record it!",
+    emoji: "🌅"
   }
 ];
 
@@ -322,6 +641,50 @@ export const missingYouMessages: NotificationMessage[] = [
   {
     title: "Geri dön 🏡",
     body: "Yolculuğuna kaldığın yerden devam edebilirsin",
+    emoji: "🏡"
+  }
+];
+
+// MISSING YOU MESSAGES (3+ days without writing) - English
+export const missingYouMessagesEN: NotificationMessage[] = [
+  {
+    title: "I miss you 💙",
+    body: "Is everything okay? We're always here for you",
+    emoji: "💙"
+  },
+  {
+    title: "How are you? 🌸",
+    body: "We haven't talked in a while. I hope you're doing well",
+    emoji: "🌸"
+  },
+  {
+    title: "I'm here 💚",
+    body: "Come whenever you want, I'll listen without judgment",
+    emoji: "💚"
+  },
+  {
+    title: "I'm curious 🌿",
+    body: "You haven't written in a while. Is everything okay?",
+    emoji: "🌿"
+  },
+  {
+    title: "Let's talk ☕",
+    body: "Are you going through a tough time? Share, relax",
+    emoji: "☕"
+  },
+  {
+    title: "When you're ready 💪",
+    body: "It's okay if you're away. Come back when you feel ready",
+    emoji: "💪"
+  },
+  {
+    title: "I'm waiting 🌻",
+    body: "The door is always open, you can come back anytime",
+    emoji: "🌻"
+  },
+  {
+    title: "Come back 🏡",
+    body: "You can continue your journey from where you left off",
     emoji: "🏡"
   }
 ];
@@ -370,6 +733,50 @@ export const celebrationMessages: NotificationMessage[] = [
   }
 ];
 
+// CELEBRATION MESSAGES (Achievement notifications) - English
+export const celebrationMessagesEN: NotificationMessage[] = [
+  {
+    title: "Amazing! 🎉",
+    body: "3 day streak! Keep it up",
+    emoji: "🎉"
+  },
+  {
+    title: "Incredible! 🔥",
+    body: "7 day streak! I'm proud of you",
+    emoji: "🔥"
+  },
+  {
+    title: "Legendary! 💎",
+    body: "14 day streak! This is a lifestyle now",
+    emoji: "💎"
+  },
+  {
+    title: "Proud! 👑",
+    body: "30 day streak! You've made it a habit",
+    emoji: "👑"
+  },
+  {
+    title: "Extraordinary! 🌟",
+    body: "You wrote every day this week! Congratulations",
+    emoji: "🌟"
+  },
+  {
+    title: "Super! ⭐",
+    body: "You wrote your 10th entry! Keep going",
+    emoji: "⭐"
+  },
+  {
+    title: "Perfect! 🎊",
+    body: "50 days of writing! This is a success story",
+    emoji: "🎊"
+  },
+  {
+    title: "Legend! 🏆",
+    body: "100 days of writing! You've become a legend",
+    emoji: "🏆"
+  }
+];
+
 // MOTİVASYON MESAJLARI (Motivasyonu düşükse)
 export const motivationalMessages: NotificationMessage[] = [
   {
@@ -410,6 +817,50 @@ export const motivationalMessages: NotificationMessage[] = [
   {
     title: "Gücünü hatırla 💪",
     body: "Buraya kadar geldiysen, daha da ileriye gidebilirsin",
+    emoji: "💪"
+  }
+];
+
+// MOTIVATIONAL MESSAGES (When motivation is low) - English
+export const motivationalMessagesEN: NotificationMessage[] = [
+  {
+    title: "Take care of yourself 💚",
+    body: "Tough days are temporary, you are permanent",
+    emoji: "💚"
+  },
+  {
+    title: "You're not alone 🤗",
+    body: "Sharing your feelings is a sign of strength",
+    emoji: "🤗"
+  },
+  {
+    title: "You're enough today 💙",
+    body: "You don't have to be perfect",
+    emoji: "💙"
+  },
+  {
+    title: "Take a breath 🌬️",
+    body: "Take a deep breath, everything will be okay",
+    emoji: "🌬️"
+  },
+  {
+    title: "Small steps 👣",
+    body: "Every small step counts as progress",
+    emoji: "👣"
+  },
+  {
+    title: "You're valuable 💎",
+    body: "Your existence alone is a sufficient gift",
+    emoji: "💎"
+  },
+  {
+    title: "Everything takes time 🌱",
+    body: "Healing is not linear, be patient",
+    emoji: "🌱"
+  },
+  {
+    title: "Remember your strength 💪",
+    body: "If you've come this far, you can go even further",
     emoji: "💪"
   }
 ];
@@ -490,6 +941,15 @@ export const weatherMessages = {
  * Rastgele mesaj seçici fonksiyonlar
  */
 export const getRandomMessage = (messages: NotificationMessage[]): NotificationMessage => {
+  // Güvenlik kontrolü: messages undefined veya boş ise fallback mesaj döndür
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    console.warn('⚠️ getRandomMessage: messages array is empty or undefined, using fallback');
+    return {
+      title: 'Hello 👋',
+      body: 'Have a great day!',
+      emoji: '👋'
+    };
+  }
   return messages[Math.floor(Math.random() * messages.length)];
 };
 

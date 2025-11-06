@@ -38,19 +38,82 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
     getAchievementsByCategory,
     getAchievementProgress,
     getAchievementStats,
+    refreshData,
   } = useAchievements(user?.uid);
 
   const [activeTab, setActiveTab] = useState<'all' | 'streak' | 'writing' | 'goals' | 'mood'>('all');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<string, { progress: number; current: number; required: number }>>({});
   const [animationValues] = useState({
     fadeAnim: new Animated.Value(0),
     scaleAnim: new Animated.Value(0.9),
   });
 
+  const getFilteredAchievements = () => {
+    if (activeTab === 'all') {
+      return achievementDefinitions;
+    }
+    return achievementDefinitions.filter(def => def.category === activeTab);
+  };
+
+  // Progress bilgisini yükle
+  const loadProgress = React.useCallback(async () => {
+    if (loading) {
+      return; // Loading sırasında progress yükleme
+    }
+    
+    try {
+      const filtered = getFilteredAchievements();
+      // Sadece ilk 10 başarı için progress hesapla (performans için)
+      const limitedFiltered = filtered.slice(0, 20);
+      const progressPromises = limitedFiltered.map(async (def) => {
+        try {
+          const progress = await getAchievementProgress(def.id);
+          return { id: def.id, progress };
+        } catch (error) {
+          console.error(`Error loading progress for ${def.id}:`, error);
+          return { id: def.id, progress: null };
+        }
+      });
+      
+      const progressResults = await Promise.all(progressPromises);
+      const newProgressMap: Record<string, { progress: number; current: number; required: number }> = {};
+      progressResults.forEach(({ id, progress }) => {
+        if (progress) {
+          newProgressMap[id] = progress;
+        }
+      });
+      setProgressMap(newProgressMap);
+    } catch (error) {
+      console.error('Error loading progress:', error);
+    }
+  }, [activeTab, loading, getAchievementProgress, achievementDefinitions]);
+
   useEffect(() => {
     startAnimations();
   }, []);
+
+  // Progress'i yükle (sadece loading bittiğinde ve tab değiştiğinde)
+  useEffect(() => {
+    if (!loading) {
+      // Kısa bir delay ekle ki loading tamamen bitsin
+      const timer = setTimeout(() => {
+        loadProgress();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, loading]);
+  
+  // Achievements değiştiğinde progress'i yenile
+  useEffect(() => {
+    if (!loading && achievements.length > 0) {
+      const timer = setTimeout(() => {
+        loadProgress();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [achievements.length, loading]);
 
   const startAnimations = () => {
     Animated.parallel([
@@ -76,13 +139,6 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedAchievement(achievement);
     setShowDetailModal(true);
-  };
-
-  const getFilteredAchievements = () => {
-    if (activeTab === 'all') {
-      return achievementDefinitions;
-    }
-    return achievementDefinitions.filter(def => def.category === activeTab);
   };
 
   const getCategoryStats = () => {
@@ -431,7 +487,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
 
   const renderAchievementCard = (definition: any) => {
     const isUnlocked = achievements.find(a => a.id === definition.id);
-    const progress = getAchievementProgress(definition.id);
+    const progress = progressMap[definition.id] || null;
     
     const colors = isUnlocked 
       ? [

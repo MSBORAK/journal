@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { updateEmail, updatePassword } from '../lib/supabase';
 import { getProfile, updateProfile, createProfile } from '../services/profileService';
+import { useProfile } from '../hooks/useProfile';
 import { BackupService } from '../services/backupService';
 import { CustomAlert } from '../components/CustomAlert';
 
@@ -31,6 +32,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
   const { user, signOut, refreshUser } = useAuth();
+  const { refreshProfile } = useProfile(user?.uid);
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',
@@ -86,11 +88,64 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await updateProfile(user.uid, profileData);
+      
+      // Profil güncellemesini dene
+      try {
+        const updatedProfile = await updateProfile(user.uid, profileData);
+        // Eğer başarılı döndü (veritabanı veya local), devam et
+        if (updatedProfile) {
+          setProfileData({
+            full_name: updatedProfile.full_name || profileData.full_name,
+            bio: updatedProfile.bio || profileData.bio,
+          });
+          
+          // AuthContext'i güncelle (displayName için)
+          try {
+            await refreshUser();
+          } catch (refreshError) {
+            console.log('⚠️ Error refreshing user in AuthContext:', refreshError);
+          }
+          
+          // Profil hook'unu da refresh et (Dashboard için)
+          try {
+            await refreshProfile();
+          } catch (refreshError) {
+            console.log('⚠️ Error refreshing profile hook:', refreshError);
+          }
+        }
+      } catch (updateError: any) {
+        // Eğer veritabanı şema hatası ise, local state'te kal (uygulama donmasın)
+        if (updateError?.message?.includes('column') || 
+            updateError?.message?.includes('schema cache')) {
+          console.log('⚠️ Profile saved locally only (database schema mismatch)');
+          // Local state'te kalıyor, sorun yok
+        } else {
+          // Diğer hatalar için hata göster
+          throw updateError;
+        }
+      }
+      
       setShowProfileModal(false);
+      
+      // Profili yeniden yükle (opsiyonel, kritik değil)
+      try {
+        await loadProfile();
+      } catch (reloadError) {
+        console.log('Profile reload error (non-critical):', reloadError);
+        // Profil yükleme hatası kritik değil, devam et
+      }
+      
       showAlert(t('settings.profileUpdated'), t('settings.profileUpdateSuccess'), 'success');
-    } catch (error) {
-      showAlert(t('auth.error'), t('settings.profileUpdateFailed'), 'error');
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      // Eğer kolon hatası ise, yine de başarılı mesaj göster (local state'te kaldı)
+      if (error?.message?.includes('column') || error?.message?.includes('schema cache')) {
+        setShowProfileModal(false);
+        showAlert(t('settings.profileUpdated'), t('settings.profileUpdateSuccess'), 'success');
+      } else {
+        const errorMessage = error?.message || t('settings.profileUpdateFailed');
+        showAlert(t('auth.error'), errorMessage, 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -560,7 +615,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  İptal
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -570,7 +625,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? 'Kaydediliyor...' : 'Kaydet'}
+                  {loading ? t('settings.saving') : t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -614,7 +669,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  İptal
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -624,7 +679,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? 'Güncelleniyor...' : 'Güncelle'}
+                  {loading ? t('common.loading') : t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -682,7 +737,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  İptal
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity

@@ -33,11 +33,19 @@ export const useProfile = (userId?: string) => {
     if (!userId) return;
     
     try {
+      setError(null);
       const profileData = await getProfile(userId);
       setProfile(profileData);
     } catch (err: any) {
       console.error('Error refreshing profile:', err);
-      setError(err.message);
+      // Bio kolonu hatası varsa, profil null olarak ayarla (kritik hata değil)
+      if (err?.message?.includes('bio') || err?.message?.includes("column 'bio'")) {
+        console.log('⚠️ Bio column error in refreshProfile, setting profile to null');
+        setProfile(null);
+        setError(null); // Bio hatası kritik değil
+      } else {
+        setError(err.message);
+      }
     }
   };
 

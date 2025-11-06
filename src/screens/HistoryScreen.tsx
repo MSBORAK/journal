@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -26,7 +27,16 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
   const { currentTheme } = useTheme();
   const { t, currentLanguage } = useLanguage();
   const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
-  const { entries, loading, getEntriesByTag, getEntriesByMood } = useDiary(user?.uid);
+  const { entries, loading, getEntriesByTag, getEntriesByMood, refetch } = useDiary(user?.uid);
+  
+  // Ekran focus olduğunda entries'i yenile
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user?.uid && refetch) {
+        refetch();
+      }
+    }, [user?.uid, refetch])
+  );
   
   // Compute simple luminance to adapt badge colors for light/dark themes
   const hexToRgb = (hex: string) => {

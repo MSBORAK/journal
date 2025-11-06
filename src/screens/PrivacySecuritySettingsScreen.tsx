@@ -65,7 +65,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
   const showPrivacyPolicy = () => {
     showAlert(
       t('settings.privacyPolicy'),
-      t('settings.learnDataProtection'),
+      t('settings.privacyPolicyContent'),
       'info'
     );
   };
@@ -73,7 +73,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
   const showDataTransparency = () => {
     showAlert(
       t('settings.dataTransparency'),
-      t('settings.seeDataUsageDetails'),
+      t('settings.dataTransparencyContent'),
       'info'
     );
   };
@@ -81,7 +81,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
   const showTermsOfService = () => {
     showAlert(
       t('settings.termsOfService'),
-      t('settings.viewAppDetails'),
+      t('settings.termsOfServiceContent'),
       'info'
     );
   };
@@ -89,7 +89,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
   const showSecurityInfo = () => {
     showAlert(
       t('settings.securityInformation'),
-      t('settings.securityInformation'),
+      t('settings.securityInformationContent'),
       'info'
     );
   };

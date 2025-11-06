@@ -22,6 +22,7 @@ import {
   requestNotificationPermissions,
   scheduleAllNotifications,
   cancelAllNotifications,
+  sendLocalNotification,
   NotificationSettings
 } from '../services/notificationService';
 import { CustomAlert } from '../components/CustomAlert';
@@ -114,7 +115,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       console.log('✅ Haptic done');
       
       // AsyncStorage'a kaydet (arka planda)
-      await saveNotificationSettings(newSettings);
+      await saveNotificationSettings(newSettings, user?.uid);
       console.log('✅ Settings saved to storage successfully');
     } catch (error) {
       console.error('❌ Error saving notification settings:', error);
@@ -157,6 +158,62 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
       showAlert(t('settings.error'), t('settings.notificationPermissionRequired'), 'error');
+    }
+  };
+
+  const handleTestNotification = async () => {
+    let userLanguage = 'tr';
+    try {
+      // Önce izin kontrolü yap
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        showAlert(
+          t('settings.permissionRequired'),
+          t('settings.systemPermissionRequiredDesc'),
+          'warning'
+        );
+        return;
+      }
+
+      const { getCurrentLanguage } = await import('../services/languageService');
+      userLanguage = await getCurrentLanguage();
+      
+      let title, body;
+      if (userLanguage === 'en') {
+        title = 'Test Notification ✅';
+        body = 'If you see this, notifications are working perfectly!';
+      } else {
+        title = 'Test Bildirimi ✅';
+        body = 'Eğer bunu görüyorsan, bildirimler mükemmel çalışıyor!';
+      }
+      
+      await sendLocalNotification(title, body, { type: 'test' }, 'default', true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      showAlert(
+        userLanguage === 'en' ? 'Test Sent!' : 'Test Gönderildi!',
+        userLanguage === 'en' 
+          ? 'Check your notification bar. If you see it, everything is working!'
+          : 'Bildirim çubuğunu kontrol et. Eğer görüyorsan, her şey çalışıyor!',
+        'success'
+      );
+    } catch (error: any) {
+      console.error('Error sending test notification:', error);
+      
+      // Daha spesifik hata mesajları
+      let errorMessage = t('settings.notificationPermissionRequired');
+      if (error?.message?.includes('bundle') || error?.message?.includes('LoadBundle')) {
+        errorMessage = userLanguage === 'en' 
+          ? 'Notification service is loading. Please try again in a moment.'
+          : 'Bildirim servisi yükleniyor. Lütfen birkaç saniye sonra tekrar deneyin.';
+      } else if (error?.message?.includes('permission')) {
+        errorMessage = t('settings.systemPermissionRequiredDesc');
+      }
+      
+      showAlert(
+        t('settings.error'),
+        errorMessage,
+        'error'
+      );
     }
   };
 
@@ -417,6 +474,17 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
               {!settings.enabled ? t('settings.enableNotifications') : t('settings.grantPermission')}
             </Text>
           </TouchableOpacity>
+          
+          {permissionGranted && (
+            <TouchableOpacity
+              style={[dynamicStyles.actionButton, dynamicStyles.actionButtonSecondary, { marginTop: 12 }]}
+              onPress={handleTestNotification}
+            >
+              <Text style={[dynamicStyles.actionButtonText, dynamicStyles.actionButtonTextSecondary]}>
+                {t('settings.sendTestNotification')}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Genel Ayarlar */}

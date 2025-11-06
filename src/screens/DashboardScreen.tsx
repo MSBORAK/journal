@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -35,6 +36,8 @@ import { getGreetingMessage, getUserTimezone } from '../utils/dateTimeUtils';
 import { useTooltips } from '../hooks/useTooltips';
 import Tooltip from '../components/Tooltip';
 import MotivationCard from '../components/MotivationCard';
+import { useAppTour } from '../hooks/useAppTour';
+import AppTour from '../components/AppTour';
 
 const { width } = Dimensions.get('window');
 
@@ -57,6 +60,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   
   // Tooltips
   const tooltipManager = useTooltips('Dashboard');
+  
+  // App Tour
+  const tour = useAppTour(navigation, 'Dashboard');
 
   // Animation values
   const fadeAnims = useRef({
@@ -82,7 +88,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   }).current;
   // const { fontConfig } = useFont(); // Kaldırıldı
   const { entries } = useDiary(user?.uid);
-  const { profile } = useProfile(user?.uid);
+  const { profile, refreshProfile } = useProfile(user?.uid);
   const { 
     getTodayTasks, 
     getTodayCompletedCount, 
@@ -255,6 +261,15 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     loadDailyInspiration();
   }, [entries]); // Entries değiştiğinde yeniden yükle (ruh hali güncellendiğinde)
 
+  // Dashboard'a focus olduğunda profili refresh et (profil güncellemesi sonrası)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user?.uid) {
+        refreshProfile();
+      }
+    }, [user?.uid])
+  );
+
   // Animasyon fonksiyonları
   const animateTaskCompletion = async (taskId: string) => {
     // GÜÇLÜ Haptic feedback
@@ -336,11 +351,11 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
           const last = await AsyncStorage.getItem('notificationsScheduledAt');
           const today = new Date().toDateString();
           if (last !== today) {
-            await scheduleAllNotifications();
+            await scheduleAllNotifications(user?.uid);
             await AsyncStorage.setItem('notificationsScheduledAt', today);
           }
         } catch {
-          await scheduleAllNotifications();
+          await scheduleAllNotifications(user?.uid);
         }
       }
     };
@@ -2387,7 +2402,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 <View style={dynamicStyles.streakGoalHeader}>
                   <Text style={dynamicStyles.streakGoalTitle}>{t('dashboard.threeDayGoal')}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
-                    {getCurrentStreak() >= 3 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/3`}
+                    {getCurrentStreak() >= 3 ? t('dashboard.completed') : `${getCurrentStreak()}/3`}
                   </Text>
             </View>
                 <View style={dynamicStyles.streakGoalBar}>
@@ -2404,7 +2419,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 <View style={dynamicStyles.streakGoalHeader}>
                   <Text style={dynamicStyles.streakGoalTitle}>{t('dashboard.sevenDayGoal')}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
-                    {getCurrentStreak() >= 7 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/7`}
+                    {getCurrentStreak() >= 7 ? t('dashboard.completed') : `${getCurrentStreak()}/7`}
                   </Text>
           </View>
                 <View style={dynamicStyles.streakGoalBar}>
@@ -2421,7 +2436,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 <View style={dynamicStyles.streakGoalHeader}>
                   <Text style={dynamicStyles.streakGoalTitle}>{t('dashboard.thirtyDayGoal')}</Text>
                   <Text style={dynamicStyles.streakGoalStatus}>
-                    {getCurrentStreak() >= 30 ? '✅ Tamamlandı!' : `${getCurrentStreak()}/30`}
+                    {getCurrentStreak() >= 30 ? t('dashboard.completed') : `${getCurrentStreak()}/30`}
         </Text>
                 </View>
                 <View style={dynamicStyles.streakGoalBar}>
@@ -2974,6 +2989,19 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         userId={user?.uid}
         autoShow={true}
         delay={3000}
+      />
+    )}
+
+    {/* App Tour */}
+    {tour.currentStep && (
+      <AppTour
+        visible={tour.tourVisible}
+        currentStep={tour.currentTourStep}
+        totalSteps={tour.totalSteps}
+        step={tour.currentStep}
+        onNext={tour.handleNext}
+        onSkip={tour.handleSkip}
+        onComplete={tour.handleComplete}
       />
     )}
 

@@ -352,10 +352,20 @@ export const useAchievements = (userId?: string) => {
 
   const saveAchievements = async (newAchievements: Achievement[]) => {
     try {
-      await AsyncStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(newAchievements));
+      const achievementsJson = JSON.stringify(newAchievements);
+      await AsyncStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, achievementsJson);
       setAchievements(newAchievements);
+      console.log(`💾 Achievements saved to AsyncStorage: ${newAchievements.length} achievements`);
+      
+      // Doğrulama: AsyncStorage'dan oku ve kontrol et
+      const verifyData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+      if (verifyData) {
+        const verified = JSON.parse(verifyData);
+        console.log(`✅ Verification: ${verified.length} achievements in AsyncStorage`);
+      }
     } catch (error) {
-      console.error('Error saving achievements:', error);
+      console.error('❌ Error saving achievements:', error);
+      throw error;
     }
   };
 
@@ -370,13 +380,59 @@ export const useAchievements = (userId?: string) => {
 
   // Başarı kontrolü
   const checkAchievements = async (stats: Partial<UserStats>) => {
-    const newStats = { ...userStats, ...stats };
+    console.log('🔍 checkAchievements called with stats:', stats);
+    
+    // Önce mevcut userStats'ı yeniden yükle (AsyncStorage'dan)
+    const currentStatsData = await AsyncStorage.getItem(USER_STATS_STORAGE_KEY);
+    let currentUserStats: UserStats = userStats;
+    if (currentStatsData) {
+      currentUserStats = JSON.parse(currentStatsData);
+      console.log('📦 Loaded stats from AsyncStorage:', currentUserStats);
+    } else {
+      console.log('📦 No stats in AsyncStorage, using default:', currentUserStats);
+    }
+    
+    // Yeni stats ile mevcut stats'ı birleştir
+    // Önemli: stats içindeki değerler mevcut stats'ı override etmeli
+    const newStats: UserStats = { 
+      ...currentUserStats, 
+      ...stats,
+      // Eğer stats içinde totalDiaryEntries varsa, onu kullan
+      totalDiaryEntries: stats.totalDiaryEntries !== undefined ? stats.totalDiaryEntries : currentUserStats.totalDiaryEntries,
+    };
+    
+    console.log('📊 Merged stats:', {
+      oldStats: currentUserStats,
+      incomingStats: stats,
+      mergedStats: newStats,
+      totalDiaryEntries: newStats.totalDiaryEntries,
+      currentStreak: newStats.currentStreak,
+      'totalDiaryEntries source': stats.totalDiaryEntries !== undefined ? 'from incoming stats' : 'from old stats'
+    });
+    
     const newAchievements: Achievement[] = [];
+    
+    // Önce mevcut achievements'ı yeniden yükle
+    const currentAchievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+    let currentAchievements = achievements;
+    if (currentAchievementsData) {
+      currentAchievements = JSON.parse(currentAchievementsData);
+      console.log('🏆 Loaded achievements from AsyncStorage:', currentAchievements.length, 'achievements');
+    } else {
+      console.log('🏆 No achievements in AsyncStorage');
+    }
+    
+    console.log(`🔍 Checking ${achievementDefinitions.length} achievement definitions...`);
     
     for (const definition of achievementDefinitions) {
       // Zaten kazanılmış mı kontrol et
-      const alreadyEarned = achievements.find(a => a.id === definition.id);
-      if (alreadyEarned) continue;
+      const alreadyEarned = currentAchievements.find(a => a.id === definition.id);
+      if (alreadyEarned) {
+        console.log(`⏭️ Achievement ${definition.id} already earned, skipping`);
+        continue;
+      }
+      
+      console.log(`🔎 Checking achievement: ${definition.id} (${definition.title})`);
       
       let isEarned = false;
       
@@ -384,21 +440,36 @@ export const useAchievements = (userId?: string) => {
         case 'streak':
           if (newStats.currentStreak >= definition.requirement.value) {
             isEarned = true;
+            console.log(`✅ Streak achievement ${definition.id} earned: ${newStats.currentStreak} >= ${definition.requirement.value}`);
           }
           break;
           
         case 'total':
+          // Günlük yazma başarıları için kontrol
           if (definition.id.includes('entry') || definition.id.includes('writer') || definition.id.includes('diarist') || definition.id.includes('master_writer')) {
-            if (newStats.totalDiaryEntries >= definition.requirement.value) {
+            const totalDiaryEntries = newStats.totalDiaryEntries ?? 0;
+            console.log(`📝 Checking diary achievement ${definition.id}: totalDiaryEntries=${totalDiaryEntries}, required=${definition.requirement.value}, newStats:`, newStats);
+            
+            // Özellikle first_entry için detaylı log
+            if (definition.id === 'first_entry') {
+              console.log(`🎯 FIRST_ENTRY CHECK: totalDiaryEntries=${totalDiaryEntries}, required=1, condition=${totalDiaryEntries >= 1}`);
+            }
+            
+            if (totalDiaryEntries >= definition.requirement.value) {
               isEarned = true;
+              console.log(`✅ Total diary achievement ${definition.id} EARNED: ${totalDiaryEntries} >= ${definition.requirement.value}`);
+            } else {
+              console.log(`❌ Total diary achievement ${definition.id} NOT earned: ${totalDiaryEntries} < ${definition.requirement.value}`);
             }
           } else if (definition.id.includes('task') || definition.id.includes('productive') || definition.id.includes('achiever')) {
-            if (newStats.totalTasksCompleted >= definition.requirement.value) {
+            if ((newStats.totalTasksCompleted ?? 0) >= definition.requirement.value) {
               isEarned = true;
+              console.log(`✅ Task achievement ${definition.id} earned: ${newStats.totalTasksCompleted} >= ${definition.requirement.value}`);
             }
           } else if (definition.id.includes('reminder')) {
-            if (newStats.totalReminders >= definition.requirement.value) {
+            if ((newStats.totalReminders ?? 0) >= definition.requirement.value) {
               isEarned = true;
+              console.log(`✅ Reminder achievement ${definition.id} earned: ${newStats.totalReminders} >= ${definition.requirement.value}`);
             }
           }
           break;
@@ -407,10 +478,12 @@ export const useAchievements = (userId?: string) => {
           if (definition.id.includes('health')) {
             if (newStats.healthTrackingDays >= definition.requirement.value) {
               isEarned = true;
+              console.log(`✅ Health achievement ${definition.id} earned: ${newStats.healthTrackingDays} >= ${definition.requirement.value}`);
             }
           } else if (definition.id.includes('app_lover')) {
             if (newStats.appUsageDays >= definition.requirement.value) {
               isEarned = true;
+              console.log(`✅ App usage achievement ${definition.id} earned: ${newStats.appUsageDays} >= ${definition.requirement.value}`);
             }
           }
           break;
@@ -427,6 +500,7 @@ export const useAchievements = (userId?: string) => {
         };
         
         newAchievements.push(achievement);
+        console.log(`🎉 Achievement unlocked: ${achievement.title}`);
         
         // Başarı bildirimi gönder
         try {
@@ -441,22 +515,48 @@ export const useAchievements = (userId?: string) => {
     }
     
     if (newAchievements.length > 0) {
-      const updatedAchievements = [...achievements, ...newAchievements];
+      const updatedAchievements = [...currentAchievements, ...newAchievements];
+      console.log(`💾 Saving ${newAchievements.length} new achievements:`, newAchievements.map(a => a.id));
       await saveAchievements(updatedAchievements);
+      setAchievements(updatedAchievements);
+      console.log(`✅ Achievements saved and state updated. Total achievements: ${updatedAchievements.length}`);
+    } else {
+      console.log('ℹ️ No new achievements to save');
     }
     
+    // Stats'ı her zaman kaydet (başarı kazanılsa da kazanılmasa da)
     await saveUserStats(newStats);
+    setUserStats(newStats);
+    console.log(`💾 Updated user stats:`, {
+      totalDiaryEntries: newStats.totalDiaryEntries,
+      currentStreak: newStats.currentStreak,
+      longestStreak: newStats.longestStreak
+    });
+    
     return newAchievements;
   };
 
   // Günlük yazma başarısı kontrolü
   const checkDiaryAchievements = async (entryCount: number, currentStreak: number) => {
-    return await checkAchievements({
+    console.log('🎯 checkDiaryAchievements called:', { entryCount, currentStreak, userStatsLongestStreak: userStats.longestStreak });
+    
+    const statsToCheck = {
       totalDiaryEntries: entryCount,
       currentStreak: currentStreak,
-      longestStreak: Math.max(userStats.longestStreak, currentStreak),
+      longestStreak: Math.max(userStats.longestStreak || 0, currentStreak),
       lastDiaryDate: new Date().toISOString().split('T')[0],
-    });
+    };
+    
+    console.log('📤 Calling checkAchievements with:', statsToCheck);
+    
+    try {
+      const result = await checkAchievements(statsToCheck);
+      console.log('✅ checkDiaryAchievements completed, result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error in checkDiaryAchievements:', error);
+      throw error;
+    }
   };
 
   // Görev başarısı kontrolü
@@ -496,35 +596,49 @@ export const useAchievements = (userId?: string) => {
   };
 
   // İlerleme bilgisi
-  const getAchievementProgress = (achievementId: string) => {
+  const getAchievementProgress = async (achievementId: string) => {
     const definition = achievementDefinitions.find(d => d.id === achievementId);
     if (!definition) return null;
     
-    const alreadyEarned = achievements.find(a => a.id === achievementId);
+    // AsyncStorage'dan güncel achievements'ı yükle
+    const currentAchievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+    let currentAchievements = achievements;
+    if (currentAchievementsData) {
+      currentAchievements = JSON.parse(currentAchievementsData);
+    }
+    
+    const alreadyEarned = currentAchievements.find(a => a.id === achievementId);
     if (alreadyEarned) {
       return { progress: 100, current: definition.requirement.value, required: definition.requirement.value };
+    }
+    
+    // AsyncStorage'dan güncel stats'ı yükle
+    const currentStatsData = await AsyncStorage.getItem(USER_STATS_STORAGE_KEY);
+    let currentStats = userStats;
+    if (currentStatsData) {
+      currentStats = JSON.parse(currentStatsData);
     }
     
     let current = 0;
     
     switch (definition.requirement.type) {
       case 'streak':
-        current = userStats.currentStreak;
+        current = currentStats.currentStreak || 0;
         break;
       case 'total':
         if (achievementId.includes('entry') || achievementId.includes('writer') || achievementId.includes('diarist') || achievementId.includes('master_writer')) {
-          current = userStats.totalDiaryEntries;
+          current = currentStats.totalDiaryEntries || 0;
         } else if (achievementId.includes('task') || achievementId.includes('productive') || achievementId.includes('achiever')) {
-          current = userStats.totalTasksCompleted;
+          current = currentStats.totalTasksCompleted || 0;
         } else if (achievementId.includes('reminder')) {
-          current = userStats.totalReminders;
+          current = currentStats.totalReminders || 0;
         }
         break;
       case 'consecutive':
         if (achievementId.includes('health')) {
-          current = userStats.healthTrackingDays;
+          current = currentStats.healthTrackingDays || 0;
         } else if (achievementId.includes('app_lover')) {
-          current = userStats.appUsageDays;
+          current = currentStats.appUsageDays || 0;
         }
         break;
     }
@@ -559,6 +673,16 @@ export const useAchievements = (userId?: string) => {
     };
   };
 
+  // loadData'yı export et ki AchievementsScreen'den çağırabilelim
+  const refreshData = async () => {
+    // Eğer zaten yükleniyorsa, tekrar yükleme
+    if (loading) {
+      console.log('⚠️ Already loading, skipping refreshData');
+      return;
+    }
+    await loadData();
+  };
+
   return {
     // Data
     achievements,
@@ -572,6 +696,7 @@ export const useAchievements = (userId?: string) => {
     checkTaskAchievements,
     checkHealthAchievements,
     checkReminderAchievements,
+    refreshData,
     checkHabitAchievements: async (totalCompletions: number, longestStreak: number, perfectWeeks: number = 0) => {
       const newAchievements: Achievement[] = [];
       

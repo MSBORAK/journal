@@ -15,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ONBOARDING_STEPS, setOnboardingCompleted, setSelectedTheme } from '../services/onboardingService';
+import { supportedLanguages, Language } from '../services/languageService';
 import { soundService } from '../services/soundService';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
@@ -30,7 +31,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [showConfetti, setShowConfetti] = useState(false);
   const { user } = useAuth();
   const { currentTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, setCurrentLanguage, currentLanguage } = useLanguage();
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
+  const [selectedTheme, setSelectedTheme] = useState<string>('cozy');
   
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -69,13 +72,13 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       fontWeight: '700',
       textAlign: 'center',
       marginBottom: 20,
-      color: currentTheme.colors.text,
+      color: '#1A1A1A', // Koyu renk - açık arka planlar için iyi kontrast
       fontFamily: 'Poppins_700Bold',
     },
     description: {
       fontSize: 18,
       textAlign: 'center',
-      color: currentTheme.colors.text,
+      color: '#2D2D2D', // Koyu gri - okunabilirlik için yeterli kontrast
       marginBottom: 40,
       lineHeight: 28,
       fontFamily: 'Poppins_400Regular',
@@ -104,18 +107,38 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 20,
-      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)', // Beyaz arka plan - daha iyi kontrast
+      borderWidth: 1,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+      shadowColor: 'rgba(0, 0, 0, 0.2)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     skipButtonText: {
-      color: currentTheme.colors.text,
+      color: '#1A1A1A', // Koyu renk - beyaz arka plan üzerinde net görünür
       fontSize: 16,
-      fontWeight: '500',
-      fontFamily: 'Poppins_500Medium',
+      fontWeight: '600',
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    preferencesContainer: {
+      width: '100%',
+      marginTop: 20,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      textAlign: 'center',
+      color: '#1A1A1A',
+      marginBottom: 16,
+      fontFamily: 'Poppins_600SemiBold',
     },
     themeButtons: {
       flexDirection: 'row',
       gap: 20,
-      marginTop: 20,
+      marginBottom: 32,
+      justifyContent: 'center',
     },
     themeBtn: {
       paddingVertical: 16,
@@ -133,6 +156,49 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       fontSize: 16,
       fontWeight: '600',
       fontFamily: 'Poppins_600SemiBold',
+      color: '#1A1A1A', // Varsayılan koyu renk - Cozy butonu için
+    },
+    languageButtons: {
+      gap: 12,
+      marginBottom: 20,
+    },
+    languageBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      borderRadius: 16,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderWidth: 2,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+      shadowColor: 'rgba(0, 0, 0, 0.2)',
+      shadowOpacity: 0.1,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    languageBtnSelected: {
+      borderColor: currentTheme.colors.primary,
+      backgroundColor: currentTheme.colors.primary + '15',
+    },
+    languageFlag: {
+      fontSize: 28,
+      marginRight: 12,
+    },
+    languageInfo: {
+      flex: 1,
+    },
+    languageName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#1A1A1A',
+      marginBottom: 2,
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    languageNativeName: {
+      fontSize: 13,
+      color: '#666',
+      fontFamily: 'Poppins_400Regular',
     },
     paginationContainer: {
       position: 'absolute',
@@ -206,9 +272,32 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     await handleComplete();
   };
 
-  const handleThemeSelect = async (theme: 'cozy' | 'luxury') => {
+  const handleLanguageSelect = async (languageCode: string) => {
+    setSelectedLanguage(languageCode);
+    await setCurrentLanguage(languageCode, user?.uid);
+    await soundService.playTap();
     try {
-      await setSelectedTheme(theme);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.log('Haptic feedback error:', error);
+    }
+  };
+
+  const handleThemeSelect = async (theme: 'cozy' | 'luxury') => {
+    setSelectedTheme(theme);
+    await soundService.playTap();
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.log('Haptic feedback error:', error);
+    }
+  };
+
+  const handlePreferencesComplete = async () => {
+    try {
+      // Tema ve dili kaydet
+      await setSelectedTheme(selectedTheme as 'cozy' | 'luxury');
+      await setCurrentLanguage(selectedLanguage, user?.uid);
       
       // Play success sound
       await soundService.playSuccess();
@@ -221,18 +310,18 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       
       showAlert(
         '🎉 Harika seçim!', 
-        theme === 'cozy' 
+        selectedTheme === 'cozy' 
           ? 'Sıcak, huzurlu tonlar seni bekliyor.' 
           : 'Zarif ve modern bir atmosfer seni bekliyor!',
         'success'
       );
       
-      // Tema seçimi sonrası onboarding'i tamamla
+      // Tercihler seçimi sonrası onboarding'i tamamla
       setTimeout(() => {
         handleComplete();
       }, 2000); // 2 saniye bekle, alert'i göster
     } catch (error) {
-      console.error('❌ Error selecting theme:', error);
+      console.error('❌ Error saving preferences:', error);
       handleComplete();
     }
   };
@@ -271,36 +360,97 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" translucent={true} backgroundColor="transparent" />
       
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipButtonText}>Atla</Text>
+        <Text style={styles.skipButtonText}>{t('onboarding.skip')}</Text>
       </TouchableOpacity>
 
       <Animated.View 
         style={[styles.content, { opacity: fadeAnim }]}
       >
-        <Text style={styles.title}>{currentStepData.title}</Text>
-        <Text style={styles.description}>{currentStepData.description}</Text>
+        <Text style={styles.title}>
+          {currentStep === 0 ? t('onboarding.welcome') + ' 🌞' :
+           currentStep === 1 ? t('onboarding.routineTitle') + ' 🌿' :
+           currentStep === 2 ? t('onboarding.themeTitle') + ' 💫' :
+           currentStepData.title}
+        </Text>
+        <Text style={styles.description}>
+          {currentStep === 0 ? t('onboarding.welcomeDescription') + ' 💫' :
+           currentStep === 1 ? t('onboarding.routineDescription') + ' ✨' :
+           currentStep === 2 ? t('onboarding.themeDescription') :
+           currentStepData.description}
+        </Text>
 
         {currentStep < 2 ? (
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
             <Text style={styles.nextButtonText}>{t('onboarding.continue')}</Text>
           </TouchableOpacity>
         ) : (
-          <View style={styles.themeButtons}>
-            <TouchableOpacity
-              style={[styles.themeBtn, { backgroundColor: '#8FBC93' }]}
-              onPress={() => handleThemeSelect('cozy')}
-            >
-              <Text style={styles.themeText}>Cozy 🌿</Text>
-            </TouchableOpacity>
+          <View style={styles.preferencesContainer}>
+            {/* Tema Seçimi */}
+            <Text style={styles.sectionTitle}>{t('onboarding.selectTheme')}</Text>
+            <View style={styles.themeButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.themeBtn, 
+                  { 
+                    backgroundColor: '#8FBC93',
+                    borderWidth: selectedTheme === 'cozy' ? 3 : 0,
+                    borderColor: currentTheme.colors.primary,
+                  }
+                ]}
+                onPress={() => handleThemeSelect('cozy')}
+              >
+                <Text style={[styles.themeText, { color: '#1A1A1A' }]}>Cozy 🌿</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.themeBtn, { backgroundColor: '#2D423B' }]}
-              onPress={() => handleThemeSelect('luxury')}
-            >
-              <Text style={[styles.themeText, { color: currentTheme.colors.background }]}>Luxury ✨</Text>
+              <TouchableOpacity
+                style={[
+                  styles.themeBtn, 
+                  { 
+                    backgroundColor: '#2D423B',
+                    borderWidth: selectedTheme === 'luxury' ? 3 : 0,
+                    borderColor: currentTheme.colors.primary,
+                  }
+                ]}
+                onPress={() => handleThemeSelect('luxury')}
+              >
+                <Text style={[styles.themeText, { color: '#FFFFFF' }]}>Luxury ✨</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Dil Seçimi */}
+            <Text style={styles.sectionTitle}>{t('onboarding.selectLanguage')}</Text>
+            <View style={styles.languageButtons}>
+              {supportedLanguages.map((language: Language) => (
+                <TouchableOpacity
+                  key={language.code}
+                  style={[
+                    styles.languageBtn,
+                    selectedLanguage === language.code && styles.languageBtnSelected,
+                  ]}
+                  onPress={() => handleLanguageSelect(language.code)}
+                >
+                  <Text style={styles.languageFlag}>{language.flag}</Text>
+                  <View style={styles.languageInfo}>
+                    <Text style={styles.languageName}>{language.name}</Text>
+                    <Text style={styles.languageNativeName}>{language.nativeName}</Text>
+                  </View>
+                  {selectedLanguage === language.code && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color={currentTheme.colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Tamamla Butonu */}
+            <TouchableOpacity style={styles.nextButton} onPress={handlePreferencesComplete}>
+              <Text style={styles.nextButtonText}>{t('onboarding.letsStart')}</Text>
             </TouchableOpacity>
           </View>
         )}

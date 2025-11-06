@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { supportedLanguages, Language } from '../services/languageService';
 
 interface LanguageSelectionScreenProps {
@@ -17,13 +18,15 @@ interface LanguageSelectionScreenProps {
 }
 
 const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = ({ navigation }) => {
+  const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t, setCurrentLanguage, currentLanguage } = useLanguage();
   const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
 
   const handleLanguageSelect = async (languageCode: string) => {
     setSelectedLanguage(languageCode);
-    await setCurrentLanguage(languageCode);
+    // Dil değiştiğinde bildirimleri de yeniden zamanla (senkronizasyon)
+    await setCurrentLanguage(languageCode, user?.uid);
   };
 
   const handleContinue = () => {
@@ -146,7 +149,7 @@ const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = ({ navig
             {t('onboarding.selectLanguage')}
           </Text>
           <Text style={dynamicStyles.subtitle}>
-            Choose your preferred language for the app
+            {t('onboarding.selectLanguageDescription')}
           </Text>
         </View>
 

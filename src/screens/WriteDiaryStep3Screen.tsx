@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useDiary } from '../hooks/useDiary';
+import { useAchievements } from '../hooks/useAchievements';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 import { QUESTION_ORDER } from '../constants/diaryQuestions';
@@ -27,7 +28,8 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
-  const { addEntry } = useDiary(user?.uid);
+  const { addEntry, entries, refetch } = useDiary(user?.uid);
+  const { checkDiaryAchievements } = useAchievements(user?.uid);
   
   const { title, mood, answers, freeWriting } = route.params;
 
@@ -44,6 +46,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   
   // Custom Alert States
   const [showCustomAlert, setShowCustomAlert] = useState(false);
@@ -229,8 +232,37 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
     return text;
   };
 
+  // Streak hesaplama fonksiyonu
+  const getCurrentStreak = (allEntries: any[], currentDate: string): number => {
+    if (allEntries.length === 0) return 1;
+    
+    const sortedEntries = [...allEntries].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    let streak = 1;
+    const today = new Date(currentDate);
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < sortedEntries.length; i++) {
+      const entryDate = new Date(sortedEntries[i].date);
+      entryDate.setHours(0, 0, 0, 0);
+      
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - (i + 1));
+      
+      if (entryDate.getTime() === expectedDate.getTime()) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
   const handleSave = async () => {
-    if (loading) return;
+    if (loading || isSaved) return;
     
     console.log('handleSave called');
     console.log('user:', user);
@@ -244,7 +276,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       
       const entry = {
         title: title.trim(),
-        content: content || 'Bugün güzel bir gün geçirdim.',
+        content: content || t('settings.defaultDiaryContent'),
         mood: mood,
         tags: tags,
         date: new Date().toISOString().split('T')[0],
@@ -253,8 +285,52 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       };
       
       console.log('Entry to save:', entry);
-      await addEntry(entry);
-      console.log('Entry saved successfully');
+      const savedEntry = await addEntry(entry);
+      console.log('Entry saved successfully:', savedEntry);
+      
+      // addEntry state'i güncelledi, ama React state güncellemesi asenkron olduğu için
+      // entries state'i henüz güncellenmemiş olabilir. Bu yüzden manuel olarak hesaplıyoruz.
+      const allEntries = [savedEntry, ...entries];
+      const totalEntries = allEntries.length;
+      const currentStreak = getCurrentStreak(allEntries, entry.date);
+      
+      console.log('🔍 Checking achievements:', { 
+        entriesLengthBefore: entries.length,
+        entriesLengthAfter: allEntries.length,
+        totalEntries, 
+        currentStreak,
+        entryDate: entry.date,
+        savedEntryId: savedEntry.id,
+        savedEntry: savedEntry,
+        allEntries: allEntries.map(e => ({ id: e.id, date: e.date, title: e.title }))
+      });
+      
+      // Başarıları kontrol et
+      try {
+        console.log('🚀 Calling checkDiaryAchievements with:', { 
+          totalEntries, 
+          currentStreak,
+          entryCount: totalEntries,
+          expectedFirstEntry: totalEntries >= 1 ? 'Should unlock first_entry' : 'Will NOT unlock first_entry'
+        });
+        const newAchievements = await checkDiaryAchievements(totalEntries, currentStreak);
+        
+        if (newAchievements && newAchievements.length > 0) {
+          console.log('🎉 SUCCESS! New achievements unlocked:', newAchievements.length, newAchievements);
+          console.log('Achievement IDs:', newAchievements.map(a => a.id));
+        } else {
+          console.log('⚠️ No new achievements unlocked. Current stats:', {
+            totalDiaryEntries: totalEntries,
+            currentStreak: currentStreak
+          });
+        }
+      } catch (achievementError) {
+        console.error('❌ Error checking achievements:', achievementError);
+        console.error('Error stack:', achievementError instanceof Error ? achievementError.stack : 'No stack');
+        // Başarı kontrolü hatası günlük kaydetmeyi engellemesin
+      }
+      
+      setIsSaved(true);
       
       showAlert(
         '🎉 Başarılı!',
@@ -272,11 +348,11 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
     } catch (error) {
       console.error('Error saving entry:', error);
       showAlert(
-        '❌ Hata',
-        'Günlük kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        t('common.error'),
+        t('diary.diaryNotSaved'),
         'error',
         {
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: () => setShowCustomAlert(false),
           style: 'primary'
         }

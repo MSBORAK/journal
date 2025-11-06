@@ -22,6 +22,8 @@ import * as Haptics from 'expo-haptics';
 import CelebrationModal from '../components/CelebrationModal';
 import { CustomAlert } from '../components/CustomAlert';
 import { Dream, Goal } from '../types';
+import { useAppTour } from '../hooks/useAppTour';
+import AppTour from '../components/AppTour';
 
 interface DreamsGoalsScreenProps {
   navigation: any;
@@ -31,6 +33,9 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t, currentLanguage } = useLanguage();
+  
+  // App Tour
+  const tour = useAppTour(navigation, 'DreamsGoals');
   const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
   const {
     dreams,
@@ -413,7 +418,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
           <View style={dynamicStyles.progressBar}>
             <View style={[dynamicStyles.progressFill, { width: `${goal.progress}%` }]} />
           </View>
-          <Text style={dynamicStyles.progressText}>{goal.progress}% tamamlandı</Text>
+          <Text style={dynamicStyles.progressText}>{goal.progress}% {t('dreams.completed')}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -1546,6 +1551,19 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
         }}
         onClose={hideAlert}
       />
+
+      {/* App Tour */}
+      {tour.currentStep && (
+        <AppTour
+          visible={tour.tourVisible}
+          currentStep={tour.currentTourStep}
+          totalSteps={tour.totalSteps}
+          step={tour.currentStep}
+          onNext={tour.handleNext}
+          onSkip={tour.handleSkip}
+          onComplete={tour.handleComplete}
+        />
+      )}
     </SafeAreaView>
   );
 });

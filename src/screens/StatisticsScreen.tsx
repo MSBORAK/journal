@@ -15,6 +15,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDiary } from '../hooks/useDiary';
 import { useHealth } from '../hooks/useHealth';
 import { useHabits } from '../hooks/useHabits';
+import { useAppTour } from '../hooks/useAppTour';
+import AppTour from '../components/AppTour';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -32,6 +34,9 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+  
+  // App Tour
+  const tour = useAppTour(navigation, 'Statistics');
   const { entries, getStreak } = useDiary(user?.uid);
   const { getTodayHealthData, saveHealthData, getTodayWellnessScore, getWeeklyAverage } = useHealth(user?.uid);
   const {
@@ -2248,6 +2253,18 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
 
     </ScrollView>
 
+      {/* App Tour */}
+      {tour.currentStep && (
+        <AppTour
+          visible={tour.tourVisible}
+          currentStep={tour.currentTourStep}
+          totalSteps={tour.totalSteps}
+          step={tour.currentStep}
+          onNext={tour.handleNext}
+          onSkip={tour.handleSkip}
+          onComplete={tour.handleComplete}
+        />
+      )}
     </SafeAreaView>
   );
 }

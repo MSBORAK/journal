@@ -20,10 +20,13 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
+import { useAchievements } from '../hooks/useAchievements';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
 import { useTimer } from '../contexts/TimerContext';
 import FocusMode from '../components/FocusMode';
+import { useAppTour } from '../hooks/useAppTour';
+import AppTour from '../components/AppTour';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -35,6 +38,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+  
+  // App Tour
+  const tour = useAppTour(navigation, 'Tasks');
   const { 
     tasks,
     loading: tasksLoading, 
@@ -53,6 +59,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     getTodayReminders,
     deleteReminder,
   } = useReminders(user?.uid);
+  
+  const { checkTaskAchievements } = useAchievements(user?.uid);
 
   // State
   const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'monthly' | 'future' | 'all'>('daily');
@@ -67,6 +75,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     timeLeft, 
     selectedDuration,
     totalFocusTime,
+    totalWorkTime,
     progressAnim, 
     scaleAnim 
   } = useTimer();
@@ -144,6 +153,22 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       }
       
       await toggleTaskCompletion(taskId);
+      
+      // Başarıları kontrol et
+      try {
+        // Toggle işleminden sonra güncel task listesini al
+        const updatedTasks = tasks.map(t => t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t);
+        const completedTasksCount = updatedTasks.filter(t => t.isCompleted).length;
+        const newAchievements = await checkTaskAchievements(completedTasksCount);
+        
+        if (newAchievements && newAchievements.length > 0) {
+          console.log('🎉 New achievements unlocked:', newAchievements.length);
+        }
+      } catch (achievementError) {
+        console.error('Error checking achievements:', achievementError);
+        // Başarı kontrolü hatası görev tamamlamayı engellemesin
+      }
+      
       await soundService.playSuccess();
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
@@ -438,18 +463,33 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     }
   };
 
-  // Calculate work time from timer
+  // Calculate work time (bugünkü toplam + aktif timer'ın geçen süresi)
   const getWorkTime = () => {
+    let displayTime = totalWorkTime; // Bugünkü toplam çalışma süresi
+    
+    // Eğer timer aktifse, geçen süreyi de ekle
     if (isActive && selectedDuration > 0) {
       const totalSeconds = selectedDuration * 60;
       const elapsedSeconds = totalSeconds - timeLeft;
-      const minutes = Math.floor(elapsedSeconds / 60);
-      const seconds = elapsedSeconds % 60;
-      
-      if (minutes > 0) {
-        return `${minutes}dk`;
-      } else if (seconds > 0) {
+      const elapsedMinutes = elapsedSeconds / 60;
+      displayTime = totalWorkTime + elapsedMinutes;
+    }
+    
+    // Formatı göster
+    if (displayTime > 0) {
+      if (displayTime < 1) {
+        // 1 dakikadan az ise saniye olarak göster
+        const seconds = Math.floor(displayTime * 60);
         return `${seconds}s`;
+      } else {
+        // 1 dakika ve üzeri ise dakika olarak göster
+        const minutes = Math.floor(displayTime);
+        const remainingSeconds = Math.floor((displayTime - minutes) * 60);
+        if (remainingSeconds > 0) {
+          return `${minutes}dk ${remainingSeconds}s`;
+        } else {
+          return `${minutes}dk`;
+        }
       }
     }
     return '0dk';
@@ -1080,7 +1120,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 {/* Tamamlanan Görevler */}
                 {completedTasks.filter(t => t.title && t.title.trim().length > 0).length > 0 && (
                   <View>
-                    <Text style={dynamicStyles.subsectionTitle}>✅ Tamamlanan Görevler</Text>
+                    <Text style={dynamicStyles.subsectionTitle}>✅ {t('settings.completedTasks')}</Text>
                     {completedTasks.filter(t => t.title && t.title.trim().length > 0).map((task) => (
                       <View key={task.id} style={[dynamicStyles.taskCard, dynamicStyles.completedTaskCard]}>
                         <View style={dynamicStyles.taskLeft}>
@@ -1583,6 +1623,19 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           onClose={() => setShowFocusMode(false)}
         />
       </Modal>
+
+      {/* App Tour */}
+      {tour.currentStep && (
+        <AppTour
+          visible={tour.tourVisible}
+          currentStep={tour.currentTourStep}
+          totalSteps={tour.totalSteps}
+          step={tour.currentStep}
+          onNext={tour.handleNext}
+          onSkip={tour.handleSkip}
+          onComplete={tour.handleComplete}
+        />
+      )}
     </SafeAreaView>
   );
 }

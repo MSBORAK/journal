@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DiaryEntry } from '../types';
 
@@ -9,8 +10,7 @@ export const useDiary = (userId?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     if (!userId) return;
     
     try {
@@ -22,8 +22,15 @@ export const useDiary = (userId?: string) => {
       if (storedEntries) {
         // Kaydedilmiş veriler varsa onları kullan
         const parsedEntries = JSON.parse(storedEntries);
-        setEntries(parsedEntries);
-        console.log('Loaded entries from AsyncStorage:', parsedEntries.length);
+        // Duplicate entries'i filtrele (aynı tarih ve benzer içerik)
+        const uniqueEntries = parsedEntries.filter((entry: DiaryEntry, index: number, self: DiaryEntry[]) => {
+          const firstIndex = self.findIndex((e: DiaryEntry) => 
+            e.id === entry.id || (e.date === entry.date && e.title === entry.title && e.content === entry.content)
+          );
+          return index === firstIndex;
+        });
+        setEntries(uniqueEntries);
+        console.log('Loaded entries from AsyncStorage:', uniqueEntries.length);
       } else {
         // İlk kullanımda boş array ile başla
         setEntries([]);
@@ -35,31 +42,50 @@ export const useDiary = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   const addEntry = async (entry: Omit<DiaryEntry, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!userId) throw new Error('User not authenticated');
 
     try {
-      const newEntry: DiaryEntry = {
-        id: Date.now().toString(),
-        ...entry,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      // Aynı tarihte entry var mı kontrol et
+      const existingEntryIndex = entries.findIndex(e => e.date === entry.date);
+      
+      let updatedEntries: DiaryEntry[];
+      let savedEntry: DiaryEntry;
+
+      if (existingEntryIndex >= 0) {
+        // Aynı tarihte entry varsa update et
+        const existingEntry = entries[existingEntryIndex];
+        savedEntry = {
+          ...existingEntry,
+          ...entry,
+          updatedAt: new Date().toISOString(),
+        };
+        updatedEntries = entries.map((e, index) => 
+          index === existingEntryIndex ? savedEntry : e
+        );
+        console.log('Entry updated (same date):', savedEntry.id);
+      } else {
+        // Yeni entry ekle
+        savedEntry = {
+          id: Date.now().toString(),
+          ...entry,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        updatedEntries = [savedEntry, ...entries];
+        console.log('New entry added:', savedEntry.id);
+      }
 
       // State'i güncelle
-      const updatedEntries = [newEntry, ...entries];
       setEntries(updatedEntries);
       
       // AsyncStorage'a kaydet
       await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
-      console.log('Entry saved to AsyncStorage:', newEntry.id);
+      console.log('Entry saved to AsyncStorage:', savedEntry.id);
       
-      // Başarı kontrolü component seviyesinde yapılacak
-      // Bu hook sadece günlük ekleme işlemini yapar
-      
-      return newEntry;
+      return savedEntry;
     } catch (err) {
       console.error('Error adding entry:', err);
       setError(err instanceof Error ? err.message : 'Failed to add entry');
@@ -155,7 +181,15 @@ export const useDiary = (userId?: string) => {
 
   useEffect(() => {
     fetchEntries();
-  }, [userId]);
+  }, [fetchEntries]);
+
+  // refetch fonksiyonunu useCallback ile sarmalayarak stable referans sağla
+  const refetch = useCallback(async () => {
+    await fetchEntries();
+    // fetchEntries zaten setEntries çağırıyor, bu yüzden entries state'i güncellenecek
+    // Ama bu fonksiyon çağrıldıktan sonra entries'in güncel olması için
+    // fetchEntries'in tamamlanmasını beklemek yeterli
+  }, [fetchEntries]);
 
   return {
     entries,
@@ -168,6 +202,6 @@ export const useDiary = (userId?: string) => {
     getEntriesByTag,
     getEntriesByMood,
     getStreak,
-    refetch: fetchEntries,
+    refetch,
   };
 };

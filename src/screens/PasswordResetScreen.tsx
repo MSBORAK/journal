@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { CustomAlert } from '../components/CustomAlert';
+import { Linking } from 'react-native';
 
 export default function PasswordResetScreen() {
   const { currentTheme } = useTheme();
@@ -35,16 +36,96 @@ export default function PasswordResetScreen() {
     // Check if we have a valid session for password reset
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
-          showAlert('⚠️ Oturum Hatası', 'Şifre sıfırlama oturumu geçersiz. Lütfen email linkini tekrar kullanın.', 'error');
+        console.log('🔐 PasswordResetScreen - Session kontrolü başlatılıyor...');
+        
+        // Deep link'ten gelen URL'leri kontrol et
+        const handleURL = async (url: string | null) => {
+          if (!url) return;
+          
+          console.log('🔗 URL yakalandı:', url);
+          
+          // Supabase'den gelen hash fragment'leri kontrol et
+          if (url.includes('#access_token') || url.includes('type=recovery') || url.includes('token')) {
+            console.log('✅ Password reset token bulundu!');
+            
+            // URL'den token'ları parse et
+            let accessToken: string | null = null;
+            let refreshToken: string | null = null;
+            
+            if (url.includes('#')) {
+              // Hash fragment formatı: #access_token=xxx&refresh_token=yyy
+              const hashPart = url.split('#')[1];
+              const hashParams = new URLSearchParams(hashPart);
+              accessToken = hashParams.get('access_token');
+              refreshToken = hashParams.get('refresh_token');
+            } else if (url.includes('?')) {
+              // Query param formatı: ?access_token=xxx&refresh_token=yyy
+              const queryPart = url.split('?')[1];
+              const queryParams = new URLSearchParams(queryPart);
+              accessToken = queryParams.get('access_token');
+              refreshToken = queryParams.get('refresh_token');
+            }
+            
+            console.log('🔑 Access token:', accessToken ? 'Mevcut' : 'Yok');
+            console.log('🔑 Refresh token:', refreshToken ? 'Mevcut' : 'Yok');
+            
+            if (accessToken && refreshToken) {
+              // Session'ı set et
+              const { data, error: setSessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              
+              if (setSessionError) {
+                console.error('❌ Set session error:', setSessionError);
+                showAlert(
+                  t('auth.error') || '❌ Hata', 
+                  'Session kurulamadı: ' + setSessionError.message, 
+                  'error'
+                );
+              } else {
+                console.log('✅ Session başarıyla kuruldu!');
+              }
+            }
+          }
+        };
+        
+        // Initial URL kontrolü
+        const initialURL = await Linking.getInitialURL();
+        await handleURL(initialURL);
+        
+        // Uygulama açıkken gelen linkler için listener
+        const subscription = Linking.addEventListener('url', ({ url }) => {
+          handleURL(url);
+        });
+        
+        // Mevcut session kontrolü
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+          console.warn('⚠️ Session bulunamadı, kullanıcıdan email linkini tekrar kullanması isteniyor...');
+          showAlert(
+            t('auth.warning') || '⚠️ Oturum Hatası', 
+            t('auth.passwordResetSessionInvalid') || 'Şifre sıfırlama oturumu geçersiz. Lütfen email linkini tekrar kullanın.', 
+            'error'
+          );
           setTimeout(() => {
             navigation.navigate('Auth' as never);
           }, 3000);
+        } else {
+          console.log('✅ Geçerli session mevcut!');
         }
+        
+        return () => {
+          subscription.remove();
+        };
       } catch (error) {
-        console.error('Session check error:', error);
-        showAlert('❌ Hata', 'Oturum kontrolünde hata oluştu.', 'error');
+        console.error('❌ Session check error:', error);
+        showAlert(
+          t('auth.error') || '❌ Hata', 
+          t('auth.sessionCheckError') || 'Oturum kontrolünde hata oluştu.', 
+          'error'
+        );
       }
     };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -13,7 +14,7 @@ import GlobalFloatingPomodoro from './src/components/GlobalFloatingPomodoro';
 import BackgroundWrapper from './src/components/BackgroundWrapper';
 // import { FontProvider } from './src/contexts/FontContext'; // Kaldırıldı
 import { Ionicons } from '@expo/vector-icons';
-import { scheduleMotivationNotifications, requestNotificationPermission, scheduleSmartNotifications } from './src/services/motivationNotificationService';
+import { scheduleAllNotifications, requestNotificationPermissions } from './src/services/notificationService';
 import { recordUserActivity } from './src/services/userActivityService';
 import { isOnboardingCompleted } from './src/services/onboardingService';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
@@ -47,6 +48,7 @@ type RootStackParamList = {
   Mindfulness: undefined;
   HelpGuide: undefined;
   DiaryDetail: { entry: any };
+  PasswordReset: undefined;
 };
 
 type TabParamList = {
@@ -86,11 +88,13 @@ import AchievementsScreen from './src/screens/AchievementsScreen';
 import MindfulnessScreen from './src/screens/MindfulnessScreen';
 import HelpGuideScreen from './src/screens/HelpGuideScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import PasswordResetScreen from './src/screens/PasswordResetScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function MainTabs() {
+  const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
   
@@ -119,10 +123,10 @@ function MainTabs() {
   useEffect(() => {
     const initNotifications = async () => {
       try {
-        const hasPermission = await requestNotificationPermission();
+        const hasPermission = await requestNotificationPermissions();
         if (hasPermission) {
-          await scheduleMotivationNotifications();
-          await scheduleSmartNotifications();
+          // Tek merkezi scheduler ile tüm bildirimleri planla
+          await scheduleAllNotifications(user?.uid);
           await recordUserActivity('app_launch');
           console.log('✅ Tüm bildirimler başlatıldı!');
         }
@@ -249,8 +253,41 @@ function AppNavigator() {
     setShowOnboarding(false);
   };
 
+  // Deep linking configuration - şifre sıfırlama için
+  // Not: Expo Go'da rhythm:// scheme çalışmaz, bu yüzden production build'de test et
+  const linking = {
+    prefixes: ['rhythm://'],
+    config: {
+      screens: {
+        Auth: 'auth',
+        PasswordReset: 'PasswordReset',
+      },
+    },
+    async getInitialURL() {
+      const url = await Linking.getInitialURL();
+      console.log('🔗 App - Initial URL:', url);
+      return url;
+    },
+    subscribe(listener: (url: string) => void) {
+      const onReceiveURL = ({ url }: { url: string }) => {
+        console.log('🔗 App - Deep link received:', url);
+        listener(url);
+      };
+      const subscription = Linking.addEventListener('url', onReceiveURL);
+      Linking.getInitialURL().then((url) => {
+        if (url) {
+          console.log('🔗 App - Initial URL found:', url);
+          listener(url);
+        }
+      });
+      return () => {
+        subscription.remove();
+      };
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator 
         screenOptions={{ 
           headerShown: false,
@@ -317,7 +354,10 @@ function AppNavigator() {
         <Stack.Screen name="DiaryDetail" component={DiaryDetailScreen} options={{ headerShown: false }} />
           </>
         ) : (
-          <Stack.Screen name="Auth" component={AuthScreen} />
+          <>
+            <Stack.Screen name="Auth" component={AuthScreen} />
+            <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

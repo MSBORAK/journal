@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -12,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useProfile } from '../hooks/useProfile';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
@@ -20,6 +22,9 @@ import { CustomAlert } from '../components/CustomAlert';
 import { useMigration } from '../hooks/useMigration';
 import { BackupService } from '../services/backupService';
 import { useCloudData } from '../hooks/useCloudData';
+import { resetOnboarding } from '../services/onboardingService';
+import { useAppTour } from '../hooks/useAppTour';
+import AppTour from '../components/AppTour';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -39,6 +44,10 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
   const { user, signOut } = useAuth();
   const { currentTheme } = useTheme();
   const { t, currentLanguage } = useLanguage();
+  const { profile, refreshProfile } = useProfile(user?.uid);
+  
+  // App Tour
+  const tour = useAppTour(navigation, 'Settings');
   const { migrateData, checkMigrationStatus, isMigrating } = useMigration();
   const { syncFromCloud, pushToCloud, isLoading: isSyncing } = useCloudData();
   const [soundEnabled, setSoundEnabled] = useState(soundService.isSoundEnabled());
@@ -61,6 +70,15 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
   const hideAlert = () => {
     setAlertConfig(prev => ({ ...prev, visible: false }));
   };
+
+  // Settings ekranına focus olduğunda profili refresh et
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user?.uid) {
+        refreshProfile();
+      }
+    }, [user?.uid])
+  );
 
   // Avatar renk fonksiyonu
   const getAvatarColor = (name: string) => {
@@ -168,6 +186,21 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     });
   };
 
+  const handleResetOnboarding = async () => {
+    try {
+      await resetOnboarding(user?.uid);
+      await soundService.playSuccess();
+      showAlert(
+        '✅ Onboarding Sıfırlandı',
+        'Uygulamayı yeniden başlattığınızda onboarding ekranını göreceksiniz.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+      showAlert('❌ Hata', 'Onboarding sıfırlanırken bir hata oluştu.', 'error');
+    }
+  };
+
   const menuItems: MenuItem[] = [
     {
       id: 'theme',
@@ -264,6 +297,14 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       icon: 'refresh-circle-outline',
       action: handleResetMotivation,
       color: '#f59e0b',
+    },
+    {
+      id: 'reset-onboarding',
+      title: '🧪 Onboarding\'i Tekrar Göster',
+      subtitle: 'Test amaçlı onboarding ekranını sıfırla',
+      icon: 'refresh-outline',
+      action: handleResetOnboarding,
+      color: '#8b5cf6',
     },
     {
       id: 'logout',
@@ -426,16 +467,16 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
               <View
                 style={[
                   dynamicStyles.avatar,
-                  { backgroundColor: getAvatarColor(user?.displayName || 'Kullanıcı') },
+                  { backgroundColor: getAvatarColor(profile?.full_name || user?.displayName || 'Kullanıcı') },
                 ]}
               >
                 <Text style={dynamicStyles.avatarText}>
-                  {(user?.displayName || 'Kullanıcı').charAt(0).toUpperCase()}
+                  {(profile?.full_name || user?.displayName || 'Kullanıcı').charAt(0).toUpperCase()}
                 </Text>
               </View>
               <View style={dynamicStyles.userDetails}>
                 <Text style={dynamicStyles.userName}>
-                  {user?.displayName || 'Kullanıcı'}
+                  {profile?.full_name || user?.displayName || 'Kullanıcı'}
                 </Text>
                 <Text style={dynamicStyles.userEmail}>
                   {user?.email || 'email@example.com'}
@@ -520,6 +561,19 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
         }
         onClose={hideAlert}
       />
+
+      {/* App Tour */}
+      {tour.currentStep && (
+        <AppTour
+          visible={tour.tourVisible}
+          currentStep={tour.currentTourStep}
+          totalSteps={tour.totalSteps}
+          step={tour.currentStep}
+          onNext={tour.handleNext}
+          onSkip={tour.handleSkip}
+          onComplete={tour.handleComplete}
+        />
+      )}
     </SafeAreaView>
   );
 });

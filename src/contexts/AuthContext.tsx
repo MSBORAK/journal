@@ -121,6 +121,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           } catch (error: any) {
             console.error('❌ Sign in catch error:', error);
+            
+            // Network hatalarını kontrol et
+            const errorMessage = error?.message || error?.toString() || '';
+            if (errorMessage.toLowerCase().includes('network request failed') ||
+                errorMessage.toLowerCase().includes('network error') ||
+                errorMessage.toLowerCase().includes('fetch failed') ||
+                errorMessage.toLowerCase().includes('connection') ||
+                error?.code === 'NETWORK_ERROR' ||
+                error?.name === 'NetworkError') {
+              throw new Error('İnternet bağlantınızı kontrol edin. Bağlantı hatası oluştu.');
+            }
+            
             // Eğer error zaten bir Error object ise direkt throw et
             if (error instanceof Error) {
               throw error;
@@ -187,6 +199,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           } catch (error: any) {
             console.error('❌ Sign up catch error:', error);
+            
+            // Network hatalarını kontrol et
+            const errorMessage = error?.message || error?.toString() || '';
+            if (errorMessage.toLowerCase().includes('network request failed') ||
+                errorMessage.toLowerCase().includes('network error') ||
+                errorMessage.toLowerCase().includes('fetch failed') ||
+                errorMessage.toLowerCase().includes('connection') ||
+                error?.code === 'NETWORK_ERROR' ||
+                error?.name === 'NetworkError') {
+              throw new Error('İnternet bağlantınızı kontrol edin. Bağlantı hatası oluştu.');
+            }
+            
             // Eğer error zaten bir Error object ise direkt throw et
             if (error instanceof Error) {
               throw error;

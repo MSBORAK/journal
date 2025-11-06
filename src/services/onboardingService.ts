@@ -29,7 +29,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     gradient: ['#FCEBBF', '#E9ACBB'],
   },
   {
-    id: 'theme',
+    id: 'preferences',
     title: 'Tarzını Seç 💫',
     description: 'Daily iki farklı dünyada seni bekliyor. Hangisi senin enerjine daha yakın?',
     icon: 'color-palette',

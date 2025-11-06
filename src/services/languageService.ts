@@ -4,6 +4,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 
 export interface Language {
   code: string;
@@ -27,7 +28,38 @@ export const supportedLanguages: Language[] = [
   }
 ];
 
-export const defaultLanguage = 'tr';
+// Get device language using expo-localization
+export const getDeviceLanguage = (): string => {
+  try {
+    // Cihaz dilini algıla
+    const locales = Localization.getLocales();
+    if (locales && locales.length > 0) {
+      const languageCode = locales[0].languageCode?.toLowerCase();
+      
+      // Desteklenen dillerden biriyse onu döndür
+      const supportedCodes = supportedLanguages.map(lang => lang.code);
+      if (languageCode && supportedCodes.includes(languageCode)) {
+        console.log(`✅ Device language detected: ${languageCode}`);
+        return languageCode;
+      }
+      
+      // İngilizce'ye yakın diller için (en-US, en-GB vs.) İngilizce döndür
+      if (languageCode && languageCode.startsWith('en')) {
+        console.log(`✅ Device language detected: ${languageCode} -> en`);
+        return 'en';
+      }
+    }
+    
+    // Varsayılan olarak İngilizce döndür (genel kullanım için)
+    console.log('⚠️ Device language not supported, defaulting to: en');
+    return 'en';
+  } catch (error) {
+    console.error('Error detecting device language:', error);
+    return 'en'; // Varsayılan olarak İngilizce
+  }
+};
+
+export const defaultLanguage = getDeviceLanguage();
 
 // Translation cache
 let translationsCache: { [key: string]: any } = {};
@@ -97,10 +129,18 @@ export const getTranslationSync = (key: string, language: string = 'tr'): string
 export const getCurrentLanguage = async (): Promise<string> => {
   try {
     const savedLanguage = await AsyncStorage.getItem('selectedLanguage');
-    return savedLanguage || defaultLanguage;
+    
+    // Eğer kaydedilmiş bir dil yoksa, cihaz dilini kullan
+    if (!savedLanguage) {
+      const deviceLang = getDeviceLanguage();
+      console.log(`No saved language found, using device language: ${deviceLang}`);
+      return deviceLang;
+    }
+    
+    return savedLanguage;
   } catch (error) {
     console.error('Error loading language:', error);
-    return defaultLanguage;
+    return getDeviceLanguage(); // Hata durumunda cihaz dilini kullan
   }
 };
 

@@ -87,7 +87,7 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
         };
       case 'secondary':
         return {
-          backgroundColor: currentTheme.colors.accent,
+          backgroundColor: currentTheme.colors.background,
           borderColor: currentTheme.colors.border,
         };
       default: // primary
@@ -187,6 +187,7 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
     },
     secondaryButtonText: {
       color: currentTheme.colors.text,
+      fontWeight: '600',
     },
     closeButton: {
       position: 'absolute',
@@ -260,10 +261,15 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
                   ]}
                   onPress={secondaryButton.onPress}
                 >
-                  <Ionicons name="refresh" size={20} color={secondaryButton.style === 'secondary' ? currentTheme.colors.text : 'white'} />
+                  <Ionicons 
+                    name="refresh" 
+                    size={20} 
+                    color={secondaryButton.style === 'secondary' ? currentTheme.colors.text : 'white'} 
+                  />
                   <Text style={[
-                    dynamicStyles.buttonText,
-                    secondaryButton.style === 'secondary' && dynamicStyles.secondaryButtonText
+                    secondaryButton.style === 'secondary' 
+                      ? dynamicStyles.secondaryButtonText 
+                      : dynamicStyles.buttonText
                   ]}>
                     {secondaryButton.text}
                   </Text>

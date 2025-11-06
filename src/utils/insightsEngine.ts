@@ -218,7 +218,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any, _locale: string): I
   if (currentStreak >= 7) {
     insights.push({
       type: 'streak',
-      title: `${currentStreak} Day Streak! 🔥`,
+      title: t('insights.dayStreak').replace('{count}', currentStreak.toString()),
       description: t('insights.streakIncredible'),
       icon: '🔥',
       color: '#ef4444',
@@ -228,7 +228,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any, _locale: string): I
   } else if (currentStreak >= 3) {
     insights.push({
       type: 'streak',
-      title: `${currentStreak} Days in a Row! ⭐`,
+      title: t('insights.daysInRow').replace('{count}', currentStreak.toString()),
       description: t('insights.streakDoingGreat'),
       icon: '⭐',
       color: '#f59e0b',
@@ -272,7 +272,7 @@ export const analyzeStreak = (entries: DiaryEntry[], t: any, _locale: string): I
   if (maxStreak >= 7 && maxStreak > currentStreak) {
     insights.push({
       type: 'achievement',
-      title: `Longest Streak: ${maxStreak} Days! 🏆`,
+      title: t('insights.longestStreak').replace('{count}', maxStreak.toString()),
       description: t('insights.canBreakRecord'),
       icon: '🏆',
       color: '#f59e0b',
@@ -380,8 +380,8 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any, _locale: stri
     if (entries.length === milestone) {
       insights.push({
         type: 'achievement',
-        title: `Your ${milestone}th Diary! 🏆`,
-        description: `You wrote ${milestone} diaries! An incredible achievement`,
+        title: t('insights.milestoneDiary').replace('{count}', milestone.toString()),
+        description: t('insights.milestoneDiaryDesc').replace('{count}', milestone.toString()),
         icon: '🏆',
         color: '#f59e0b',
         priority: 'high',
