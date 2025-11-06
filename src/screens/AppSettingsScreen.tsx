@@ -327,7 +327,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
         {/* Rate & Share */}
         <View style={dynamicStyles.section}>
-          <Text style={dynamicStyles.sectionTitle}>{t('settings.rateAndShare')}</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings.ratingShareSection')}</Text>
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>

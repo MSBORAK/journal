@@ -3,6 +3,8 @@ export interface User {
   email: string;
   displayName: string;
   photoURL?: string;
+  appAlias?: string; // Uygulamanın kullanıcıya hitap etme şekli (örn: "Rhythm")
+  nickname?: string; // Kullanıcıya nasıl hitap edileceği (örn: "Luna", "Melis", "Friend")
 }
 
 export interface DiaryEntry {

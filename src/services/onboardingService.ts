@@ -17,7 +17,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
     title: 'Hoş Geldin 🌞',
-    description: 'Daily, seni her gün biraz daha iyi hissettiren bir yolculuğa davet ediyor. Günlük yaz, hedeflerini belirle, ilerlemeni izle 💫',
+    description: 'Rhythm, seni her gün biraz daha iyi hissettiren bir yolculuğa davet ediyor. Günlük yaz, hedeflerini belirle, ilerlemeni izle 💫',
     icon: 'sparkles',
     gradient: ['#FFF9F0', '#FFECD1'],
   },
@@ -31,7 +31,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'preferences',
     title: 'Tarzını Seç 💫',
-    description: 'Daily iki farklı dünyada seni bekliyor. Hangisi senin enerjine daha yakın?',
+    description: 'Rhythm iki farklı dünyada seni bekliyor. Hangisi senin enerjine daha yakın?',
     icon: 'color-palette',
     gradient: ['#8FBC93', '#C9B297'],
   },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -41,10 +41,11 @@ interface MenuItem {
 }
 
 const SettingsScreen = React.memo(function SettingsScreen({ navigation }: SettingsScreenProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAnonymous } = useAuth();
   const { currentTheme } = useTheme();
   const { t, currentLanguage } = useLanguage();
   const { profile, refreshProfile } = useProfile(user?.uid);
+  const nav = useNavigation();
   
   // App Tour
   const tour = useAppTour(navigation, 'Settings');
@@ -321,7 +322,24 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     if (item.action) {
       item.action();
     } else if (item.screen) {
-      navigation.navigate(item.screen);
+      // Tab Navigator içindeyken Stack Navigator'a navigate etmek için getParent kullan
+      try {
+        const parent = navigation.getParent();
+        if (parent) {
+          parent.navigate(item.screen as never);
+        } else {
+          // Fallback: useNavigation hook'unu kullan
+          (nav as any).navigate(item.screen);
+        }
+      } catch (error) {
+        console.error('Navigation error:', error);
+        // Son çare: direkt navigate dene
+        try {
+          (nav as any).navigate(item.screen);
+        } catch (e) {
+          console.error('Fallback navigation error:', e);
+        }
+      }
     }
   };
 
@@ -479,7 +497,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
                   {profile?.full_name || user?.displayName || 'Kullanıcı'}
                 </Text>
                 <Text style={dynamicStyles.userEmail}>
-                  {user?.email || 'email@example.com'}
+                  {user?.email || t('settings.noEmail') || 'E-posta yok'}
                 </Text>
               </View>
             </View>

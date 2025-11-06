@@ -140,23 +140,23 @@ export const getGreetingMessage = (timezone?: string, language: 'tr' | 'en' = 't
   
   if (language === 'tr') {
     if (hourNum >= 5 && hourNum < 12) {
-      return 'Günaydın! ☀️';
+      return 'Günaydın, {{nickname}}! ☀️';
     } else if (hourNum >= 12 && hourNum < 17) {
-      return 'İyi günler! 🌤️';
+      return 'İyi günler, {{nickname}}! 🌤️';
     } else if (hourNum >= 17 && hourNum < 21) {
-      return 'İyi akşamlar! 🌅';
+      return 'İyi akşamlar, {{nickname}}! 🌅';
     } else {
-      return 'İyi geceler! 🌙';
+      return 'İyi geceler, {{nickname}}! 🌙';
     }
   } else {
     if (hourNum >= 5 && hourNum < 12) {
-      return 'Good Morning! ☀️';
+      return 'Good Morning, {{nickname}}! ☀️';
     } else if (hourNum >= 12 && hourNum < 17) {
-      return 'Good Afternoon! 🌤️';
+      return 'Good Afternoon, {{nickname}}! 🌤️';
     } else if (hourNum >= 17 && hourNum < 21) {
-      return 'Good Evening! 🌅';
+      return 'Good Evening, {{nickname}}! 🌅';
     } else {
-      return 'Good Night! 🌙';
+      return 'Good Night, {{nickname}}! 🌙';
     }
   }
 };

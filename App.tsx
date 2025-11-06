@@ -16,7 +16,7 @@ import BackgroundWrapper from './src/components/BackgroundWrapper';
 import { Ionicons } from '@expo/vector-icons';
 import { scheduleAllNotifications, requestNotificationPermissions } from './src/services/notificationService';
 import { recordUserActivity } from './src/services/userActivityService';
-import { isOnboardingCompleted } from './src/services/onboardingService';
+import { isOnboardingCompleted, setOnboardingCompleted } from './src/services/onboardingService';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import * as SplashScreen from 'expo-splash-screen';
 // import './global.css'; // Disabled for now
@@ -26,7 +26,6 @@ SplashScreen.preventAutoHideAsync();
 
 // Type definitions for navigation
 type RootStackParamList = {
-  Auth: undefined;
   Onboarding: undefined;
   MainTabs: undefined;
   WriteDiary: { entry?: any } | undefined;
@@ -48,20 +47,19 @@ type RootStackParamList = {
   Mindfulness: undefined;
   HelpGuide: undefined;
   DiaryDetail: { entry: any };
-  PasswordReset: undefined;
 };
 
 type TabParamList = {
   Dashboard: undefined;
   DreamsGoals: undefined;
-  History: undefined;
   Statistics: undefined;
+  Insights: undefined;
+  History: undefined;
   Tasks: undefined;
   Settings: undefined;
 };
 
 // Screens
-import AuthScreen from './src/screens/AuthScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import WriteDiaryScreen from './src/screens/WriteDiaryScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
@@ -88,7 +86,7 @@ import AchievementsScreen from './src/screens/AchievementsScreen';
 import MindfulnessScreen from './src/screens/MindfulnessScreen';
 import HelpGuideScreen from './src/screens/HelpGuideScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
-import PasswordResetScreen from './src/screens/PasswordResetScreen';
+import InsightsScreen from './src/screens/InsightsScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -108,6 +106,8 @@ function MainTabs() {
         return <Ionicons name={focused ? "star" : "star-outline"} {...iconProps} />;
       case 'Statistics':
         return <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} {...iconProps} />;
+      case 'Insights':
+        return <Ionicons name={focused ? "bulb" : "bulb-outline"} {...iconProps} />;
       case 'History':
         return <Ionicons name={focused ? "calendar" : "calendar-outline"} {...iconProps} />;
       case 'Tasks':
@@ -198,6 +198,14 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
+        name="Insights"
+        component={InsightsScreen}
+        options={{
+          title: t('navigation.insights'),
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Insights', focused, color, size),
+        }}
+      />
+      <Tab.Screen
         name="History"
         component={HistoryScreen}
         options={{
@@ -231,37 +239,107 @@ function AppNavigator() {
   const { t } = useLanguage();
   const { currentTheme } = useTheme();
   const [showOnboarding, setShowOnboarding] = React.useState<boolean | null>(null);
+  const [onboardingLoading, setOnboardingLoading] = React.useState<boolean>(true);
+  const hasCheckedOnboarding = React.useRef<boolean>(false);
 
+  const [isMounted, setIsMounted] = React.useState(true);
+  
   React.useEffect(() => {
+    setIsMounted(true);
+    
     const checkOnboarding = async () => {
-      if (user && !loading) {
-        const completed = await isOnboardingCompleted(user.uid);
-        setShowOnboarding(!completed);
-      } else if (!user && !loading) {
-        setShowOnboarding(false);
+      // Loading bitene kadar bekle
+      if (loading) {
+        return;
+      }
+      
+      // Eğer zaten kontrol edildiyse ve onboarding tamamlandıysa, tekrar kontrol etme
+      if (hasCheckedOnboarding.current && showOnboarding === false) {
+        console.log('📋 Onboarding already checked and completed, skipping check');
+        return;
+      }
+      
+      // Eğer showOnboarding zaten false ise (onboarding tamamlandı), tekrar kontrol etme
+      if (showOnboarding === false && !onboardingLoading) {
+        console.log('📋 Onboarding already marked as completed, skipping check');
+        hasCheckedOnboarding.current = true;
+        return;
+      }
+      
+      try {
+        // Önce user-specific key'i kontrol et, sonra genel key'i
+        let completed = false;
+        
+        if (user?.uid) {
+          completed = await isOnboardingCompleted(user.uid);
+          // Eğer user-specific key yoksa, genel key'i kontrol et (eski anonim kullanıcılar için)
+          if (!completed) {
+            completed = await isOnboardingCompleted();
+          }
+        } else {
+          // User yoksa genel key'i kontrol et (anonim kullanıcı oluşturulana kadar)
+          completed = await isOnboardingCompleted();
+        }
+        
+        if (isMounted) {
+          // Sadece showOnboarding null veya true ise güncelle
+          if (showOnboarding === null || showOnboarding === true) {
+            setShowOnboarding(!completed);
+            console.log(`📋 Onboarding check: ${completed ? 'completed' : 'not completed'}`);
+          }
+          // Onboarding kontrolü tamamlandı
+          setOnboardingLoading(false);
+          hasCheckedOnboarding.current = true;
+        }
+      } catch (error) {
+        console.error('❌ Error checking onboarding status:', error);
+        // Hata durumunda onboarding göster (güvenli taraf) - ama sadece showOnboarding null veya true ise
+        if (isMounted && (showOnboarding === null || showOnboarding === true)) {
+          setShowOnboarding(true);
+        }
+        // Hata olsa bile loading'i bitir
+        setOnboardingLoading(false);
+        hasCheckedOnboarding.current = true;
       }
     };
     
     checkOnboarding();
+    
+    return () => {
+      setIsMounted(false);
+    };
   }, [user, loading]);
 
-  if (loading || showOnboarding === null) {
-    return null; // Loading screen can be added here
-  }
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
+  const handleOnboardingComplete = async () => {
+    try {
+      // OnboardingScreen zaten setOnboardingCompleted'i çağırdı ve delay bekledi
+      // Küçük bir delay ekle - AsyncStorage'ın gerçekten kaydedilmesini garantile
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // State'i güncelle - tekrar kontrol etme, direkt kapat
+      if (isMounted) {
+        setShowOnboarding(false);
+        setOnboardingLoading(false);
+        hasCheckedOnboarding.current = true; // Kontrol edildi olarak işaretle
+        console.log('✅ Onboarding state set to false, navigating to main app');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error completing onboarding:', error);
+      // Hata olsa bile onboarding'i kapat
+      if (isMounted) {
+        setShowOnboarding(false);
+        setOnboardingLoading(false);
+        hasCheckedOnboarding.current = true; // Kontrol edildi olarak işaretle
+      }
+    }
   };
 
-  // Deep linking configuration - şifre sıfırlama için
-  // Not: Expo Go'da rhythm:// scheme çalışmaz, bu yüzden production build'de test et
+  // Deep linking configuration
   const linking = {
     prefixes: ['rhythm://'],
     config: {
-      screens: {
-        Auth: 'auth',
-        PasswordReset: 'PasswordReset',
-      },
+      screens: {},
     },
     async getInitialURL() {
       const url = await Linking.getInitialURL();
@@ -285,6 +363,11 @@ function AppNavigator() {
       };
     },
   };
+
+  // Loading durumunda veya onboarding kontrolü yapılırken boş ekran göster
+  if (loading || onboardingLoading || showOnboarding === null) {
+    return null; // Loading screen can be added here
+  }
 
   return (
     <NavigationContainer linking={linking}>
@@ -317,7 +400,7 @@ function AppNavigator() {
           <Stack.Screen name="Onboarding">
             {() => <OnboardingScreen onComplete={handleOnboardingComplete} />}
           </Stack.Screen>
-        ) : user ? (
+        ) : (
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen
@@ -352,11 +435,6 @@ function AppNavigator() {
         <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
         <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DiaryDetail" component={DiaryDetailScreen} options={{ headerShown: false }} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Auth" component={AuthScreen} />
-            <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }} />
           </>
         )}
       </Stack.Navigator>

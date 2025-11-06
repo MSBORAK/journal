@@ -247,8 +247,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            📱 {t('settings.backupAndManageData')} 
-            {t('settings.profileAndSettingsControlled')}
+            ☁️ {t('settings.cloudSyncInfo')}
           </Text>
         </View>
 
@@ -261,10 +260,10 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               <View style={dynamicStyles.settingIcon}>
                 <Ionicons name="cloud-upload-outline" size={20} color={currentTheme.colors.primary} />
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('settings.moveDataToCloud')}</Text>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.syncLocalData')}</Text>
             </View>
             <Text style={dynamicStyles.settingDescription}>
-              {t('settings.synchronizeTasksReminders')}
+              {t('settings.syncLocalDataDescription')}
             </Text>
             <TouchableOpacity
               style={dynamicStyles.actionButton}
@@ -273,7 +272,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
               activeOpacity={0.8}
             >
               <Text style={dynamicStyles.actionButtonText}>
-                {isMigrating ? t('settings.moving') : t('settings.moveToCloud')}
+                {isMigrating ? t('settings.syncing') : t('settings.syncNow')}
               </Text>
             </TouchableOpacity>
           </View>

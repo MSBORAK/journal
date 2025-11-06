@@ -9,6 +9,7 @@ import {
   Animated,
   Modal,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -38,6 +39,7 @@ import Tooltip from '../components/Tooltip';
 import MotivationCard from '../components/MotivationCard';
 import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
+import { replaceAppName, replaceNickname, replacePlaceholders } from '../utils/textUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -1042,9 +1044,17 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       flex: 1,
       backgroundColor: currentThemeColors.background, // Pastel taban
     },
+    scrollContainer: {
+      flex: 1,
+      backgroundColor: currentThemeColors.background, // Tema arka plan rengi
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 120,
+    },
     header: {
       paddingHorizontal: 20,
-      paddingTop: 80,
+      paddingTop: 50,
       paddingBottom: 20,
     },
     headerTitle: {
@@ -2613,19 +2623,28 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         </View>
       </Modal>
 
-    <ScrollView 
-      style={dynamicStyles.container}
-      contentContainerStyle={{ paddingBottom: 100 }}
-      showsVerticalScrollIndicator={false}
-    >
+    <SafeAreaView style={dynamicStyles.container}>
+      <ScrollView 
+        style={dynamicStyles.scrollContainer}
+        contentContainerStyle={dynamicStyles.scrollContent}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled={true}
+        bounces={true}
+        scrollEnabled={true}
+        alwaysBounceVertical={true}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={false}
+      >
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.headerTitle}>{t('dashboard.welcome')}! 🌟</Text>
+        <Text style={dynamicStyles.headerTitle}>
+          {replaceAppName(t('dashboard.welcomeBack') || t('dashboard.welcome'), user?.appAlias || 'Rhythm')} 🌟
+        </Text>
         <Text style={dynamicStyles.headerSubtitle}>
           {t('dashboard.headerSubtitle')}
         </Text>
         <Text style={dynamicStyles.userGreeting}>
-          {greeting} {displayName}
+          {replaceNickname(greeting, user?.nickname || displayName)}
         </Text>
         <Text style={dynamicStyles.userEmail}>{t('dashboard.howAreYou')}</Text>
       </View>
@@ -2876,7 +2895,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
 
 
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
 
     {/* Hoşgeldin Modalı */}
     {showWelcomeModal && (
@@ -2911,7 +2931,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 fontWeight: 'bold',
                 color: currentTheme.colors.text,
                 textAlign: 'center',
-              }}>{t('dashboard.welcome')}</Text>
+              }}>{replaceAppName(t('dashboard.welcomeBack') || t('dashboard.welcome'), user?.appAlias)}</Text>
             </View>
             
             <Text style={{

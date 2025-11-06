@@ -10,6 +10,11 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   refreshUser: () => Promise<void>;
+  linkAccount: (email: string, password: string) => Promise<void>;
+  updateDisplayName: (displayName: string) => Promise<void>;
+  updateAppAlias: (appAlias: string) => Promise<void>;
+  updateNickname: (nickname: string) => Promise<void>;
+  isAnonymous: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,24 +34,111 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [anonymousErrorShown, setAnonymousErrorShown] = useState(false);
+
+  const createAnonymousUser = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        // Özel hata mesajı göster (sadece bir kez)
+        if ((error.message?.includes('disabled') || error.message?.includes('Anonymous sign-ins')) && !anonymousErrorShown) {
+          console.error('⚠️ IMPORTANT: Anonymous sign-ins are disabled in Supabase!');
+          console.error('📋 Please follow these steps:');
+          console.error('   1. Go to Supabase Dashboard: https://app.supabase.com');
+          console.error('   2. Select your project');
+          console.error('   3. Go to Authentication → Settings');
+          console.error('   4. Enable "Allow anonymous sign-ins"');
+          console.error('   5. Click "Save changes"');
+          console.error('   6. Restart the app');
+          setAnonymousErrorShown(true);
+        }
+        throw error;
+      }
+      
+      if (data.user) {
+        setIsAnonymous(true);
+        setAnonymousErrorShown(false); // Başarılı olduğunda reset et
+        const user: User = {
+          uid: data.user.id,
+          email: '',
+          displayName: 'Guest',
+          photoURL: undefined,
+          appAlias: data.user.user_metadata?.app_alias || 'Mindora',
+          nickname: data.user.user_metadata?.nickname || 'Guest',
+        };
+        setUser(user);
+        console.log('✅ Anonymous user created:', user.uid);
+      }
+    } catch (error) {
+      // Sadece ilk hatada logla, tekrarlayan hataları loglama
+      if (!anonymousErrorShown) {
+        console.error('❌ Failed to create anonymous user:', error);
+      }
+      throw error;
+    }
+  };
+
+  const initializeAuth = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        const isAnon = currentUser.is_anonymous || false;
+        setIsAnonymous(isAnon);
+        const user: User = {
+          uid: currentUser.id,
+          email: currentUser.email || '',
+          displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || '',
+          photoURL: currentUser.user_metadata?.avatar_url || undefined,
+          appAlias: currentUser.user_metadata?.app_alias || 'Mindora',
+          nickname: currentUser.user_metadata?.nickname || 'Guest',
+        };
+        setUser(user);
+      } else {
+        // Kullanıcı yoksa otomatik olarak anonim kullanıcı oluştur
+        await createAnonymousUser();
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Auth initialization error:', error);
+      // Hata durumunda da anonim kullanıcı oluşturmayı dene
+      try {
+        await createAnonymousUser();
+      } catch (anonError: any) {
+        // Hata mesajı createAnonymousUser içinde gösterildi, burada tekrar gösterme
+        setUser(null);
+      }
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize auth state
     initializeAuth();
     
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
+          const isAnon = session.user.is_anonymous || false;
+          setIsAnonymous(isAnon);
           const user: User = {
             uid: session.user.id,
             email: session.user.email || '',
-            displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '',
+            displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Guest',
             photoURL: session.user.user_metadata?.avatar_url || undefined,
+            appAlias: session.user.user_metadata?.app_alias || 'Mindora',
+            nickname: session.user.user_metadata?.nickname || 'Guest',
           };
           setUser(user);
         } else {
-          setUser(null);
+          // Session yoksa anonim kullanıcı oluştur
+          try {
+            await createAnonymousUser();
+          } catch (error: any) {
+            // Hata mesajı createAnonymousUser içinde gösterildi, burada tekrar gösterme
+            setUser(null);
+          }
         }
         setLoading(false);
       }
@@ -54,29 +146,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const initializeAuth = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      if (currentUser) {
-        const user: User = {
-          uid: currentUser.id,
-          email: currentUser.email || '',
-          displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || '',
-          photoURL: currentUser.user_metadata?.avatar_url || undefined,
-        };
-        setUser(user);
-      } else {
-        // No user logged in - this is normal
-        setUser(null);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Auth initialization error:', error);
-      setUser(null);
-      setLoading(false);
-    }
-  };
 
         const signIn = async (email: string, password: string) => {
           setLoading(true);
@@ -115,6 +184,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 email: data.user.email || '',
                 displayName: data.user.user_metadata?.full_name || email.split('@')[0],
                 photoURL: data.user.user_metadata?.avatar_url || undefined,
+                appAlias: data.user.user_metadata?.app_alias || 'Mindora',
+                nickname: data.user.user_metadata?.nickname || 'Guest',
               };
               setUser(user);
               console.log('✅ User signed in successfully:', user);
@@ -193,6 +264,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 email: data.user.email || '',
                 displayName: displayName.trim(),
                 photoURL: data.user.user_metadata?.avatar_url || undefined,
+                appAlias: data.user.user_metadata?.app_alias || 'Mindora',
+                nickname: data.user.user_metadata?.nickname || 'Guest',
               };
               setUser(user);
               console.log('✅ User signed up successfully:', user);
@@ -228,9 +301,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await supabaseSignOut();
       setUser(null);
+      setIsAnonymous(false);
+      // Çıkış yaptıktan sonra yeni anonim kullanıcı oluştur
+      await createAnonymousUser();
     } catch (error) {
       console.error('Sign out error:', error);
-      setUser(null); // Force sign out even if there's an error
+      setUser(null);
+      setIsAnonymous(false);
+      // Hata olsa bile yeni anonim kullanıcı oluşturmayı dene
+      try {
+        await createAnonymousUser();
+      } catch (anonError) {
+        console.error('Failed to create anonymous user after sign out:', anonError);
+      }
     } finally {
       setLoading(false);
     }
@@ -257,11 +340,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('🔄 Refreshing user data...');
       const currentUser = await getCurrentUser();
       if (currentUser) {
+        const isAnon = currentUser.is_anonymous || false;
+        setIsAnonymous(isAnon);
         const updatedUser: User = {
           uid: currentUser.id,
           email: currentUser.email || '',
-          displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || '',
+          displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Guest',
           photoURL: currentUser.user_metadata?.avatar_url || undefined,
+          appAlias: currentUser.user_metadata?.app_alias || 'Mindora',
+          nickname: currentUser.user_metadata?.nickname || 'Guest',
         };
         setUser(updatedUser);
         console.log('✅ User data refreshed:', updatedUser);
@@ -273,6 +360,257 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const linkAccount = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+    try {
+      // Validasyon
+      if (!email || !password) {
+        throw new Error('Email ve şifre zorunludur');
+      }
+
+      if (password.length < 6) {
+        throw new Error('Şifre en az 6 karakter olmalıdır');
+      }
+
+      const trimmedEmail = email.toLowerCase().trim();
+
+      // Email ve şifreyi aynı anda güncellemeyi dene
+      // Anonim kullanıcılar için bu daha güvenilir
+      const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+        email: trimmedEmail,
+        password: password,
+      });
+
+      if (updateError) {
+        console.error('❌ Link account update error:', updateError);
+        const errorMessage = updateError?.message || '';
+        
+        // Eğer aynı anda güncelleme başarısız olursa, önce email'i güncellemeyi dene
+        if (errorMessage.toLowerCase().includes('password') || 
+            errorMessage.toLowerCase().includes('invalid')) {
+          console.log('⚠️ Trying to update email first, then password...');
+          
+          // Önce email'i güncelle
+          const { data: emailData, error: emailError } = await supabase.auth.updateUser({
+            email: trimmedEmail,
+          });
+
+          if (emailError) {
+            console.error('❌ Link account email error:', emailError);
+            const emailErrorMessage = emailError?.message || '';
+            if (emailErrorMessage.toLowerCase().includes('already registered') || 
+                emailErrorMessage.toLowerCase().includes('already been registered')) {
+              throw new Error('Bu email adresi zaten kullanılıyor.');
+            }
+            if (emailErrorMessage.toLowerCase().includes('invalid email')) {
+              throw new Error('Geçersiz email adresi.');
+            }
+            throw new Error(emailErrorMessage || 'Email güncellenemedi');
+          }
+
+          // Email güncelleme başarılı, şimdi şifreyi güncelle
+          // Kısa bir bekleme ekle (email güncelleme işleminin tamamlanması için)
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          const { data: passwordData, error: passwordError } = await supabase.auth.updateUser({
+            password: password,
+          });
+
+          if (passwordError) {
+            console.error('❌ Link account password error:', passwordError);
+            const passwordErrorMessage = passwordError?.message || '';
+            
+            // Şifre güncelleme hatası için daha açıklayıcı mesaj
+            if (passwordErrorMessage.toLowerCase().includes('same') || 
+                passwordErrorMessage.toLowerCase().includes('identical')) {
+              throw new Error('Yeni şifre mevcut şifreyle aynı olamaz.');
+            }
+            if (passwordErrorMessage.toLowerCase().includes('weak') || 
+                passwordErrorMessage.toLowerCase().includes('strength')) {
+              throw new Error('Şifre çok zayıf. Daha güçlü bir şifre seçin.');
+            }
+            throw new Error('Şifre güncellenemedi. Lütfen tekrar deneyin.');
+          }
+
+          // Başarılı - email ve şifre ayrı ayrı güncellendi
+          const finalUser = passwordData?.user || emailData?.user;
+          if (finalUser) {
+            setIsAnonymous(false);
+            const updatedUser: User = {
+              uid: finalUser.id,
+              email: finalUser.email || trimmedEmail,
+              displayName: finalUser.user_metadata?.full_name || trimmedEmail.split('@')[0],
+              photoURL: finalUser.user_metadata?.avatar_url || undefined,
+              appAlias: finalUser.user_metadata?.app_alias || 'Mindora',
+              nickname: finalUser.user_metadata?.nickname || 'Guest',
+            };
+            setUser(updatedUser);
+            console.log('✅ Account linked successfully (separate updates):', updatedUser);
+          }
+        } else {
+          // Diğer hatalar
+          if (errorMessage.toLowerCase().includes('already registered') || 
+              errorMessage.toLowerCase().includes('already been registered')) {
+            throw new Error('Bu email adresi zaten kullanılıyor.');
+          }
+          if (errorMessage.toLowerCase().includes('invalid email')) {
+            throw new Error('Geçersiz email adresi.');
+          }
+          throw new Error(errorMessage || 'Hesap bağlanamadı. Lütfen tekrar deneyin.');
+        }
+      } else {
+        // Başarılı - email ve şifre aynı anda güncellendi
+        if (updateData?.user) {
+          setIsAnonymous(false);
+          const updatedUser: User = {
+            uid: updateData.user.id,
+            email: updateData.user.email || trimmedEmail,
+            displayName: updateData.user.user_metadata?.full_name || trimmedEmail.split('@')[0],
+            photoURL: updateData.user.user_metadata?.avatar_url || undefined,
+            appAlias: updateData.user.user_metadata?.app_alias || 'Mindora',
+            nickname: updateData.user.user_metadata?.nickname || 'Guest',
+          };
+          setUser(updatedUser);
+          console.log('✅ Account linked successfully (simultaneous update):', updatedUser);
+        }
+      }
+    } catch (error: any) {
+      console.error('❌ Link account catch error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateDisplayName = async (displayName: string): Promise<void> => {
+    setLoading(true);
+    try {
+      if (!displayName || displayName.trim().length === 0) {
+        throw new Error('İsim boş olamaz');
+      }
+
+      const trimmedName = displayName.trim();
+      
+      // Supabase user_metadata'yı güncelle
+      const { data, error } = await supabase.auth.updateUser({
+        data: { full_name: trimmedName },
+      });
+
+      if (error) {
+        console.error('❌ Update display name error:', error);
+        throw new Error('İsim güncellenemedi. Lütfen tekrar deneyin.');
+      }
+
+      if (data?.user) {
+        // Local user state'i güncelle
+        const updatedUser: User = {
+          uid: data.user.id,
+          email: data.user.email || user?.email || '',
+          displayName: trimmedName,
+          photoURL: data.user.user_metadata?.avatar_url || user?.photoURL || undefined,
+          appAlias: data.user.user_metadata?.app_alias || user?.appAlias || 'Mindora',
+          nickname: data.user.user_metadata?.nickname || user?.nickname || 'Guest',
+        };
+        setUser(updatedUser);
+        console.log('✅ Display name updated successfully:', trimmedName);
+      }
+    } catch (error: any) {
+      console.error('❌ Update display name catch error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateAppAlias = async (appAlias: string): Promise<void> => {
+    setLoading(true);
+    try {
+      if (!appAlias || appAlias.trim().length === 0) {
+        throw new Error('Uygulama ismi boş olamaz');
+      }
+
+      const trimmedAlias = appAlias.trim();
+      
+      // Max 25 karakter kontrolü
+      if (trimmedAlias.length > 25) {
+        throw new Error('Uygulama ismi en fazla 25 karakter olabilir');
+      }
+      
+      // Supabase user_metadata'yı güncelle
+      const { data, error } = await supabase.auth.updateUser({
+        data: { app_alias: trimmedAlias },
+      });
+
+      if (error) {
+        console.error('❌ Update app alias error:', error);
+        throw new Error('Uygulama ismi güncellenemedi. Lütfen tekrar deneyin.');
+      }
+
+      if (data?.user) {
+        // Local user state'i güncelle
+        const updatedUser: User = {
+          uid: data.user.id,
+          email: data.user.email || user?.email || '',
+          displayName: data.user.user_metadata?.full_name || user?.displayName || '',
+          photoURL: data.user.user_metadata?.avatar_url || user?.photoURL || undefined,
+          appAlias: trimmedAlias,
+        };
+        setUser(updatedUser);
+        console.log('✅ App alias updated successfully:', trimmedAlias);
+      }
+    } catch (error: any) {
+      console.error('❌ Update app alias catch error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateNickname = async (nickname: string): Promise<void> => {
+    setLoading(true);
+    try {
+      if (!nickname || nickname.trim().length === 0) {
+        throw new Error('Takma isim boş olamaz');
+      }
+
+      const trimmedNickname = nickname.trim();
+      
+      // Max 25 karakter kontrolü
+      if (trimmedNickname.length > 25) {
+        throw new Error('Takma isim en fazla 25 karakter olabilir');
+      }
+      
+      // Supabase user_metadata'yı güncelle
+      const { data, error } = await supabase.auth.updateUser({
+        data: { nickname: trimmedNickname },
+      });
+
+      if (error) {
+        console.error('❌ Update nickname error:', error);
+        throw new Error('Takma isim güncellenemedi. Lütfen tekrar deneyin.');
+      }
+
+      if (data?.user) {
+        // Local user state'i güncelle
+        const updatedUser: User = {
+          uid: data.user.id,
+          email: data.user.email || user?.email || '',
+          displayName: data.user.user_metadata?.full_name || user?.displayName || '',
+          photoURL: data.user.user_metadata?.avatar_url || user?.photoURL || undefined,
+          appAlias: data.user.user_metadata?.app_alias || user?.appAlias || 'Mindora',
+          nickname: trimmedNickname,
+        };
+        setUser(updatedUser);
+        console.log('✅ Nickname updated successfully:', trimmedNickname);
+      }
+    } catch (error: any) {
+      console.error('❌ Update nickname catch error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -281,6 +619,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     refreshSession,
     refreshUser,
+    linkAccount,
+    updateDisplayName,
+    updateAppAlias,
+    updateNickname,
+    isAnonymous,
   };
 
   return (

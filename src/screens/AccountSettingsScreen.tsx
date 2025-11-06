@@ -31,7 +31,7 @@ interface AccountSettingsScreenProps {
 export default function AccountSettingsScreen({ navigation }: AccountSettingsScreenProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
-  const { user, signOut, refreshUser } = useAuth();
+  const { user, signOut, refreshUser, linkAccount, updateDisplayName, updateNickname, isAnonymous } = useAuth();
   const { refreshProfile } = useProfile(user?.uid);
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -57,6 +57,16 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showLinkAccountModal, setShowLinkAccountModal] = useState(false);
+  const [showDisplayNameModal, setShowDisplayNameModal] = useState(false);
+  // App alias modal kaldırıldı - app adı sabit "Rhythm"
+  const [showNicknameModal, setShowNicknameModal] = useState(false);
+  const [linkEmail, setLinkEmail] = useState('');
+  const [linkPassword, setLinkPassword] = useState('');
+  const [linkConfirmPassword, setLinkConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  // App adı her zaman "Rhythm" - değişmez
+  const [nickname, setNickname] = useState(user?.nickname || '');
   const [profileData, setProfileData] = useState({
     full_name: user?.displayName || '',
     bio: '',
@@ -251,6 +261,109 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       t('settings.logoutConfirmMessage'),
       'warning'
     );
+  };
+
+  const handleLinkAccount = async () => {
+    // Validasyonlar
+    if (!linkEmail || !linkPassword) {
+      showAlert(t('settings.warning'), t('auth.emailAndPasswordRequired'), 'warning');
+      return;
+    }
+    
+    if (linkPassword.length < 6) {
+      showAlert(t('settings.warning'), t('auth.passwordTooShort'), 'warning');
+      return;
+    }
+    
+    if (linkPassword !== linkConfirmPassword) {
+      showAlert(t('settings.warning'), t('auth.passwordsDoNotMatch'), 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await linkAccount(linkEmail, linkPassword);
+      
+      // Form temizle
+      setShowLinkAccountModal(false);
+      setLinkEmail('');
+      setLinkPassword('');
+      setLinkConfirmPassword('');
+      
+      // User state'ini güncelle
+      await refreshUser();
+      
+      showAlert(t('settings.success'), t('settings.accountLinkedSuccess'), 'success');
+    } catch (error: any) {
+      showAlert(t('settings.error'), error.message || t('settings.linkAccountFailed'), 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDisplayNameUpdate = async () => {
+    // Validasyonlar
+    if (!displayName || displayName.trim().length === 0) {
+      showAlert(t('settings.warning'), t('settings.nameRequired'), 'warning');
+      return;
+    }
+
+    if (displayName.trim().length < 2) {
+      showAlert(t('settings.warning'), t('settings.nameTooShort'), 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await updateDisplayName(displayName.trim());
+      
+      // Modal'ı kapat
+      setShowDisplayNameModal(false);
+      
+      // User state'ini güncelle
+      await refreshUser();
+      
+      showAlert(t('settings.success'), t('settings.nameUpdatedSuccess'), 'success');
+    } catch (error: any) {
+      showAlert(t('settings.error'), error.message || t('settings.nameUpdateFailed'), 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // App adı artık sabit "Rhythm" - düzenleme kaldırıldı
+
+  const handleNicknameUpdate = async () => {
+    // Validasyonlar
+    if (!nickname || nickname.trim().length === 0) {
+      showAlert(t('settings.warning'), t('settings.nicknameRequired'), 'warning');
+      return;
+    }
+
+    if (nickname.trim().length > 25) {
+      showAlert(t('settings.warning'), t('settings.nicknameTooLong'), 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await updateNickname(nickname.trim());
+      
+      // Modal'ı kapat
+      setShowNicknameModal(false);
+      
+      // User state'ini güncelle
+      await refreshUser();
+      
+      showAlert(t('settings.success'), t('settings.nicknameUpdatedSuccess'), 'success');
+    } catch (error: any) {
+      showAlert(t('settings.error'), error.message || t('settings.nicknameUpdateFailed'), 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -467,6 +580,31 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         <View style={dynamicStyles.section}>
           <Text style={dynamicStyles.sectionTitle}>{t('settings.profileInformation')}</Text>
           
+          {/* Guest kullanıcı için İsim Belirle butonu */}
+          {isAnonymous && (user?.displayName === 'Guest' || !user?.displayName) && (
+            <View style={dynamicStyles.settingCard}>
+              <View style={dynamicStyles.settingHeader}>
+                <View style={dynamicStyles.settingIcon}>
+                  <Ionicons name="person-add" size={20} color={currentTheme.colors.primary} />
+                </View>
+                <Text style={dynamicStyles.settingTitle}>{t('settings.setYourName')}</Text>
+              </View>
+              <Text style={dynamicStyles.settingDescription}>
+                {t('settings.setYourNameDescription')}
+              </Text>
+              <TouchableOpacity
+                style={[dynamicStyles.actionButton, { backgroundColor: currentTheme.colors.success }]}
+                onPress={() => {
+                  setDisplayName(user?.displayName || '');
+                  setShowDisplayNameModal(true);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={dynamicStyles.actionButtonText}>✨ {t('settings.setName')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
@@ -485,11 +623,67 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               <Text style={dynamicStyles.actionButtonText}>✏️ {t('settings.edit')}</Text>
             </TouchableOpacity>
           </View>
+
+
+          {/* Nickname Düzenleme */}
+          <View style={dynamicStyles.settingCard}>
+            <View style={dynamicStyles.settingHeader}>
+              <View style={dynamicStyles.settingIcon}>
+                <Ionicons name="heart" size={20} color={currentTheme.colors.primary} />
+              </View>
+              <Text style={dynamicStyles.settingTitle}>{t('settings.nickname')}</Text>
+            </View>
+            <Text style={dynamicStyles.settingDescription}>
+              {t('settings.nicknameDescription')}
+            </Text>
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[dynamicStyles.settingDescription, { fontSize: 14, fontStyle: 'italic' }]}>
+                {t('settings.currentNickname')}: <Text style={{ fontWeight: 'bold' }}>{user?.nickname || 'Guest'}</Text>
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={dynamicStyles.actionButton}
+              onPress={() => {
+                setNickname(user?.nickname || '');
+                setShowNicknameModal(true);
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={dynamicStyles.actionButtonText}>✨ {t('settings.editNickname')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Hesap Güvenliği */}
         <View style={dynamicStyles.section}>
           <Text style={dynamicStyles.sectionTitle}>{t('settings.accountSecurity')}</Text>
+          
+          {/* Anonim kullanıcı için Hesabını Bağla butonu */}
+          {isAnonymous && (
+            <View style={dynamicStyles.settingCard}>
+              <View style={dynamicStyles.settingHeader}>
+                <View style={dynamicStyles.settingIcon}>
+                  <Ionicons name="link" size={20} color={currentTheme.colors.primary} />
+                </View>
+                <Text style={dynamicStyles.settingTitle}>{t('settings.linkAccount')}</Text>
+              </View>
+              <Text style={dynamicStyles.settingDescription}>
+                {t('settings.linkAccountDescription')}
+              </Text>
+              <TouchableOpacity
+                style={[dynamicStyles.actionButton, { backgroundColor: currentTheme.colors.success }]}
+                onPress={() => {
+                  setLinkEmail('');
+                  setLinkPassword('');
+                  setLinkConfirmPassword('');
+                  setShowLinkAccountModal(true);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={dynamicStyles.actionButtonText}>🔗 {t('settings.linkAccount')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
@@ -649,14 +843,14 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
             activeOpacity={1}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={dynamicStyles.modalTitle}>Email Değiştir</Text>
+            <Text style={dynamicStyles.modalTitle}>{t('settings.changeEmail')}</Text>
             
-            <Text style={dynamicStyles.inputLabel}>Yeni Email</Text>
+            <Text style={dynamicStyles.inputLabel}>{t('settings.newEmailLabel')}</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={newEmail}
               onChangeText={setNewEmail}
-              placeholder="yeni@email.com"
+              placeholder={t('settings.newEmailPlaceholder')}
               placeholderTextColor={currentTheme.colors.muted}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -695,9 +889,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>Şifre Değiştir</Text>
+            <Text style={dynamicStyles.modalTitle}>{t('settings.changePassword')}</Text>
             
-            <Text style={dynamicStyles.inputLabel}>Mevcut Şifre</Text>
+            <Text style={dynamicStyles.inputLabel}>{t('settings.currentPasswordLabel')}</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={oldPassword}
@@ -708,7 +902,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               autoCapitalize="none"
             />
             
-            <Text style={dynamicStyles.inputLabel}>Yeni Şifre</Text>
+            <Text style={dynamicStyles.inputLabel}>{t('settings.newPasswordLabel')}</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={newPassword}
@@ -719,7 +913,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
               autoCapitalize="none"
             />
             
-            <Text style={dynamicStyles.inputLabel}>Yeni Şifre Tekrar</Text>
+            <Text style={dynamicStyles.inputLabel}>{t('settings.confirmPasswordLabel')}</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={confirmPassword}
@@ -747,11 +941,180 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 activeOpacity={0.8}
               >
                 <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? 'Güncelleniyor...' : 'Güncelle'}
+                  {loading ? t('settings.updating') : t('settings.update')}
                 </Text>
               </TouchableOpacity>
             </View>
             </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Link Account Modal */}
+      <Modal visible={showLinkAccountModal} transparent animationType="fade" onRequestClose={() => setShowLinkAccountModal(false)}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <View style={dynamicStyles.modalContent}>
+            <Text style={dynamicStyles.modalTitle}>{t('settings.linkAccount')}</Text>
+            <Text style={[dynamicStyles.settingDescription, { marginBottom: 20, textAlign: 'center' }]}>
+              {t('settings.linkAccountInfo')}
+            </Text>
+            
+            <Text style={dynamicStyles.inputLabel}>{t('settings.newEmailLabel')}</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={linkEmail}
+              onChangeText={setLinkEmail}
+              placeholder={t('settings.newEmailPlaceholder')}
+              placeholderTextColor={currentTheme.colors.muted}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            
+            <Text style={dynamicStyles.inputLabel}>{t('settings.newPasswordLabel')}</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={linkPassword}
+              onChangeText={setLinkPassword}
+              placeholder={t('settings.enterNewPassword')}
+              placeholderTextColor={currentTheme.colors.muted}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+            
+            <Text style={dynamicStyles.inputLabel}>{t('settings.confirmPasswordLabel')}</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={linkConfirmPassword}
+              onChangeText={setLinkConfirmPassword}
+              placeholder={t('settings.confirmNewPassword')}
+              placeholderTextColor={currentTheme.colors.muted}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+            
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => setShowLinkAccountModal(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  {t('common.cancel')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={handleLinkAccount}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  {loading ? t('settings.updating') : t('settings.linkAccount')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Display Name Modal */}
+      <Modal visible={showDisplayNameModal} transparent animationType="fade" onRequestClose={() => setShowDisplayNameModal(false)}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <View style={dynamicStyles.modalContent}>
+            <Text style={dynamicStyles.modalTitle}>{t('settings.setYourName')}</Text>
+            <Text style={[dynamicStyles.settingDescription, { marginBottom: 20, textAlign: 'center' }]}>
+              {t('settings.setYourNameDescription')}
+            </Text>
+            
+            <Text style={dynamicStyles.inputLabel}>{t('settings.displayName')}</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder={t('settings.enterYourName')}
+              placeholderTextColor={currentTheme.colors.muted}
+              autoCapitalize="words"
+              maxLength={50}
+            />
+            
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => setShowDisplayNameModal(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  {t('common.cancel')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={handleDisplayNameUpdate}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  {loading ? t('settings.updating') : t('common.save')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Nickname Modal */}
+      <Modal visible={showNicknameModal} transparent animationType="fade" onRequestClose={() => setShowNicknameModal(false)}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <View style={dynamicStyles.modalContent}>
+            <Text style={dynamicStyles.modalTitle}>{t('settings.nickname')}</Text>
+            <Text style={[dynamicStyles.settingDescription, { marginBottom: 20, textAlign: 'center' }]}>
+              {t('settings.nicknameDescription')}
+            </Text>
+            
+            <Text style={dynamicStyles.inputLabel}>{t('onboarding.howShouldWeAddressYouNickname')}</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={nickname}
+              onChangeText={setNickname}
+              placeholder={t('onboarding.enterNickname') || 'Luna, Melis, Friend...'}
+              placeholderTextColor={currentTheme.colors.muted}
+              autoCapitalize="words"
+              maxLength={25}
+            />
+            <Text style={[dynamicStyles.settingDescription, { fontSize: 12, marginTop: 4, color: currentTheme.colors.muted }]}>
+              {t('onboarding.nicknameHint')}
+            </Text>
+            
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => setShowNicknameModal(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  {t('common.cancel')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={handleNicknameUpdate}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  {loading ? t('settings.updating') : t('common.save')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </KeyboardAvoidingView>
       </Modal>
 
