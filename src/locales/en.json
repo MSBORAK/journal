@@ -24,7 +24,10 @@
     "info": "Info",
     "hide": "Hide",
     "draw": "Draw",
-    "congratulations": "Congratulations!"
+    "congratulations": "Congratulations!",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -1183,6 +1186,7 @@
   },
   "insights": {
     "noInsightsYet": "No insights yet",
+    "discoverYourself": "Discover yourself",
     "greatWeek": "Great Week! 😊",
     "greatWeekDesc": "Your average mood in the last 7 days is {avgMood}/5. You're doing great!",
     "toughPeriod": "Tough Period 💙",

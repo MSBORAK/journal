@@ -24,7 +24,10 @@
     "info": "Bilgi",
     "hide": "Gizle",
     "draw": "Çiz",
-    "congratulations": "Tebrikler!"
+    "congratulations": "Tebrikler!",
+    "high": "Yüksek",
+    "medium": "Orta",
+    "low": "Düşük"
   },
   "navigation": {
     "dashboard": "Ana Sayfa",
@@ -1184,6 +1187,7 @@
   },
   "insights": {
     "noInsightsYet": "Henüz içgörü yok",
+    "discoverYourself": "Kendini keşfet",
     "greatWeek": "Harika Hafta! 😊",
     "greatWeekDesc": "Son 7 gündeki ortalama ruh halin {avgMood}/5. Harika gidiyorsun!",
     "toughPeriod": "Zor Dönem 💙",

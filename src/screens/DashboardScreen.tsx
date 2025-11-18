@@ -41,7 +41,7 @@ import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
 import { replaceAppName, replaceNickname, replacePlaceholders } from '../utils/textUtils';
 
-const { width } = Dimensions.get('window');
+const { width, height: screenHeight } = Dimensions.get('window');
 
 interface WellnessData {
   waterGlasses: number;
@@ -65,6 +65,27 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   
   // App Tour
   const tour = useAppTour(navigation, 'Dashboard');
+
+  // ScrollView ref for resetting after App Tour closes
+  const scrollViewRef = useRef<ScrollView>(null);
+  const prevTourVisible = useRef<boolean>(false);
+
+  // Reset ScrollView when App Tour closes
+  useEffect(() => {
+    if (prevTourVisible.current && !tour.tourVisible) {
+      // App Tour just closed - force re-enable scrolling and reset gesture handler
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          // Force re-enable scrolling by setting native props
+          scrollViewRef.current.setNativeProps({ 
+            scrollEnabled: true,
+            bounces: true,
+          });
+        }
+      }, 150);
+    }
+    prevTourVisible.current = tour.tourVisible;
+  }, [tour.tourVisible]);
 
   // Animation values
   const fadeAnims = useRef({
@@ -1045,11 +1066,9 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       backgroundColor: currentThemeColors.background, // Pastel taban
     },
     scrollContainer: {
-      flex: 1,
       backgroundColor: currentThemeColors.background, // Tema arka plan rengi
     },
     scrollContent: {
-      flexGrow: 1,
       paddingBottom: 120,
     },
     header: {
@@ -2625,15 +2644,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
     <SafeAreaView style={dynamicStyles.container}>
       <ScrollView 
+        ref={scrollViewRef}
         style={dynamicStyles.scrollContainer}
         contentContainerStyle={dynamicStyles.scrollContent}
         showsVerticalScrollIndicator={true}
-        nestedScrollEnabled={true}
-        bounces={true}
-        scrollEnabled={true}
-        alwaysBounceVertical={true}
+        scrollEnabled={!tour.tourVisible}
+        nestedScrollEnabled={false}
         keyboardShouldPersistTaps="handled"
-        removeClippedSubviews={false}
+        bounces={!tour.tourVisible}
       >
       {/* Header */}
       <View style={dynamicStyles.header}>

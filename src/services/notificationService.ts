@@ -244,11 +244,17 @@ export const scheduleNotification = async (
   repeats: boolean = true,
   channelId: string = 'default'
 ): Promise<string> => {
+  // ⚠️ ÖNEMLİ: CalendarTriggerInput timezone parametresi YOK
+  // Bu yüzden cihazın YEREL SAATİNE göre çalışır
+  // Türkiye'deki cihaz → Türkiye saatine göre (hour: 21 = Türkiye saati 21:00)
+  // Amerika'daki cihaz → Amerika saatine göre (hour: 21 = Amerika saati 21:00)
+  // Bu tam istediğimiz şey! ✅
   const trigger: Notifications.CalendarTriggerInput = {
     type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
     hour,
     minute,
     repeats,
+    // ⚠️ timezone parametresi YOK - cihazın yerel saatine göre çalışır
   };
 
   // Sadece sistem sesi kullan
@@ -280,9 +286,16 @@ export const scheduleMorningNotification = async (): Promise<void> => {
 
   const [hour, minute] = settings.morningTime.split(':').map(Number);
   
+  // Kullanıcının timezone'unu al
+  const userTimezone = settings.timezone || getUserTimezone();
+  
   // Sabah saatleri kontrolü (05:00 - 11:00)
   if (hour < 5 || hour >= 11) {
     if (__DEV__) console.warn(`⚠️ Morning notification scheduled for ${hour}:${minute} (not morning hours 5-11!)`);
+  }
+  
+  if (__DEV__) {
+    console.log(`🌍 Scheduling morning notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
   }
   
   // Hafta içi/sonu kontrolü - bildirimler her gün tekrar ediyor, bu yüzden
@@ -300,6 +313,11 @@ export const scheduleMorningNotification = async (): Promise<void> => {
     const weekdayMessage = getRandomMessage(messagesToUse);
     
     // Hafta içi günler için bildirim planla (Pazartesi=2, Cuma=6)
+    // ⚠️ ÖNEMLİ: CalendarTriggerInput timezone parametresi YOK
+    // Bu yüzden cihazın YEREL SAATİNE göre çalışır
+    // Türkiye'deki cihaz → Türkiye saatine göre
+    // Amerika'daki cihaz → Amerika saatine göre
+    // Bu tam istediğimiz şey! ✅
     for (let weekday = 2; weekday <= 6; weekday++) {
       await Notifications.scheduleNotificationAsync({
         identifier: `morning-reminder-weekday-${weekday}`,
@@ -316,6 +334,7 @@ export const scheduleMorningNotification = async (): Promise<void> => {
           hour,
           minute,
           repeats: true,
+          // ⚠️ timezone parametresi YOK - cihazın yerel saatine göre çalışır
         },
       });
     }
@@ -370,10 +389,17 @@ export const scheduleLunchNotification = async (): Promise<void> => {
 
   const [hour, minute] = (settings.lunchTime || '12:00').split(':').map(Number);
 
+  // Kullanıcının timezone'unu al
+  const userTimezone = settings.timezone || getUserTimezone();
+
   // Öğlen bildirimi için saat kontrolü ile doğru mesaj seç
   // Öğlen saatleri: 11:00 - 15:59 arası
   // Dil kontrolü ile mesaj seç
   const userLanguage = await getCurrentLanguage();
+  
+  if (__DEV__) {
+    console.log(`🌍 Scheduling lunch notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
+  }
   // Güvenlik kontrolü: mesaj setlerinin varlığını kontrol et
   const afternoonMessagesToUse = userLanguage === 'en'
     ? (afternoonMessagesEN && afternoonMessagesEN.length > 0 ? afternoonMessagesEN : afternoonMessages)
@@ -403,13 +429,16 @@ export const scheduleLunchNotification = async (): Promise<void> => {
 };
 
 /**
- * Bugün günlük yazılıp yazılmadığını kontrol et
+ * Bugün günlük yazılıp yazılmadığını kontrol et (timezone-aware)
  */
-const checkTodayDiaryWritten = async (userId?: string): Promise<boolean> => {
+const checkTodayDiaryWritten = async (userId?: string, timezone?: string): Promise<boolean> => {
   if (!userId) return false;
   
   try {
-    const today = getLocalDateISO(undefined);
+    // Kullanıcının timezone'una göre bugünün tarihini al
+    const userTimezone = timezone || getUserTimezone();
+    const today = getLocalDateISO(userTimezone);
+    
     const DIARY_STORAGE_KEY = 'diary_entries';
     const storedEntries = await AsyncStorage.getItem(`${DIARY_STORAGE_KEY}_${userId}`);
     
@@ -435,7 +464,12 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
 
   const [hour, minute] = settings.eveningTime.split(':').map(Number);
   
-  // Saat kontrolü ile doğru mesaj tipini belirle
+  // Kullanıcının timezone'unu al
+  const userTimezone = settings.timezone || getUserTimezone();
+  
+  // Saat kontrolü ile doğru mesaj tipini belirle (timezone-aware)
+  // Not: Expo Notifications CalendarTriggerInput zaten cihazın yerel saatine göre çalışır
+  // Bu yüzden hour ve minute değerleri kullanıcının timezone'una göre yorumlanmalı
   let messageType: 'night' | 'evening' | 'afternoon' | 'morning' = 'evening';
   if (hour >= 21 || hour < 5) {
     messageType = 'night';
@@ -447,6 +481,10 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
   } else {
     messageType = 'morning';
     if (__DEV__) console.warn(`⚠️ Evening notification scheduled for ${hour}:${minute} (morning hours!)`);
+  }
+  
+  if (__DEV__) {
+    console.log(`🌍 Scheduling evening notification for timezone: ${userTimezone}, hour: ${hour}:${minute}, messageType: ${messageType}`);
   }
   
   // Hafta içi bildirimi (Pazartesi-Cuma)
@@ -463,8 +501,8 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
         : (nightMessages && nightMessages.length > 0 ? nightMessages : nightMessagesEN || []);
       weekdayMessage = getRandomMessage(nightMessagesToUse);
     } else if (messageType === 'evening') {
-      // Akşam mesajları - günlük yazılmış mı kontrol et
-      const todayDiaryWritten = await checkTodayDiaryWritten(userId);
+      // Akşam mesajları - günlük yazılmış mı kontrol et (timezone-aware)
+      const todayDiaryWritten = await checkTodayDiaryWritten(userId, userTimezone);
       if (todayDiaryWritten) {
         const eveningMessagesToUse = userLanguage === 'en'
           ? (eveningMessagesEN && eveningMessagesEN.length > 0 ? eveningMessagesEN : eveningMessages)
@@ -490,6 +528,11 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
     }
     
     // Hafta içi günler için bildirim planla (Pazartesi=2, Cuma=6)
+    // ⚠️ ÖNEMLİ: CalendarTriggerInput timezone parametresi YOK
+    // Bu yüzden cihazın YEREL SAATİNE göre çalışır
+    // Türkiye'deki cihaz → Türkiye saatine göre
+    // Amerika'daki cihaz → Amerika saatine göre
+    // Bu tam istediğimiz şey! ✅
     for (let weekday = 2; weekday <= 6; weekday++) {
       await Notifications.scheduleNotificationAsync({
         identifier: `evening-reminder-weekday-${weekday}`,
@@ -506,6 +549,7 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
           hour,
           minute,
           repeats: true,
+          // ⚠️ timezone parametresi YOK - cihazın yerel saatine göre çalışır
         },
       });
     }
@@ -515,13 +559,45 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
   
   // Hafta sonu bildirimi (Cumartesi-Pazar)
   if (settings.weekendMotivationEnabled) {
-    // Dil kontrolü ile mesaj seç
+    let weekendMessage;
+    
+    // Dil kontrolü
     const userLanguageWeekend = await getCurrentLanguage();
-    // Güvenlik kontrolü: mesaj setlerinin varlığını kontrol et
-    const weekendMessagesToUse = userLanguageWeekend === 'en'
-      ? (weekendMessagesEN && weekendMessagesEN.length > 0 ? weekendMessagesEN : weekendMessages)
-      : (weekendMessages && weekendMessages.length > 0 ? weekendMessages : weekendMessagesEN || []);
-    const weekendMessage = getRandomMessage(weekendMessagesToUse);
+    
+    // Hafta içi ile aynı mantık: mesaj tipine göre mesaj seç
+    if (messageType === 'night') {
+      // Gece mesajları (21:00+)
+      const nightMessagesToUse = userLanguageWeekend === 'en'
+        ? (nightMessagesEN && nightMessagesEN.length > 0 ? nightMessagesEN : nightMessages)
+        : (nightMessages && nightMessages.length > 0 ? nightMessages : nightMessagesEN || []);
+      weekendMessage = getRandomMessage(nightMessagesToUse);
+    } else if (messageType === 'evening') {
+      // Akşam mesajları - günlük yazılmış mı kontrol et (timezone-aware)
+      const todayDiaryWritten = await checkTodayDiaryWritten(userId, userTimezone);
+      if (todayDiaryWritten) {
+        const eveningMessagesToUse = userLanguageWeekend === 'en'
+          ? (eveningMessagesEN && eveningMessagesEN.length > 0 ? eveningMessagesEN : eveningMessages)
+          : (eveningMessages && eveningMessages.length > 0 ? eveningMessages : eveningMessagesEN || []);
+        weekendMessage = getRandomMessage(eveningMessagesToUse);
+      } else {
+        // Dil kontrolü ile hatırlatıcı mesajları seç
+        const reminderMessages = userLanguageWeekend === 'en' 
+          ? (eveningReminderMessagesEN && eveningReminderMessagesEN.length > 0 ? eveningReminderMessagesEN : eveningReminderMessages)
+          : (eveningReminderMessages && eveningReminderMessages.length > 0 ? eveningReminderMessages : eveningReminderMessagesEN || []);
+        weekendMessage = getRandomMessage(reminderMessages);
+      }
+    } else if (messageType === 'afternoon') {
+      const afternoonMessagesToUse = userLanguageWeekend === 'en'
+        ? (afternoonMessagesEN && afternoonMessagesEN.length > 0 ? afternoonMessagesEN : afternoonMessages)
+        : (afternoonMessages && afternoonMessages.length > 0 ? afternoonMessages : afternoonMessagesEN || []);
+      weekendMessage = getRandomMessage(afternoonMessagesToUse);
+    } else {
+      // Varsayılan olarak weekend mesajları kullan
+      const weekendMessagesToUse = userLanguageWeekend === 'en'
+        ? (weekendMessagesEN && weekendMessagesEN.length > 0 ? weekendMessagesEN : weekendMessages)
+        : (weekendMessages && weekendMessages.length > 0 ? weekendMessages : weekendMessagesEN || []);
+      weekendMessage = getRandomMessage(weekendMessagesToUse);
+    }
     
     // Hafta sonu günler için bildirim planla (Cumartesi=7, Pazar=1)
     for (let weekday of [1, 7]) {
@@ -544,7 +620,7 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
       });
     }
     
-    if (__DEV__) console.log(`✅ Evening weekend notifications scheduled for ${hour}:${minute} (Saturday-Sunday)`);
+    if (__DEV__) console.log(`✅ Evening weekend notifications scheduled for ${hour}:${minute} (Saturday-Sunday, type: ${messageType})`);
   }
 
   if (__DEV__) console.log(`✅ Evening notifications scheduled for ${hour}:${minute}`);
@@ -558,12 +634,20 @@ export const scheduleDailySummaryNotification = async (): Promise<void> => {
 
   if (!settings.enabled || !settings.dailySummaryEnabled) return;
 
+  // Kullanıcının timezone'unu al
+  const userTimezone = settings.timezone || getUserTimezone();
+
   // Gün sonu özeti için saat 22:00
   const hour = 22;
   const minute = 0;
 
   // Dil kontrolü ile mesaj seç
   const userLanguage = await getCurrentLanguage();
+  
+  if (__DEV__) {
+    console.log(`🌍 Scheduling daily summary notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
+  }
+  
   const title = userLanguage === 'en' ? '📊 Daily Summary' : '📊 Günlük Özet';
   const body = userLanguage === 'en' 
     ? 'Check out today\'s summary! How close are you to your goals?'
@@ -590,8 +674,15 @@ export const scheduleDailyTaskCheck = async (): Promise<void> => {
   
   if (!settings.enabled || !settings.taskRemindersEnabled) return;
 
+  // Kullanıcının timezone'unu al
+  const userTimezone = settings.timezone || getUserTimezone();
+
   // Dil kontrolü ile mesaj seç
   const userLanguage = await getCurrentLanguage();
+  
+  if (__DEV__) {
+    console.log(`🌍 Scheduling daily task check notification for timezone: ${userTimezone}, hour: 20:00`);
+  }
   const title = userLanguage === 'en' ? '📝 Daily Task Check' : '📝 Günlük Görev Kontrolü';
   const body = userLanguage === 'en'
     ? 'How are your tasks going today? Let\'s check! 🎯'

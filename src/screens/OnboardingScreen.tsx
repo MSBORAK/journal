@@ -431,25 +431,20 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       
       // Onboarding'i tamamlandı olarak işaretle - user.uid varsa kullan, yoksa genel key kullan
       if (user?.uid) {
+        console.log('💾 [OnboardingScreen] Saving onboarding completed for user:', user.uid);
         await setOnboardingCompleted(user.uid);
-        console.log('✅ Onboarding completed for user:', user.uid);
+        console.log('✅ [OnboardingScreen] Onboarding completed for user:', user.uid);
       } else {
         // User henüz yoksa genel key kullan (anonim kullanıcı oluşturulana kadar)
+        console.log('💾 [OnboardingScreen] Saving onboarding completed (general key)');
         await setOnboardingCompleted();
-        console.log('✅ Onboarding completed for anonymous user');
+        console.log('✅ [OnboardingScreen] Onboarding completed for anonymous user');
       }
       
       // AsyncStorage'a yazılması için yeterli delay
+      console.log('⏳ [OnboardingScreen] Waiting 500ms for AsyncStorage write...');
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // User state'ini refresh et
-      if (user?.uid) {
-        try {
-          await refreshUser();
-        } catch (error) {
-          console.error('❌ Error refreshing user:', error);
-        }
-      }
+      console.log('✅ [OnboardingScreen] AsyncStorage write delay completed');
       
       // Play success sound
       await soundService.playSuccess();
@@ -480,14 +475,21 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   };
 
   const handleComplete = async () => {
+    console.log('🎯 [OnboardingScreen] handleComplete called', {
+      userId: user?.uid,
+    });
     try {
       // handlePreferencesComplete zaten setOnboardingCompleted'i çağırdı ve delay bekledi
-      // Ek bir delay eklemeden direkt onComplete'i çağır
       // onComplete callback'ini çağır - bu App.tsx'teki handleOnboardingComplete'i tetikler
+      // refreshUser() çağrısını kaldırdık - user state'i zaten handlePreferencesComplete içinde güncellendi
+      // Dashboard açıldıktan sonra user state'i otomatik olarak güncellenecek
+      console.log('📞 [OnboardingScreen] Calling onComplete() callback...');
       onComplete();
+      console.log('✅ [OnboardingScreen] onComplete() callback called');
     } catch (error) {
-      console.error('❌ Error completing onboarding:', error);
+      console.error('❌ [OnboardingScreen] Error completing onboarding:', error);
       // Hata olsa bile onboarding'i tamamla ve devam et
+      console.log('📞 [OnboardingScreen] Calling onComplete() callback (error case)...');
       onComplete();
     }
   };

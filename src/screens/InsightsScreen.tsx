@@ -204,9 +204,9 @@ export default function InsightsScreen({ navigation }: InsightsScreenProps) {
                   <Text style={dynamicStyles.insightTitle}>{insight.title}</Text>
                   <View style={[dynamicStyles.priorityBadge, { backgroundColor: priorityStyle.backgroundColor }]}>
                     <Text style={[dynamicStyles.priorityText, { color: priorityStyle.color }]}>
-                      {insight.priority === 'high' ? t('common.high') || 'Yüksek' :
-                       insight.priority === 'medium' ? t('common.medium') || 'Orta' :
-                       t('common.low') || 'Düşük'}
+                      {insight.priority === 'high' ? t('common.high') :
+                       insight.priority === 'medium' ? t('common.medium') :
+                       t('common.low')}
                     </Text>
                   </View>
                 </View>

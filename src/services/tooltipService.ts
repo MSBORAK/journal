@@ -13,22 +13,6 @@ export interface TooltipData {
 
 export const TOOLTIPS: TooltipData[] = [
   {
-    id: 'dashboard_mood',
-    title: 'Ruh Halini Kaydet',
-    description: 'Buraya tıklayarak günlük ruh halinizi kaydedebilirsiniz',
-    position: 'bottom',
-    targetElement: 'mood_selector',
-    screen: 'Dashboard',
-  },
-  {
-    id: 'dashboard_quick_add',
-    title: 'Hızlı Giriş',
-    description: 'Günlük yazmaya hızlıca başlamak için buraya tıklayın',
-    position: 'bottom',
-    targetElement: 'quick_add_button',
-    screen: 'Dashboard',
-  },
-  {
     id: 'dreams_goals_add',
     title: 'Hayal & Hedef Ekle',
     description: 'Yeni hayaller ve hedefler eklemek için + butonuna tıklayın',

@@ -219,19 +219,26 @@ export default function AppTour({
       animationType="none"
       statusBarTranslucent
       onRequestClose={handleSkip}
+      presentationStyle="overFullScreen"
     >
       <StatusBar barStyle="light-content" backgroundColor="rgba(0, 0, 0, 0.7)" />
       
       <View style={styles.overlay}>
-        <Animated.View
-          style={[
-            styles.tourCard,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
+        <TouchableOpacity 
+          activeOpacity={1}
+          style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
+          onPress={handleSkip}
         >
+          <Animated.View
+            style={[
+              styles.tourCard,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+            onStartShouldSetResponder={() => true}
+          >
           <View style={styles.header}>
             <Text style={styles.stepIndicator}>
               {`${currentStep + 1}/${totalSteps}`}
@@ -266,6 +273,7 @@ export default function AppTour({
             </TouchableOpacity>
           </View>
         </Animated.View>
+        </TouchableOpacity>
       </View>
     </Modal>
   );

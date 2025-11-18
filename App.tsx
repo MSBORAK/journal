@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Linking } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -139,7 +139,6 @@ function MainTabs() {
   }, []);
   
   return (
-    <BackgroundWrapper>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -230,7 +229,6 @@ function MainTabs() {
         }}
       />
       </Tab.Navigator>
-    </BackgroundWrapper>
   );
 }
 
@@ -241,97 +239,150 @@ function AppNavigator() {
   const [showOnboarding, setShowOnboarding] = React.useState<boolean | null>(null);
   const [onboardingLoading, setOnboardingLoading] = React.useState<boolean>(true);
   const hasCheckedOnboarding = React.useRef<boolean>(false);
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
 
-  const [isMounted, setIsMounted] = React.useState(true);
-  
+  // Render öncesi log - useEffect hook'u her zaman aynı sırada çağrılmalı
   React.useEffect(() => {
-    setIsMounted(true);
-    
+    if (showOnboarding !== null && !loading && !onboardingLoading) {
+      if (showOnboarding) {
+        console.log('📱 [AppNavigator] Rendering ONBOARDING navigator');
+      } else {
+        console.log('📱 [AppNavigator] Rendering MAIN TABS navigator');
+      }
+    }
+  }, [showOnboarding, loading, onboardingLoading]);
+
+  // Onboarding sadece 1 kez kontrol edilecek - Nihai Garantili Çözüm
+  // ✅ hasCheckedOnboarding kontrolü ile sadece bir kez çalışır
+  // ✅ loading ve user dependency'leri var ama hasCheckedOnboarding kontrolü ile skip edilir
+  React.useEffect(() => {
+    console.log('🔄 [AppNavigator] useEffect TRIGGERED', {
+      hasChecked: hasCheckedOnboarding.current,
+      loading,
+      userId: user?.uid,
+      showOnboarding,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Eğer zaten kontrol edildiyse, hiçbir şey yapma
+    if (hasCheckedOnboarding.current) {
+      console.log('⏩ [AppNavigator] Already checked onboarding, skipping useEffect');
+      return;
+    }
+
+    // Loading bitene kadar bekle
+    if (loading) {
+      console.log('⏳ [AppNavigator] Still loading, waiting...', { loading });
+      return;
+    }
+
+    let isMounted = true;
+
     const checkOnboarding = async () => {
-      // Loading bitene kadar bekle
-      if (loading) {
+      console.log('🔍 [AppNavigator] checkOnboarding called', {
+        hasChecked: hasCheckedOnboarding.current,
+        loading,
+        userId: user?.uid,
+        showOnboarding,
+      });
+
+      // Eğer zaten kontrol edildiyse, skip et (double check)
+      if (hasCheckedOnboarding.current) {
+        console.log('⏩ [AppNavigator] Already checked, skipping');
         return;
       }
-      
-      // Eğer zaten kontrol edildiyse ve onboarding tamamlandıysa, tekrar kontrol etme
-      if (hasCheckedOnboarding.current && showOnboarding === false) {
-        console.log('📋 Onboarding already checked and completed, skipping check');
-        return;
-      }
-      
-      // Eğer showOnboarding zaten false ise (onboarding tamamlandı), tekrar kontrol etme
-      if (showOnboarding === false && !onboardingLoading) {
-        console.log('📋 Onboarding already marked as completed, skipping check');
-        hasCheckedOnboarding.current = true;
-        return;
-      }
-      
+
       try {
         // Önce user-specific key'i kontrol et, sonra genel key'i
         let completed = false;
         
         if (user?.uid) {
+          console.log('👤 [AppNavigator] Checking user-specific onboarding:', user.uid);
           completed = await isOnboardingCompleted(user.uid);
+          console.log('📊 [AppNavigator] User-specific result:', completed);
           // Eğer user-specific key yoksa, genel key'i kontrol et (eski anonim kullanıcılar için)
           if (!completed) {
+            console.log('🔍 [AppNavigator] Checking general onboarding key');
             completed = await isOnboardingCompleted();
+            console.log('📊 [AppNavigator] General key result:', completed);
           }
         } else {
           // User yoksa genel key'i kontrol et (anonim kullanıcı oluşturulana kadar)
+          console.log('👤 [AppNavigator] No user, checking general onboarding key');
           completed = await isOnboardingCompleted();
+          console.log('📊 [AppNavigator] General key result:', completed);
         }
         
-        if (isMounted) {
-          // Sadece showOnboarding null veya true ise güncelle
-          if (showOnboarding === null || showOnboarding === true) {
-            setShowOnboarding(!completed);
-            console.log(`📋 Onboarding check: ${completed ? 'completed' : 'not completed'}`);
-          }
-          // Onboarding kontrolü tamamlandı
+        if (isMounted && !hasCheckedOnboarding.current) {
+          console.log(`📋 [AppNavigator] Onboarding check → ${completed ? 'completed' : 'not completed'}`);
+          console.log(`🎯 [AppNavigator] Setting showOnboarding to: ${!completed}`);
+          setShowOnboarding(!completed);
+          setOnboardingLoading(false);
+          hasCheckedOnboarding.current = true; // 🔒 Artık tekrar kontrol yapılmaz
+          console.log('✅ [AppNavigator] Onboarding check completed, hasCheckedOnboarding = true');
+        }
+      } catch (error) {
+        console.error('❌ [AppNavigator] Error checking onboarding:', error);
+        if (isMounted && !hasCheckedOnboarding.current) {
+          setShowOnboarding(true);
           setOnboardingLoading(false);
           hasCheckedOnboarding.current = true;
         }
-      } catch (error) {
-        console.error('❌ Error checking onboarding status:', error);
-        // Hata durumunda onboarding göster (güvenli taraf) - ama sadece showOnboarding null veya true ise
-        if (isMounted && (showOnboarding === null || showOnboarding === true)) {
-          setShowOnboarding(true);
-        }
-        // Hata olsa bile loading'i bitir
-        setOnboardingLoading(false);
-        hasCheckedOnboarding.current = true;
       }
     };
-    
-    checkOnboarding();
-    
-    return () => {
-      setIsMounted(false);
-    };
-  }, [user, loading]);
 
+    checkOnboarding();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loading]); // ✅ SADECE loading değiştiğinde - user?.uid dependency'si kaldırıldı çünkü user değiştiğinde tekrar kontrol yapmaya gerek yok
+
+  // ✅ Onboarding tamamlanınca
   const handleOnboardingComplete = async () => {
+    console.log('🎉 [AppNavigator] handleOnboardingComplete called', {
+      userId: user?.uid,
+      currentShowOnboarding: showOnboarding,
+      hasChecked: hasCheckedOnboarding.current,
+    });
+
+    // ÖNCE hasCheckedOnboarding'ı set et ki useEffect hiçbir şey yapmasın
+    hasCheckedOnboarding.current = true;
+    console.log('🔒 [AppNavigator] Setting hasCheckedOnboarding = true (FIRST)');
+
     try {
-      // OnboardingScreen zaten setOnboardingCompleted'i çağırdı ve delay bekledi
-      // Küçük bir delay ekle - AsyncStorage'ın gerçekten kaydedilmesini garantile
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // State'i güncelle - tekrar kontrol etme, direkt kapat
-      if (isMounted) {
-        setShowOnboarding(false);
-        setOnboardingLoading(false);
-        hasCheckedOnboarding.current = true; // Kontrol edildi olarak işaretle
-        console.log('✅ Onboarding state set to false, navigating to main app');
+      // AsyncStorage'a kaydet
+      if (user?.uid) {
+        console.log('💾 [AppNavigator] Saving onboarding completed for user:', user.uid);
+        await setOnboardingCompleted(user.uid);
+      } else {
+        console.log('💾 [AppNavigator] Saving onboarding completed (general key)');
+        await setOnboardingCompleted();
       }
       
+      // AsyncStorage'a yazılması için kısa bir delay
+      console.log('⏳ [AppNavigator] Waiting 100ms for AsyncStorage write...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // State'i BATCH olarak güncelle - React'in state batching'i kullan
+      // Bu sayede tek bir re-render olur ve flash olmaz
+      console.log('🚪 [AppNavigator] Setting showOnboarding = false and onboardingLoading = false');
+      React.startTransition(() => {
+        setShowOnboarding(false);
+        setOnboardingLoading(false);
+      });
+      
+      console.log('✅ [AppNavigator] Onboarding tamamlandı, dashboard açılıyor...', {
+        showOnboarding: false,
+        hasChecked: hasCheckedOnboarding.current,
+      });
     } catch (error) {
-      console.error('❌ Error completing onboarding:', error);
+      console.error('❌ [AppNavigator] Hata onboarding tamamlanırken:', error);
       // Hata olsa bile onboarding'i kapat
-      if (isMounted) {
+      React.startTransition(() => {
         setShowOnboarding(false);
         setOnboardingLoading(false);
-        hasCheckedOnboarding.current = true; // Kontrol edildi olarak işaretle
-      }
+      });
     }
   };
 
@@ -365,44 +416,37 @@ function AppNavigator() {
   };
 
   // Loading durumunda veya onboarding kontrolü yapılırken boş ekran göster
-  if (loading || onboardingLoading || showOnboarding === null) {
-    return null; // Loading screen can be added here
+  // AMA hook'lar her zaman çağrılmalı, bu yüzden conditional return YOK
+  const shouldShowLoading = loading || onboardingLoading || showOnboarding === null;
+  
+  if (shouldShowLoading) {
+    console.log('⏸️ [AppNavigator] Loading state - not rendering', {
+      loading,
+      onboardingLoading,
+      showOnboarding,
+    });
+  } else {
+    console.log('🎬 [AppNavigator] Rendering navigator', {
+      showOnboarding,
+      hasChecked: hasCheckedOnboarding.current,
+      userId: user?.uid,
+    });
   }
 
   return (
-    <NavigationContainer linking={linking}>
-      <Stack.Navigator 
-        screenOptions={{ 
-          headerShown: false,
-          // Performans için animasyonları basitleştir
-          cardStyleInterpolator: ({ current }) => ({
-            cardStyle: {
-              opacity: current.progress,
-            },
-          }),
-          transitionSpec: {
-            open: {
-              animation: 'timing',
-              config: {
-                duration: 200, // Daha hızlı geçiş
-              },
-            },
-            close: {
-              animation: 'timing',
-              config: {
-                duration: 150, // Daha hızlı geçiş
-              },
-            },
-          },
-        }}
-      >
-        {showOnboarding ? (
+    <NavigationContainer ref={navigationRef} linking={linking}>
+      {shouldShowLoading ? (
+        // Loading durumunda boş ekran - ama hook'lar zaten çağrıldı
+        null
+      ) : showOnboarding ? (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Onboarding">
             {() => <OnboardingScreen onComplete={handleOnboardingComplete} />}
           </Stack.Screen>
-        ) : (
-          <>
-            <Stack.Screen name="MainTabs" component={MainTabs} />
+        </Stack.Navigator>
+      ) : (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen
               name="WriteDiary"
               component={WriteDiaryScreen}
@@ -418,26 +462,25 @@ function AppNavigator() {
                 },
               }}
             />
-        <Stack.Screen name="ThemeSelection" component={ThemeSelectionScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="WriteDiaryStep1" component={WriteDiaryStep1Screen} options={{ headerShown: false }} />
-        <Stack.Screen name="WriteDiaryStep2" component={WriteDiaryStep2Screen} options={{ headerShown: false }} />
-        <Stack.Screen name="WriteDiaryStep3" component={WriteDiaryStep3Screen} options={{ headerShown: false }} />
-        <Stack.Screen name="WellnessTracking" component={WellnessTrackingScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Archive" component={ArchiveScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Tasks" component={TasksScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="DataBackupSettings" component={DataBackupSettingsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="PrivacySecuritySettings" component={PrivacySecuritySettingsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="AppSettings" component={AppSettingsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="DiaryDetail" component={DiaryDetailScreen} options={{ headerShown: false }} />
-          </>
-        )}
-      </Stack.Navigator>
+            <Stack.Screen name="ThemeSelection" component={ThemeSelectionScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="WriteDiaryStep1" component={WriteDiaryStep1Screen} options={{ headerShown: false }} />
+            <Stack.Screen name="WriteDiaryStep2" component={WriteDiaryStep2Screen} options={{ headerShown: false }} />
+            <Stack.Screen name="WriteDiaryStep3" component={WriteDiaryStep3Screen} options={{ headerShown: false }} />
+            <Stack.Screen name="WellnessTracking" component={WellnessTrackingScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Archive" component={ArchiveScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Tasks" component={TasksScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="DataBackupSettings" component={DataBackupSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="PrivacySecuritySettings" component={PrivacySecuritySettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="AppSettings" component={AppSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Mindfulness" component={MindfulnessScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="HelpGuide" component={HelpGuideScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="DiaryDetail" component={DiaryDetailScreen} options={{ headerShown: false }} />
+        </Stack.Navigator>
+      )}
     </NavigationContainer>
   );
 }
