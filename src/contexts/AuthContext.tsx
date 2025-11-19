@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email: session.user.email || '',
             displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Guest',
             photoURL: session.user.user_metadata?.avatar_url || undefined,
-            appAlias: session.user.user_metadata?.app_alias || 'Mindora',
+            appAlias: session.user.user_metadata?.app_alias || 'Rhythm',
             nickname: session.user.user_metadata?.nickname || 'Guest',
           };
           setUser(user);
@@ -441,7 +441,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               email: finalUser.email || trimmedEmail,
               displayName: finalUser.user_metadata?.full_name || trimmedEmail.split('@')[0],
               photoURL: finalUser.user_metadata?.avatar_url || undefined,
-              appAlias: finalUser.user_metadata?.app_alias || 'Mindora',
+              appAlias: finalUser.user_metadata?.app_alias || 'Rhythm',
               nickname: finalUser.user_metadata?.nickname || 'Guest',
             };
             setUser(updatedUser);
@@ -467,7 +467,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email: updateData.user.email || trimmedEmail,
             displayName: updateData.user.user_metadata?.full_name || trimmedEmail.split('@')[0],
             photoURL: updateData.user.user_metadata?.avatar_url || undefined,
-            appAlias: updateData.user.user_metadata?.app_alias || 'Mindora',
+            appAlias: updateData.user.user_metadata?.app_alias || 'Rhythm',
             nickname: updateData.user.user_metadata?.nickname || 'Guest',
           };
           setUser(updatedUser);
