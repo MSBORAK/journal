@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Achievement } from '../types';
 import { sendAchievementNotification } from '../services/notificationService';
@@ -118,8 +118,8 @@ export const useAchievements = (userId?: string) => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Başarı tanımları
-  const achievementDefinitions: AchievementDefinition[] = [
+  // Başarı tanımları - currentLanguage değiştiğinde yeniden oluştur
+  const achievementDefinitions: AchievementDefinition[] = useMemo(() => [
     // Streak Başarıları
     {
       id: 'first_streak_3',
@@ -322,7 +322,7 @@ export const useAchievements = (userId?: string) => {
       requirement: { type: 'consecutive', value: 30 },
       reward: { points: 100 }
     }
-  ];
+  ], [currentLanguage]);
 
   useEffect(() => {
     loadData();

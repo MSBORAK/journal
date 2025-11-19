@@ -404,16 +404,16 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   }, []);
 
   // İlk kullanıcı kontrolü - hoşgeldin mesajı
-  const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(true);
+  const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(false);
   useEffect(() => {
     const checkFirstTimeUser = async () => {
       try {
-        const isFirstTime = await AsyncStorage.getItem('hasSeenWelcome');
-        if (!isFirstTime) {
-          setHasSeenWelcome(false);
-          // 1 saniye bekle ki sayfa yüklensin
+        const hasSeen = await AsyncStorage.getItem('hasSeenWelcome');
+        if (!hasSeen) {
+          // İlk kullanıcı - modal göster
           setTimeout(() => {
             setShowWelcomeModal(true);
+            setHasSeenWelcome(false);
             // Hoşgeldin modalının animasyonunu başlat
             Animated.timing(fadeAnims.welcome, {
               toValue: 1,
@@ -421,9 +421,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
               useNativeDriver: true,
             }).start();
           }, 1000);
+        } else {
+          // Daha önce görmüş - modal gösterme
+          setHasSeenWelcome(true);
         }
       } catch (error) {
         console.error('Error checking first time user:', error);
+        // Hata durumunda modal gösterme
+        setHasSeenWelcome(true);
       }
     };
     
@@ -992,6 +997,56 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       'Akşamda kendine şefkat göster! Sen değerlisin! 💙',
       'Günün sonunda kendinle barışık ol! Sen harikasın! ✨',
       'Bugünü kutla! Sen başardın! 🎊',
+      
+      // Yeni çeşitli mesajlar (i18n)
+      t('motivation.messages.todayNewChapter'),
+      t('motivation.messages.yourJourneyUnique'),
+      t('motivation.messages.innerWisdomGuide'),
+      t('motivation.messages.everyEmotionValid'),
+      t('motivation.messages.selfCareNotSelfish'),
+      t('motivation.messages.progressNotPerfection'),
+      t('motivation.messages.yourVoiceMatters'),
+      t('motivation.messages.healingTakesTime'),
+      t('motivation.messages.youAreEnoughToday'),
+      t('motivation.messages.smallWinsMatter'),
+      t('motivation.messages.yourStoryWorthTelling'),
+      t('motivation.messages.growthInDiscomfort'),
+      t('motivation.messages.selfLoveDailyPractice'),
+      t('motivation.messages.yourEnergyPrecious'),
+      t('motivation.messages.restIsProductive'),
+      t('motivation.messages.comparisonThief'),
+      t('motivation.messages.mistakesAreTeachers'),
+      t('motivation.messages.gratitudeShiftsPerspective'),
+      t('motivation.messages.yourPresenceGift'),
+      t('motivation.messages.authenticityYourPower'),
+      t('motivation.messages.boundariesAreLove'),
+      t('motivation.messages.youDeserveHappiness'),
+      t('motivation.messages.yourIntuitionWise'),
+      t('motivation.messages.vulnerabilityStrength'),
+      t('motivation.messages.selfCompassionFirst'),
+      t('motivation.messages.yourPacePerfect'),
+      t('motivation.messages.celebrateProgress'),
+      t('motivation.messages.youAreResilient'),
+      t('motivation.messages.mindfulnessPresent'),
+      t('motivation.messages.yourDreamsValid'),
+      t('motivation.messages.selfAcceptanceFreedom'),
+      t('motivation.messages.youAreNotAlone'),
+      t('motivation.messages.yourFeelingsReal'),
+      t('motivation.messages.kindnessStartsWithin'),
+      t('motivation.messages.youAreGrowing'),
+      t('motivation.messages.patienceWithYourself'),
+      t('motivation.messages.yourLightShines'),
+      t('motivation.messages.selfTalkMatters'),
+      t('motivation.messages.youAreWorthy'),
+      t('motivation.messages.restRecharges'),
+      t('motivation.messages.yourPathUnique'),
+      t('motivation.messages.selfLoveRadiates'),
+      t('motivation.messages.youAreBraveEnough'),
+      t('motivation.messages.gratitudeMultiplies'),
+      t('motivation.messages.yourStoryEvolving'),
+      t('motivation.messages.selfCarePriority'),
+      t('motivation.messages.youAreEnoughAlways'),
+      t('motivation.messages.progressOverPerfection'),
     ];
     
     // Ruh haline göre mesaj seç
@@ -2977,6 +3032,25 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
                 <Text style={{ fontSize: 20, marginRight: 12, width: 24 }}>💖</Text>
                 <Text style={{ fontSize: 14, color: currentTheme.colors.text, flex: 1 }}>{t('dashboard.loveAndGrow')}</Text>
               </View>
+            </View>
+            
+            {/* Ayarlara yönlendirme mesajı */}
+            <View style={{
+              backgroundColor: currentTheme.colors.primary + '15',
+              borderRadius: 12,
+              padding: 12,
+              marginBottom: 20,
+              borderWidth: 1,
+              borderColor: currentTheme.colors.primary + '30',
+            }}>
+              <Text style={{
+                fontSize: 13,
+                color: currentTheme.colors.text,
+                textAlign: 'center',
+                lineHeight: 18,
+              }}>
+                {t('dashboard.customizeInSettings')}
+              </Text>
             </View>
             
             <TouchableOpacity 

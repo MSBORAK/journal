@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
-// Use legacy API to avoid SDK 52 deprecation error for writeAsStringAsync
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DataSyncService } from './dataSyncService';
@@ -311,10 +310,153 @@ export class BackupService {
   }
 
   /**
-   * Download user data (alias for exportData)
+   * Download user data (includes local AsyncStorage data + cloud data)
    */
   static async downloadUserData(userId: string): Promise<{ success: boolean; filePath?: string; error?: string }> {
-    return this.exportData(userId);
+    try {
+      console.log('📥 Starting data download for user:', userId);
+
+      // Get local data from AsyncStorage
+      const localData: any = {
+        diaries: [],
+        dreams: [],
+        goals: [],
+        promises: [],
+        tasks: [],
+        habits: [],
+        achievements: [],
+        settings: {},
+      };
+
+      // Load diaries
+      try {
+        const diaryKey = `diary_entries_${userId}`;
+        const diaryData = await AsyncStorage.getItem(diaryKey);
+        if (diaryData) {
+          localData.diaries = JSON.parse(diaryData);
+        }
+      } catch (e) {
+        console.error('Error loading diaries:', e);
+      }
+
+      // Load dreams, goals, promises
+      try {
+        const dreamsData = await AsyncStorage.getItem(`@daily_dreams_${userId}`);
+        const goalsData = await AsyncStorage.getItem(`@daily_goals_${userId}`);
+        const promisesData = await AsyncStorage.getItem(`@daily_promises_${userId}`);
+        
+        if (dreamsData) localData.dreams = JSON.parse(dreamsData);
+        if (goalsData) localData.goals = JSON.parse(goalsData);
+        if (promisesData) localData.promises = JSON.parse(promisesData);
+      } catch (e) {
+        console.error('Error loading dreams/goals:', e);
+      }
+
+      // Load tasks
+      try {
+        const tasksData = await AsyncStorage.getItem('@daily_tasks');
+        if (tasksData) {
+          localData.tasks = JSON.parse(tasksData);
+        }
+      } catch (e) {
+        console.error('Error loading tasks:', e);
+      }
+
+      // Load habits
+      try {
+        const habitsData = await AsyncStorage.getItem('@daily_habits');
+        if (habitsData) {
+          localData.habits = JSON.parse(habitsData);
+        }
+      } catch (e) {
+        console.error('Error loading habits:', e);
+      }
+
+      // Load achievements
+      try {
+        const achievementsData = await AsyncStorage.getItem('@daily_achievements');
+        if (achievementsData) {
+          localData.achievements = JSON.parse(achievementsData);
+        }
+      } catch (e) {
+        console.error('Error loading achievements:', e);
+      }
+
+      // Get cloud data (if available)
+      const cloudData: BackupData = {
+        journals: [],
+        goals: [],
+        habits: [],
+        tasks: [],
+        reminders: [],
+        reflections: [],
+        achievements: [],
+        user_settings: [],
+        metadata: {
+          export_date: new Date().toISOString(),
+          user_id: userId,
+          version: '1.0',
+        },
+      };
+
+      try {
+        const tables = ['journals', 'goals', 'habits', 'tasks', 'reminders', 'reflections', 'achievements', 'user_settings'];
+        for (const table of tables) {
+          const { data, error } = await supabase
+            .from(table)
+            .select('*')
+            .eq('user_id', userId);
+
+          if (!error && data) {
+            (cloudData as any)[table] = data;
+          }
+        }
+      } catch (e) {
+        console.error('Error loading cloud data:', e);
+      }
+
+      // Combine local and cloud data
+      const exportData: any = {
+        local_data: localData,
+        cloud_data: cloudData,
+        metadata: {
+          export_date: new Date().toISOString(),
+          user_id: userId,
+          version: '1.0',
+          source: 'local_and_cloud',
+        },
+      };
+
+      // Save to file
+      const fileName = `daily_backup_${new Date().toISOString().split('T')[0]}.json`;
+      const filePath = `${FileSystem.documentDirectory}${fileName}`;
+
+      await FileSystem.writeAsStringAsync(filePath, JSON.stringify(exportData, null, 2));
+
+      console.log(`🎉 Data download completed: ${fileName}`);
+
+      // Share the file
+      try {
+        const shared = await this.shareData(filePath);
+        if (shared) {
+          console.log('✅ File shared successfully');
+        }
+      } catch (shareError) {
+        console.error('Share error (non-critical):', shareError);
+        // Share hatası kritik değil, dosya zaten kaydedildi
+      }
+
+      return {
+        success: true,
+        filePath,
+      };
+    } catch (error) {
+      console.error('Download error:', error);
+      return {
+        success: false,
+        error: 'Failed to download data',
+      };
+    }
   }
 
   /**

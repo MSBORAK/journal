@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DailyTask, TaskProgress, TaskCategory, TaskAchievement } from '../types';
@@ -9,28 +9,24 @@ const CATEGORIES_STORAGE_KEY = '@task_categories';
 const ACHIEVEMENTS_STORAGE_KEY = '@task_achievements';
 
 export const useTasks = (userId?: string) => {
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, t } = useLanguage();
   const [tasks, setTasks] = useState<DailyTask[]>([]);
   const [progress, setProgress] = useState<TaskProgress[]>([]);
   const [categories, setCategories] = useState<TaskCategory[]>([]);
   const [achievements, setAchievements] = useState<TaskAchievement[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Default categories
-  const defaultCategories: TaskCategory[] = [
-    { id: 'health', name: 'Sağlık', emoji: '🏥', color: '#ef4444', description: 'Sağlık ile ilgili görevler' },
-    { id: 'personal', name: 'Kişisel Gelişim', emoji: '🌱', color: '#10b981', description: 'Kişisel gelişim görevleri' },
-    { id: 'work', name: 'İş', emoji: '💼', color: '#3b82f6', description: 'İş ile ilgili görevler' },
-    { id: 'hobby', name: 'Hobi', emoji: '🎨', color: '#8b5cf6', description: 'Hobi ve eğlence görevleri' },
-    { id: 'custom', name: 'Özel', emoji: '⭐', color: '#f59e0b', description: 'Özel görevler' },
-  ];
+  // Default categories with translations
+  const defaultCategories: TaskCategory[] = useMemo(() => [
+    { id: 'health', name: t('tasks.categoryHealth'), emoji: '🏥', color: '#ef4444', description: t('tasks.categoryHealthDesc') },
+    { id: 'personal', name: t('tasks.categoryPersonal'), emoji: '🌱', color: '#10b981', description: t('tasks.categoryPersonalDesc') },
+    { id: 'work', name: t('tasks.categoryWork'), emoji: '💼', color: '#3b82f6', description: t('tasks.categoryWorkDesc') },
+    { id: 'hobby', name: t('tasks.categoryHobby'), emoji: '🎨', color: '#8b5cf6', description: t('tasks.categoryHobbyDesc') },
+    { id: 'custom', name: t('tasks.categoryCustom'), emoji: '⭐', color: '#f59e0b', description: t('tasks.categoryCustomDesc') },
+  ], [t]);
 
   // Load data from storage
-  useEffect(() => {
-    loadData();
-  }, [userId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -66,7 +62,11 @@ export const useTasks = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [defaultCategories]);
+
+  useEffect(() => {
+    loadData();
+  }, [userId, loadData]);
 
   // Save tasks to storage
   const saveTasks = async (newTasks: DailyTask[]) => {

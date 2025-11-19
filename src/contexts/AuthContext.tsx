@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: '',
           displayName: 'Guest',
           photoURL: undefined,
-          appAlias: data.user.user_metadata?.app_alias || 'Mindora',
+          appAlias: data.user.user_metadata?.app_alias || 'Rhythm',
           nickname: data.user.user_metadata?.nickname || 'Guest',
         };
         setUser(user);
@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: currentUser.email || '',
           displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || '',
           photoURL: currentUser.user_metadata?.avatar_url || undefined,
-          appAlias: currentUser.user_metadata?.app_alias || 'Mindora',
+          appAlias: currentUser.user_metadata?.app_alias || 'Rhythm',
           nickname: currentUser.user_metadata?.nickname || 'Guest',
         };
         setUser(user);
@@ -184,7 +184,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 email: data.user.email || '',
                 displayName: data.user.user_metadata?.full_name || email.split('@')[0],
                 photoURL: data.user.user_metadata?.avatar_url || undefined,
-                appAlias: data.user.user_metadata?.app_alias || 'Mindora',
+                appAlias: data.user.user_metadata?.app_alias || 'Rhythm',
                 nickname: data.user.user_metadata?.nickname || 'Guest',
               };
               setUser(user);
@@ -264,7 +264,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 email: data.user.email || '',
                 displayName: displayName.trim(),
                 photoURL: data.user.user_metadata?.avatar_url || undefined,
-                appAlias: data.user.user_metadata?.app_alias || 'Mindora',
+                appAlias: data.user.user_metadata?.app_alias || 'Rhythm',
                 nickname: data.user.user_metadata?.nickname || 'Guest',
               };
               setUser(user);
@@ -347,7 +347,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: currentUser.email || '',
           displayName: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Guest',
           photoURL: currentUser.user_metadata?.avatar_url || undefined,
-          appAlias: currentUser.user_metadata?.app_alias || 'Mindora',
+          appAlias: currentUser.user_metadata?.app_alias || 'Rhythm',
           nickname: currentUser.user_metadata?.nickname || 'Guest',
         };
         setUser(updatedUser);
@@ -508,7 +508,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: data.user.email || user?.email || '',
           displayName: trimmedName,
           photoURL: data.user.user_metadata?.avatar_url || user?.photoURL || undefined,
-          appAlias: data.user.user_metadata?.app_alias || user?.appAlias || 'Mindora',
+          appAlias: data.user.user_metadata?.app_alias || user?.appAlias || 'Rhythm',
           nickname: data.user.user_metadata?.nickname || user?.nickname || 'Guest',
         };
         setUser(updatedUser);
@@ -597,7 +597,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: data.user.email || user?.email || '',
           displayName: data.user.user_metadata?.full_name || user?.displayName || '',
           photoURL: data.user.user_metadata?.avatar_url || user?.photoURL || undefined,
-          appAlias: data.user.user_metadata?.app_alias || user?.appAlias || 'Mindora',
+          appAlias: data.user.user_metadata?.app_alias || user?.appAlias || 'Rhythm',
           nickname: trimmedNickname,
         };
         setUser(updatedUser);

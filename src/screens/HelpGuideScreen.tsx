@@ -35,14 +35,17 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
 
   const FAQ_ITEMS: FAQItem[] = [
     { q: t('settings.howToWriteDiary'), a: t('settings.diaryInstructions'), category: 'diary' },
+    { q: t('settings.howToTrackMood'), a: t('settings.moodTrackingAnswer'), category: 'diary' },
     { q: t('settings.dreamVsGoal'), a: t('settings.dreamVsGoalAnswer'), category: 'goals' },
     { q: t('settings.whatArePromisesFor'), a: t('settings.promisesAnswer'), category: 'goals' },
     { q: t('settings.whatIsMilestone'), a: t('settings.milestoneAnswer'), category: 'goals' },
+    { q: t('settings.whatIsDevelopmentProfile'), a: t('settings.developmentProfileAnswer'), category: 'general' },
+    { q: t('settings.whatAreAchievements'), a: t('settings.achievementsAnswer'), category: 'general' },
+    { q: t('settings.areMessagesPersonal'), a: t('settings.messagesPersonalAnswer'), category: 'general' },
     { q: t('settings.howToSetupNotifications'), a: t('settings.notificationsAnswer'), category: 'settings' },
     { q: t('settings.howThemeChange'), a: t('settings.themeChangeAnswer'), category: 'settings' },
     { q: t('settings.howLanguageChanged'), a: t('settings.languageChangeAnswer'), category: 'settings' },
     { q: t('settings.willDataBeLost'), a: t('settings.dataBackupAnswer'), category: 'data' },
-    { q: t('settings.areMessagesPersonal'), a: t('settings.messagesPersonalAnswer'), category: 'general' },
     { q: t('settings.wantToReportProblem'), a: t('settings.reportProblemAnswer'), category: 'support' },
   ];
 

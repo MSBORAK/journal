@@ -913,6 +913,8 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingBottom: 20 }}
+              removeClippedSubviews={true}
+              keyboardDismissMode="interactive"
             >
               {/* Title */}
               <View style={dynamicStyles.formGroup}>
@@ -923,6 +925,11 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
                   placeholder={t('tasks.taskTitlePlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
+                  autoCorrect={false}
+                  autoCapitalize="sentences"
+                  textContentType="none"
+                  autoComplete="off"
+                  returnKeyType="next"
                 />
               </View>
 
@@ -936,6 +943,13 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
                   placeholder={t('tasks.taskDescriptionPlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                   multiline
+                  autoCorrect={false}
+                  autoCapitalize="sentences"
+                  textContentType="none"
+                  autoComplete="off"
+                  returnKeyType="default"
+                  blurOnSubmit={false}
+                  enablesReturnKeyAutomatically={false}
                 />
               </View>
 

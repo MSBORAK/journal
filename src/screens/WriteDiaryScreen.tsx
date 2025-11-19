@@ -453,7 +453,13 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
         </View>
       )}
 
-      <ScrollView style={dynamicStyles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={dynamicStyles.content} 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={true}
+        keyboardDismissMode="interactive"
+      >
         <View
         >
           {/* Title Input */}
@@ -522,7 +528,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
               placeholder={t('diary.contentPlaceholder')}
               multiline={true}
               scrollEnabled={true}
-              autoCorrect={true}
+              autoCorrect={false}
               autoCapitalize="sentences"
               placeholderTextColor="#9ca3af"
               textAlignVertical="top"

@@ -37,24 +37,24 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
 ];
 
-export const setOnboardingCompleted = async (userId?: string): Promise<void> => {
+// ✅ ÇÖZÜM 1: userId parametresi kaldırıldı - tek key kullanılıyor
+export const setOnboardingCompleted = async (): Promise<void> => {
   try {
-    const key = userId ? `${ONBOARDING_KEY}_${userId}` : ONBOARDING_KEY;
-    await AsyncStorage.setItem(key, 'true');
-    console.log(`Onboarding completed for user ${userId || 'anonymous'}`);
+    await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    console.log(`✅ Onboarding completed set`);
   } catch (error) {
-    console.error('Error setting onboarding completed:', error);
-    // Don't throw, just log the error
+    console.error('❌ Error setting onboarding completed:', error);
   }
 };
 
-export const isOnboardingCompleted = async (userId?: string): Promise<boolean> => {
+// ✅ ÇÖZÜM 1: userId parametresi kaldırıldı - tek key kullanılıyor
+export const isOnboardingCompleted = async (): Promise<boolean> => {
   try {
-    const key = userId ? `${ONBOARDING_KEY}_${userId}` : ONBOARDING_KEY;
-    const completed = await AsyncStorage.getItem(key);
+    const completed = await AsyncStorage.getItem(ONBOARDING_KEY);
+    console.log(`🔍 Onboarding completed check → ${completed === 'true'}`);
     return completed === 'true';
   } catch (error) {
-    console.error('Error checking onboarding status:', error);
+    console.error('❌ Error checking onboarding status:', error);
     return false;
   }
 };
@@ -75,11 +75,9 @@ export const isFirstTimeUser = async (userId?: string): Promise<boolean> => {
   }
 };
 
-export const resetOnboarding = async (userId?: string): Promise<void> => {
-  const onboardingKey = userId ? `${ONBOARDING_KEY}_${userId}` : ONBOARDING_KEY;
-  const firstTimeKey = userId ? `${FIRST_TIME_KEY}_${userId}` : FIRST_TIME_KEY;
-  
-  await AsyncStorage.multiRemove([onboardingKey, firstTimeKey]);
+// ✅ ÇÖZÜM 1: userId parametresi kaldırıldı - tek key kullanılıyor
+export const resetOnboarding = async (): Promise<void> => {
+  await AsyncStorage.multiRemove([ONBOARDING_KEY, FIRST_TIME_KEY]);
 };
 
 const APP_THEME_KEY = 'app_theme';

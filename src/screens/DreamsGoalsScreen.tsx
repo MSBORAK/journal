@@ -995,6 +995,13 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       value={formData.promiseText}
                       onChangeText={(text) => setFormData({ ...formData, promiseText: text })}
                       multiline
+                      autoCorrect={false}
+                      autoCapitalize="sentences"
+                      textContentType="none"
+                      autoComplete="off"
+                      returnKeyType="default"
+                      blurOnSubmit={false}
+                      enablesReturnKeyAutomatically={false}
                     />
                   </View>
                 ) : (
@@ -1023,6 +1030,11 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         placeholderTextColor={currentTheme.colors.muted}
                         value={formData.title}
                         onChangeText={(text) => setFormData({ ...formData, title: text })}
+                        autoCorrect={false}
+                        autoCapitalize="sentences"
+                        textContentType="none"
+                        autoComplete="off"
+                        returnKeyType="next"
                       />
                     </View>
                     
@@ -1052,6 +1064,13 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         value={formData.description}
                         onChangeText={(text) => setFormData({ ...formData, description: text })}
                         multiline
+                        autoCorrect={false}
+                        autoCapitalize="sentences"
+                        textContentType="none"
+                        autoComplete="off"
+                        returnKeyType="default"
+                        blurOnSubmit={false}
+                        enablesReturnKeyAutomatically={false}
                       />
                     </View>
                   </View>

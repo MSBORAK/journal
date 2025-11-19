@@ -311,7 +311,14 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                       { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
                       { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
                   ]}>
-                    <Text style={styles.unlockEmojiBox}>📝</Text>
+                    {personality.stats.totalEntries >= 1 ? (
+                      <Text style={styles.unlockEmojiBox}>📝</Text>
+                    ) : (
+                      <View style={styles.lockedIconContainer}>
+                        <Text style={styles.unlockEmojiBox}>📝</Text>
+                        <Ionicons name="lock-closed" size={8} color={currentTheme.colors.secondary} style={styles.lockIcon} />
+                      </View>
+                    )}
                     <Text style={[
                       styles.unlockTextBox, 
                       { color: personality.stats.totalEntries >= 1 ? currentTheme.colors.primary : currentTheme.colors.secondary }
@@ -323,7 +330,14 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
                       { backgroundColor: currentTheme.colors.primary + '15', borderColor: currentTheme.colors.primary } : 
                       { backgroundColor: currentTheme.colors.border + '20', borderColor: currentTheme.colors.border }
                   ]}>
-                    <Text style={styles.unlockEmojiBox}>🎯</Text>
+                    {personality.stats.totalEntries >= 5 ? (
+                      <Text style={styles.unlockEmojiBox}>🎯</Text>
+                    ) : (
+                      <View style={styles.lockedIconContainer}>
+                        <Text style={styles.unlockEmojiBox}>🎯</Text>
+                        <Ionicons name="lock-closed" size={8} color={currentTheme.colors.secondary} style={styles.lockIcon} />
+                      </View>
+                    )}
                     <Text style={[
                       styles.unlockTextBox, 
                       { color: personality.stats.totalEntries >= 5 ? currentTheme.colors.primary : currentTheme.colors.secondary }

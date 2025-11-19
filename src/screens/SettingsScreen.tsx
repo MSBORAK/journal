@@ -22,7 +22,6 @@ import { CustomAlert } from '../components/CustomAlert';
 import { useMigration } from '../hooks/useMigration';
 import { BackupService } from '../services/backupService';
 import { useCloudData } from '../hooks/useCloudData';
-import { resetOnboarding } from '../services/onboardingService';
 import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
 
@@ -94,8 +93,8 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
 
   const handleSignOut = () => {
     showAlert(
-      '🚪 Çıkış Yap',
-      'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
+      t('settings.signOutTitle'),
+      t('settings.logoutConfirmMessage'),
       'warning'
     );
   };
@@ -104,7 +103,7 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     try {
       await signOut();
     } catch (error) {
-      showAlert('❌ Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+      showAlert(t('settings.signOutError'), t('settings.signOutErrorDesc'), 'error');
     }
   };
 
@@ -112,18 +111,18 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     try {
       const result = await migrateData();
       if (result?.success) {
-        showAlert('✅ Başarılı', 'Verileriniz başarıyla cloud\'a taşındı! Artık tüm cihazlarınızda senkronize olacak.', 'success');
+        showAlert(t('settings.migrationSuccess'), t('settings.migrationSuccessDesc'), 'success');
       } else {
-        showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
+        showAlert(t('settings.migrationError'), t('settings.migrationErrorDesc'), 'error');
       }
     } catch (error) {
-      showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
+      showAlert(t('settings.migrationError'), t('settings.migrationErrorDesc'), 'error');
     }
   };
 
   const handleExportData = async () => {
     if (!user?.uid) {
-      showAlert('❌ Hata', 'Lütfen önce giriş yapın', 'error');
+      showAlert(t('settings.exportError'), t('settings.exportErrorLogin'), 'error');
       return;
     }
 
@@ -131,39 +130,39 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       const result = await BackupService.exportData(user.uid);
       if (result.success && result.filePath) {
         await BackupService.shareData(result.filePath);
-        showAlert('✅ Başarılı', 'Verileriniz başarıyla dışa aktarıldı!', 'success');
+        showAlert(t('settings.exportSuccess'), t('settings.exportSuccessDesc'), 'success');
       } else {
-        showAlert('❌ Hata', result.error || 'Veri dışa aktarma başarısız', 'error');
+        showAlert(t('settings.exportError'), result.error || t('settings.exportErrorDesc'), 'error');
       }
     } catch (error) {
-      showAlert('❌ Hata', 'Veri dışa aktarma başarısız', 'error');
+      showAlert(t('settings.exportError'), t('settings.exportErrorDesc'), 'error');
     }
   };
 
   const handleCloudBackup = async () => {
     if (!user?.uid) {
-      showAlert('❌ Hata', 'Lütfen önce giriş yapın', 'error');
+      showAlert(t('settings.cloudBackupError'), t('settings.cloudBackupErrorLogin'), 'error');
       return;
     }
 
     try {
-      const result = await BackupService.createCloudBackup(user.uid, 'Manuel yedekleme');
+      const result = await BackupService.createCloudBackup(user.uid, t('settings.cloudBackupManual'));
       if (result.success) {
-        showAlert('✅ Başarılı', 'Cloud yedekleme başarıyla oluşturuldu!', 'success');
+        showAlert(t('settings.cloudBackupSuccess'), t('settings.cloudBackupSuccessDesc'), 'success');
       } else {
-        showAlert('❌ Hata', result.error || 'Cloud yedekleme başarısız', 'error');
+        showAlert(t('settings.cloudBackupError'), result.error || t('settings.cloudBackupErrorDesc'), 'error');
       }
     } catch (error) {
-      showAlert('❌ Hata', 'Cloud yedekleme başarısız', 'error');
+      showAlert(t('settings.cloudBackupError'), t('settings.cloudBackupErrorDesc'), 'error');
     }
   };
 
   const handleSyncNow = async () => {
     try {
       await syncFromCloud();
-      showAlert('✅ Başarılı', 'Verileriniz başarıyla senkronize edildi!', 'success');
+      showAlert(t('settings.syncSuccess'), t('settings.syncSuccessDesc'), 'success');
     } catch (error) {
-      showAlert('❌ Hata', 'Senkronizasyon başarısız', 'error');
+      showAlert(t('settings.syncError'), t('settings.syncErrorDesc'), 'error');
     }
   };
 
@@ -185,21 +184,6 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       message: t('settings.resetMotivationHistorySubtitle'),
       type: 'warning',
     });
-  };
-
-  const handleResetOnboarding = async () => {
-    try {
-      await resetOnboarding(user?.uid);
-      await soundService.playSuccess();
-      showAlert(
-        '✅ Onboarding Sıfırlandı',
-        'Uygulamayı yeniden başlattığınızda onboarding ekranını göreceksiniz.',
-        'success'
-      );
-    } catch (error) {
-      console.error('Error resetting onboarding:', error);
-      showAlert('❌ Hata', 'Onboarding sıfırlanırken bir hata oluştu.', 'error');
-    }
   };
 
   const menuItems: MenuItem[] = [
@@ -298,14 +282,6 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
       icon: 'refresh-circle-outline',
       action: handleResetMotivation,
       color: '#f59e0b',
-    },
-    {
-      id: 'reset-onboarding',
-      title: '🧪 Onboarding\'i Tekrar Göster',
-      subtitle: 'Test amaçlı onboarding ekranını sıfırla',
-      icon: 'refresh-outline',
-      action: handleResetOnboarding,
-      color: '#8b5cf6',
     },
     {
       id: 'logout',

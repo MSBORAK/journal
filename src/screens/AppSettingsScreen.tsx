@@ -101,8 +101,8 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
 
   const showSystemInfo = () => {
     showAlert(
-      '🔧 Sistem Bilgileri',
-      'Uygulama Bilgileri:\n\n📱 Versiyon: 1.0.0\n🏗️ Build: 2025.01\n💾 Boyut: ~25 MB\n🔧 Platform: React Native\n📊 Framework: Expo\n\nCihaz Bilgileri:\n• React Native ile geliştirilmiştir\n• iOS ve Android desteklenir\n• Offline çalışır\n• Minimal depolama kullanır',
+      t('settings.systemInfoTitle'),
+      t('settings.systemInfoContent'),
       'info'
     );
   };

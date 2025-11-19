@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -221,12 +221,12 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
     },
   });
 
-  const handleAnswerChange = (questionId: string, text: string) => {
+  const handleAnswerChange = useCallback((questionId: string, text: string) => {
     setAnswers(prev => ({
       ...prev,
       [questionId]: text,
     }));
-  };
+  }, []);
 
   const handleNext = () => {
     navigation.navigate('WriteDiaryStep3', {
@@ -276,7 +276,12 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       </View>
 
       {/* Content */}
-      <ScrollView style={dynamicStyles.content}>
+      <ScrollView 
+        style={dynamicStyles.content}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={true}
+        keyboardDismissMode="interactive"
+      >
         {/* Progress */}
         <View style={dynamicStyles.progressContainer}>
           <View style={dynamicStyles.progressBar}>
@@ -310,6 +315,10 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
               autoCorrect={false}
               autoCapitalize="sentences"
               textContentType="none"
+              autoComplete="off"
+              returnKeyType="default"
+              blurOnSubmit={false}
+              enablesReturnKeyAutomatically={false}
             />
           </View>
         ))}
@@ -333,6 +342,10 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
             autoCorrect={false}
             autoCapitalize="sentences"
             textContentType="none"
+            autoComplete="off"
+            returnKeyType="default"
+            blurOnSubmit={false}
+            enablesReturnKeyAutomatically={false}
           />
         </View>
 

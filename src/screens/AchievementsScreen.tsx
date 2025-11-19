@@ -691,11 +691,23 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
           <View style={dynamicStyles.modalOverlay}>
             <View style={dynamicStyles.modalContent}>
               <View style={dynamicStyles.modalHeader}>
-                <Text style={dynamicStyles.modalIcon}>{selectedAchievement?.icon}</Text>
-                <Text style={dynamicStyles.modalTitle}>{selectedAchievement?.title}</Text>
-                <Text style={dynamicStyles.modalDescription}>
-                  {selectedAchievement?.description}
-                </Text>
+                {(() => {
+                  // Güncel dildeki başlık ve açıklamayı achievementDefinitions'dan al
+                  const achievementDef = achievementDefinitions.find(def => def.id === selectedAchievement?.id);
+                  const displayTitle = achievementDef?.title || selectedAchievement?.title || '';
+                  const displayDescription = achievementDef?.description || selectedAchievement?.description || '';
+                  const displayIcon = achievementDef?.icon || selectedAchievement?.icon || '🏆';
+                  
+                  return (
+                    <>
+                      <Text style={dynamicStyles.modalIcon}>{displayIcon}</Text>
+                      <Text style={dynamicStyles.modalTitle}>{displayTitle}</Text>
+                      <Text style={dynamicStyles.modalDescription}>
+                        {displayDescription}
+                      </Text>
+                    </>
+                  );
+                })()}
                 <Text style={dynamicStyles.modalDate}>
                   {t('achievements.unlockDate')}: {selectedAchievement?.unlockedAt ? 
                     new Date(selectedAchievement.unlockedAt).toLocaleDateString(locale) : 

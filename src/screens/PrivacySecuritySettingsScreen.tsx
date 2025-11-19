@@ -53,10 +53,20 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await BackupService.downloadUserData(user.uid);
-      showAlert(t('settings.success'), t('settings.downloadAllPersonalData'));
-    } catch (error) {
-      showAlert(t('settings.error'), t('settings.shareError'));
+      const result = await BackupService.downloadUserData(user.uid);
+      
+      if (result.success) {
+        showAlert(
+          t('settings.success'),
+          t('settings.downloadAllPersonalData') + '\n\n' + 
+          (t('settings.dataDownloadedTo') || 'Verileriniz indirildi ve paylaşım menüsü açıldı. Dosyayı kaydetmek için "Dosyalar" uygulamasını seçebilirsiniz.')
+        );
+      } else {
+        showAlert(t('settings.error'), result.error || t('settings.shareError'));
+      }
+    } catch (error: any) {
+      console.error('Download error:', error);
+      showAlert(t('settings.error'), error.message || t('settings.shareError'));
     } finally {
       setLoading(false);
     }

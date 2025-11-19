@@ -440,7 +440,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.colors.text} />
         </TouchableOpacity>
-        <Text style={dynamicStyles.headerTitle}>🔔 {t('settings.notifications')}</Text>
+        <Text style={dynamicStyles.headerTitle}>🔔 {t('settings.notificationSettings')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -494,7 +494,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLeft}>
-                <Text style={dynamicStyles.settingTitle}>{t('settings.notifications')}</Text>
+                <Text style={dynamicStyles.settingTitle}>{t('settings.notificationSettings')}</Text>
                 <Text style={dynamicStyles.settingDescription}>
                   {t('settings.turnAllNotifications')}
                 </Text>

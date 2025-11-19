@@ -292,9 +292,28 @@ export const analyzeWords = (entries: DiaryEntry[], t: any, _locale: string): In
   
   if (entries.length === 0) return insights;
 
-  // Tüm kelimeleri topla
+  // Tüm kelimeleri topla - hem content hem de answers'dan
+  const getAllTextFromEntry = (entry: DiaryEntry): string => {
+    let text = entry.content?.toLowerCase() || '';
+    
+    // answers alanındaki tüm cevapları ekle
+    if (entry.answers) {
+      const answerTexts = Object.values(entry.answers)
+        .filter((answer): answer is string => typeof answer === 'string' && answer.trim().length > 0)
+        .map(answer => answer.toLowerCase());
+      text += ' ' + answerTexts.join(' ');
+    }
+    
+    // freeWriting varsa onu da ekle
+    if (entry.freeWriting) {
+      text += ' ' + entry.freeWriting.toLowerCase();
+    }
+    
+    return text;
+  };
+
   const allWords = entries
-    .map(entry => entry.content?.toLowerCase() || '')
+    .map(entry => getAllTextFromEntry(entry))
     .join(' ')
     .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
     .split(/\s+/)
@@ -324,14 +343,51 @@ export const analyzeWords = (entries: DiaryEntry[], t: any, _locale: string): In
     });
   }
 
-  // Pozitif kelime analizi
-  const positiveWords = ['mutlu', 'güzel', 'harika', 'muhteşem', 'iyi', 'sevindim', 'başardım', 'keyifli'];
-  const negativeWords = ['kötü', 'üzgün', 'stres', 'yorgun', 'zor', 'problem', 'sıkıntı', 'endişe'];
+  // Pozitif kelime analizi - genişletilmiş liste
+  const positiveWords = [
+    'mutlu', 'güzel', 'harika', 'muhteşem', 'iyi', 'sevindim', 'başardım', 'keyifli',
+    'mükemmel', 'neşeli', 'sevinçli', 'başarılı', 'gururlu',
+    'huzurlu', 'rahat', 'keyif', 'zevk', 'coşku', 'heyecan', 'umut', 'iyimser',
+    'pozitif', 'enerjik', 'canlı', 'dinç', 'şükür', 'minnettar', 'teşekkür',
+    'gülümseme', 'gülmek', 'eğlenceli', 'eğlence', 'mutluluk', 'sevinç', 'yüksek'
+  ];
   
+  const negativeWords = [
+    'kötü', 'üzgün', 'stres', 'yorgun', 'zor', 'problem', 'sıkıntı', 'endişe',
+    'kaygı', 'korku', 'panik', 'sinir', 'öfke', 'kızgın', 'hayal', 'kırıklığı',
+    'umutsuz', 'çaresiz', 'bitkin', 'tükenmiş', 'bunalım', 'depresif',
+    'mutsuz', 'hüzünlü', 'kederli', 'acı', 'ağrı', 'sıkıntılı', 'bunaltıcı',
+    'yok', 'boş', 'anlamsız', 'değersiz', 'başarısız', 'kayıp', 'düşük'
+  ];
+  
+  // Tüm metni birleştir (çok kelimeli ifadeler için)
+  const fullText = entries
+    .map(entry => getAllTextFromEntry(entry))
+    .join(' ')
+    .toLowerCase();
+  
+  // Çok kelimeli negatif ifadeler
+  const negativePhrases = ['hiçbir şey', 'hiç bir şey', 'hiçbirşey', 'hiç birşey'];
+  let negativePhraseCount = 0;
+  negativePhrases.forEach(phrase => {
+    const regex = new RegExp(phrase, 'gi');
+    const matches = fullText.match(regex);
+    if (matches) {
+      negativePhraseCount += matches.length;
+    }
+  });
+  
+  // Tek kelime analizi
   const positiveCount = allWords.filter(word => positiveWords.includes(word)).length;
-  const negativeCount = allWords.filter(word => negativeWords.includes(word)).length;
+  const negativeCount = allWords.filter(word => negativeWords.includes(word)).length + negativePhraseCount;
   
-  if (positiveCount > negativeCount * 1.5) {
+  // Eğer hiç kelime yoksa içgörü gösterme
+  if (positiveCount === 0 && negativeCount === 0) {
+    return insights;
+  }
+  
+  // Pozitif/negatif oranına göre içgörü oluştur
+  if (positiveCount > negativeCount * 1.5 && positiveCount >= 2) {
     insights.push({
       type: 'mood',
       title: t('insights.positiveEnergy'),
@@ -341,7 +397,7 @@ export const analyzeWords = (entries: DiaryEntry[], t: any, _locale: string): In
       priority: 'medium',
       data: { positiveCount, negativeCount }
     });
-  } else if (negativeCount > positiveCount * 1.5) {
+  } else if (negativeCount > positiveCount * 1.5 && negativeCount >= 2) {
     insights.push({
       type: 'suggestion',
       title: t('insights.takeCare'),

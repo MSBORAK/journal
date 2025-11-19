@@ -23,6 +23,7 @@ import { getProfile, updateProfile, createProfile } from '../services/profileSer
 import { useProfile } from '../hooks/useProfile';
 import { BackupService } from '../services/backupService';
 import { CustomAlert } from '../components/CustomAlert';
+import { AuthService } from '../services/authService';
 
 interface AccountSettingsScreenProps {
   navigation: any;
@@ -248,19 +249,75 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   };
 
   const handleDeleteAccount = () => {
-    showAlert(
-      `⚠️ ${t('settings.deleteAccount')}`,
-      `${t('settings.deleteAccountWarning')}\n\n${t('settings.dataToBeDeleted')}\n• ${t('settings.allDiaryEntries')}\n• ${t('settings.profileInformationData')}\n• ${t('settings.statisticsAndInsights')}\n• ${t('settings.usageHistory')}\n\n${t('settings.areYouSure')}`,
-      'error'
-    );
+    setAlertConfig({
+      visible: true,
+      title: `⚠️ ${t('settings.deleteAccount')}`,
+      message: `${t('settings.deleteAccountWarning')}\n\n${t('settings.dataToBeDeleted')}\n• ${t('settings.allDiaryEntries')}\n• ${t('settings.profileInformationData')}\n• ${t('settings.statisticsAndInsights')}\n• ${t('settings.usageHistory')}\n\n${t('settings.areYouSure')}`,
+      type: 'error',
+    });
+  };
+
+  const confirmDeleteAccount = async () => {
+    setLoading(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      const result = await AuthService.deleteAccount();
+      
+      if (result.success) {
+        hideAlert();
+        // Hesap silindikten sonra çıkış yap ve anonim kullanıcı oluştur
+        await signOut();
+        showAlert(
+          t('settings.success'),
+          t('settings.accountDeletedSuccess') || 'Hesabınız başarıyla silindi.',
+          'success'
+        );
+      } else {
+        showAlert(
+          t('settings.error'),
+          result.error || t('settings.deleteAccountFailed') || 'Hesap silinirken bir hata oluştu.',
+          'error'
+        );
+      }
+    } catch (error: any) {
+      console.error('Delete account error:', error);
+      showAlert(
+        t('settings.error'),
+        error.message || t('settings.deleteAccountFailed') || 'Hesap silinirken bir hata oluştu.',
+        'error'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignOut = () => {
-    showAlert(
-      `🚪 ${t('settings.logout')}`,
-      t('settings.logoutConfirmMessage'),
-      'warning'
-    );
+    setAlertConfig({
+      visible: true,
+      title: `🚪 ${t('settings.logout')}`,
+      message: t('settings.logoutConfirmMessage'),
+      type: 'warning',
+    });
+  };
+
+  const confirmSignOut = async () => {
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await signOut();
+      hideAlert();
+      showAlert(
+        t('settings.success'),
+        t('settings.loggedOutSuccess') || 'Başarıyla çıkış yaptınız.',
+        'success'
+      );
+    } catch (error: any) {
+      console.error('Sign out error:', error);
+      showAlert(
+        t('settings.error'),
+        error.message || t('settings.signOutError') || 'Çıkış yapılırken bir hata oluştu.',
+        'error'
+      );
+    }
   };
 
   const handleLinkAccount = async () => {
@@ -736,24 +793,27 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         <View style={dynamicStyles.section}>
           <Text style={dynamicStyles.sectionTitle}>{t('settings.accountOperations')}</Text>
           
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="log-out" size={20} color={currentTheme.colors.primary} />
+          {/* Çıkış Yap - Sadece email ile giriş yapmış kullanıcılar için */}
+          {!isAnonymous && user?.email && (
+            <View style={dynamicStyles.settingCard}>
+              <View style={dynamicStyles.settingHeader}>
+                <View style={dynamicStyles.settingIcon}>
+                  <Ionicons name="log-out" size={20} color={currentTheme.colors.primary} />
+                </View>
+                <Text style={dynamicStyles.settingTitle}>{t('settings.logout')}</Text>
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('settings.logout')}</Text>
+              <Text style={dynamicStyles.settingDescription}>
+                {t('settings.logOutSecurely')}
+              </Text>
+              <TouchableOpacity
+                style={dynamicStyles.actionButton}
+                onPress={handleSignOut}
+                activeOpacity={0.8}
+              >
+                <Text style={dynamicStyles.actionButtonText}>🚪 {t('settings.logout')}</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={dynamicStyles.settingDescription}>
-              {t('settings.logOutSecurely')}
-            </Text>
-            <TouchableOpacity
-              style={dynamicStyles.actionButton}
-              onPress={handleSignOut}
-              activeOpacity={0.8}
-            >
-              <Text style={dynamicStyles.actionButtonText}>🚪 {t('settings.logout')}</Text>
-            </TouchableOpacity>
-          </View>
+          )}
 
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
@@ -1114,7 +1174,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -1124,11 +1184,35 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         title={alertConfig.title}
         message={alertConfig.message}
         type={alertConfig.type}
-        primaryButton={{
-          text: t('common.ok'),
-          onPress: hideAlert,
-          style: alertConfig.type === 'error' ? 'danger' : 'primary',
-        }}
+        primaryButton={
+          alertConfig.type === 'error' && (alertConfig.title.includes('Hesap Sil') || alertConfig.title.includes('Delete Account'))
+            ? {
+                text: t('common.delete'),
+                onPress: confirmDeleteAccount,
+                style: 'danger' as const,
+              }
+            : alertConfig.type === 'warning' && (alertConfig.title.includes('Çıkış Yap') || alertConfig.title.includes('Logout') || alertConfig.title.includes('🚪'))
+            ? {
+                text: t('settings.logout') || 'Çıkış Yap',
+                onPress: confirmSignOut,
+                style: 'primary' as const,
+              }
+            : {
+                text: t('common.ok'),
+                onPress: hideAlert,
+                style: alertConfig.type === 'error' ? 'danger' : 'primary',
+              }
+        }
+        secondaryButton={
+          (alertConfig.type === 'error' && (alertConfig.title.includes('Hesap Sil') || alertConfig.title.includes('Delete Account'))) ||
+          (alertConfig.type === 'warning' && (alertConfig.title.includes('Çıkış Yap') || alertConfig.title.includes('Logout') || alertConfig.title.includes('🚪')))
+            ? {
+                text: t('common.cancel'),
+                onPress: hideAlert,
+                style: 'secondary' as const,
+              }
+            : undefined
+        }
         onClose={hideAlert}
       />
     </SafeAreaView>

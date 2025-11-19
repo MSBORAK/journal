@@ -218,6 +218,11 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
             onChangeText={setTitle}
             placeholder={t('mood.howWasYourDay')}
             placeholderTextColor={currentTheme.colors.muted}
+            autoCorrect={false}
+            autoCapitalize="sentences"
+            textContentType="none"
+            autoComplete="off"
+            returnKeyType="next"
           />
         </View>
 

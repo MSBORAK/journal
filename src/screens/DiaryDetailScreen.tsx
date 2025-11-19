@@ -230,8 +230,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
   const isFreeWritingDuplicatedInContent = freeWritingText.length > 0 && (entry.content || '').toLowerCase().includes(freeWritingText.toLowerCase());
   const shouldShowFreeWriting = freeWritingText.length > 0 && !isPlaceholderFreeWriting && !isFreeWritingDuplicatedInContent;
 
-  const aqLabelRaw = t('diary.answeredQuestions');
-  const aqLabel = aqLabelRaw && aqLabelRaw.includes('.') ? (currentLanguage === 'tr' ? 'Cevaplanan Sorular' : 'Answered Questions') : aqLabelRaw;
+  const aqLabel = t('diary.answeredQuestions');
   const contentText = (entry.content || '').trim();
   const colonLineCount = contentText.split('\n').filter(l => l.includes(':')).length;
   const looksLikeGuidedSummary = colonLineCount >= 3; // e.g., multiple "Label: answer" lines

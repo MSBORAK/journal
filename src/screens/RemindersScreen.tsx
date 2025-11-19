@@ -804,6 +804,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingBottom: 20 }}
+              removeClippedSubviews={true}
+              keyboardDismissMode="interactive"
             >
               {/* Title */}
               <View style={dynamicStyles.formGroup}>
@@ -814,6 +816,11 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   onChangeText={(text) => setFormData({ ...formData, title: text })}
                   placeholder={t('reminders.examplePlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
+                  autoCorrect={false}
+                  autoCapitalize="sentences"
+                  textContentType="none"
+                  autoComplete="off"
+                  returnKeyType="next"
                 />
               </View>
 
@@ -827,6 +834,13 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
                   placeholder={t('reminders.additionalInfoPlaceholder')}
                   placeholderTextColor={currentTheme.colors.muted}
                   multiline
+                  autoCorrect={false}
+                  autoCapitalize="sentences"
+                  textContentType="none"
+                  autoComplete="off"
+                  returnKeyType="default"
+                  blurOnSubmit={false}
+                  enablesReturnKeyAutomatically={false}
                 />
               </View>
 
