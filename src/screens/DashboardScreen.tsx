@@ -24,10 +24,10 @@ import { useProfile } from '../hooks/useProfile';
 import { useTasks } from '../hooks/useTasks';
 import { useReminders } from '../hooks/useReminders';
 import { useAchievements } from '../hooks/useAchievements';
+import { useDreamsGoals } from '../hooks/useDreamsGoals';
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
 import { PersonalityCard } from '../components/PersonalityCard';
-import { getAllInsights, Insight } from '../utils/insightsEngine';
 import { 
   requestNotificationPermissions, 
   scheduleAllNotifications 
@@ -122,8 +122,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
   } = useTasks(user?.uid);
   const { getTodayReminders } = useReminders(user?.uid);
   const { achievements, getAchievementStats } = useAchievements(user?.uid);
+  const { getActivePromises } = useDreamsGoals(user?.uid);
 
-  const [insights, setInsights] = useState<Insight[]>([]);
   const [showHealthModal, setShowHealthModal] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -387,17 +387,6 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     initializeNotifications();
   }, []);
 
-  // İçgörüleri hesapla
-  const locale = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
-
-  useEffect(() => {
-    if (entries.length > 0) {
-      const allInsights = getAllInsights(entries, t, locale);
-      setInsights(allInsights.slice(0, 3)); // En önemli 3 içgörüyü göster
-    } else {
-      setInsights([]);
-    }
-  }, [entries, t, locale]);
 
   // Wellness verilerini yükle
   useEffect(() => {
@@ -1462,13 +1451,6 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       opacity: 0.95,
     },
     // Insights Styles
-    insightsSection: {
-      marginHorizontal: 20,
-      marginBottom: 20,
-      backgroundColor: currentTheme.colors.background,
-      borderRadius: 20,
-      padding: 16,
-    },
     // Achievements Styles
     achievementsCard: {
       backgroundColor: currentTheme.colors.card + 'F8',
@@ -1562,6 +1544,74 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     achievementsButtonText: {
       fontSize: 14,
       color: '#FFD700',
+      fontWeight: '600',
+    },
+    promisesCard: {
+      backgroundColor: currentTheme.colors.card + 'F8',
+      marginHorizontal: 20,
+      marginBottom: 20,
+      borderRadius: 28,
+      padding: 24,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 4,
+      transform: [{ translateY: -1 }],
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '15',
+    },
+    promisesHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    promisesTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: currentTheme.colors.text,
+      flex: 1,
+    },
+    promisesIcon: {
+      fontSize: 24,
+      marginRight: 8,
+    },
+    promiseItem: {
+      backgroundColor: currentTheme.colors.background + 'F0',
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderLeftWidth: 3,
+      borderLeftColor: currentTheme.colors.primary,
+    },
+    promiseEmoji: {
+      fontSize: 24,
+      marginRight: 12,
+    },
+    promiseText: {
+      flex: 1,
+      fontSize: 15,
+      color: currentTheme.colors.text,
+      fontWeight: '500',
+      lineHeight: 22,
+    },
+    promisesButton: {
+      backgroundColor: currentTheme.colors.primary + '15',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.primary + '25',
+      borderRadius: 20,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    promisesButtonText: {
+      fontSize: 14,
+      color: currentTheme.colors.primary,
       fontWeight: '600',
     },
     sectionTitle: {
@@ -2809,6 +2859,53 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         </View>
       </Animated.View>
 
+      {/* Nefes Egzersizi Hızlı Butonu */}
+      <Animated.View
+        style={{
+          opacity: fadeAnims.motivation,
+          transform: [{
+            scale: fadeAnims.motivation.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.95, 1],
+            })
+          }]
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            backgroundColor: currentTheme.colors.card,
+            marginHorizontal: 20,
+            marginBottom: 20,
+            borderRadius: 20,
+            padding: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: currentTheme.colors.primary + '20',
+            shadowColor: currentTheme.colors.shadow,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 3,
+          }}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            navigation.navigate('Mindfulness' as never);
+          }}
+          activeOpacity={0.8}
+        >
+          <Text style={{
+            fontSize: 17,
+            fontWeight: '700',
+            color: currentTheme.colors.primary,
+            letterSpacing: 0.3,
+          }}>
+            {t('settings.breathingExerciseQuick')}
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
+
       {/* Motivation Message (hide for first-time until welcome dismissed) */}
       {(!showWelcomeModal && hasSeenWelcome) && (
       <Animated.View
@@ -2932,8 +3029,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Insights Section */}
-      {insights.length > 0 && (
+      {/* Promises Widget */}
+      {getActivePromises().length > 0 && (
         <Animated.View
           style={{
             opacity: fadeAnims.insights,
@@ -2945,40 +3042,53 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
             }]
           }}
         >
-          <View style={[
-            dynamicStyles.insightsSection,
-            {
-              backgroundColor: currentTheme.colors.card,
-              borderWidth: 1,
-              borderColor: currentTheme.colors.border,
-            }
-          ]}>
-          <Text style={dynamicStyles.sectionTitle}>
-            💡 {t('dashboard.yourPersonalInsights')}
-                  </Text>
-          {insights.map((insight, index) => (
-            <View key={`${insight.type}-${index}`} style={[
-              dynamicStyles.insightCard,
-              {
-                backgroundColor: currentTheme.colors.card,
-                borderWidth: 1,
-                borderColor: currentTheme.colors.border,
-                borderLeftColor: insight.color,
-                borderLeftWidth: 4,
-              }
-            ]}>
-              <View style={dynamicStyles.insightHeader}>
-                <Text style={dynamicStyles.insightIcon}>{insight.icon}</Text>
-                <Text style={dynamicStyles.insightTitle}>{insight.title}</Text>
-                </View>
-              <Text style={dynamicStyles.insightDescription}>
-                {insight.description}
-              </Text>
+          <TouchableOpacity
+            style={dynamicStyles.promisesCard}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              navigation.navigate('DreamsGoals');
+            }}
+            activeOpacity={0.8}
+          >
+            <View style={dynamicStyles.promisesHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                <Text style={dynamicStyles.promisesIcon}>💫</Text>
+                <Text style={dynamicStyles.promisesTitle}>
+                  {t('dashboard.myPromises') || 'Kendine Verdiğin Sözler'}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={currentTheme.colors.secondary} />
             </View>
+
+            {getActivePromises().slice(0, 2).map((promise) => (
+              <View key={promise.id} style={dynamicStyles.promiseItem}>
+                <Text style={dynamicStyles.promiseEmoji}>{promise.emoji}</Text>
+                <Text style={dynamicStyles.promiseText}>{promise.text}</Text>
+              </View>
             ))}
-          </View>
+
+            {getActivePromises().length > 2 && (
+              <Text style={[dynamicStyles.promisesButtonText, { marginTop: 8, textAlign: 'center' }]}>
+                +{getActivePromises().length - 2} {t('dashboard.morePromises') || 'daha fazla söz'}
+              </Text>
+            )}
+
+            <TouchableOpacity
+              style={dynamicStyles.promisesButton}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                navigation.navigate('DreamsGoals');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={dynamicStyles.promisesButtonText}>
+                {t('dashboard.seeAllPromises') || 'Tüm Sözleri Gör'} 💫
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </Animated.View>
       )}
+
 
 
 

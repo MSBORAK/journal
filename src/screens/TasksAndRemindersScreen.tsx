@@ -68,6 +68,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const [showReminders, setShowReminders] = useState(true);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [toggleAnim] = useState(new Animated.Value(0)); // Toggle animation
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const { 
     setShowFocusMode, 
     showFocusMode, 
@@ -172,21 +173,6 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       
       await soundService.playSuccess();
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
-      // Tebrik mesajları
-      const celebrationMessages = [
-        { emoji: '🎉', text: 'Harika iş çıkardın!', subtext: 'Kendinle gurur duyabilirsin 🌟' },
-        { emoji: '✨', text: 'Tebrikler!', subtext: 'Bir adım daha ilerledin 💪' },
-        { emoji: '🌟', text: 'Mükemmel!', subtext: 'Bu enerjiyle devam et 🚀' },
-        { emoji: '💫', text: 'Süper!', subtext: 'Her tamamladığın görev seni güçlendiriyor ✨' },
-        { emoji: '🎊', text: 'Harika!', subtext: 'Küçük adımlar büyük değişiklikler yaratır 🌸' },
-      ];
-      const randomCelebration = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
-      
-      // TODO: Celebration modal ekle
-      console.log('🎉 Görev tamamlandı:', randomCelebration);
-      
-      // TODO: Add confetti animation
     } catch (error) {
       console.error('Error completing task:', error);
     }
@@ -660,6 +646,8 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
     },
     taskLeft: {
       flexDirection: 'row',
@@ -897,18 +885,20 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       position: 'absolute',
       bottom: 100,
       right: 20,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
+      width: 64,
+      height: 64,
+      borderRadius: 32,
       backgroundColor: currentTheme.colors.primary,
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: currentTheme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 12,
       zIndex: 1000,
+      borderWidth: 3,
+      borderColor: currentTheme.colors.background,
     },
     timerButtonContent: {
       width: '100%',
@@ -1012,12 +1002,6 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 {t('health.focus')}
               </Text>
             </View>
-            <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>{getWorkTime()}</Text>
-              <Text style={dynamicStyles.statLabel}>
-                {t('health.work')}
-              </Text>
-            </View>
           </View>
 
           <View style={dynamicStyles.buttonsRow}>
@@ -1093,13 +1077,53 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                   <View>
                     <Text style={dynamicStyles.subsectionTitle}>🔄 Bekleyen Görevler</Text>
                     {pendingTasks.filter(t => t.title && t.title.trim().length > 0).map((task) => (
-                      <View key={task.id} style={dynamicStyles.taskCard}>
+                      <TouchableOpacity
+                        key={task.id}
+                        style={[
+                          dynamicStyles.taskCard,
+                          selectedTaskId === task.id && {
+                            borderWidth: 3,
+                            borderColor: currentTheme.colors.primary,
+                            backgroundColor: currentTheme.colors.primary + '15',
+                            shadowColor: currentTheme.colors.primary,
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 8,
+                            elevation: 6,
+                          }
+                        ]}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          const newSelectedId = selectedTaskId === task.id ? null : task.id;
+                          setSelectedTaskId(newSelectedId);
+                          console.log('📌 Görev seçildi:', newSelectedId ? task.title : 'Seçim kaldırıldı');
+                        }}
+                        activeOpacity={0.7}
+                      >
                         <View style={dynamicStyles.taskLeft}>
                           <Text style={dynamicStyles.taskEmoji}>{task.emoji}</Text>
                           <View style={dynamicStyles.taskContent}>
-                            <Text style={dynamicStyles.taskTitle}>
-                              {task.title?.trim() || 'İsimsiz Görev'}
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                              <Text style={dynamicStyles.taskTitle}>
+                                {task.title?.trim() || 'İsimsiz Görev'}
+                              </Text>
+                              {selectedTaskId === task.id && (
+                                <View style={{
+                                  backgroundColor: currentTheme.colors.primary,
+                                  borderRadius: 10,
+                                  paddingHorizontal: 8,
+                                  paddingVertical: 2,
+                                }}>
+                                  <Text style={{
+                                    color: currentTheme.colors.background,
+                                    fontSize: 10,
+                                    fontWeight: '700',
+                                  }}>
+                                    🎯
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
                             <Text style={dynamicStyles.taskDetails}>
                               {task.category} • {task.estimatedTime || '15 dk'}
                             </Text>
@@ -1108,12 +1132,15 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                         </View>
                         <TouchableOpacity
                           style={dynamicStyles.completeButton}
-                          onPress={() => handleTaskComplete(task.id)}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            handleTaskComplete(task.id);
+                          }}
                           activeOpacity={0.7}
                         >
                           <Ionicons name="checkmark" size={20} color={currentTheme.colors.background} />
                         </TouchableOpacity>
-                      </View>
+                      </TouchableOpacity>
                     ))}
                   </View>
                 )}
@@ -1569,7 +1596,16 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       {/* Floating Timer Button - Only on Tasks Screen */}
       <TouchableOpacity
         style={dynamicStyles.floatingTimerButton}
-        onPress={() => setShowFocusMode(true)}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          if (selectedTaskId) {
+            const selectedTask = tasks.find(t => t.id === selectedTaskId);
+            console.log('🎯 Pomodoro başlatılıyor, seçili görev:', selectedTask?.title);
+          } else {
+            console.log('⏰ Pomodoro başlatılıyor (görev seçili değil)');
+          }
+          setShowFocusMode(true);
+        }}
         activeOpacity={0.8}
       >
         <Animated.View
@@ -1621,7 +1657,19 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       >
         <FocusMode
           visible={showFocusMode}
-          onClose={() => setShowFocusMode(false)}
+          onClose={() => {
+            setShowFocusMode(false);
+            setSelectedTaskId(null); // Seçimi temizle
+          }}
+          selectedTaskTitle={(() => {
+            if (selectedTaskId) {
+              const task = tasks.find(t => t.id === selectedTaskId);
+              console.log('🔍 Seçili görev bulundu:', task?.title, 'ID:', selectedTaskId);
+              return task?.title;
+            }
+            console.log('⚠️ Seçili görev yok');
+            return undefined;
+          })()}
         />
       </Modal>
 

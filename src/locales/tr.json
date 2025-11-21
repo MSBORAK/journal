@@ -31,12 +31,17 @@
   },
   "navigation": {
     "dashboard": "Ana Sayfa",
-    "dreams": "Hayaller",
+    "journal": "Günlük",
+    "dreams": "Hedefler",
+    "tasks": "Görevler",
+    "analytics": "Analiz",
     "statistics": "İstatistikler",
     "insights": "İçgörü",
     "history": "Geçmiş",
-    "tasks": "Görevler",
     "settings": "Ayarlar"
+  },
+  "journal": {
+    "subtitle": "Günlüklerini yaz, geçmişini keşfet"
   },
   "auth": {
     "warning": "⚠️ Uyarı",
@@ -105,6 +110,9 @@
     "completion": "Tamamlanma",
     "badgesEarned": "rozet kazandın",
     "seeAllAchievements": "Tüm Başarıları Gör",
+    "myPromises": "Kendine Verdiğin Sözler",
+    "morePromises": "daha fazla söz",
+    "seeAllPromises": "Tüm Sözleri Gör",
     "yourPersonalInsights": "Kişisel İçgörülerin",
     "nowThisIsYourWorld": "Artık burası senin dünyan! 🌟",
     "yourRulesApply": "Senin kuralların geçerli, senin hikayen burada yazılacak.",
@@ -154,6 +162,7 @@
   },
   "diary": {
     "writeDiary": "Günlük Yaz",
+    "writeNew": "Yeni Günlük Yaz",
     "newDiary": "Yeni Günlük",
     "editDiary": "Günlüğü Düzenle",
     "diaryContent": "Günlük İçeriği",
@@ -563,6 +572,8 @@
     "myGoalPlaceholder": "Hedefim...",
     "descriptionLabel": "Açıklama",
     "detailYourDream": "Hayalini detaylandır...",
+    "whyLabel": "Neden?",
+    "whyPlaceholder": "Bu hedefe neden ulaşmak istiyorsun? Bu senin için ne anlama geliyor?",
     "cancelButton": "İptal",
     "saveButton": "Kaydet",
     "promiseLabel": "Sözün *",
@@ -574,6 +585,7 @@
     "updateError": "Güncelleme sırasında bir hata oluştu"
   },
   "achievements": {
+    "title": "Başarılar",
     "writing": "📝 Yazma",
     "tasks": "🎯 Görevler",
     "health": "💪 Sağlık",
@@ -608,10 +620,15 @@
     "legend": "Efsane",
     "tapToFlip": "Tekrar dokunarak çevir",
     "unlockInfo": "Kilidi açmak için:",
-    "levelRequirements": "Seviye Gereksinimleri"
+    "levelRequirements": "Seviye Gereksinimleri",
+    "wellnessScore": "Wellness Skoru"
   },
   "settings": {
     "settings": "Ayarlar",
+    "personalization": "Kişiselleştirme",
+    "notifications": "Bildirimler",
+    "accountData": "Hesap & Veri",
+    "other": "Diğer",
     "diary": "Günlük",
     "goals": "Hedefler",
     "accountSettings": "Hesap Ayarları",
@@ -734,7 +751,7 @@
     "warning": "⚠️ Uyarı",
     
     "notificationsEnabled": "🔔 Bildirimler Açıldı",
-    "notifications": {
+    "notificationMessages": {
       "morning": "{{appName}}'dan günaydın!",
       "evening": "{{appName}} uyumadan önce seni dinlemeye hazır 💫",
       "motivation": "{{appName}} sana inanıyor — devam et!"
@@ -783,6 +800,37 @@
     "noNotificationsInterval": "Bu aralıkta bildirim gönderilmez",
     "dailySummary": "Günlük Özet",
     "soundEffects": "Ses Efektleri",
+    "mindfulness": "Farkındalık",
+    "mindfulnessDesc": "Nefes egzersizi ve mindfulness rutinleri",
+    "mindfulnessSubtitle": "Günlük rutinlerin ve pozitif düşüncelerin",
+    "morningRoutine": "Sabah Rutinim",
+    "eveningRoutine": "Akşam Yansıması",
+    "weeklySummary": "Haftalık Özet",
+    "weeklySummaryDesc": "Haftalık farkındalık istatistikleri burada görünecek",
+    "gratitudePractice": "Minnettarlık Pratiği",
+    "deepBreathing": "Derin Nefes",
+    "intentionSetting": "Niyet Belirleme",
+    "morningStretch": "Sabah Esnemesi",
+    "dailyReflection": "Günlük Yansıma",
+    "gratitudeJournal": "Minnettarlık Günlüğü",
+    "mindfulBreathing": "Farkındalıklı Nefes",
+    "digitalDetox": "Dijital Detoks",
+    "getPositiveAffirmation": "Pozitif Onaylama Al",
+    "positiveAffirmation": "Pozitif Onaylama",
+    "breathingExercise": "Nefes Egzersizi",
+    "breathingExerciseQuick": "Hemen Rahatla 🌬️",
+    "breathingExerciseDesc": "Rahat bir pozisyonda otur, gözlerini kapat ve nefesine odaklan",
+    "breatheIn": "Nefes Al",
+    "hold": "Tut",
+    "breatheOut": "Nefes Ver",
+    "pause": "Bekle",
+    "start": "Başla",
+    "stop": "Durdur",
+    "breath": "Nefes",
+    "sessionTime": "seans süresi",
+    "breathingPattern": "Nefes Deseni",
+    "close": "Kapat",
+    "breathsCompleted": "nefes tamamlandı",
     "hapticFeedback": "Dokunsal Geri Bildirim",
     "themeSelection": "Tema Seçimi",
     "languageSelection": "Dil Seçimi",
@@ -1298,10 +1346,13 @@
       "progressOverPerfection": "Mükemmellikten çok ilerleme! Sen ilerliyorsun! 📊"
     }
   },
-  "focus": {
+    "focus": {
     "focusMode": "Odaklanma Modu",
     "screenTitle": "Odaklanma Zamanı",
     "subtitle": "Bu an sadece senin... Huzurla odaklan 🕯️",
+    "selectedTask": "Seçili Görev",
+    "whatAreYouFocusingOn": "Neye odaklanacaksın?",
+    "focusPlaceholder": "Örn: Proje X üzerinde çalışmak",
     "minuteAbbr": "dk",
     "work": "Çalışma",
     "break": "Mola",

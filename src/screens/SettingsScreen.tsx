@@ -186,112 +186,129 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     });
   };
 
-  const menuItems: MenuItem[] = [
-    {
-      id: 'theme',
-      title: t('settings.themeSelection'),
-      subtitle: `${t('settings.currentTheme')}${currentTheme.name}`,
-      icon: 'color-palette-outline',
-      screen: 'ThemeSelection',
-      color: currentTheme.colors.primary,
+  // Kategorilere göre ayarlar
+  const settingsCategories = {
+    personalization: {
+      title: t('settings.personalization') || 'Kişiselleştirme',
+      icon: '🎨',
+      items: [
+        {
+          id: 'theme',
+          title: t('settings.themeSelection'),
+          subtitle: `${t('settings.currentTheme')}${currentTheme.name}`,
+          icon: 'color-palette-outline',
+          screen: 'ThemeSelection',
+          color: currentTheme.colors.primary,
+        },
+        {
+          id: 'language',
+          title: t('settings.languageSelection'),
+          subtitle: currentLanguage === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English',
+          icon: 'language-outline',
+          screen: 'LanguageSelection',
+          color: '#3b82f6',
+        },
+        {
+          id: 'sound',
+          title: t('settings.soundEffects'),
+          subtitle: soundEnabled ? t('settings.soundEffectsOn') : t('settings.soundEffectsOff'),
+          icon: soundEnabled ? 'volume-high-outline' : 'volume-mute-outline',
+          action: handleToggleSound,
+          color: soundEnabled ? '#10b981' : '#6b7280',
+        },
+        {
+          id: 'mindfulness',
+          title: t('settings.mindfulness') || '🧘‍♀️ Farkındalık',
+          subtitle: t('settings.mindfulnessDesc') || 'Nefes egzersizi ve mindfulness rutinleri',
+          icon: 'leaf-outline',
+          screen: 'Mindfulness',
+          color: '#10b981',
+        },
+      ],
     },
-    {
-      id: 'sound',
-      title: t('settings.soundEffects'),
-      subtitle: soundEnabled ? t('settings.soundEffectsOn') : t('settings.soundEffectsOff'),
-      icon: soundEnabled ? 'volume-high-outline' : 'volume-mute-outline',
-      action: handleToggleSound,
-      color: soundEnabled ? '#10b981' : '#6b7280',
+    notifications: {
+      title: t('settings.notifications') || 'Bildirimler',
+      icon: '🔔',
+      items: [
+        {
+          id: 'notifications',
+          title: t('settings.notificationSettings'),
+          subtitle: t('settings.notificationSettingsDesc'),
+          icon: 'notifications-outline',
+          screen: 'NotificationSettings',
+          color: '#f59e0b',
+        },
+      ],
     },
-    {
-      id: 'language',
-      title: t('settings.languageSelection'),
-      subtitle: currentLanguage === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English',
-      icon: 'language-outline',
-      screen: 'LanguageSelection',
-      color: '#3b82f6',
+    accountData: {
+      title: t('settings.accountData') || 'Hesap & Veri',
+      icon: '🔒',
+      items: [
+        {
+          id: 'account',
+          title: t('settings.accountSettings'),
+          subtitle: t('settings.accountSettingsDesc'),
+          icon: 'person-outline',
+          screen: 'AccountSettings',
+          color: '#10b981',
+        },
+        {
+          id: 'data-backup',
+          title: t('settings.dataManagement'),
+          subtitle: t('settings.backupAndManageData'),
+          icon: 'cloud-upload-outline',
+          screen: 'DataBackupSettings',
+          color: '#06b6d4',
+        },
+        {
+          id: 'privacy',
+          title: t('settings.privacySecurity'),
+          subtitle: t('settings.privacySecurityInfo'),
+          icon: 'shield-checkmark-outline',
+          screen: 'PrivacySecuritySettings',
+          color: '#f59e0b',
+        },
+        {
+          id: 'logout',
+          title: t('settings.logout'),
+          subtitle: t('settings.logOutSecurely'),
+          icon: 'log-out-outline',
+          action: handleSignOut,
+          color: '#ef4444',
+        },
+      ],
     },
-    {
-      id: 'notifications',
-      title: t('settings.notificationSettings'),
-      subtitle: t('settings.notificationSettingsDesc'),
-      icon: 'notifications-outline',
-      screen: 'NotificationSettings',
-      color: '#f59e0b',
+    other: {
+      title: t('settings.other') || 'Diğer',
+      icon: '⚙️',
+      items: [
+        {
+          id: 'app',
+          title: t('settings.appSettings'),
+          subtitle: t('settings.otherAppPreferences'),
+          icon: 'settings-outline',
+          screen: 'AppSettings',
+          color: '#8b5cf6',
+        },
+        {
+          id: 'help',
+          title: t('settings.helpGuide'),
+          subtitle: t('settings.startWithQuickSteps'),
+          icon: 'help-buoy-outline',
+          screen: 'HelpGuide',
+          color: currentTheme.colors.primary,
+        },
+        {
+          id: 'motivation',
+          title: t('settings.resetMotivationHistoryTitle'),
+          subtitle: t('settings.resetMotivationHistorySubtitle'),
+          icon: 'refresh-circle-outline',
+          action: handleResetMotivation,
+          color: '#f59e0b',
+        },
+      ],
     },
-    {
-      id: 'achievements',
-      title: t('settings.myAchievements'),
-      subtitle: t('settings.badgesAndAchievements'),
-      icon: 'trophy-outline',
-      screen: 'Achievements',
-      color: '#FFD700',
-    },
-    {
-      id: 'account',
-      title: t('settings.accountSettings'),
-      subtitle: t('settings.accountSettingsDesc'),
-      icon: 'person-outline',
-      screen: 'AccountSettings',
-      color: '#10b981',
-    },
-    {
-      id: 'language2',
-      title: t('settings.languageSelection'),
-      subtitle: t('settings.changeAppLanguage'),
-      icon: 'language-outline',
-      screen: 'LanguageSelection',
-      color: '#3b82f6',
-    },
-    {
-      id: 'app',
-      title: t('settings.appSettings'),
-      subtitle: t('settings.otherAppPreferences'),
-      icon: 'settings-outline',
-      screen: 'AppSettings',
-      color: '#8b5cf6',
-    },
-    {
-      id: 'privacy',
-      title: t('settings.privacySecurity'),
-      subtitle: t('settings.privacySecurityInfo'),
-      icon: 'shield-checkmark-outline',
-      screen: 'PrivacySecuritySettings',
-      color: '#f59e0b',
-    },
-    {
-      id: 'data-backup',
-      title: t('settings.dataManagement'),
-      subtitle: t('settings.backupAndManageData'),
-      icon: 'cloud-upload-outline',
-      screen: 'DataBackupSettings',
-      color: '#06b6d4',
-    },
-    {
-      id: 'help',
-      title: t('settings.helpGuide'),
-      subtitle: t('settings.startWithQuickSteps'),
-      icon: 'help-buoy-outline',
-      screen: 'HelpGuide',
-      color: currentTheme.colors.primary,
-    },
-    {
-      id: 'motivation',
-      title: t('settings.resetMotivationHistoryTitle'),
-      subtitle: t('settings.resetMotivationHistorySubtitle'),
-      icon: 'refresh-circle-outline',
-      action: handleResetMotivation,
-      color: '#f59e0b',
-    },
-    {
-      id: 'logout',
-      title: t('settings.logout'),
-      subtitle: t('settings.logOutSecurely'),
-      icon: 'log-out-outline',
-      action: handleSignOut,
-      color: '#ef4444',
-    },
-  ];
+  };
 
   const handleMenuPress = (item: MenuItem) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -384,6 +401,24 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
     menuSection: {
       padding: 20,
       paddingTop: 10,
+    },
+    categorySection: {
+      marginBottom: 32,
+    },
+    categoryHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingHorizontal: 4,
+    },
+    categoryIcon: {
+      fontSize: 20,
+      marginRight: 8,
+    },
+    categoryTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
     },
     menuItem: {
       backgroundColor: currentTheme.colors.card,
@@ -480,43 +515,179 @@ const SettingsScreen = React.memo(function SettingsScreen({ navigation }: Settin
           </View>
         </View>
 
-        {/* Menu Items */}
+        {/* Menu Items - Kategorilere göre */}
         <View style={dynamicStyles.menuSection}>
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={dynamicStyles.menuItem}
-              onPress={() => handleMenuPress(item)}
-              activeOpacity={0.7}
-            >
-              <LinearGradient
-                colors={[item.color + '15', item.color + '05']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-              <View style={dynamicStyles.menuItemContent}>
-                <View
-                  style={[
-                    dynamicStyles.menuIconContainer,
-                    { backgroundColor: item.color + '20' },
-                  ]}
-                >
-                  <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
-                </View>
-                <View style={dynamicStyles.menuItemText}>
-                  <Text style={dynamicStyles.menuItemTitle}>{item.title}</Text>
-                  <Text style={dynamicStyles.menuItemSubtitle}>{item.subtitle}</Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={currentTheme.colors.secondary}
-                  style={dynamicStyles.chevron}
+          {/* Kişiselleştirme */}
+          <View style={dynamicStyles.categorySection}>
+            <View style={dynamicStyles.categoryHeader}>
+              <Text style={dynamicStyles.categoryIcon}>{settingsCategories.personalization.icon}</Text>
+              <Text style={dynamicStyles.categoryTitle}>{settingsCategories.personalization.title}</Text>
+            </View>
+            {settingsCategories.personalization.items.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={dynamicStyles.menuItem}
+                onPress={() => handleMenuPress(item)}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={[item.color + '15', item.color + '05']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
                 />
-              </View>
-            </TouchableOpacity>
-          ))}
+                <View style={dynamicStyles.menuItemContent}>
+                  <View
+                    style={[
+                      dynamicStyles.menuIconContainer,
+                      { backgroundColor: item.color + '20' },
+                    ]}
+                  >
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
+                  </View>
+                  <View style={dynamicStyles.menuItemText}>
+                    <Text style={dynamicStyles.menuItemTitle}>{item.title}</Text>
+                    <Text style={dynamicStyles.menuItemSubtitle}>{item.subtitle}</Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={currentTheme.colors.secondary}
+                    style={dynamicStyles.chevron}
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Bildirimler */}
+          <View style={dynamicStyles.categorySection}>
+            <View style={dynamicStyles.categoryHeader}>
+              <Text style={dynamicStyles.categoryIcon}>{settingsCategories.notifications.icon}</Text>
+              <Text style={dynamicStyles.categoryTitle}>{settingsCategories.notifications.title}</Text>
+            </View>
+            {settingsCategories.notifications.items.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={dynamicStyles.menuItem}
+                onPress={() => handleMenuPress(item)}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={[item.color + '15', item.color + '05']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={dynamicStyles.menuItemContent}>
+                  <View
+                    style={[
+                      dynamicStyles.menuIconContainer,
+                      { backgroundColor: item.color + '20' },
+                    ]}
+                  >
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
+                  </View>
+                  <View style={dynamicStyles.menuItemText}>
+                    <Text style={dynamicStyles.menuItemTitle}>{item.title}</Text>
+                    <Text style={dynamicStyles.menuItemSubtitle}>{item.subtitle}</Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={currentTheme.colors.secondary}
+                    style={dynamicStyles.chevron}
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Hesap & Veri */}
+          <View style={dynamicStyles.categorySection}>
+            <View style={dynamicStyles.categoryHeader}>
+              <Text style={dynamicStyles.categoryIcon}>{settingsCategories.accountData.icon}</Text>
+              <Text style={dynamicStyles.categoryTitle}>{settingsCategories.accountData.title}</Text>
+            </View>
+            {settingsCategories.accountData.items.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={dynamicStyles.menuItem}
+                onPress={() => handleMenuPress(item)}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={[item.color + '15', item.color + '05']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={dynamicStyles.menuItemContent}>
+                  <View
+                    style={[
+                      dynamicStyles.menuIconContainer,
+                      { backgroundColor: item.color + '20' },
+                    ]}
+                  >
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
+                  </View>
+                  <View style={dynamicStyles.menuItemText}>
+                    <Text style={dynamicStyles.menuItemTitle}>{item.title}</Text>
+                    <Text style={dynamicStyles.menuItemSubtitle}>{item.subtitle}</Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={currentTheme.colors.secondary}
+                    style={dynamicStyles.chevron}
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Diğer */}
+          <View style={dynamicStyles.categorySection}>
+            <View style={dynamicStyles.categoryHeader}>
+              <Text style={dynamicStyles.categoryIcon}>{settingsCategories.other.icon}</Text>
+              <Text style={dynamicStyles.categoryTitle}>{settingsCategories.other.title}</Text>
+            </View>
+            {settingsCategories.other.items.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={dynamicStyles.menuItem}
+                onPress={() => handleMenuPress(item)}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={[item.color + '15', item.color + '05']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={dynamicStyles.menuItemContent}>
+                  <View
+                    style={[
+                      dynamicStyles.menuIconContainer,
+                      { backgroundColor: item.color + '20' },
+                    ]}
+                  >
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
+                  </View>
+                  <View style={dynamicStyles.menuItemText}>
+                    <Text style={dynamicStyles.menuItemTitle}>{item.title}</Text>
+                    <Text style={dynamicStyles.menuItemSubtitle}>{item.subtitle}</Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={currentTheme.colors.secondary}
+                    style={dynamicStyles.chevron}
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         {/* App Version */}

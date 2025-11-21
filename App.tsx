@@ -15,6 +15,7 @@ import BackgroundWrapper from './src/components/BackgroundWrapper';
 // import { FontProvider } from './src/contexts/FontContext'; // Kaldırıldı
 import { Ionicons } from '@expo/vector-icons';
 import { scheduleAllNotifications, requestNotificationPermissions } from './src/services/notificationService';
+import * as Notifications from 'expo-notifications';
 import { recordUserActivity } from './src/services/userActivityService';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { DMSerifText_400Regular } from '@expo-google-fonts/dm-serif-text';
@@ -51,12 +52,10 @@ type RootStackParamList = {
 
 type TabParamList = {
   Dashboard: undefined;
+  Journal: undefined;
   DreamsGoals: undefined;
-  Statistics: undefined;
-  Insights: undefined;
-  History: undefined;
   Tasks: undefined;
-  Settings: undefined;
+  Analytics: undefined;
 };
 
 // Screens
@@ -66,6 +65,8 @@ import HistoryScreen from './src/screens/HistoryScreen';
 import DiaryDetailScreen from './src/screens/DiaryDetailScreen';
 import StatisticsScreen from './src/screens/StatisticsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import JournalScreen from './src/screens/JournalScreen';
+import AnalyticsScreen from './src/screens/AnalyticsScreen';
 import ThemeSelectionScreen from './src/screens/ThemeSelectionScreen';
 import LanguageSelectionScreen from './src/screens/LanguageSelectionScreen';
 import WriteDiaryStep1Screen from './src/screens/WriteDiaryStep1Screen';
@@ -101,18 +102,14 @@ function MainTabs() {
     switch (name) {
       case 'Dashboard':
         return <Ionicons name={focused ? "home" : "home-outline"} {...iconProps} />;
+      case 'Journal':
+        return <Ionicons name={focused ? "book" : "book-outline"} {...iconProps} />;
       case 'DreamsGoals':
         return <Ionicons name={focused ? "star" : "star-outline"} {...iconProps} />;
-      case 'Statistics':
-        return <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} {...iconProps} />;
-      case 'Insights':
-        return <Ionicons name={focused ? "bulb" : "bulb-outline"} {...iconProps} />;
-      case 'History':
-        return <Ionicons name={focused ? "calendar" : "calendar-outline"} {...iconProps} />;
       case 'Tasks':
         return <Ionicons name={focused ? "checkmark-circle" : "checkmark-circle-outline"} {...iconProps} />;
-      case 'Settings':
-        return <Ionicons name={focused ? "settings" : "settings-outline"} {...iconProps} />;
+      case 'Analytics':
+        return <Ionicons name={focused ? "analytics" : "analytics-outline"} {...iconProps} />;
       default:
         return <Ionicons name="help-outline" {...iconProps} />;
     }
@@ -182,35 +179,19 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
+        name="Journal"
+        component={JournalScreen}
+        options={{
+          title: t('navigation.journal') || 'Günlük',
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Journal', focused, color, size),
+        }}
+      />
+      <Tab.Screen
         name="DreamsGoals"
         component={DreamsGoalsScreen}
         options={{
-          title: t('navigation.dreams'),
+          title: t('navigation.dreams') || 'Hedefler',
           tabBarIcon: ({ color, size, focused }) => renderTabIcon('DreamsGoals', focused, color, size),
-        }}
-      />
-      <Tab.Screen
-        name="Statistics"
-        component={StatisticsScreen}
-        options={{
-          title: t('navigation.statistics'),
-          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Statistics', focused, color, size),
-        }}
-      />
-      <Tab.Screen
-        name="Insights"
-        component={InsightsScreen}
-        options={{
-          title: t('navigation.insights'),
-          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Insights', focused, color, size),
-        }}
-      />
-      <Tab.Screen
-        name="History"
-        component={HistoryScreen}
-        options={{
-          title: t('navigation.history'),
-          tabBarIcon: ({ color, size, focused }) => renderTabIcon('History', focused, color, size),
         }}
       />
       <Tab.Screen
@@ -222,11 +203,11 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
+        name="Analytics"
+        component={AnalyticsScreen}
         options={{
-          title: t('navigation.settings'),
-          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Settings', focused, color, size),
+          title: t('navigation.analytics') || 'Analiz',
+          tabBarIcon: ({ color, size, focused }) => renderTabIcon('Analytics', focused, color, size),
         }}
       />
       </Tab.Navigator>
@@ -238,6 +219,23 @@ function AppNavigator() {
   const { t } = useLanguage();
   const { currentTheme } = useTheme();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
+
+  // Notification response handler (CTA)
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const data = response.notification.request.content.data;
+      console.log('📱 Notification tapped:', data);
+      
+      if (data?.action && data?.screen) {
+        // Navigate to the specified screen
+        if (data.action === 'openMindfulness' || data.action === 'openBreathing') {
+          navigationRef.current?.navigate('Mindfulness' as never);
+        }
+      }
+    });
+
+    return () => subscription.remove();
+  }, [navigationRef]);
 
   // Deep linking configuration
   const linking = {

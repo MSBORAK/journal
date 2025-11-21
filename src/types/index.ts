@@ -245,6 +245,7 @@ export interface Dream {
 }
 
 export interface Goal {
+  why?: string; // Hedefe ulaşmak isteme nedeni
   id: string;
   dreamId?: string; // Hangi hayale bağlı (opsiyonel)
   title: string;

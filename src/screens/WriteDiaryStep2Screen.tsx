@@ -8,11 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import { getButtonTextColor } from '../utils/colorUtils';
+import * as Haptics from 'expo-haptics';
 
 interface WriteDiaryStep2ScreenProps {
   navigation: any;
@@ -89,11 +91,47 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
   
   const [answers, setAnswers] = useState({
     happiness: '',
+    gratitude: '',
+    accomplishment: '',
     lesson: '',
     communication: '',
+    energy: '',
+    growth: '',
+    emotion: '',
+    tomorrow: '',
     challenge: '',
   });
   const [freeWriting, setFreeWriting] = useState('');
+  
+  // Collapsible state - her soru için açık/kapalı durumu tutar
+  const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({
+    happiness: false,
+    gratitude: false,
+    accomplishment: false,
+    lesson: false,
+    communication: false,
+    energy: false,
+    growth: false,
+    emotion: false,
+    tomorrow: false,
+    challenge: false,
+    freeWriting: false,
+  });
+  
+  // Her soru için animasyon değerleri
+  const animations = React.useRef<Record<string, Animated.Value>>({});
+  
+  // Animasyonları başlat
+  React.useEffect(() => {
+    questions(t).forEach(q => {
+      if (!animations.current[q.id]) {
+        animations.current[q.id] = new Animated.Value(0);
+      }
+    });
+    if (!animations.current.freeWriting) {
+      animations.current.freeWriting = new Animated.Value(0);
+    }
+  }, [t]);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -168,12 +206,26 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       fontWeight: '500',
     },
     questionContainer: {
-      marginBottom: 32,
+      marginBottom: 16,
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      overflow: 'hidden',
     },
     questionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 12,
+      padding: 16,
+      justifyContent: 'space-between',
+    },
+    questionHeaderContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    questionToggle: {
+      padding: 4,
     },
     questionIcon: {
       fontSize: 24,
@@ -186,7 +238,7 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       flex: 1,
     },
     answerInput: {
-      backgroundColor: currentTheme.colors.card,
+      backgroundColor: currentTheme.colors.background,
       borderRadius: 12,
       padding: 16,
       fontSize: 16,
@@ -195,6 +247,11 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       minHeight: 100,
       borderWidth: 1,
       borderColor: currentTheme.colors.border,
+      margin: 16,
+      marginTop: 0,
+    },
+    questionContent: {
+      overflow: 'hidden',
     },
     freeWritingDescription: {
       fontSize: 14,
@@ -229,6 +286,26 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
     }));
   }, []);
 
+  const toggleQuestion = useCallback((questionId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const isExpanded = expandedQuestions[questionId];
+    const newExpanded = !isExpanded;
+    
+    setExpandedQuestions(prev => ({
+      ...prev,
+      [questionId]: newExpanded,
+    }));
+
+    // Animasyonu başlat
+    if (animations.current[questionId]) {
+      Animated.timing(animations.current[questionId], {
+        toValue: newExpanded ? 1 : 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [expandedQuestions]);
+
   const handleNext = () => {
     navigation.navigate('WriteDiaryStep3', {
       title,
@@ -244,8 +321,14 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
       mood,
       answers: {
         happiness: '',
+        gratitude: '',
+        accomplishment: '',
         lesson: '',
         communication: '',
+        energy: '',
+        growth: '',
+        emotion: '',
+        tomorrow: '',
         challenge: '',
       },
       freeWriting: '',
@@ -300,54 +383,123 @@ export default function WriteDiaryStep2Screen({ navigation, route }: WriteDiaryS
           <Text style={dynamicStyles.skipButtonText}>{t('diary.skipQuestions')}</Text>
         </TouchableOpacity>
 
-        {questions(t).map((question) => (
-          <View key={question.id} style={dynamicStyles.questionContainer}>
-            <View style={dynamicStyles.questionHeader}>
-              <Text style={dynamicStyles.questionIcon}>{question.icon}</Text>
-              <Text style={dynamicStyles.questionTitle}>{question.title}</Text>
+        {questions(t).map((question) => {
+          const isExpanded = expandedQuestions[question.id];
+          const hasAnswer = answers[question.id as keyof typeof answers]?.trim().length > 0;
+          
+          return (
+            <View key={question.id} style={dynamicStyles.questionContainer}>
+              <TouchableOpacity
+                style={dynamicStyles.questionHeader}
+                onPress={() => toggleQuestion(question.id)}
+                activeOpacity={0.7}
+              >
+                <View style={dynamicStyles.questionHeaderContent}>
+                  <Text style={dynamicStyles.questionIcon}>{question.icon}</Text>
+                  <Text style={[
+                    dynamicStyles.questionTitle,
+                    hasAnswer && { color: currentTheme.colors.primary, fontWeight: '700' }
+                  ]}>
+                    {question.title}
+                  </Text>
+                </View>
+                <Ionicons
+                  name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color={currentTheme.colors.secondary}
+                />
+              </TouchableOpacity>
+              
+              {isExpanded && animations.current[question.id] && (
+                <Animated.View
+                  style={[
+                    dynamicStyles.questionContent,
+                    {
+                      opacity: animations.current[question.id],
+                      maxHeight: animations.current[question.id].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 500],
+                      }),
+                    }
+                  ]}
+                >
+                  <TextInput
+                    style={dynamicStyles.answerInput}
+                    value={answers[question.id as keyof typeof answers] || ''}
+                    onChangeText={(text) => handleAnswerChange(question.id, text)}
+                    placeholder={question.placeholder}
+                    placeholderTextColor={currentTheme.colors.muted}
+                    multiline
+                    autoCorrect={false}
+                    autoCapitalize="sentences"
+                    textContentType="none"
+                    autoComplete="off"
+                    returnKeyType="default"
+                    blurOnSubmit={false}
+                    enablesReturnKeyAutomatically={false}
+                  />
+                </Animated.View>
+              )}
             </View>
-            <TextInput
-              style={dynamicStyles.answerInput}
-              value={answers[question.id as keyof typeof answers]}
-              onChangeText={(text) => handleAnswerChange(question.id, text)}
-              placeholder={question.placeholder}
-              placeholderTextColor={currentTheme.colors.muted}
-              multiline
-              autoCorrect={false}
-              autoCapitalize="sentences"
-              textContentType="none"
-              autoComplete="off"
-              returnKeyType="default"
-              blurOnSubmit={false}
-              enablesReturnKeyAutomatically={false}
-            />
-          </View>
-        ))}
+          );
+        })}
 
         {/* Serbest Yazma Bölümü */}
         <View style={dynamicStyles.questionContainer}>
-          <View style={dynamicStyles.questionHeader}>
-            <Text style={dynamicStyles.questionIcon}>📝</Text>
-            <Text style={dynamicStyles.questionTitle}>{t('diary.freeWriting')}</Text>
-          </View>
-          <Text style={dynamicStyles.freeWritingDescription}>
-            {t('diary.freeWritingDescription')}
-          </Text>
-          <TextInput
-            style={[dynamicStyles.answerInput, { minHeight: 150 }]}
-            value={freeWriting}
-            onChangeText={setFreeWriting}
-            placeholder={t('diary.freeWritingPlaceholder')}
-            placeholderTextColor={currentTheme.colors.muted}
-            multiline
-            autoCorrect={false}
-            autoCapitalize="sentences"
-            textContentType="none"
-            autoComplete="off"
-            returnKeyType="default"
-            blurOnSubmit={false}
-            enablesReturnKeyAutomatically={false}
-          />
+          <TouchableOpacity
+            style={dynamicStyles.questionHeader}
+            onPress={() => toggleQuestion('freeWriting')}
+            activeOpacity={0.7}
+          >
+            <View style={dynamicStyles.questionHeaderContent}>
+              <Text style={dynamicStyles.questionIcon}>📝</Text>
+              <Text style={[
+                dynamicStyles.questionTitle,
+                freeWriting.trim().length > 0 && { color: currentTheme.colors.primary, fontWeight: '700' }
+              ]}>
+                {t('diary.freeWriting')}
+              </Text>
+            </View>
+            <Ionicons
+              name={expandedQuestions.freeWriting ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={currentTheme.colors.secondary}
+            />
+          </TouchableOpacity>
+          
+          {expandedQuestions.freeWriting && animations.current.freeWriting && (
+            <Animated.View
+              style={[
+                dynamicStyles.questionContent,
+                {
+                  opacity: animations.current.freeWriting,
+                  maxHeight: animations.current.freeWriting.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 500],
+                  }),
+                }
+              ]}
+            >
+              <Text style={[dynamicStyles.freeWritingDescription, { marginHorizontal: 16, marginTop: 0 }]}>
+                {t('diary.freeWritingDescription')}
+              </Text>
+              <TextInput
+                style={[dynamicStyles.answerInput, { minHeight: 150 }]}
+                value={freeWriting}
+                onChangeText={setFreeWriting}
+                placeholder={t('diary.freeWritingPlaceholder')}
+                placeholderTextColor={currentTheme.colors.muted}
+                multiline
+                autoCorrect={false}
+                autoCapitalize="sentences"
+                textContentType="none"
+                autoComplete="off"
+                returnKeyType="default"
+                blurOnSubmit={false}
+                enablesReturnKeyAutomatically={false}
+              />
+            </Animated.View>
+          )}
         </View>
 
         <View style={{ height: 20 }} />

@@ -326,6 +326,11 @@ export const scheduleMorningNotification = async (): Promise<void> => {
           body: weekdayMessage.body,
           sound: getSystemSound(),
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          data: { 
+            action: 'openMindfulness',
+            type: 'morning',
+            screen: 'Mindfulness'
+          },
           ...(Platform.OS === 'android' && { channelId: 'default' }),
         },
         trigger: {
@@ -361,6 +366,11 @@ export const scheduleMorningNotification = async (): Promise<void> => {
           body: weekendMessage.body,
           sound: getSystemSound(),
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          data: { 
+            action: 'openMindfulness',
+            type: 'morning',
+            screen: 'Mindfulness'
+          },
           ...(Platform.OS === 'android' && { channelId: 'default' }),
         },
         trigger: {
@@ -535,6 +545,11 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
           body: weekdayMessage.body,
           sound: getSystemSound(),
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          data: { 
+            action: 'openBreathing',
+            type: 'evening',
+            screen: 'Mindfulness'
+          },
           ...(Platform.OS === 'android' && { channelId: 'default' }),
         },
         trigger: {
@@ -596,6 +611,11 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
           body: weekendMessage.body,
           sound: getSystemSound(),
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          data: { 
+            action: 'openBreathing',
+            type: 'evening',
+            screen: 'Mindfulness'
+          },
           ...(Platform.OS === 'android' && { channelId: 'default' }),
         },
         trigger: {

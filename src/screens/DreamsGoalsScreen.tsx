@@ -79,6 +79,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
     title: '',
     description: '',
     promiseText: '',
+    why: '', // Hedef için "Neden?" alanı
   });
 
   const handleTabChange = (tab: 'dreams' | 'goals' | 'promise') => {
@@ -227,6 +228,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
         await addGoal({
           title: formData.title,
           description: formData.description,
+          why: formData.why, // Neden alanı
           progress: 0,
           status: 'active',
           dreamId: '',
@@ -239,7 +241,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       }
     }
     
-    setFormData({ title: '', description: '', promiseText: '' });
+    setFormData({ title: '', description: '', promiseText: '', why: '' });
     setShowAddModal(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
@@ -1080,6 +1082,45 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                         enablesReturnKeyAutomatically={false}
                       />
                     </View>
+                    
+                    {/* Neden? Alanı - Sadece Hedefler için */}
+                    {activeTab === 'goals' && (
+                      <View>
+                        <Text style={{
+                          fontSize: 14,
+                          fontWeight: '600',
+                          color: currentTheme.colors.text,
+                          marginBottom: 8,
+                        }}>
+                          {t('dreams.whyLabel') || 'Neden?'} 💭
+                        </Text>
+                        <TextInput
+                          style={{
+                            backgroundColor: currentTheme.colors.background,
+                            borderRadius: 12,
+                            padding: 16,
+                            fontSize: 16,
+                            color: currentTheme.colors.text,
+                            minHeight: 100,
+                            textAlignVertical: 'top',
+                            borderWidth: 1,
+                            borderColor: currentTheme.colors.border,
+                          }}
+                          placeholder={t('dreams.whyPlaceholder') || 'Bu hedefe neden ulaşmak istiyorsun? Bu senin için ne anlama geliyor?'}
+                          placeholderTextColor={currentTheme.colors.muted}
+                          value={formData.why}
+                          onChangeText={(text) => setFormData({ ...formData, why: text })}
+                          multiline
+                          autoCorrect={false}
+                          autoCapitalize="sentences"
+                          textContentType="none"
+                          autoComplete="off"
+                          returnKeyType="default"
+                          blurOnSubmit={false}
+                          enablesReturnKeyAutomatically={false}
+                        />
+                      </View>
+                    )}
                   </View>
                 )}
 
@@ -1175,6 +1216,34 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
               }}>
                 {selectedItem.description}
               </Text>
+            )}
+
+            {/* Why? - only for goals */}
+            {activeTab === 'goals' && (selectedItem as Goal)?.why && (
+              <View style={{
+                backgroundColor: currentTheme.colors.background,
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 20,
+                borderLeftWidth: 3,
+                borderLeftColor: currentTheme.colors.primary,
+              }}>
+                <Text style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: currentTheme.colors.text,
+                  marginBottom: 8,
+                }}>
+                  💭 {t('dreams.whyLabel') || 'Neden?'}
+                </Text>
+                <Text style={{
+                  fontSize: 15,
+                  color: currentTheme.colors.secondary,
+                  lineHeight: 22,
+                }}>
+                  {(selectedItem as Goal).why}
+                </Text>
+              </View>
             )}
 
             {/* Milestones - only for goals */}
@@ -1286,6 +1355,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                       title: selectedItem.title || selectedItem.text || '',
                       description: selectedItem.description || '',
                       promiseText: selectedItem.text || '',
+                      why: (selectedItem as Goal)?.why || '',
                     });
                   }
                   setShowEditModal(true);
@@ -1484,6 +1554,51 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           />
                         </View>
                       )}
+
+                      {/* Neden? Alanı - Sadece Hedefler için */}
+                      {activeTab === 'goals' && (
+                        <View>
+                          <Text style={{
+                            fontSize: 14,
+                            fontWeight: '600',
+                            color: currentTheme.colors.text,
+                            marginBottom: 8,
+                          }}>
+                            {t('dreams.whyLabel') || 'Neden?'} 💭
+                          </Text>
+                          <TextInput
+                            style={{
+                              backgroundColor: currentTheme.colors.background,
+                              borderRadius: 12,
+                              padding: 16,
+                              fontSize: 16,
+                              color: currentTheme.colors.text,
+                              minHeight: 100,
+                              textAlignVertical: 'top',
+                              borderWidth: 1,
+                              borderColor: currentTheme.colors.border,
+                            }}
+                            placeholder={t('dreams.whyPlaceholder') || 'Bu hedefe neden ulaşmak istiyorsun? Bu senin için ne anlama geliyor?'}
+                            placeholderTextColor={currentTheme.colors.muted}
+                            value={formData.why}
+                            onChangeText={(text) => {
+                              setFormData({ ...formData, why: text });
+                              setSelectedItem({
+                                ...selectedItem,
+                                why: text
+                              } as Goal);
+                            }}
+                            multiline
+                            autoCorrect={false}
+                            autoCapitalize="sentences"
+                            textContentType="none"
+                            autoComplete="off"
+                            returnKeyType="default"
+                            blurOnSubmit={false}
+                            enablesReturnKeyAutomatically={false}
+                          />
+                        </View>
+                      )}
                     </>
                   )}
                 </View>
@@ -1527,6 +1642,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                           await updateGoal(selectedItem.id, {
                             title: formData.title,
                             description: formData.description,
+                            why: formData.why,
                           });
                         } else if (activeTab === 'promise' && selectedItem) {
                           await updatePromise(selectedItem.id, {

@@ -20,9 +20,10 @@ import { CustomAlert } from './CustomAlert';
 interface FocusModeProps {
   visible: boolean;
   onClose: () => void;
+  selectedTaskTitle?: string;
 }
 
-export default function FocusMode({ visible, onClose }: FocusModeProps) {
+export default function FocusMode({ visible, onClose, selectedTaskTitle }: FocusModeProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
   const {
@@ -43,6 +44,17 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
   const [focusSubject, setFocusSubject] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Seçili görev varsa focusSubject'i otomatik set et
+  useEffect(() => {
+    if (selectedTaskTitle && visible) {
+      setFocusSubject(selectedTaskTitle);
+      console.log('✅ Seçili görev FocusMode\'e geçirildi:', selectedTaskTitle);
+    } else if (!visible) {
+      // Modal kapandığında temizle
+      setFocusSubject('');
+    }
+  }, [selectedTaskTitle, visible]);
   
   // Alert state
   const [alertConfig, setAlertConfig] = useState({
@@ -430,6 +442,79 @@ export default function FocusMode({ visible, onClose }: FocusModeProps) {
               <Text style={dynamicStyles.subtitle}>
                 {t('focus.subtitle')}
               </Text>
+
+              {/* Seçili Görev Bilgisi */}
+              {focusSubject && !isActive && (
+                <View style={{
+                  backgroundColor: currentTheme.colors.primary + '20',
+                  borderRadius: 16,
+                  padding: 16,
+                  marginBottom: 20,
+                  borderWidth: 2,
+                  borderColor: currentTheme.colors.primary + '40',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                }}>
+                  <Text style={{ fontSize: 24 }}>🎯</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{
+                      fontSize: 12,
+                      color: currentTheme.colors.secondary,
+                      marginBottom: 4,
+                      fontWeight: '600',
+                    }}>
+                      {t('focus.selectedTask') || 'Seçili Görev'}
+                    </Text>
+                    <Text style={{
+                      fontSize: 16,
+                      color: currentTheme.colors.text,
+                      fontWeight: '700',
+                    }}>
+                      {focusSubject}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setFocusSubject('')}
+                    style={{
+                      padding: 8,
+                    }}
+                  >
+                    <Ionicons name="close-circle" size={24} color={currentTheme.colors.secondary} />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Odaklanma Konusu Input (Seçili görev yoksa) */}
+              {!focusSubject && !isActive && (
+                <View style={{ marginBottom: 20, width: '100%' }}>
+                  <Text style={{
+                    fontSize: 14,
+                    color: currentTheme.colors.secondary,
+                    marginBottom: 8,
+                    textAlign: 'center',
+                    fontWeight: '600',
+                  }}>
+                    {t('focus.whatAreYouFocusingOn') || 'Neye odaklanacaksın?'}
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: currentTheme.colors.card,
+                      borderRadius: 12,
+                      padding: 16,
+                      fontSize: 16,
+                      color: currentTheme.colors.text,
+                      borderWidth: 1,
+                      borderColor: currentTheme.colors.border,
+                      textAlign: 'center',
+                    }}
+                    placeholder={t('focus.focusPlaceholder') || 'Örn: Proje X üzerinde çalışmak'}
+                    placeholderTextColor={currentTheme.colors.muted}
+                    value={focusSubject}
+                    onChangeText={setFocusSubject}
+                  />
+                </View>
+              )}
 
               {/* Duration Selector */}
               <View style={dynamicStyles.durationSelector}>

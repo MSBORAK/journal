@@ -3,7 +3,7 @@
  * 3D flip animation ile kişilik kartı
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -40,6 +40,13 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
   const [isFlipped, setIsFlipped] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  
+  // Yeni animasyonlar
+  const pulseAnim = useRef(new Animated.Value(1)).current; // Nabız efekti için
+  const sparkleAnim = useRef(new Animated.Value(0)).current; // Yıldız tozu için
+  const waveAnim = useRef(new Animated.Value(0)).current; // Ritim dalgaları için
+  const flamePulseAnim = useRef(new Animated.Value(1)).current; // Alev ikonu için
 
   // Kişilik analizi
   const getPersonalityAnalysis = () => {
@@ -150,6 +157,83 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
 
   const personality = getPersonalityAnalysis();
 
+  // Circular progress animasyonu
+  useEffect(() => {
+    const progress = Math.min((personality.stats.totalEntries / 100) * 100, 100);
+    Animated.timing(progressAnim, {
+      toValue: progress,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [personality.stats.totalEntries]);
+
+  // Nabız animasyonu (kişilik ikonu için)
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.08,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  // Yıldız tozu animasyonu (Yeni Yolcu seviyesinde)
+  useEffect(() => {
+    if (personality.stats.totalEntries < 5) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(sparkleAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(sparkleAnim, {
+            toValue: 0,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [personality.stats.totalEntries]);
+
+  // Ritim dalgaları animasyonu
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(waveAnim, {
+        toValue: 1,
+        duration: 3000,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
+  // Alev ikonu parıltı animasyonu
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(flamePulseAnim, {
+          toValue: 1.15,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(flamePulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
@@ -206,11 +290,68 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
     >
       {/* Front Side */}
       <Animated.View style={[styles.card, frontAnimatedStyle]}>
-        <View style={[styles.frontCard, { backgroundColor: currentTheme.colors.card }]}>
+        <LinearGradient
+          colors={[
+            currentTheme.colors.card,
+            currentTheme.colors.card,
+            currentTheme.colors.primary + '08',
+          ]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.frontCard}
+        >
+          {/* Ritim Dalgaları Deseni */}
+          <Animated.View
+            style={[
+              styles.wavePattern,
+              {
+                opacity: waveAnim.interpolate({
+                  inputRange: [0, 0.5, 1],
+                  outputRange: [0.03, 0.06, 0.03],
+                }),
+                transform: [
+                  {
+                    translateX: waveAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 20],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View style={[styles.waveCircle, { borderColor: currentTheme.colors.primary + '20' }]} />
+            <View style={[styles.waveCircle, { borderColor: currentTheme.colors.primary + '15', top: 30, left: 40 }]} />
+            <View style={[styles.waveCircle, { borderColor: currentTheme.colors.primary + '10', top: 60, left: 20 }]} />
+          </Animated.View>
+
+          {/* Yıldız Tozu Efekti (Yeni Yolcu seviyesinde) */}
+          {personality.stats.totalEntries < 5 && (
+            <Animated.View
+              style={[
+                styles.sparkleContainer,
+                {
+                  opacity: sparkleAnim,
+                },
+              ]}
+            >
+              <Text style={[styles.sparkle, { top: 20, left: 30 }]}>✨</Text>
+              <Text style={[styles.sparkle, { top: 50, right: 40 }]}>✨</Text>
+              <Text style={[styles.sparkle, { bottom: 40, left: 50 }]}>✨</Text>
+              <Text style={[styles.sparkle, { bottom: 20, right: 30 }]}>✨</Text>
+            </Animated.View>
+          )}
+
           <View style={styles.frontContent}>
             {/* Header */}
             <View style={styles.frontHeader}>
-              <Text style={styles.emoji}>{personality.emoji}</Text>
+              <Animated.View
+                style={{
+                  transform: [{ scale: pulseAnim }],
+                }}
+              >
+                <Text style={styles.emoji}>{personality.emoji}</Text>
+              </Animated.View>
               <Text style={[styles.title, { color: currentTheme.colors.text }]}>
                 {t('personality.personalityCard')}
               </Text>
@@ -226,34 +367,96 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
               </Text>
             </View>
             
-            {/* Stats */}
+            {/* Stats - 3 Kritik Veri: Wellness Skoru, Gün Serisi, Hedefler */}
             <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statEmoji}>💎</Text>
-                <Text style={[styles.statNumber, { color: currentTheme.colors.text }]}>
+              <View style={[styles.statItem, styles.statItemHighlight]}>
+                <View style={[styles.statIconContainer, { backgroundColor: currentTheme.colors.primary + '20' }]}>
+                  <Text style={styles.statEmoji}>💎</Text>
+                </View>
+                <Text style={[styles.statNumber, { color: currentTheme.colors.primary, fontSize: 24 }]}>
                   {personality.wellnessScore}
                 </Text>
-                <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
-                  Wellness
+                <Text style={[styles.statLabel, { color: currentTheme.colors.text, fontWeight: '700' }]}>
+                  {t('personality.wellnessScore') || 'Wellness'}
                 </Text>
+                {/* Wellness İlerleme Çubuğu */}
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarBg, { backgroundColor: currentTheme.colors.border + '30' }]}>
+                    <Animated.View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.min(personality.wellnessScore, 100)}%`,
+                          backgroundColor: currentTheme.colors.primary,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
               </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statEmoji}>🔥</Text>
-                <Text style={[styles.statNumber, { color: currentTheme.colors.text }]}>
+              <View style={[styles.statItem, styles.statItemHighlight]}>
+                <View style={[styles.statIconContainer, { backgroundColor: '#f59e0b20' }]}>
+                  <Animated.View
+                    style={{
+                      transform: [{ scale: flamePulseAnim }],
+                    }}
+                  >
+                    <Text style={styles.statEmoji}>🔥</Text>
+                  </Animated.View>
+                </View>
+                <Text style={[styles.statNumber, { color: '#f59e0b', fontSize: 24 }]}>
                   {personality.stats.currentStreak}
                 </Text>
-                <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
+                <Text style={[styles.statLabel, { color: currentTheme.colors.text, fontWeight: '700' }]}>
                   {t('dashboard.dayStreak')}
                 </Text>
+                {/* Gün Serisi İlerleme Çubuğu (100 güne göre) */}
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarBg, { backgroundColor: '#f59e0b30' }]}>
+                    <Animated.View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.min((personality.stats.currentStreak / 100) * 100, 100)}%`,
+                          backgroundColor: '#f59e0b',
+                        },
+                      ]}
+                    />
+                  </View>
+                  <Text style={[styles.progressBarLabel, { color: currentTheme.colors.secondary }]}>
+                    {personality.stats.currentStreak}/100
+                  </Text>
+                </View>
               </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statEmoji}>🎯</Text>
-                <Text style={[styles.statNumber, { color: currentTheme.colors.text }]}>
+              <View style={[styles.statItem, styles.statItemHighlight]}>
+                <View style={[styles.statIconContainer, { backgroundColor: '#3b82f620' }]}>
+                  <Text style={styles.statEmoji}>🎯</Text>
+                </View>
+                <Text style={[styles.statNumber, { color: '#3b82f6', fontSize: 24 }]}>
                   {personality.stats.completedGoals}
                 </Text>
-                <Text style={[styles.statLabel, { color: currentTheme.colors.secondary }]}>
+                <Text style={[styles.statLabel, { color: currentTheme.colors.text, fontWeight: '700' }]}>
                   {t('dreams.goals')}
                 </Text>
+                {/* Hedefler İlerleme Çubuğu */}
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarBg, { backgroundColor: '#3b82f630' }]}>
+                    <Animated.View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${goals.length > 0 ? Math.min((personality.stats.completedGoals / goals.length) * 100, 100) : 0}%`,
+                          backgroundColor: '#3b82f6',
+                        },
+                      ]}
+                    />
+                  </View>
+                  {goals.length > 0 && (
+                    <Text style={[styles.progressBarLabel, { color: currentTheme.colors.secondary }]}>
+                      {personality.stats.completedGoals}/{goals.length}
+                    </Text>
+                  )}
+                </View>
               </View>
             </View>
 
@@ -265,7 +468,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
               </Text>
             </View>
           </View>
-        </View>
+        </LinearGradient>
       </Animated.View>
 
       {/* Back Side */}
@@ -282,16 +485,33 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
               </Text>
             </View>
             
-            {/* Simple Progress */}
-            <View style={styles.simpleProgress}>
-              <Text style={[styles.progressLabel, { color: currentTheme.colors.secondary }]}>
-                {t('achievements.progress')}: {personality.stats.totalEntries} / 100 {t('statistics.diaries')}
-              </Text>
-              <View style={[styles.progressBar, { backgroundColor: currentTheme.colors.border }]}>
-                <View style={[styles.progressFill, { 
-                  width: `${Math.min((personality.stats.totalEntries / 100) * 100, 100)}%`,
-                  backgroundColor: currentTheme.colors.primary 
+            {/* Circular Progress for Diary Entries */}
+            <View style={styles.circularProgressContainer}>
+              <View style={styles.circularProgressWrapper}>
+                {/* Background Circle */}
+                <View style={[styles.circularProgressBg, {
+                  borderColor: currentTheme.colors.border + '40',
                 }]} />
+                {/* Progress Circle */}
+                <Animated.View style={[styles.circularProgressFill, {
+                  borderColor: currentTheme.colors.primary,
+                  borderTopColor: Math.min((personality.stats.totalEntries / 100) * 100, 100) > 0 ? currentTheme.colors.primary : 'transparent',
+                  borderRightColor: Math.min((personality.stats.totalEntries / 100) * 100, 100) > 25 ? currentTheme.colors.primary : 'transparent',
+                  borderBottomColor: Math.min((personality.stats.totalEntries / 100) * 100, 100) > 50 ? currentTheme.colors.primary : 'transparent',
+                  borderLeftColor: Math.min((personality.stats.totalEntries / 100) * 100, 100) > 75 ? currentTheme.colors.primary : 'transparent',
+                }]} />
+                {/* Center Text */}
+                <View style={styles.circularProgressCenter}>
+                  <Text style={[styles.circularProgressNumber, { color: currentTheme.colors.text }]}>
+                    {personality.stats.totalEntries}
+                  </Text>
+                  <Text style={[styles.circularProgressLabel, { color: currentTheme.colors.secondary }]}>
+                    / 100
+                  </Text>
+                  <Text style={[styles.circularProgressSubLabel, { color: currentTheme.colors.secondary }]}>
+                    {t('statistics.diaries')}
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -444,7 +664,7 @@ export const PersonalityCard: React.FC<PersonalityCardProps> = ({ onPress }) => 
 const styles = StyleSheet.create({
   container: {
     width: width - 40,
-    height: 360,
+    height: 420,
     alignSelf: 'center',
     marginVertical: 20,
   },
@@ -543,25 +763,42 @@ const styles = StyleSheet.create({
   statItem: {
     alignItems: 'center',
     flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  statItemHighlight: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginHorizontal: 2,
+  },
+  statIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
   },
   statIcon: {
     marginBottom: 4,
   },
   statEmoji: {
-    fontSize: 16,
+    fontSize: 20,
   },
   statNumber: {
     fontSize: 20,
     fontWeight: '900',
     color: 'white',
-    marginBottom: 3,
+    marginBottom: 4,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   statLabel: {
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(255, 255, 255, 0.95)',
     fontWeight: '600',
     textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.2)',
@@ -711,6 +948,53 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
   },
+  circularProgressContainer: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  circularProgressWrapper: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  circularProgressBg: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 6,
+  },
+  circularProgressFill: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 6,
+    transform: [{ rotate: '-90deg' }],
+  },
+  circularProgressCenter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circularProgressNumber: {
+    fontSize: 20,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  circularProgressLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: -2,
+  },
+  circularProgressSubLabel: {
+    fontSize: 9,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginTop: 1,
+  },
   unlockContainer: {
     marginBottom: 16,
   },
@@ -758,5 +1042,55 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 4,
     padding: 1,
+  },
+  // Yeni animasyon stilleri
+  wavePattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    overflow: 'hidden',
+  },
+  waveCircle: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    top: 10,
+    left: 20,
+  },
+  sparkleContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  sparkle: {
+    position: 'absolute',
+    fontSize: 16,
+    opacity: 0.6,
+  },
+  progressBarContainer: {
+    width: '100%',
+    marginTop: 6,
+    alignItems: 'center',
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  progressBarLabel: {
+    fontSize: 8,
+    marginTop: 2,
+    fontWeight: '600',
   },
 });
