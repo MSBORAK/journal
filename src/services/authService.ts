@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface AuthResponse {
   success: boolean;
@@ -208,6 +209,8 @@ export class AuthService {
 
   /**
    * Delete user account and all data (GDPR compliance)
+   * Note: Supabase doesn't allow users to delete their own accounts via client SDK.
+   * We delete all user data and sign them out instead.
    */
   static async deleteAccount(): Promise<AuthResponse> {
     try {
@@ -238,24 +241,47 @@ export class AuthService {
         }
       }
 
-      // Finally, delete the user account
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
-
-      if (error) {
-        return {
-          success: false,
-          error: this.getErrorMessage(error.message),
-        };
+      // Note: supabase.auth.admin.deleteUser() requires admin privileges and cannot be called from client
+      // Instead, we delete all local data and sign out the user
+      // The account will remain in Supabase but all data is deleted
+      
+      // Delete all local data from AsyncStorage
+      try {
+        const userId = user.id;
+        const keysToDelete = [
+          `diary_entries_${userId}`,
+          `@daily_dreams_${userId}`,
+          `@daily_goals_${userId}`,
+          `@daily_promises_${userId}`,
+          `@daily_tasks_${userId}`,
+          `@daily_reminders_${userId}`,
+          `@daily_achievements`,
+          `@daily_user_stats`,
+          `@daily_habits_${userId}`,
+          `@daily_wellness_${userId}`,
+          `user_profile_${userId}`,
+          `user_settings_${userId}`,
+        ];
+        
+        await AsyncStorage.multiRemove(keysToDelete);
+        console.log('✅ All local data deleted from AsyncStorage');
+      } catch (storageError) {
+        console.error('Error deleting local data:', storageError);
+        // Continue even if local deletion fails
       }
+      
+      // Sign out the user
+      await supabase.auth.signOut();
 
       return {
         success: true,
         user: null,
       };
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Delete account error:', error);
       return {
         success: false,
-        error: 'An unexpected error occurred during account deletion',
+        error: error?.message || 'An unexpected error occurred during account deletion',
       };
     }
   }

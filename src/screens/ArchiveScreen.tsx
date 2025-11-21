@@ -15,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useDiary } from '../hooks/useDiary';
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface ArchiveScreenProps {
   navigation: any;
@@ -374,7 +375,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       marginLeft: 4,
     },
     activeFilterButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     clearFiltersButton: {
       backgroundColor: currentTheme.colors.accent,
@@ -411,7 +412,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       color: currentTheme.colors.text,
     },
     activeViewModeButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     // Calendar styles
     calendarContainer: {
@@ -477,7 +478,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       color: currentTheme.colors.text,
     },
     calendarDayTextWithEntry: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '600',
     },
     calendarDayTextToday: {
@@ -659,7 +660,7 @@ export default function ArchiveScreen({ navigation }: ArchiveScreenProps) {
       fontWeight: '500',
     },
     selectedTagText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
   });
 

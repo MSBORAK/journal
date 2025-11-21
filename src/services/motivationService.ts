@@ -187,7 +187,381 @@ export const MOTIVATION_MESSAGES: MotivationData[] = [
     emoji: '💝',
     priority: 'high',
     conditions: {
-      cooldownHours: 14,
+      cooldownHours: 48, // 2 gün
+    },
+  },
+  {
+    id: 'self_compassion_2',
+    type: 'encouragement',
+    title: 'Kendine Şefkatli Ol! 💝',
+    message: 'Kendine şefkatli ol! Sen insansın ve hata yapmak normal. Kendini affetmeyi öğren!',
+    emoji: '🤗',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 50, // ~2 gün
+    },
+  },
+  {
+    id: 'self_compassion_3',
+    type: 'encouragement',
+    title: 'Kendini Yargılama! 🕊️',
+    message: 'Kendini yargılamadan kabul et! Sen mükemmel olmak zorunda değilsin, sadece kendin olman yeterli!',
+    emoji: '🕊️',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 52, // ~2 gün
+    },
+  },
+  {
+    id: 'self_compassion_4',
+    type: 'encouragement',
+    title: 'Kendine İyi Bak! 🌺',
+    message: 'Bugün kendine ne kadar nazik davranacaksın? Unutma, sen de sevgi ve şefkat hak ediyorsun!',
+    emoji: '🌺',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 54, // ~2 gün
+    },
+  },
+  {
+    id: 'self_compassion_5',
+    type: 'encouragement',
+    title: 'Kendinle Barışık Ol! ✨',
+    message: 'Bugün de kendinle barışık ol! Her gün aynı enerjide olmak zorunda değilsin, bu normal!',
+    emoji: '✨',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 56, // ~2 gün
+    },
+  },
+  {
+    id: 'self_compassion_6',
+    type: 'encouragement',
+    title: 'Kendini Olduğun Gibi Kabul Et! 🤲',
+    message: 'Kendini olduğun gibi kabul et! Sen yeterlisin ve mükemmel olmak zorunda değilsin!',
+    emoji: '🤲',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 58, // ~2.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_7',
+    type: 'encouragement',
+    title: 'Kendine Zaman Ver! ⏰',
+    message: 'Kendine zaman ver! Her şey yerli yerine gelecek. Sabırlı ol, sen harikasın!',
+    emoji: '⏰',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 60, // ~2.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_8',
+    type: 'encouragement',
+    title: 'Kendini Sev! 💕',
+    message: 'Kendini sevmek, en güzel alışkanlık! Bugün de kendine sevgiyle yaklaş, sen özelsin!',
+    emoji: '💕',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 62, // ~2.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_9',
+    type: 'encouragement',
+    title: 'Kendine İzin Ver! 🌈',
+    message: 'Kendine izin ver! Dinlenmek, hata yapmak, zorlanmak hepsi normal. Sen insansın!',
+    emoji: '🌈',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 64, // ~2.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_10',
+    type: 'encouragement',
+    title: 'Kendini Dinle! 🎧',
+    message: 'Kendini dinle! İhtiyacın olan şey ne? Bazen sadece dinlenmek yeterli. Sen değerlisin!',
+    emoji: '🎧',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 66, // ~2.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_11',
+    type: 'encouragement',
+    title: 'Kendine Şefkat Göster! 💝',
+    message: 'Kendine şefkat göster! En zor günlerinde bile kendinle nazik ol. Sen bunu hak ediyorsun!',
+    emoji: '💝',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 68, // ~3 gün
+    },
+  },
+  {
+    id: 'self_compassion_12',
+    type: 'encouragement',
+    title: 'Kendini Affet! 🤲',
+    message: 'Kendini affet! Geçmiş hatalar seni tanımlamaz. Her gün yeni bir başlangıç!',
+    emoji: '🤲',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 70, // ~3 gün
+    },
+  },
+  {
+    id: 'self_compassion_13',
+    type: 'encouragement',
+    title: 'Kendine Değer Ver! 💎',
+    message: 'Kendine değer ver! Sen özelsin ve bu dünyada bir tanesin. Kendini olduğun gibi sev!',
+    emoji: '💎',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 72, // 3 gün
+    },
+  },
+  {
+    id: 'self_compassion_14',
+    type: 'encouragement',
+    title: 'Kendine Sabırlı Ol! ⏳',
+    message: 'Kendine sabırlı ol! Her şey zamanında olur. Sen zaten harika birisin!',
+    emoji: '⏳',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 74, // ~3 gün
+    },
+  },
+  {
+    id: 'self_compassion_15',
+    type: 'encouragement',
+    title: 'Kendini Yorma! 😌',
+    message: 'Kendini yorma! Bugün sadece nefes almak bile yeter. Sen zaten yeterince iyisin!',
+    emoji: '😌',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 76, // ~3 gün
+    },
+  },
+  {
+    id: 'self_compassion_16',
+    type: 'encouragement',
+    title: 'Kendinle Konuş! 💬',
+    message: 'Kendinle konuş! En değerli sohbet kendinle olan sohbet. Kendini dinle ve anla!',
+    emoji: '💬',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 78, // ~3 gün
+    },
+  },
+  {
+    id: 'self_compassion_17',
+    type: 'encouragement',
+    title: 'Kendine Güven! 🌟',
+    message: 'Kendine güven! Sen yapabilirsin. İçindeki güç sandığından çok daha büyük!',
+    emoji: '🌟',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 80, // ~3 gün
+    },
+  },
+  {
+    id: 'self_compassion_18',
+    type: 'encouragement',
+    title: 'Kendini Kucakla! 🤗',
+    message: 'Kendini kucakla! Bugün zorlanıyorsan bu normal. Kendine sarıl, sen değerlisin!',
+    emoji: '🤗',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 82, // ~3.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_19',
+    type: 'encouragement',
+    title: 'Kendine İyi Davran! 🌸',
+    message: 'Kendine iyi davran! En sevdiğin insana gösterdiğin sevgiyi kendine de göster. Sen hak ediyorsun!',
+    emoji: '🌸',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 84, // ~3.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_20',
+    type: 'encouragement',
+    title: 'Kendini Önemse! 💖',
+    message: 'Kendini önemse! Senin ihtiyaçların da önemli. Kendine öncelik vermekten çekinme!',
+    emoji: '💖',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 86, // ~3.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_21',
+    type: 'encouragement',
+    title: 'Kendine Merhametli Ol! 🕊️',
+    message: 'Kendine merhametli ol! Hata yapmak insan olmanın bir parçası. Kendini affetmeyi öğren!',
+    emoji: '🕊️',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 88, // ~3.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_22',
+    type: 'encouragement',
+    title: 'Kendini Besle! 🌱',
+    message: 'Kendini besle! Hem bedenini hem ruhunu. Kendine iyi bakmak bir öz-sevgi eylemidir!',
+    emoji: '🌱',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 90, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_23',
+    type: 'encouragement',
+    title: 'Kendine Şükret! 🙏',
+    message: 'Kendine şükret! Bugün burada olman, nefes alman bile bir nimet. Kendini takdir et!',
+    emoji: '🙏',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 92, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_24',
+    type: 'encouragement',
+    title: 'Kendine İnan! ✨',
+    message: 'Kendine inan! Sen yapabilirsin. İçindeki potansiyel sınırsız. Kendine güven!',
+    emoji: '✨',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 94, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_25',
+    type: 'encouragement',
+    title: 'Kendini Onayla! ✅',
+    message: 'Kendini onayla! Sen yeterlisin, sen değerlisin, sen özelsin. Bunu kendine hatırlat!',
+    emoji: '✅',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 96, // 4 gün
+    },
+  },
+  {
+    id: 'self_compassion_26',
+    type: 'encouragement',
+    title: 'Kendine Şans Ver! 🍀',
+    message: 'Kendine şans ver! Her gün yeni bir fırsat. Bugün de kendin için bir şey yap!',
+    emoji: '🍀',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 98, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_27',
+    type: 'encouragement',
+    title: 'Kendini Dinle! 🎵',
+    message: 'Kendini dinle! İç sesin sana ne söylüyor? Ona kulak ver, seni yönlendirecek!',
+    emoji: '🎵',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 100, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_28',
+    type: 'encouragement',
+    title: 'Kendine Teşekkür Et! 🙏',
+    message: 'Kendine teşekkür et! Bugüne kadar geldiğin için, ayakta kaldığın için. Sen güçlüsün!',
+    emoji: '🙏',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 102, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_29',
+    type: 'encouragement',
+    title: 'Kendini Ödüllendir! 🎁',
+    message: 'Kendini ödüllendir! Küçük başarıların bile kutlanmayı hak ediyor. Sen harikasın!',
+    emoji: '🎁',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 104, // ~4 gün
+    },
+  },
+  {
+    id: 'self_compassion_30',
+    type: 'encouragement',
+    title: 'Kendine Saygı Göster! 👑',
+    message: 'Kendine saygı göster! Sen değerlisin ve saygıyı hak ediyorsun. Önce kendinden başla!',
+    emoji: '👑',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 106, // ~4.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_31',
+    type: 'encouragement',
+    title: 'Kendini Anla! 💭',
+    message: 'Kendini anla! Duyguların, düşüncelerin hepsi geçerli. Kendini yargılamadan kabul et!',
+    emoji: '💭',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 108, // ~4.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_32',
+    type: 'encouragement',
+    title: 'Kendine Destek Ol! 🤝',
+    message: 'Kendine destek ol! En zor zamanlarında bile kendin yanında ol. Sen yalnız değilsin!',
+    emoji: '🤝',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 110, // ~4.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_33',
+    type: 'encouragement',
+    title: 'Kendini Besle! 🍎',
+    message: 'Kendini besle! Hem bedenini hem ruhunu. Sağlıklı olmak bir öz-sevgi eylemidir!',
+    emoji: '🍎',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 112, // ~4.5 gün
+    },
+  },
+  {
+    id: 'self_compassion_34',
+    type: 'encouragement',
+    title: 'Kendine İlham Ver! ✨',
+    message: 'Kendine ilham ver! Senin hikayen, senin yolculuğun çok değerli. Kendini kutla!',
+    emoji: '✨',
+    priority: 'medium',
+    conditions: {
+      cooldownHours: 114, // ~5 gün
+    },
+  },
+  {
+    id: 'self_compassion_35',
+    type: 'encouragement',
+    title: 'Kendini Kucakla! 💙',
+    message: 'Kendini kucakla! Bugün zor olsa bile, sen güçlüsün. Kendine sarıl, sen değerlisin!',
+    emoji: '💙',
+    priority: 'high',
+    conditions: {
+      cooldownHours: 120, // 5 gün
     },
   },
   {

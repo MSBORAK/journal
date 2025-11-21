@@ -16,6 +16,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CustomAlert } from '../components/CustomAlert';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface AppSettingsScreenProps {
   navigation: any;
@@ -192,7 +193,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
       elevation: 2,
     },
     actionButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 14,
       fontWeight: '600',
     },
@@ -218,7 +219,7 @@ export default function AppSettingsScreen({ navigation }: AppSettingsScreenProps
       marginTop: 8,
     },
     versionBadgeText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 12,
       fontWeight: '600',
     },

@@ -24,6 +24,7 @@ import { CustomAlert } from '../components/CustomAlert';
 import { Dream, Goal } from '../types';
 import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface DreamsGoalsScreenProps {
   navigation: any;
@@ -510,11 +511,14 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       borderWidth: 1,
       borderColor: currentTheme.colors.primary + '25',
     },
+    headerEmoji: {
+      fontSize: 24,
+      opacity: 0.8,
+    },
     headerTitle: {
       fontSize: 28,
       fontWeight: 'bold',
       color: currentTheme.colors.text,
-      marginBottom: 8,
       textAlign: 'center',
     },
     headerSubtitle: {
@@ -781,9 +785,12 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
       />
       {/* Header */}
       <View style={dynamicStyles.header}>
-        <Text style={dynamicStyles.headerTitle}>
-          ✨ {t('dreams.dreamsAndGoals')}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Text style={dynamicStyles.headerEmoji}>💭</Text>
+          <Text style={dynamicStyles.headerTitle}>
+            {t('dreams.dreamsAndGoals')}
+          </Text>
+        </View>
         <Text style={dynamicStyles.headerSubtitle}>
           {t('dreams.guideYourFuture')}
         </Text>
@@ -1116,7 +1123,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                     <Text style={{
                       fontSize: 16,
                       fontWeight: '600',
-                      color: currentTheme.colors.background,
+                      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
                     }}>
                       {t('dreams.saveButton')}
                     </Text>
@@ -1294,7 +1301,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                 <Text style={{
                   fontSize: 16,
                   fontWeight: '600',
-                  color: currentTheme.colors.background,
+                  color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
                 }}>
                   {t('common.edit')}
                 </Text>
@@ -1545,7 +1552,7 @@ const DreamsGoalsScreen = React.memo(function DreamsGoalsScreen({ navigation }: 
                     <Text style={{
                       fontSize: 16,
                       fontWeight: '600',
-                      color: currentTheme.colors.background,
+                      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
                     }}>
                       {t('dreams.saveButton')}
                     </Text>

@@ -11,6 +11,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface WriteDiaryStep1ScreenProps {
   navigation: any;
@@ -61,7 +62,7 @@ export default function WriteDiaryStep1Screen({ navigation, route }: WriteDiaryS
       borderRadius: 20,
     },
     nextButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '600',
     },

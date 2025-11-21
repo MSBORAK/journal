@@ -27,6 +27,7 @@ import { useTimer } from '../contexts/TimerContext';
 import FocusMode from '../components/FocusMode';
 import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -890,7 +891,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       color: currentTheme.colors.text,
     },
     modalButtonTextPrimary: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     floatingTimerButton: {
       position: 'absolute',

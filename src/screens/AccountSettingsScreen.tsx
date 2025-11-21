@@ -24,6 +24,7 @@ import { useProfile } from '../hooks/useProfile';
 import { BackupService } from '../services/backupService';
 import { CustomAlert } from '../components/CustomAlert';
 import { AuthService } from '../services/authService';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface AccountSettingsScreenProps {
   navigation: any;
@@ -597,7 +598,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       fontWeight: '500',
     },
     modalButtonTextPrimary: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     modalButtonTextSecondary: {
       color: currentTheme.colors.text,

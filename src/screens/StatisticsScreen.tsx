@@ -23,6 +23,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 // import { useDreamsGoals } from '../hooks/useDreamsGoals'; // Kaldırıldı
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface StatisticsScreenProps {
   navigation: any;
@@ -147,7 +148,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
           <View style={dynamicStyles.habitContent}>
             <Text style={[
               dynamicStyles.habitTitle,
-              habit.todayCompleted && { color: currentTheme.colors.background }
+              habit.todayCompleted && { color: getButtonTextColor(habit.color, currentTheme.colors.background) }
             ]}>
               {(habit.title === 'Su İç' || habit.title === 'Drink Water') ? t('statistics.drinkWater') :
                (habit.title === 'Egzersiz Yap' || habit.title === 'Exercise') ? t('statistics.exercise') :
@@ -161,7 +162,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
             </Text>
             <Text style={[
               dynamicStyles.habitDescription,
-              habit.todayCompleted && { color: currentTheme.colors.background, opacity: 0.9 }
+              habit.todayCompleted && { color: getButtonTextColor(habit.color, currentTheme.colors.background), opacity: 0.9 }
             ]}>
               {(habit.description === 'Günde 8 bardak su iç' || habit.description === 'Drink 8 glasses of water daily') ? t('statistics.drink8Glasses') :
                (habit.description === 'Günde 30 dakika egzersiz' || habit.description === '30 minutes of exercise daily') ? t('statistics.exercise30Minutes') :
@@ -188,7 +189,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               </View>
               <Text style={[
                 dynamicStyles.habitProgressText,
-                habit.todayCompleted && { color: currentTheme.colors.background }
+                habit.todayCompleted && { color: getButtonTextColor(habit.color, currentTheme.colors.background) }
               ]}>
                 {habit.todayValue} / {habit.target} {habit.unit === 'glasses' ? t('statistics.glasses') : 
                  habit.unit === 'minutes' ? t('statistics.min') : 
@@ -201,7 +202,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
               <View style={dynamicStyles.habitStreak}>
                 <Text style={[
                   dynamicStyles.habitStreakText,
-                  habit.todayCompleted && { color: currentTheme.colors.background }
+                  habit.todayCompleted && { color: getButtonTextColor(habit.color, currentTheme.colors.background) }
                 ]}>
                   🔥 {streak.currentStreak} {t('statistics.dayStreak')}
                 </Text>
@@ -572,11 +573,11 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     lifeMapScoreNumber: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: currentTheme.colors.background,
+      color: getButtonTextColor('#F59E0B', currentTheme.colors.background),
     },
     lifeMapScoreLabel: {
       fontSize: 14,
-      color: currentTheme.colors.background,
+      color: getButtonTextColor('#F59E0B', currentTheme.colors.background),
       marginLeft: 4,
     },
     title: {
@@ -670,7 +671,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       fontWeight: '500',
     },
     activePeriodButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '600',
     },
     summaryContainer: {
@@ -1066,7 +1067,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
       elevation: 6,
     },
     startWritingButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 14,
       fontWeight: '600',
     },
@@ -1516,7 +1517,7 @@ export default function StatisticsScreen({ navigation }: StatisticsScreenProps) 
     modalSaveButtonText: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       textShadowColor: 'rgba(0, 0, 0, 0.3)',
       textShadowOffset: { width: 0, height: 1 },
       textShadowRadius: 2,

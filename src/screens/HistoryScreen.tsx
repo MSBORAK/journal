@@ -17,6 +17,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 // import { View } from 'moti'; // Removed for now
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry } from '../types';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface HistoryScreenProps {
   navigation: any;
@@ -188,7 +189,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       textAlign: 'center',
     },
     selectedTagFilterText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     resultsInfo: {
       flexDirection: 'row',
@@ -280,7 +281,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
     },
     tagText: {
       fontSize: 12,
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '500',
       textAlign: 'center',
       lineHeight: 16,

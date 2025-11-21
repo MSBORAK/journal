@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface HelpGuideScreenProps {
   navigation: any;
@@ -184,7 +185,7 @@ export default function HelpGuideScreen({ navigation }: HelpGuideScreenProps) {
       shadowRadius: 4,
       elevation: 2,
     },
-    actionText: { color: currentTheme.colors.background, fontWeight: '600', fontSize: 14 },
+    actionText: { color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background), fontWeight: '600', fontSize: 14 },
     quickStartCard: {
       backgroundColor: currentTheme.colors.primary + '10',
       borderRadius: 16,

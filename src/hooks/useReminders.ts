@@ -65,25 +65,7 @@ export const useReminders = (userId?: string) => {
     await saveReminders(newReminders);
     console.log('Reminders saved to storage');
     
-    // Eğer hatırlatıcı aktifse bildirimi planla
-    if (newReminder.isActive) {
-      try {
-        await scheduleReminderNotification(
-          newReminder.id,
-          newReminder.emoji + ' ' + newReminder.title,
-          newReminder.description || 'Hatırlatıcı zamanı!',
-          newReminder.time,
-          newReminder.repeatType,
-          newReminder.category,
-          newReminder.date, // Gelecek tarih için
-          newReminder.repeatDays // Haftalık hatırlatıcılar için günler
-        );
-        console.log('✅ Hatırlatıcı bildirimi planlandı:', newReminder.id);
-      } catch (error) {
-        console.error('❌ Hatırlatıcı bildirimi planlanırken hata:', error);
-        // Bildirim planlanamasa bile hatırlatıcı kaydedildi
-      }
-    }
+    // Bildirim planlama RemindersScreen.tsx'de yapılıyor (daha iyi hata yönetimi için)
     
     return newReminder;
   };

@@ -26,6 +26,7 @@ import {
   NotificationSettings
 } from '../services/notificationService';
 import { CustomAlert } from '../components/CustomAlert';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface NotificationSettingsScreenProps {
   navigation: any;
@@ -349,7 +350,7 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
       borderColor: currentTheme.colors.primary,
     },
     actionButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '700',
     },

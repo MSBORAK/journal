@@ -19,6 +19,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { CustomAlert } from '../components/CustomAlert';
 import { Toast } from '../components/Toast';
 import { supabase } from '../lib/supabase';
+import { getButtonTextColor } from '../utils/colorUtils';
 import { useNavigation } from '@react-navigation/native';
 // import { MotiView } from 'moti'; // Removed for now
 
@@ -168,7 +169,7 @@ export default function AuthScreen() {
       backgroundColor: currentTheme.colors.primary,
     },
     buttonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '600',
     },
@@ -243,7 +244,7 @@ export default function AuthScreen() {
       fontWeight: '600',
     },
     modalButtonTextPrimary: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     modalButtonTextSecondary: {
       color: currentTheme.colors.primary,

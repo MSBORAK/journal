@@ -17,6 +17,7 @@ import { CustomAlert } from '../components/CustomAlert';
 import * as Haptics from 'expo-haptics';
 import { BackupService } from '../services/backupService';
 import { useMigration } from '../hooks/useMigration';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface DataBackupSettingsScreenProps {
   navigation: any;
@@ -25,6 +26,9 @@ interface DataBackupSettingsScreenProps {
 export default function DataBackupSettingsScreen({ navigation }: DataBackupSettingsScreenProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+  const { user, isAnonymous } = useAuth();
+  const { migrateData, isMigrating } = useMigration();
+  const [loading, setLoading] = useState(false);
   
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -58,9 +62,6 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
       showAlert('❌ Hata', 'Veri taşıma işlemi başarısız oldu', 'error');
     }
   };
-  const { user } = useAuth();
-  const { migrateData, isMigrating } = useMigration();
-  const [loading, setLoading] = useState(false);
 
   const handleBackup = async () => {
     if (!user?.uid) return;
@@ -200,7 +201,7 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
       elevation: 2,
     },
     actionButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 14,
       fontWeight: '600',
     },
@@ -247,7 +248,10 @@ export default function DataBackupSettingsScreen({ navigation }: DataBackupSetti
         {/* Info Card */}
         <View style={dynamicStyles.infoCard}>
           <Text style={dynamicStyles.infoText}>
-            ☁️ {t('settings.cloudSyncInfo')}
+            ☁️ {isAnonymous 
+              ? t('settings.cloudSyncInfo')
+              : t('settings.cloudSyncInfoWithEmail') || 'Verileriniz Supabase (cloud) üzerinde güvenli bir şekilde saklanıyor. Tüm cihazlarınızda senkronize olacak.'
+            }
           </Text>
         </View>
 

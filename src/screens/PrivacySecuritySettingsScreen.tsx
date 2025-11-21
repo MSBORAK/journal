@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { getButtonTextColor } from '../utils/colorUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 import * as Haptics from 'expo-haptics';
@@ -189,7 +190,7 @@ export default function PrivacySecuritySettingsScreen({ navigation }: PrivacySec
       elevation: 2,
     },
     actionButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 14,
       fontWeight: '600',
     },

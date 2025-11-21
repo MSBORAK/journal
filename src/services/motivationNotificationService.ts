@@ -305,6 +305,13 @@ export const sendMissingUserNotification = async (): Promise<void> => {
 // Zamanlanmış görev hatırlatıcısı (2 saat sonra)
 export const scheduleTaskReminder = async (): Promise<void> => {
   try {
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      console.warn('⚠️ Notification permission not granted, skipping task reminder');
+      return;
+    }
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '📝 Görev Hatırlatıcısı',
@@ -316,9 +323,11 @@ export const scheduleTaskReminder = async (): Promise<void> => {
         seconds: 2 * 60 * 60, // 2 saat
       },
     });
-    console.log('✅ Görev hatırlatıcısı 2 saat sonra için zamanlandı!');
-  } catch (error) {
+    if (__DEV__) console.log('✅ Görev hatırlatıcısı 2 saat sonra için zamanlandı!');
+  } catch (error: any) {
     console.error('❌ Görev hatırlatıcısı zamanlanamadı:', error);
+    // Hata durumunda sessizce devam et - görev kaydedildi ama bildirim planlanamadı
+    // Hata mesajını throw etme, sadece log'la
   }
 };
 

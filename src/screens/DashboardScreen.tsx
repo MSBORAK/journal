@@ -40,6 +40,7 @@ import MotivationCard from '../components/MotivationCard';
 import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
 import { replaceAppName, replaceNickname, replacePlaceholders } from '../utils/textUtils';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 const { width, height: screenHeight } = Dimensions.get('window');
 
@@ -1132,21 +1133,26 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       paddingBottom: 20,
     },
     headerTitle: {
-      fontSize: 28,
-      fontWeight: 'bold',
+      fontSize: 32,
+      fontFamily: 'BodoniModa_700Bold',
       color: currentThemeColors.text, // Yüksek kontrast
       marginBottom: 8,
+      letterSpacing: 1,
     },
     headerSubtitle: {
       fontSize: 16,
+      fontFamily: 'Poppins_400Regular',
       color: currentThemeColors.muted, // Soft renk
       lineHeight: 24,
       marginBottom: 16,
+      letterSpacing: 0.2,
     },
     userGreeting: {
       fontSize: 18,
+      fontFamily: 'Poppins_600SemiBold',
       color: currentThemeColors.text,
       marginBottom: 4,
+      letterSpacing: 0.3,
     },
     userEmail: {
       fontSize: 14,
@@ -1319,10 +1325,11 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       justifyContent: 'center',
     },
     moodTitle: {
-      fontSize: 18,
+      fontSize: 24,
       fontFamily: 'Poppins_700Bold',
       color: currentTheme.colors.text,
       marginBottom: 12,
+      letterSpacing: 0.8,
     },
     moodContent: {
       flexDirection: 'row',
@@ -1358,7 +1365,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       borderRadius: 12,
     },
     moodBadgeText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 10,
       fontWeight: 'bold',
     },
@@ -1402,17 +1409,24 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       alignItems: 'center',
     },
     moodActionButton: {
-      backgroundColor: currentTheme.colors.primary + '15',
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: currentTheme.colors.primary + '30',
+      backgroundColor: currentTheme.colors.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 14,
+      borderRadius: 22,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
     },
     moodActionText: {
-      fontSize: 14,
-      color: currentTheme.colors.primary,
-      fontWeight: '600',
+      fontSize: 16,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
+      fontWeight: '700',
+      fontFamily: 'Poppins_700Bold',
+      letterSpacing: 0.5,
     },
     motivationCard: {
       backgroundColor: currentTheme.colors.card,
@@ -1431,20 +1445,21 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       borderColor: currentTheme.colors.primary + '20',
     },
     motivationTitle: {
-      fontSize: 20,
+      fontSize: 22,
       fontFamily: 'Poppins_700Bold',
-      color: currentTheme.colors.primary,
+      color: currentTheme.colors.text,
       marginBottom: 16,
       textAlign: 'center',
+      letterSpacing: 1,
     },
     motivationMessage: {
-      fontSize: 18,
+      fontSize: 20,
       color: currentTheme.colors.text,
-      lineHeight: 28,
+      lineHeight: 32,
       textAlign: 'center',
-      fontWeight: '400',
-      fontStyle: 'italic',
+      fontFamily: 'DMSerifText_400Regular',
       letterSpacing: 0.5,
+      opacity: 0.95,
     },
     // Insights Styles
     insightsSection: {

@@ -130,13 +130,25 @@ export const isWeekendLocal = (timezone?: string): boolean => {
 export const getGreetingMessage = (timezone?: string, language: 'tr' | 'en' = 'tr'): string => {
   const now = new Date();
   const userTimezone = timezone || getUserTimezone();
-  const hour = now.toLocaleString('en-US', {
-    timeZone: userTimezone,
-    hour: 'numeric',
-    hour12: false
-  });
   
-  const hourNum = parseInt(hour);
+  // Daha güvenli saat hesaplama
+  let hourNum: number;
+  try {
+    const hourStr = now.toLocaleString('en-US', {
+      timeZone: userTimezone,
+      hour: 'numeric',
+      hour12: false
+    });
+    hourNum = parseInt(hourStr, 10);
+    
+    // Eğer parse başarısız olursa (NaN), local saat kullan
+    if (isNaN(hourNum)) {
+      hourNum = now.getHours();
+    }
+  } catch (error) {
+    console.error('Error getting hour from timezone, using local time:', error);
+    hourNum = now.getHours();
+  }
   
   if (language === 'tr') {
     if (hourNum >= 5 && hourNum < 12) {

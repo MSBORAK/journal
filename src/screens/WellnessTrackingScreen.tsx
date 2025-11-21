@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
+import { getButtonTextColor } from '../utils/colorUtils';
 import { CustomAlert } from '../components/CustomAlert';
 
 interface WellnessTrackingScreenProps {
@@ -241,7 +242,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       textAlign: 'center',
     },
     selectedLevelText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '600',
     },
     saveButton: {
@@ -252,7 +253,7 @@ export default function WellnessTrackingScreen({ navigation }: WellnessTrackingS
       marginTop: 20,
     },
     saveButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '600',
     },

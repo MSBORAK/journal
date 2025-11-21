@@ -977,13 +977,19 @@ export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): No
   const now = new Date();
   
   // Daha güvenli zaman dilimi kontrolü
-  let hour;
+  let hour: number;
   try {
-    hour = parseInt(now.toLocaleString('en-US', {
+    const hourStr = now.toLocaleString('en-US', {
       timeZone: userTimezone,
       hour: 'numeric',
       hour12: false
-    }));
+    });
+    hour = parseInt(hourStr, 10);
+    
+    // Eğer parse başarısız olursa (NaN), local saat kullan
+    if (isNaN(hour)) {
+      hour = now.getHours();
+    }
   } catch (error) {
     console.error('❌ Timezone error, using local time:', error);
     hour = now.getHours();
@@ -1001,6 +1007,11 @@ export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): No
   }
   
   // Aksi halde zaman bazlı mesaj seç - daha sıkı kontrol
+  // Sabah: 5-11 (5, 6, 7, 8, 9, 10)
+  // Öğlen: 11-16 (11, 12, 13, 14, 15)
+  // Akşam: 16-21 (16, 17, 18, 19, 20)
+  // Gece: 21-23 (21, 22)
+  // Sessiz: 23-5 (23, 0, 1, 2, 3, 4)
   if (hour >= 5 && hour < 11) {
     console.log('🌅 Using morning messages (5-11)');
     return getRandomMessage(morningMessages);

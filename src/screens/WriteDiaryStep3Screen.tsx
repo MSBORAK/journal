@@ -18,6 +18,7 @@ import { useAchievements } from '../hooks/useAchievements';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 import { QUESTION_ORDER } from '../constants/diaryQuestions';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface WriteDiaryStep3ScreenProps {
   navigation: any;
@@ -93,7 +94,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       elevation: 8,
     },
     saveButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 18,
       fontWeight: '700',
     },
@@ -169,7 +170,7 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       justifyContent: 'center',
     },
     tagText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 14,
       fontWeight: '500',
       marginRight: 4,

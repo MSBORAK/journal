@@ -500,21 +500,15 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
         ? (nightMessagesEN && nightMessagesEN.length > 0 ? nightMessagesEN : nightMessages)
         : (nightMessages && nightMessages.length > 0 ? nightMessages : nightMessagesEN || []);
       weekdayMessage = getRandomMessage(nightMessagesToUse);
+      if (__DEV__) console.log(`✅ Night message selected for ${hour}:${minute} (night hours, language: ${userLanguage})`);
     } else if (messageType === 'evening') {
-      // Akşam mesajları - günlük yazılmış mı kontrol et (timezone-aware)
-      const todayDiaryWritten = await checkTodayDiaryWritten(userId, userTimezone);
-      if (todayDiaryWritten) {
-        const eveningMessagesToUse = userLanguage === 'en'
-          ? (eveningMessagesEN && eveningMessagesEN.length > 0 ? eveningMessagesEN : eveningMessages)
-          : (eveningMessages && eveningMessages.length > 0 ? eveningMessages : eveningMessagesEN || []);
-        weekdayMessage = getRandomMessage(eveningMessagesToUse);
-      } else {
-        // Dil kontrolü ile hatırlatıcı mesajları seç
-        const reminderMessages = userLanguage === 'en' 
-          ? (eveningReminderMessagesEN && eveningReminderMessagesEN.length > 0 ? eveningReminderMessagesEN : eveningReminderMessages)
-          : (eveningReminderMessages && eveningReminderMessages.length > 0 ? eveningReminderMessages : eveningReminderMessagesEN || []);
-        weekdayMessage = getRandomMessage(reminderMessages);
-      }
+      // Akşam mesajları - her zaman normal akşam mesajlarını kullan
+      // (checkTodayDiaryWritten kontrolü kaldırıldı çünkü bildirim zamanlanırken kontrol ediliyor, tetiklendiğinde değil)
+      const eveningMessagesToUse = userLanguage === 'en'
+        ? (eveningMessagesEN && eveningMessagesEN.length > 0 ? eveningMessagesEN : eveningMessages)
+        : (eveningMessages && eveningMessages.length > 0 ? eveningMessages : eveningMessagesEN || []);
+      weekdayMessage = getRandomMessage(eveningMessagesToUse);
+      if (__DEV__) console.log(`✅ Evening message selected for ${hour}:${minute} (evening hours, language: ${userLanguage})`);
     } else if (messageType === 'afternoon') {
       const afternoonMessagesToUse = userLanguage === 'en'
         ? (afternoonMessagesEN && afternoonMessagesEN.length > 0 ? afternoonMessagesEN : afternoonMessages)
@@ -571,21 +565,15 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
         ? (nightMessagesEN && nightMessagesEN.length > 0 ? nightMessagesEN : nightMessages)
         : (nightMessages && nightMessages.length > 0 ? nightMessages : nightMessagesEN || []);
       weekendMessage = getRandomMessage(nightMessagesToUse);
+      if (__DEV__) console.log(`✅ Night message selected for ${hour}:${minute} (night hours, language: ${userLanguageWeekend})`);
     } else if (messageType === 'evening') {
-      // Akşam mesajları - günlük yazılmış mı kontrol et (timezone-aware)
-      const todayDiaryWritten = await checkTodayDiaryWritten(userId, userTimezone);
-      if (todayDiaryWritten) {
-        const eveningMessagesToUse = userLanguageWeekend === 'en'
-          ? (eveningMessagesEN && eveningMessagesEN.length > 0 ? eveningMessagesEN : eveningMessages)
-          : (eveningMessages && eveningMessages.length > 0 ? eveningMessages : eveningMessagesEN || []);
-        weekendMessage = getRandomMessage(eveningMessagesToUse);
-      } else {
-        // Dil kontrolü ile hatırlatıcı mesajları seç
-        const reminderMessages = userLanguageWeekend === 'en' 
-          ? (eveningReminderMessagesEN && eveningReminderMessagesEN.length > 0 ? eveningReminderMessagesEN : eveningReminderMessages)
-          : (eveningReminderMessages && eveningReminderMessages.length > 0 ? eveningReminderMessages : eveningReminderMessagesEN || []);
-        weekendMessage = getRandomMessage(reminderMessages);
-      }
+      // Akşam mesajları - her zaman normal akşam mesajlarını kullan
+      // (checkTodayDiaryWritten kontrolü kaldırıldı çünkü bildirim zamanlanırken kontrol ediliyor, tetiklendiğinde değil)
+      const eveningMessagesToUse = userLanguageWeekend === 'en'
+        ? (eveningMessagesEN && eveningMessagesEN.length > 0 ? eveningMessagesEN : eveningMessages)
+        : (eveningMessages && eveningMessages.length > 0 ? eveningMessages : eveningMessagesEN || []);
+      weekendMessage = getRandomMessage(eveningMessagesToUse);
+      if (__DEV__) console.log(`✅ Evening message selected for ${hour}:${minute} (evening hours, language: ${userLanguageWeekend})`);
     } else if (messageType === 'afternoon') {
       const afternoonMessagesToUse = userLanguageWeekend === 'en'
         ? (afternoonMessagesEN && afternoonMessagesEN.length > 0 ? afternoonMessagesEN : afternoonMessages)
@@ -951,7 +939,20 @@ export const scheduleReminderNotification = async (
   date?: string, // "YYYY-MM-DD" formatında - gelecek tarih için
   repeatDays?: number[] // 0-6 (Pazar-Pazartesi) - haftalık hatırlatıcılar için
 ): Promise<string> => {
-  const [hour, minute] = time.split(':').map(Number);
+  // Saat ve dakikayı parse et ve integer'a çevir
+  const timeParts = time.split(':');
+  if (timeParts.length !== 2) {
+    throw new Error(`Invalid time format: ${time}. Expected format: HH:MM`);
+  }
+  
+  const hour = Math.floor(Number(timeParts[0]));
+  const minute = Math.floor(Number(timeParts[1]));
+  
+  // Validasyon
+  if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    throw new Error(`Invalid time values: hour=${hour}, minute=${minute}. Must be hour: 0-23, minute: 0-59`);
+  }
+  
   let trigger: Notifications.CalendarTriggerInput;
 
   // Tekrar türüne göre trigger oluştur
@@ -1049,23 +1050,31 @@ export const scheduleReminderNotification = async (
       };
   }
 
-  const selectedSound = getSystemSound();
-  console.log('🎵 Scheduling reminder notification:', { 
-    reminderId, title, time, repeatType, channelId: category, sound: selectedSound 
-  });
+  try {
+    const selectedSound = getSystemSound();
+    if (__DEV__) console.log('🎵 Scheduling reminder notification:', { 
+      reminderId, title, time, repeatType, channelId: category, sound: selectedSound 
+    });
 
-  return await Notifications.scheduleNotificationAsync({
-    identifier: `reminder-${reminderId}`,
-    content: {
-      title,
-      body,
-      sound: selectedSound,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
-      data: { type: 'reminder', reminderId, category },
-      ...(Platform.OS === 'android' && { channelId: category }),
-    },
-    trigger,
-  });
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      identifier: `reminder-${reminderId}`,
+      content: {
+        title,
+        body,
+        sound: selectedSound,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+        data: { type: 'reminder', reminderId, category },
+        ...(Platform.OS === 'android' && { channelId: category }),
+      },
+      trigger,
+    });
+
+    if (__DEV__) console.log('✅ Reminder notification scheduled successfully:', notificationId);
+    return notificationId;
+  } catch (error: any) {
+    console.error('❌ Error scheduling reminder notification:', error);
+    throw new Error(error?.message || 'Failed to schedule reminder notification');
+  }
 };
 
 /**

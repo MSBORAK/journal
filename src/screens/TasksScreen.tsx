@@ -21,6 +21,7 @@ import { recordUserActivity } from '../services/userActivityService';
 import { scheduleTaskReminder } from '../services/motivationNotificationService';
 import { CustomAlert } from '../components/CustomAlert';
 import PomodoroTimer from '../components/PomodoroTimer';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface TasksScreenProps {
   navigation: any;
@@ -210,7 +211,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       textAlign: 'center',
     },
     activeTabText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '600',
     },
     statsContainer: {
@@ -333,7 +334,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       textAlign: 'center',
     },
     selectedCategoryName: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     categoryCount: {
       fontSize: 10,
@@ -341,7 +342,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       marginTop: 2,
     },
     selectedCategoryCount: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
     tasksList: {
       paddingHorizontal: 20,
@@ -553,7 +554,7 @@ export default function TasksScreen({ navigation }: TasksScreenProps) {
       color: currentTheme.colors.text,
     },
     selectedOptionText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '500',
     },
     modalActions: {

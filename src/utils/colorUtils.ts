@@ -81,3 +81,29 @@ export function getThemeTextColor(background: string, theme: 'light' | 'dark' = 
     return getAccessibleTextColor(background, '#FFFFFF', '#2D423B');
   }
 }
+
+/**
+ * Get readable text color on primary background
+ * Returns the best contrasting color (white or black) for text on a primary colored button
+ */
+export function getButtonTextColor(primaryColor: string, backgroundColor: string): string {
+  // Get luminance of primary color
+  const primaryRgb = hexToRgb(primaryColor);
+  if (!primaryRgb) return backgroundColor;
+  
+  const primaryLuminance = getLuminance(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+  
+  // If primary is dark (luminance < 0.5), use light text
+  // If primary is light (luminance >= 0.5), use dark text
+  if (primaryLuminance < 0.5) {
+    // Dark primary - use white or light text
+    const whiteContrast = getContrastRatio('#FFFFFF', primaryColor);
+    const backgroundContrast = getContrastRatio(backgroundColor, primaryColor);
+    return whiteContrast > backgroundContrast ? '#FFFFFF' : backgroundColor;
+  } else {
+    // Light primary - use dark text
+    const blackContrast = getContrastRatio('#000000', primaryColor);
+    const backgroundContrast = getContrastRatio(backgroundColor, primaryColor);
+    return blackContrast > backgroundContrast ? '#000000' : backgroundColor;
+  }
+}

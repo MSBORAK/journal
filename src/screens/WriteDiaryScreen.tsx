@@ -16,6 +16,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 // import { useFont } from '../contexts/FontContext'; // Kaldırıldı
 import { CustomAlert } from '../components/CustomAlert';
 import { useDiary } from '../hooks/useDiary';
+import { getButtonTextColor } from '../utils/colorUtils';
 // import { View } from 'moti'; // Removed for now
 import { Ionicons } from '@expo/vector-icons';
 import { DiaryEntry, Doodle, DrawingTool } from '../types';
@@ -231,7 +232,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       justifyContent: 'center',
     },
     saveButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '600',
     },
@@ -334,7 +335,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       justifyContent: 'center',
     },
     tagText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 14,
       fontWeight: '500',
       marginRight: 4,
@@ -432,7 +433,7 @@ export default function WriteDiaryScreen({ navigation, route }: WriteDiaryScreen
       backgroundColor: '#ef4444',
     },
     clearButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor('#ef4444', currentTheme.colors.background),
     },
   });
 

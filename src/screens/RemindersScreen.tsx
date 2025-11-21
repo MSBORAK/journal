@@ -23,6 +23,7 @@ import {
 } from '../services/notificationService';
 import DatePicker from '../components/DatePicker';
 import { CustomAlert } from '../components/CustomAlert';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface RemindersScreenProps {
   navigation: any;
@@ -401,7 +402,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       borderRadius: 20,
     },
     tasksAddButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '600',
     },
@@ -494,7 +495,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
       color: currentTheme.colors.text,
     },
     selectedOptionText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '500',
     },
     timeInput: {
@@ -536,7 +537,7 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
     saveButtonText: {
       fontSize: 16,
       fontWeight: '500',
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
     },
   });
 
@@ -592,22 +593,36 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
 
       // Bildirim planla (sadece aktifse)
       if (savedReminder.isActive) {
-        await scheduleReminderNotification(
-          savedReminder.id,
-          savedReminder.emoji + ' ' + savedReminder.title,
-          savedReminder.description || t('reminders.reminderTime'),
-          savedReminder.time,
-          savedReminder.repeatType,
-          savedReminder.category,
-          savedReminder.date
-        );
+        try {
+          await scheduleReminderNotification(
+            savedReminder.id,
+            savedReminder.emoji + ' ' + savedReminder.title,
+            savedReminder.description || t('reminders.reminderTime'),
+            savedReminder.time,
+            savedReminder.repeatType,
+            savedReminder.category,
+            savedReminder.date
+          );
+        } catch (notificationError: any) {
+          console.error('Error scheduling reminder notification:', notificationError);
+          showAlert(
+            t('reminders.notificationError'), 
+            notificationError?.message || t('reminders.notificationScheduleFailed'), 
+            'warning'
+          );
+          // Hatırlatıcı kaydedildi ama bildirim planlanamadı - kullanıcıya bilgi ver
+        }
       }
       
       setShowAddModal(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving reminder:', error);
-      showAlert(t('common.error'), t('reminders.reminderNotSaved'), 'error');
+      showAlert(
+        t('common.error'), 
+        error?.message || t('reminders.reminderNotSaved'), 
+        'error'
+      );
     }
   };
 

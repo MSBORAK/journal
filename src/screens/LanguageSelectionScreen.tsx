@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supportedLanguages, Language } from '../services/languageService';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface LanguageSelectionScreenProps {
   navigation: any;
@@ -117,7 +118,7 @@ const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = ({ navig
       marginBottom: 20,
     },
     continueButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 18,
       fontWeight: '600',
     },

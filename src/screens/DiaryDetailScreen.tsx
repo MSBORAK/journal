@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DiaryEntry } from '../types';
 import { useGuidedQuestions, QUESTION_ORDER } from '../constants/diaryQuestions';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -189,7 +190,7 @@ export default function DiaryDetailScreen({ navigation, route }: DiaryDetailScre
     },
     tagText: {
       fontSize: 12,
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '500',
     },
     emptyState: {

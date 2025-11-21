@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Achievement } from '../types';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface AchievementsScreenProps {
   navigation: any;
@@ -270,7 +271,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       lineHeight: 14,
     },
     activeTabText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontWeight: '700',
     },
     content: {
@@ -456,7 +457,7 @@ export default function AchievementsScreen({ navigation }: AchievementsScreenPro
       alignItems: 'center',
     },
     modalCloseText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '600',
     },

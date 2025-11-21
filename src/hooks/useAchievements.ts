@@ -623,11 +623,64 @@ export const useAchievements = (userId?: string) => {
     
     switch (definition.requirement.type) {
       case 'streak':
-        current = currentStats.currentStreak || 0;
+        // Günlük yazma streak'i için gerçek verileri hesapla
+        if (achievementId.includes('streak') || achievementId.includes('first_streak')) {
+          try {
+            // AsyncStorage'dan güncel günlük verilerini oku
+            const DIARY_STORAGE_KEY = 'diary_entries';
+            const diaryData = await AsyncStorage.getItem(`${DIARY_STORAGE_KEY}_${userId}`);
+            if (diaryData) {
+              const entries = JSON.parse(diaryData);
+              // Streak hesapla
+              if (entries.length > 0) {
+                const sortedEntries = [...entries].sort((a: any, b: any) => 
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
+                let streak = 0;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                for (let i = 0; i < sortedEntries.length; i++) {
+                  const entryDate = new Date(sortedEntries[i].date);
+                  entryDate.setHours(0, 0, 0, 0);
+                  const expectedDate = new Date(today);
+                  expectedDate.setDate(today.getDate() - i);
+                  if (entryDate.getTime() === expectedDate.getTime()) {
+                    streak++;
+                  } else {
+                    break;
+                  }
+                }
+                current = streak;
+              } else {
+                current = 0;
+              }
+            } else {
+              current = currentStats.currentStreak || 0;
+            }
+          } catch (error) {
+            console.error('Error calculating streak from diary entries:', error);
+            current = currentStats.currentStreak || 0;
+          }
+        } else {
+          current = currentStats.currentStreak || 0;
+        }
         break;
       case 'total':
         if (achievementId.includes('entry') || achievementId.includes('writer') || achievementId.includes('diarist') || achievementId.includes('master_writer')) {
-          current = currentStats.totalDiaryEntries || 0;
+          // Günlük yazma sayısı için gerçek verileri hesapla
+          try {
+            const DIARY_STORAGE_KEY = 'diary_entries';
+            const diaryData = await AsyncStorage.getItem(`${DIARY_STORAGE_KEY}_${userId}`);
+            if (diaryData) {
+              const entries = JSON.parse(diaryData);
+              current = entries.length || 0;
+            } else {
+              current = currentStats.totalDiaryEntries || 0;
+            }
+          } catch (error) {
+            console.error('Error calculating total diary entries:', error);
+            current = currentStats.totalDiaryEntries || 0;
+          }
         } else if (achievementId.includes('task') || achievementId.includes('productive') || achievementId.includes('achiever')) {
           current = currentStats.totalTasksCompleted || 0;
         } else if (achievementId.includes('reminder')) {

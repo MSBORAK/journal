@@ -17,6 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { scheduleAllNotifications, requestNotificationPermissions } from './src/services/notificationService';
 import { recordUserActivity } from './src/services/userActivityService';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { DMSerifText_400Regular } from '@expo-google-fonts/dm-serif-text';
+import { BodoniModa_400Regular, BodoniModa_700Bold } from '@expo-google-fonts/bodoni-moda';
 import * as SplashScreen from 'expo-splash-screen';
 // import './global.css'; // Disabled for now
 
@@ -425,6 +427,9 @@ export default function App() {
     Poppins_400Regular,
     Poppins_600SemiBold,
     Poppins_700Bold,
+    DMSerifText_400Regular,
+    BodoniModa_400Regular,
+    BodoniModa_700Bold,
   });
 
   useEffect(() => {

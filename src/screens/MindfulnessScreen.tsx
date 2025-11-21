@@ -15,6 +15,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 interface MindfulnessScreenProps {
   navigation: any;
@@ -210,7 +211,7 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
       elevation: 6,
     },
     affirmationButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '700',
     },
@@ -256,7 +257,7 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
       alignItems: 'center',
     },
     modalButtonText: {
-      color: currentTheme.colors.background,
+      color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background),
       fontSize: 16,
       fontWeight: '700',
     },

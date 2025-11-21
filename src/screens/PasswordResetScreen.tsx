@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { CustomAlert } from '../components/CustomAlert';
 import { Linking } from 'react-native';
+import { getButtonTextColor } from '../utils/colorUtils';
 
 export default function PasswordResetScreen() {
   const { currentTheme } = useTheme();
@@ -217,7 +218,7 @@ export default function PasswordResetScreen() {
           disabled={loading}
           activeOpacity={0.8}
         >
-          <Text style={[styles.buttonText, { color: currentTheme.colors.background }]}>
+          <Text style={[styles.buttonText, { color: getButtonTextColor(currentTheme.colors.primary, currentTheme.colors.background) }]}>
             {loading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
           </Text>
         </TouchableOpacity>
