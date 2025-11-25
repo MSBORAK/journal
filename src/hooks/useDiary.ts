@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 import { DiaryEntry } from '../types';
 
 const DIARY_STORAGE_KEY = 'diary_entries';
@@ -16,13 +17,46 @@ export const useDiary = (userId?: string) => {
     try {
       setLoading(true);
       
-      // AsyncStorage'dan veri yükle
+      // Önce Supabase'den veri çek
+      try {
+        const { data: supabaseEntries, error: supabaseError } = await supabase
+          .from('diary_entries')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (supabaseError) {
+          console.error('Supabase fetch error:', supabaseError);
+          // Hata olsa bile AsyncStorage'dan yüklemeyi dene
+        } else if (supabaseEntries && supabaseEntries.length > 0) {
+          // Supabase'den veri geldi, formatla ve kullan
+          const formattedEntries: DiaryEntry[] = supabaseEntries.map((entry: any) => ({
+            id: entry.id,
+            title: entry.title,
+            content: entry.content,
+            mood: entry.mood,
+            tags: entry.tags || [],
+            date: entry.date,
+            createdAt: entry.created_at,
+            updatedAt: entry.updated_at,
+          }));
+          
+          setEntries(formattedEntries);
+          // AsyncStorage'a da kaydet (offline için)
+          await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(formattedEntries));
+          console.log('✅ Loaded entries from Supabase:', formattedEntries.length);
+          return;
+        }
+      } catch (supabaseErr) {
+        console.error('Supabase connection error:', supabaseErr);
+        // Supabase'e bağlanamazsa AsyncStorage'dan yükle
+      }
+      
+      // Supabase'den veri gelmediyse veya hata varsa AsyncStorage'dan yükle
       const storedEntries = await AsyncStorage.getItem(`${DIARY_STORAGE_KEY}_${userId}`);
       
       if (storedEntries) {
-        // Kaydedilmiş veriler varsa onları kullan
         const parsedEntries = JSON.parse(storedEntries);
-        // Duplicate entries'i filtrele (aynı tarih ve benzer içerik)
         const uniqueEntries = parsedEntries.filter((entry: DiaryEntry, index: number, self: DiaryEntry[]) => {
           const firstIndex = self.findIndex((e: DiaryEntry) => 
             e.id === entry.id || (e.date === entry.date && e.title === entry.title && e.content === entry.content)
@@ -30,11 +64,10 @@ export const useDiary = (userId?: string) => {
           return index === firstIndex;
         });
         setEntries(uniqueEntries);
-        console.log('Loaded entries from AsyncStorage:', uniqueEntries.length);
+        console.log('📦 Loaded entries from AsyncStorage:', uniqueEntries.length);
       } else {
-        // İlk kullanımda boş array ile başla
         setEntries([]);
-        console.log('First time - starting with empty entries');
+        console.log('🆕 First time - starting with empty entries');
       }
     } catch (err) {
       console.error('Error fetching entries:', err);
@@ -57,33 +90,104 @@ export const useDiary = (userId?: string) => {
       if (existingEntryIndex >= 0) {
         // Aynı tarihte entry varsa update et
         const existingEntry = entries[existingEntryIndex];
-        savedEntry = {
-          ...existingEntry,
-          ...entry,
-          updatedAt: new Date().toISOString(),
-        };
+        
+        // Supabase'de güncelle
+        try {
+          const { data: updatedData, error: updateError } = await supabase
+            .from('diary_entries')
+            .update({
+              title: entry.title,
+              content: entry.content,
+              mood: entry.mood,
+              tags: entry.tags || [],
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingEntry.id)
+            .eq('user_id', userId)
+            .select()
+            .single();
+
+          if (updateError) {
+            console.error('Supabase update error:', updateError);
+            throw updateError;
+          }
+
+          savedEntry = {
+            id: updatedData.id,
+            title: updatedData.title,
+            content: updatedData.content,
+            mood: updatedData.mood,
+            tags: updatedData.tags || [],
+            date: updatedData.date,
+            createdAt: updatedData.created_at,
+            updatedAt: updatedData.updated_at,
+          };
+        } catch (supabaseErr) {
+          console.error('Supabase update failed, using local:', supabaseErr);
+          // Supabase başarısız olursa local olarak güncelle
+          savedEntry = {
+            ...existingEntry,
+            ...entry,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        
         updatedEntries = entries.map((e, index) => 
           index === existingEntryIndex ? savedEntry : e
         );
-        console.log('Entry updated (same date):', savedEntry.id);
+        console.log('✅ Entry updated (same date):', savedEntry.id);
       } else {
-        // Yeni entry ekle
-        savedEntry = {
-          id: Date.now().toString(),
-          ...entry,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+        // Yeni entry ekle - Supabase'e kaydet
+        try {
+          const { data: insertedData, error: insertError } = await supabase
+            .from('diary_entries')
+            .insert({
+              user_id: userId,
+              title: entry.title,
+              content: entry.content,
+              mood: entry.mood,
+              tags: entry.tags || [],
+              date: entry.date,
+            })
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('Supabase insert error:', insertError);
+            throw insertError;
+          }
+
+          savedEntry = {
+            id: insertedData.id,
+            title: insertedData.title,
+            content: insertedData.content,
+            mood: insertedData.mood,
+            tags: insertedData.tags || [],
+            date: insertedData.date,
+            createdAt: insertedData.created_at,
+            updatedAt: insertedData.updated_at,
+          };
+        } catch (supabaseErr) {
+          console.error('Supabase insert failed, using local ID:', supabaseErr);
+          // Supabase başarısız olursa local ID ile kaydet
+          savedEntry = {
+            id: Date.now().toString(),
+            ...entry,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        
         updatedEntries = [savedEntry, ...entries];
-        console.log('New entry added:', savedEntry.id);
+        console.log('✅ New entry added:', savedEntry.id);
       }
 
       // State'i güncelle
       setEntries(updatedEntries);
       
-      // AsyncStorage'a kaydet
+      // AsyncStorage'a kaydet (offline için)
       await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
-      console.log('Entry saved to AsyncStorage:', savedEntry.id);
+      console.log('💾 Entry saved to AsyncStorage:', savedEntry.id);
       
       return savedEntry;
     } catch (err) {
@@ -97,11 +201,50 @@ export const useDiary = (userId?: string) => {
     if (!userId) throw new Error('User not authenticated');
     
     try {
-      const updatedEntry: DiaryEntry = {
-        ...entries.find(e => e.id === id)!,
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      const existingEntry = entries.find(e => e.id === id);
+      if (!existingEntry) throw new Error('Entry not found');
+
+      // Supabase'de güncelle
+      let updatedEntry: DiaryEntry;
+      try {
+        const { data: updatedData, error: updateError } = await supabase
+          .from('diary_entries')
+          .update({
+            ...(updates.title !== undefined && { title: updates.title }),
+            ...(updates.content !== undefined && { content: updates.content }),
+            ...(updates.mood !== undefined && { mood: updates.mood }),
+            ...(updates.tags !== undefined && { tags: updates.tags }),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+          .eq('user_id', userId)
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error('Supabase update error:', updateError);
+          throw updateError;
+        }
+
+        updatedEntry = {
+          id: updatedData.id,
+          title: updatedData.title,
+          content: updatedData.content,
+          mood: updatedData.mood,
+          tags: updatedData.tags || [],
+          date: updatedData.date,
+          createdAt: updatedData.created_at,
+          updatedAt: updatedData.updated_at,
+        };
+      } catch (supabaseErr) {
+        console.error('Supabase update failed, using local:', supabaseErr);
+        // Supabase başarısız olursa local olarak güncelle
+        updatedEntry = {
+          ...existingEntry,
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        };
+      }
 
       // State'i güncelle
       const updatedEntries = entries.map((entry: DiaryEntry) => 
@@ -111,7 +254,7 @@ export const useDiary = (userId?: string) => {
       
       // AsyncStorage'a kaydet
       await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
-      console.log('Entry updated in AsyncStorage:', id);
+      console.log('✅ Entry updated:', id);
       
       return updatedEntry;
     } catch (err) {
@@ -125,13 +268,31 @@ export const useDiary = (userId?: string) => {
     if (!userId) throw new Error('User not authenticated');
     
     try {
+      // Supabase'den sil
+      try {
+        const { error: deleteError } = await supabase
+          .from('diary_entries')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId);
+
+        if (deleteError) {
+          console.error('Supabase delete error:', deleteError);
+          // Hata olsa bile local'den silmeye devam et
+        } else {
+          console.log('✅ Entry deleted from Supabase:', id);
+        }
+      } catch (supabaseErr) {
+        console.error('Supabase delete failed, deleting locally:', supabaseErr);
+      }
+
       // State'i güncelle
       const updatedEntries = entries.filter((entry: DiaryEntry) => entry.id !== id);
       setEntries(updatedEntries);
       
       // AsyncStorage'a kaydet
       await AsyncStorage.setItem(`${DIARY_STORAGE_KEY}_${userId}`, JSON.stringify(updatedEntries));
-      console.log('Entry deleted from AsyncStorage:', id);
+      console.log('💾 Entry deleted from AsyncStorage:', id);
     } catch (err) {
       console.error('Error deleting entry:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete entry');

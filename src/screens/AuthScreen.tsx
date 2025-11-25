@@ -13,6 +13,7 @@ import {
   Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -164,6 +165,12 @@ export default function AuthScreen() {
       padding: 16,
       alignItems: 'center',
       marginBottom: 16,
+      minHeight: 52,
+      shadowColor: currentTheme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
     },
     primaryButton: {
       backgroundColor: currentTheme.colors.primary,
@@ -252,7 +259,12 @@ export default function AuthScreen() {
   });
 
   const handleForgotPassword = async () => {
+    console.log('🔑 handleForgotPassword fonksiyonu çağrıldı');
+    console.log('📧 Email değeri:', forgotPasswordEmail);
+    console.log('⏳ Loading durumu:', loading);
+
     if (!forgotPasswordEmail) {
+      console.log('⚠️ Email boş, uyarı gösteriliyor');
       showAlert(
         t('auth.warning'), 
         t('auth.enterEmailForPasswordReset'), 
@@ -262,77 +274,229 @@ export default function AuthScreen() {
     }
 
     setLoading(true);
+    console.log('⏳ Loading true yapıldı');
+
     try {
       // Email doğrulama
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(forgotPasswordEmail)) {
+      const isValidEmail = emailRegex.test(forgotPasswordEmail);
+      console.log('📧 Email validasyonu:', isValidEmail);
+
+      if (!isValidEmail) {
+        console.log('❌ Geçersiz email formatı');
         showAlert(t('auth.error'), t('auth.invalidEmail'), 'error');
         setLoading(false);
         return;
       }
 
-      // Deep link URL'i - Web redirect sayfasına yönlendir
-      // Web sayfası token'ı alıp deep link'e yönlendirecek
-      // Bu sayede hem web hem mobile tarayıcılarda çalışır
-      // 
-      // ÖNEMLI: Supabase {{ .ConfirmationURL }} şu formatta olur:
-      // https://PROJECT.supabase.co/auth/v1/verify?token=XXX&type=recovery&redirect_to=REDIRECT_URL
-      // Supabase verify endpoint'i token'ı doğrular ve redirect_to URL'ine hash fragment ile yönlendirir:
-      // REDIRECT_URL#access_token=XXX&refresh_token=YYY&type=recovery
-      // 
-      // KRİTİK: Supabase Dashboard'da Site URL sadece domain olmalı (path olmamalı):
-      // ✅ Doğru: https://jblqkhgwitktbfeppume.supabase.co
-      // ❌ Yanlış: https://jblqkhgwitktbfeppume.supabase.co/storage/...
+      const trimmedEmail = forgotPasswordEmail.toLowerCase().trim();
+      console.log('📧 İşlenmiş email:', trimmedEmail);
+
+      // Web sayfası üzerinden geçiş yöntemi (Gemini'nin önerdiği en iyi yöntem)
+      // Supabase verify endpoint'i token'ı doğruladıktan sonra web sayfasına yönlendirecek
+      // Web sayfası hash fragment'i alıp mobil uygulamaya deep link ile yönlendirecek
       const redirectUrl = __DEV__ 
         ? 'http://localhost:8081/auth-reset.html' // Development - Expo web server
         : 'https://jblqkhgwitktbfeppume.supabase.co/storage/v1/object/public/auth-reset/auth-reset.html'; // Production - Supabase Storage
+      
+      // NOT: Web sayfası (auth-reset.html) Supabase'den gelen hash fragment'i (#access_token=xxx&refresh_token=yyy)
+      // alıp rhythm://PasswordReset deep link'ine ekleyecek
+      // Bu yöntem hem web hem mobil tarayıcılarda çalışır ve en güvenilir yöntemdir
 
       console.log('🔗 Şifre sıfırlama redirect URL:', redirectUrl);
-      console.log('📧 Email gönderiliyor...');
+      console.log('📧 Supabase API çağrısı yapılıyor...');
+      console.log('📧 Email:', trimmedEmail);
+      console.log('🔗 RedirectTo:', redirectUrl);
+      console.log('');
+      console.log('📋 Supabase Dashboard Kontrol Listesi (Email gelmezse):');
+      console.log('');
+      console.log('1️⃣ Authentication → Settings:');
+      console.log('   ✓ Enable email signups: Açık olmalı');
+      console.log('   ✓ Site URL: https://jblqkhgwitktbfeppume.supabase.co (sadece domain)');
+      console.log('');
+      console.log('2️⃣ Authentication → Email Templates:');
+      console.log('   ✓ "Reset Password" template: Aktif olmalı');
+      console.log('   ✓ Template içeriğinde {{ .ConfirmationURL }} olmalı');
+      console.log('   ⚠️ NOT: Email Notifications değil, Email Templates bölümünde!');
+      console.log('');
+      console.log('3️⃣ Authentication → URL Configuration:');
+      console.log('   ✓ Redirect URLs listesinde şu URL olmalı:');
+      console.log('     - rhythm://PasswordReset (mevcut)');
+      console.log('     - VEYA rhythm://* (wildcard - önerilen)');
+      console.log('   ✓ Site URL: https://jblqkhgwitktbfeppume.supabase.co');
+      console.log('');
+      console.log('4️⃣ Authentication → Users:');
+      console.log('   ✓ Email adresi (' + trimmedEmail + ') kayıtlı mı kontrol edin');
+      console.log('   ⚠️ NOT: Kayıtlı olmayan email\'lere Supabase email göndermez!');
+      console.log('');
 
+      // Supabase API çağrısı
+      const startTime = Date.now();
+      console.log('📡 Supabase API çağrısı başlatılıyor...');
+      
       const { data, error } = await supabase.auth.resetPasswordForEmail(
-        forgotPasswordEmail.toLowerCase().trim(), 
+        trimmedEmail, 
         {
           redirectTo: redirectUrl,
         }
       );
+      
+      const endTime = Date.now();
+      const duration = endTime - startTime;
 
-      if (data) {
-        console.log('✅ Email gönderildi! Data:', data);
-      }
+      console.log('⏱️ API çağrısı süresi:', duration, 'ms');
+      console.log('📦 Supabase Response - Data:', data);
+      console.log('📦 Supabase Response - Error:', error);
 
       if (error) {
-        throw error;
+        console.error('❌ Supabase API Hatası:');
+        console.error('   - Error Message:', error.message);
+        console.error('   - Error Status:', error.status);
+        console.error('   - Error Name:', error.name);
+        console.error('   - Full Error Object:', JSON.stringify(error, null, 2));
+        
+        // Özel hata mesajları
+        const errorMessage = error.message?.toLowerCase() || '';
+        
+        if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+          throw new Error('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekleyin.');
+        } else if (errorMessage.includes('invalid email')) {
+          throw new Error('Geçersiz email adresi.');
+        } else if (errorMessage.includes('email not found') || errorMessage.includes('user not found')) {
+          // NOT: Supabase güvenlik nedeniyle email'in kayıtlı olup olmadığını açık etmez
+          // Bu yüzden genel bir mesaj gösteriyoruz
+          throw new Error('Email gönderilemedi. Email adresinizin sistemde kayıtlı olduğundan emin olun.');
+        } else {
+          throw error;
+        }
       }
+
+      // NOT: Supabase başarılı durumda genellikle data döndürmez
+      // Bu normal bir davranıştır - email gönderildi demektir
+      console.log('✅ Supabase API çağrısı başarılı!');
+      console.log('📧 NOT: Supabase güvenlik nedeniyle email gönderimini doğrulamaz.');
+      console.log('📧 NOT: Email kayıtlı değilse bile hata vermez (güvenlik özelliği)');
+      
+      if (data) {
+        console.log('✅ Email gönderildi! Data:', JSON.stringify(data, null, 2));
+      } else {
+        console.log('📧 Data boş - bu normal (Supabase başarılı durumda data döndürmez)');
+      }
+      
+      console.log('');
+      console.log('📧 Email kontrol listesi:');
+      console.log('   1. Gelen kutusunu kontrol edin');
+      console.log('   2. Spam/Junk klasörünü kontrol edin');
+      console.log('   3. 5-10 dakika bekleyin (email gecikmeli gelebilir)');
+      console.log('   4. Email gelmezse:');
+      console.log('      a) Supabase Dashboard → Authentication → Users');
+      console.log('         Email adresinin kayıtlı olduğundan emin olun');
+      console.log('      b) Yukarıdaki Supabase Dashboard kontrol listesini takip edin');
 
       setShowForgotPasswordModal(false);
       setForgotPasswordEmail('');
+      
+      // Detaylı başarı mesajı
+      const successMessage = 
+        'Şifre sıfırlama linki email adresinize gönderildi.\n\n' +
+        '📧 Kontrol edin:\n' +
+        '   • Gelen kutusu\n' +
+        '   • Spam/Junk klasörü\n' +
+        '   • 5-10 dakika bekleyin\n\n' +
+        '⚠️ Email gelmezse:\n' +
+        '   1. Email adresinizin sistemde kayıtlı olduğundan emin olun\n' +
+        '      (Supabase Dashboard → Authentication → Users)\n' +
+        '   2. Supabase Dashboard → Authentication → Email Templates\n' +
+        '      "Reset Password" template\'ini kontrol edin\n' +
+        '   3. Supabase Dashboard → Authentication → URL Configuration\n' +
+        '      Redirect URL\'lerin doğru olduğundan emin olun';
+      
       showAlert(
         t('auth.emailSent'), 
-        t('auth.passwordResetLinkSent'),
+        successMessage,
         'success'
       );
     } catch (error: any) {
-      const errorMessage = error?.message || '';
-      if (errorMessage.toLowerCase().includes('rate limit')) {
-        showAlert(t('auth.warning'), t('auth.tooManyAttempts'), 'warning');
-      } else if (errorMessage.toLowerCase().includes('invalid email')) {
-        showAlert(t('auth.error'), t('auth.invalidEmail'), 'error');
-      } else if (errorMessage.toLowerCase().includes('user not found')) {
-        showAlert(t('auth.error'), t('auth.userNotFound'), 'error');
-      } else {
+      console.error('❌ handleForgotPassword catch bloğu:');
+      console.error('   - Error Type:', typeof error);
+      console.error('   - Error:', error);
+      console.error('   - Error Message:', error?.message);
+      console.error('   - Error Stack:', error?.stack);
+      console.error('   - Full Error:', JSON.stringify(error, null, 2));
+
+      // Network hatalarını kontrol et
+      const errorMessage = error?.message || error?.toString() || '';
+      const errorString = errorMessage.toLowerCase();
+
+      console.log('🔍 Hata mesajı analizi:', errorString);
+
+      if (errorString.includes('network') || 
+          errorString.includes('fetch') || 
+          errorString.includes('connection') ||
+          error?.code === 'NETWORK_ERROR' ||
+          error?.name === 'NetworkError') {
+        console.log('🌐 Network hatası tespit edildi');
         showAlert(
           t('auth.error'), 
-          t('auth.passwordResetLinkNotSent'), 
+          'İnternet bağlantınızı kontrol edin. Bağlantı hatası oluştu.',
+          'error'
+        );
+      } else if (errorString.includes('rate limit') || errorString.includes('too many')) {
+        console.log('⏱️ Rate limit hatası');
+        showAlert(t('auth.warning'), t('auth.tooManyAttempts'), 'warning');
+      } else if (errorString.includes('invalid email')) {
+        console.log('📧 Geçersiz email hatası');
+        showAlert(t('auth.error'), t('auth.invalidEmail'), 'error');
+      } else       if (errorString.includes('user not found') || errorString.includes('not registered') || errorString.includes('email not found')) {
+        console.log('👤 Kullanıcı bulunamadı hatası');
+        const notFoundMessage = 
+          'Email gönderilemedi.\n\n' +
+          '⚠️ Olası nedenler:\n' +
+          '   • Bu email adresi sistemde kayıtlı değil\n' +
+          '   • Email adresini yanlış yazdınız\n\n' +
+          '💡 Çözüm:\n' +
+          '   • Kayıt olduğunuz email adresini kullanın\n' +
+          '   • Email adresini kontrol edin';
+        showAlert(t('auth.error'), notFoundMessage, 'error');
+      } else {
+        console.log('❓ Bilinmeyen hata');
+        const userFriendlyMessage = 
+          (errorMessage || 'Şifre sıfırlama linki gönderilemedi.') + '\n\n' +
+          '🛠️ Supabase Dashboard\'da kontrol edin:\n' +
+          '   1. Authentication → Settings\n' +
+          '   2. Authentication → Email Templates\n' +
+          '   3. Authentication → URL Configuration';
+        showAlert(
+          t('auth.error'), 
+          userFriendlyMessage,
           'error'
         );
       }
     } finally {
+      console.log('🏁 handleForgotPassword finally bloğu - Loading false yapılıyor');
       setLoading(false);
     }
   };
 
+  const handleGuestContinue = async () => {
+    try {
+      // Mark that user has seen auth screen
+      await AsyncStorage.setItem('@has_completed_auth', 'true');
+      // Navigate to main app
+      navigation.navigate('MainTabs' as never);
+    } catch (error) {
+      console.error('Error saving auth status:', error);
+      // Navigate anyway
+      navigation.navigate('MainTabs' as never);
+    }
+  };
+
   const handleSubmit = async () => {
+    if (loading) {
+      console.log('⚠️ Already processing, ignoring duplicate call');
+      return;
+    }
+
     if (!email || !password) {
       showToast(t('auth.emailAndPasswordRequired'), 'error');
       return;
@@ -344,17 +508,60 @@ export default function AuthScreen() {
     }
 
     setLoading(true);
+    console.log('🔐 handleSubmit başladı - isLogin:', isLogin);
+
     try {
       if (isLogin) {
+        console.log('🔐 Sign in işlemi başlatılıyor...');
         await signIn(email, password);
+        console.log('✅ Sign in başarılı');
+        
+        // Mark that user has completed auth
+        try {
+          await AsyncStorage.setItem('@has_completed_auth', 'true');
+          console.log('✅ Auth flag kaydedildi');
+        } catch (storageError) {
+          console.error('❌ Storage error:', storageError);
+        }
+
+        // Navigate to main app
+        try {
+          navigation.navigate('MainTabs' as never);
+          console.log('✅ Navigation to MainTabs');
+        } catch (navError) {
+          console.error('❌ Navigation error:', navError);
+        }
       } else {
+        console.log('📝 Sign up işlemi başlatılıyor...');
         await signUp(email, password, displayName);
+        console.log('✅ Sign up başarılı');
+        
         showToast(t('auth.accountCreated'), 'success');
         setIsLogin(true);
         setDisplayName('');
+        
+        // Mark that user has completed auth
+        try {
+          await AsyncStorage.setItem('@has_completed_auth', 'true');
+          console.log('✅ Auth flag kaydedildi');
+        } catch (storageError) {
+          console.error('❌ Storage error:', storageError);
+        }
+
+        // Navigate to main app after a short delay
+        setTimeout(() => {
+          try {
+            navigation.navigate('MainTabs' as never);
+            console.log('✅ Navigation to MainTabs (delayed)');
+          } catch (navError) {
+            console.error('❌ Navigation error:', navError);
+          }
+        }, 1500);
       }
     } catch (error) {
+      console.error('❌ handleSubmit error:', error);
       const errorMessage = error instanceof Error ? error.message : t('auth.unknownError');
+      
       if (errorMessage.toLowerCase().includes('invalid login credentials')) {
         showToast(t('auth.invalidCredentials'), 'error');
       } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
@@ -365,6 +572,7 @@ export default function AuthScreen() {
         showToast(errorMessage, 'error');
       }
     } finally {
+      console.log('🏁 handleSubmit finally - loading false');
       setLoading(false);
     }
   };
@@ -444,13 +652,19 @@ export default function AuthScreen() {
             />
           </View>
 
+          {/* Ana Giriş/Kayıt Butonu - En Belirgin */}
           <TouchableOpacity
             style={[dynamicStyles.button, dynamicStyles.primaryButton]}
             onPress={handleSubmit}
             disabled={loading}
+            activeOpacity={0.8}
           >
-            <Text style={dynamicStyles.buttonText}>
-              {loading ? t('common.loading') : (isLogin ? t('auth.signIn') : t('auth.signUp'))}
+            <Text style={[dynamicStyles.buttonText, {
+              fontSize: 17,
+              fontWeight: '700',
+              letterSpacing: 0.5,
+            }]}>
+              {loading ? t('common.loading') : (isLogin ? `🔐 ${t('auth.signIn')}` : `✨ ${t('auth.signUp')}`)}
             </Text>
           </TouchableOpacity>
 
@@ -498,20 +712,82 @@ export default function AuthScreen() {
             </Text>
           </TouchableOpacity>
 
+          {/* Kayıt Ol / Giriş Yap Toggle Butonu - Outline Style */}
           <TouchableOpacity
-            style={dynamicStyles.switchButton}
+            style={{
+              paddingVertical: 14,
+              paddingHorizontal: 20,
+              borderRadius: 12,
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderColor: currentTheme.colors.primary + '40',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 8,
+              marginBottom: 16,
+              minHeight: 48,
+            }}
             onPress={() => {
               setIsLogin(!isLogin);
               setDisplayName('');
             }}
+            disabled={loading}
+            activeOpacity={0.7}
           >
-            <Text style={dynamicStyles.switchText}>
+            <Text style={{
+              color: currentTheme.colors.primary,
+              fontSize: 15,
+              fontWeight: '600',
+              letterSpacing: 0.3,
+            }}>
               {isLogin 
-                ? t('auth.noAccount')
-                : t('auth.hasAccount')
+                ? `📝 ${t('auth.noAccount')}`
+                : `🔐 ${t('auth.hasAccount')}`
               }
             </Text>
           </TouchableOpacity>
+
+          {/* Misafir Olarak Devam Et Butonu */}
+          <View style={{
+            marginTop: 24,
+            paddingTop: 24,
+            borderTopWidth: 1,
+            borderTopColor: currentTheme.colors.border + '40',
+          }}>
+            <Text style={{
+              fontSize: 14,
+              color: currentTheme.colors.secondary,
+              textAlign: 'center',
+              marginBottom: 12,
+            }}>
+              {t('auth.guestContinueDesc')}
+            </Text>
+            <TouchableOpacity
+              style={{
+                paddingVertical: 14,
+                paddingHorizontal: 20,
+                borderRadius: 12,
+                backgroundColor: currentTheme.colors.background,
+                borderWidth: 2,
+                borderColor: currentTheme.colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 48,
+              }}
+              onPress={handleGuestContinue}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <Text style={{
+                color: currentTheme.colors.text,
+                fontSize: 15,
+                fontWeight: '600',
+                letterSpacing: 0.3,
+              }}>
+                👤 {t('auth.guestContinue')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </LinearGradient>
       </ScrollView>
 
@@ -572,7 +848,17 @@ export default function AuthScreen() {
                     dynamicStyles.modalButtonPrimary,
                     loading && { opacity: 0.5 }
                   ]}
-                  onPress={handleForgotPassword}
+                  onPress={() => {
+                    console.log('🔘 Gönder butonuna tıklandı!');
+                    console.log('📧 Email:', forgotPasswordEmail);
+                    console.log('⏳ Loading:', loading);
+                    console.log('🔘 Disabled:', loading);
+                    if (!loading) {
+                      handleForgotPassword();
+                    } else {
+                      console.log('⚠️ Buton disabled, işlem yapılmıyor');
+                    }
+                  }}
                   disabled={loading}
                   activeOpacity={0.8}
                 >

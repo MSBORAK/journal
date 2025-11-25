@@ -113,38 +113,76 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    let subscription: any = null;
+
     // Initialize auth state
-    initializeAuth();
+    const init = async () => {
+      try {
+        await initializeAuth();
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    init();
     
     // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          const isAnon = session.user.is_anonymous || false;
-          setIsAnonymous(isAnon);
-          const user: User = {
-            uid: session.user.id,
-            email: session.user.email || '',
-            displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Guest',
-            photoURL: session.user.user_metadata?.avatar_url || undefined,
-            appAlias: session.user.user_metadata?.app_alias || 'Rhythm',
-            nickname: session.user.user_metadata?.nickname || 'Guest',
-          };
-          setUser(user);
-        } else {
-          // Session yoksa anonim kullanıcı oluştur
-          try {
-            await createAnonymousUser();
-          } catch (error: any) {
-            // Hata mesajı createAnonymousUser içinde gösterildi, burada tekrar gösterme
-            setUser(null);
+    try {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (!isMounted) return;
+
+          console.log('🔄 Auth state changed:', event, session?.user?.id);
+          
+          if (session?.user) {
+            const isAnon = session.user.is_anonymous || false;
+            setIsAnonymous(isAnon);
+            const user: User = {
+              uid: session.user.id,
+              email: session.user.email || '',
+              displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Guest',
+              photoURL: session.user.user_metadata?.avatar_url || undefined,
+              appAlias: session.user.user_metadata?.app_alias || 'Rhythm',
+              nickname: session.user.user_metadata?.nickname || 'Guest',
+            };
+            setUser(user);
+            setLoading(false);
+          } else {
+            // Session yoksa anonim kullanıcı oluştur (sadece SIGNED_OUT event'inde)
+            if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+              try {
+                await createAnonymousUser();
+              } catch (error: any) {
+                console.error('Failed to create anonymous user:', error);
+                if (isMounted) {
+                  setUser(null);
+                  setLoading(false);
+                }
+              }
+            } else {
+              setLoading(false);
+            }
           }
         }
+      );
+      subscription = authSubscription;
+    } catch (error) {
+      console.error('Error setting up auth listener:', error);
+      if (isMounted) {
         setLoading(false);
       }
-    );
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
         const signIn = async (email: string, password: string) => {

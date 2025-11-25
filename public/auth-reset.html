@@ -101,43 +101,24 @@
   </div>
 
   <script>
-    // URL'den parametreleri al
-    const urlParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    // Gemini'nin önerdiği basit ve direkt yaklaşım
+    // Supabase hash fragment'i direkt alıp deep link'e ekliyoruz
+    // Format: #access_token=xxx&refresh_token=yyy&type=recovery
     
-    // Token'ı hem query hem hash'ten kontrol et
-    const token = urlParams.get('token') || hashParams.get('token') || hashParams.get('access_token');
-    const type = urlParams.get('type') || hashParams.get('type');
-    const redirectTo = urlParams.get('redirect_to') || hashParams.get('redirect_to');
+    console.log('🔗 Sayfa yüklendi');
+    console.log('📍 Tam URL:', window.location.href);
+    console.log('🔑 Hash Fragment:', window.location.hash);
     
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-    
-    console.log('Token:', token ? 'Mevcut' : 'Yok');
-    console.log('Type:', type);
-    console.log('Access Token:', accessToken ? 'Mevcut' : 'Yok');
-    console.log('Refresh Token:', refreshToken ? 'Mevcut' : 'Yok');
+    // Hash fragment'i direkt al (Supabase'in gönderdiği format)
+    const hash = window.location.hash; // #access_token=xxx&refresh_token=yyy&type=recovery
     
     // Deep link URL'ini oluştur
-    // Supabase verify endpoint'inden sonra gelen URL'de hash fragment olacak
-    // Örnek: https://domain.com/auth-reset.html#access_token=xxx&refresh_token=yyy&type=recovery
-    let deepLinkUrl = 'rhythm://PasswordReset';
+    // Hash varsa direkt ekle, yoksa sadece deep link
+    const deepLinkUrl = hash 
+      ? `rhythm://PasswordReset${hash}` // Hash fragment'i direkt ekle
+      : 'rhythm://PasswordReset'; // Hash yoksa sadece deep link
     
-    if (accessToken && refreshToken) {
-      // Hash fragment'ten gelen token'ları kullan (Supabase'in doğrudan yönlendirdiği format)
-      deepLinkUrl = `rhythm://PasswordReset#access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}&type=recovery`;
-    } else if (token) {
-      // Query param'den gelen token'ı kullan (alternatif format)
-      deepLinkUrl = `rhythm://PasswordReset?token=${encodeURIComponent(token)}&type=${type || 'recovery'}`;
-    } else {
-      // Eğer hiç token yoksa, URL'deki tüm hash fragment'i kullan
-      const hash = window.location.hash.substring(1);
-      if (hash) {
-        deepLinkUrl = `rhythm://PasswordReset#${hash}`;
-      }
-    }
-    
-    console.log('Deep Link URL:', deepLinkUrl);
+    console.log('🎯 Deep Link URL:', deepLinkUrl);
     
     // Deep link'i açmayı dene
     function openDeepLink() {
@@ -150,6 +131,7 @@
       loadingEl.style.display = 'block';
       
       // Deep link'i aç
+      console.log('🚀 Deep link açılıyor:', deepLinkUrl);
       window.location.href = deepLinkUrl;
       
       // Eğer 2 saniye içinde uygulama açılmazsa, manuel buton göster
@@ -159,7 +141,6 @@
         openAppEl.style.display = 'inline-block';
         openAppEl.href = deepLinkUrl;
         manualLinkEl.style.display = 'inline-block';
-        manualLinkEl.href = deepLinkUrl;
         manualLinkEl.textContent = 'Linki Kopyala';
         manualLinkEl.onclick = (e) => {
           e.preventDefault();
@@ -183,20 +164,17 @@
         return;
       }
       
-      const hash = window.location.hash.substring(1);
-      const hasToken = accessToken || refreshToken || token || hash;
-      
-      if (!hasToken) {
+      // Hash fragment kontrolü
+      if (!hash || hash.length <= 1) {
         // Token yoksa hata göster
         document.getElementById('error').style.display = 'block';
         document.getElementById('error').textContent = 'Hata: Geçersiz veya eksik token. Lütfen email linkini tekrar kullanın.';
         document.getElementById('loading').style.display = 'none';
         document.getElementById('message').textContent = 'Bir hata oluştu.';
+        console.error('❌ Hash fragment bulunamadı!');
       } else {
-        // Hash fragment varsa ve accessToken/refreshToken yoksa, hash'i direkt kullan
-        if (hash && !accessToken && !refreshToken && !token) {
-          deepLinkUrl = `rhythm://PasswordReset#${hash}`;
-        }
+        // Hash fragment varsa deep link'i aç
+        console.log('✅ Hash fragment bulundu, deep link açılıyor...');
         openDeepLink();
       }
     });

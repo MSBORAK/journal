@@ -29,7 +29,7 @@ interface RemindersScreenProps {
   navigation: any;
 }
 
-const RemindersScreen = React.memo(function RemindersScreen({ navigation }: RemindersScreenProps) {
+function RemindersScreen({ navigation }: RemindersScreenProps) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
   const { t, currentLanguage } = useLanguage();
@@ -101,6 +101,12 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
   ];
 
   const stats = getReminderStats();
+  
+  // Debug: reminders state değişikliklerini izle
+  React.useEffect(() => {
+    console.log('🔄 RemindersScreen - reminders state changed:', reminders.length);
+    console.log('🔄 Reminders:', reminders.map(r => ({ id: r.id, title: r.title })));
+  }, [reminders]);
 
   const showAlert = (title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'error') => {
     setAlertConfig({
@@ -587,14 +593,29 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
         await cancelReminderNotification(editingReminder.id);
         await updateReminder(editingReminder.id, formData);
         savedReminder = { ...editingReminder, ...formData };
+        console.log('✏️ Reminder updated:', savedReminder.id);
       } else {
         savedReminder = await addReminder(formData);
+        console.log('➕ Reminder added:', savedReminder.id);
       }
+      
+      // State'in güncellendiğini doğrula
+      console.log('📊 Current reminders count after save:', reminders.length);
+      console.log('📊 Expected reminders count:', reminders.length + (editingReminder ? 0 : 1));
 
       // Bildirim planla (sadece aktifse)
       if (savedReminder.isActive) {
         try {
-          await scheduleReminderNotification(
+          console.log('📱 iOS - Scheduling reminder notification:', {
+            id: savedReminder.id,
+            title: savedReminder.emoji + ' ' + savedReminder.title,
+            time: savedReminder.time,
+            repeatType: savedReminder.repeatType,
+            date: savedReminder.date,
+            category: savedReminder.category,
+          });
+          
+          const notificationId = await scheduleReminderNotification(
             savedReminder.id,
             savedReminder.emoji + ' ' + savedReminder.title,
             savedReminder.description || t('reminders.reminderTime'),
@@ -603,8 +624,22 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
             savedReminder.category,
             savedReminder.date
           );
+          
+          console.log('✅ iOS - Reminder notification scheduled successfully:', notificationId);
+          
+          // Başarı mesajı göster
+          showAlert(
+            t('common.success') || '✅ Başarılı',
+            t('reminders.reminderSaved') || 'Hatırlatıcı kaydedildi ve bildirim planlandı!',
+            'success'
+          );
         } catch (notificationError: any) {
-          console.error('Error scheduling reminder notification:', notificationError);
+          console.error('❌ iOS - Error scheduling reminder notification:', notificationError);
+          console.error('❌ Error details:', {
+            message: notificationError?.message,
+            code: notificationError?.code,
+            stack: notificationError?.stack,
+          });
           showAlert(
             t('reminders.notificationError'), 
             notificationError?.message || t('reminders.notificationScheduleFailed'), 
@@ -612,6 +647,8 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
           );
           // Hatırlatıcı kaydedildi ama bildirim planlanamadı - kullanıcıya bilgi ver
         }
+      } else {
+        console.log('⚠️ Reminder is not active, skipping notification scheduling');
       }
       
       setShowAddModal(false);
@@ -1061,4 +1098,4 @@ const RemindersScreen = React.memo(function RemindersScreen({ navigation }: Remi
   );
 });
 
-export default RemindersScreen;
+export default React.memo(RemindersScreen);

@@ -52,7 +52,7 @@
     "passwordResetLinkNotSent": "Password reset link could not be sent. Please try again.",
     "signIn": "Sign In",
     "signUp": "Sign Up",
-    "continueJournal": "Continue your journal",
+    "continueJournal": "Continue your journal📖",
     "startJournaling": "Start journaling",
     "signOut": "Sign Out",
     "displayName": "Display Name",
@@ -83,7 +83,9 @@
     "sending": "Sending...",
     "send": "Send",
     "unknownError": "An error occurred",
-    "enterEmail": "Enter your email address"
+    "enterEmail": "Enter your email address",
+    "guestContinue": "Continue as Guest",
+    "guestContinueDesc": "Try the app without signing up. You can create an account anytime."
   },
   "dashboard": {
     "howAreYou": "How are you feeling today?",

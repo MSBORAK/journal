@@ -41,6 +41,7 @@ import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
 import { replaceAppName, replaceNickname, replacePlaceholders } from '../utils/textUtils';
 import { getButtonTextColor } from '../utils/colorUtils';
+import { isIPad, getMaxContentWidth, getHorizontalPadding } from '../utils/deviceUtils';
 
 const { width, height: screenHeight } = Dimensions.get('window');
 
@@ -1104,11 +1105,19 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
   // Premium minimalist tema sistemi - artık direkt kullanabiliriz
   const currentThemeColors = currentTheme;
+  
+  // iPad için responsive değerler
+  const horizontalMargin = isIPad() ? getHorizontalPadding() : 20;
+  const horizontalPadding = isIPad() ? getHorizontalPadding() : 20;
 
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: currentThemeColors.background, // Pastel taban
+    },
+    contentWrapper: {
+      flex: 1,
+      width: '100%',
     },
     scrollContainer: {
       backgroundColor: currentThemeColors.background, // Tema arka plan rengi
@@ -1117,7 +1126,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       paddingBottom: 120,
     },
     header: {
-      paddingHorizontal: 20,
+      paddingHorizontal: horizontalPadding,
       paddingTop: 50,
       paddingBottom: 20,
     },
@@ -1149,7 +1158,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     statsContainer: {
       flexDirection: 'row',
-      paddingHorizontal: 20,
+      paddingHorizontal: horizontalPadding,
       marginBottom: 20,
       marginTop: 16,
       gap: 12,
@@ -1201,7 +1210,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     wellnessScoreCard: {
       backgroundColor: currentTheme.colors.card,
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 20,
       borderRadius: 20,
       padding: 20,
@@ -1242,7 +1251,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       color: currentTheme.colors.secondary,
     },
     moodCard: {
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 40,
       borderRadius: 28,
       shadowColor: currentTheme.colors.primary,
@@ -1260,7 +1269,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     // İlham Kartı Stilleri
     inspirationCard: {
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 32,
       borderRadius: 24,
       shadowColor: currentTheme.colors.primary,
@@ -1419,7 +1428,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     motivationCard: {
       backgroundColor: currentTheme.colors.card,
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 20,
       borderRadius: 28,
       padding: 24,
@@ -1454,7 +1463,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     // Achievements Styles
     achievementsCard: {
       backgroundColor: currentTheme.colors.card + 'F8',
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 20,
       borderRadius: 28,
       padding: 24,
@@ -1548,7 +1557,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     promisesCard: {
       backgroundColor: currentTheme.colors.card + 'F8',
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 20,
       borderRadius: 28,
       padding: 24,
@@ -1657,7 +1666,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     // Tasks Styles
     tasksCard: {
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 80,
       borderRadius: 20,
       shadowColor: currentTheme.colors.primary,
@@ -1825,7 +1834,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     // Reminders Styles
     remindersCard: {
       backgroundColor: currentTheme.colors.card,
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 20,
       borderRadius: 20,
       padding: 18,
@@ -1886,7 +1895,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     // Şirin Baloncuk Hatırlatıcılar 🎈
     remindersBubblesContainer: {
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginBottom: 24,
     },
     remindersBubblesTitle: {
@@ -1953,7 +1962,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     },
     // Gelişmiş Sağlık Skoru Stilleri
     healthScoreCard: {
-      marginHorizontal: 20,
+      marginHorizontal: horizontalMargin,
       marginTop: 20,
       marginBottom: 40,
       borderRadius: 28,
@@ -2763,16 +2772,24 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       </Modal>
 
     <SafeAreaView style={dynamicStyles.container}>
-      <ScrollView 
-        ref={scrollViewRef}
-        style={dynamicStyles.scrollContainer}
-        contentContainerStyle={dynamicStyles.scrollContent}
-        showsVerticalScrollIndicator={true}
-        scrollEnabled={!tour.tourVisible}
-        nestedScrollEnabled={false}
-        keyboardShouldPersistTaps="handled"
-        bounces={!tour.tourVisible}
-      >
+      <View style={[
+        dynamicStyles.contentWrapper,
+        isIPad() && {
+          maxWidth: getMaxContentWidth(),
+          alignSelf: 'center',
+          width: '100%',
+        }
+      ]}>
+        <ScrollView 
+          ref={scrollViewRef}
+          style={dynamicStyles.scrollContainer}
+          contentContainerStyle={dynamicStyles.scrollContent}
+          showsVerticalScrollIndicator={true}
+          scrollEnabled={!tour.tourVisible}
+          nestedScrollEnabled={false}
+          keyboardShouldPersistTaps="handled"
+          bounces={!tour.tourVisible}
+        >
       {/* Header */}
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.headerTitle}>
@@ -2874,7 +2891,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         <TouchableOpacity
           style={{
             backgroundColor: currentTheme.colors.card,
-            marginHorizontal: 20,
+            marginHorizontal: horizontalMargin,
             marginBottom: 20,
             borderRadius: 20,
             padding: 16,
@@ -3093,7 +3110,8 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
 
 
 
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
 
     {/* Hoşgeldin Modalı */}

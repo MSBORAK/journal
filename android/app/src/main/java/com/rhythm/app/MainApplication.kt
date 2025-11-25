@@ -1,4 +1,4 @@
-package com.gnlkuygulamas
+package com.rhythm.app
 
 import android.app.Application
 import android.content.res.Configuration

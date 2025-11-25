@@ -1072,9 +1072,19 @@ export const scheduleReminderNotification = async (
 
   try {
     const selectedSound = getSystemSound();
-    if (__DEV__) console.log('🎵 Scheduling reminder notification:', { 
-      reminderId, title, time, repeatType, channelId: category, sound: selectedSound 
-    });
+    
+    if (__DEV__) {
+      console.log('🎵 Scheduling reminder notification (iOS):', { 
+        reminderId, 
+        title, 
+        body,
+        time, 
+        repeatType, 
+        date,
+        trigger: JSON.stringify(trigger),
+        sound: selectedSound 
+      });
+    }
 
     const notificationId = await Notifications.scheduleNotificationAsync({
       identifier: `reminder-${reminderId}`,
@@ -1082,17 +1092,31 @@ export const scheduleReminderNotification = async (
         title,
         body,
         sound: selectedSound,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
+        priority: Notifications.IOSNotificationPriority.HIGH,
         data: { type: 'reminder', reminderId, category },
-        ...(Platform.OS === 'android' && { channelId: category }),
       },
       trigger,
     });
 
-    if (__DEV__) console.log('✅ Reminder notification scheduled successfully:', notificationId);
+    if (__DEV__) {
+      console.log('✅ Reminder notification scheduled successfully:', notificationId);
+      console.log('📅 Trigger details:', {
+        type: trigger.type,
+        date: (trigger as any).date,
+        hour: (trigger as any).hour,
+        minute: (trigger as any).minute,
+        repeats: (trigger as any).repeats,
+      });
+    }
+    
     return notificationId;
   } catch (error: any) {
     console.error('❌ Error scheduling reminder notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+      stack: error?.stack,
+    });
     throw new Error(error?.message || 'Failed to schedule reminder notification');
   }
 };

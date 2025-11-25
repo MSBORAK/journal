@@ -1,16 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Supabase proje bilgileri
 const supabaseUrl = 'https://jblqkhgwitktbfeppume.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpibHFraGd3aXRrdGJmZXBwdW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NzQ1MDQsImV4cCI6MjA3NTI1MDUwNH0._TnZRl3PBrP5xqZ5HyQn4p6WTAzN1DCj1IG0QuM3Nl0';
 
+// Supabase URL ve Key validasyonu
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ CRITICAL: Supabase URL veya Key eksik!');
+  throw new Error('Supabase configuration is missing');
+}
+
+console.log('✅ Supabase client yapılandırılıyor...');
+console.log('   URL:', supabaseUrl);
+console.log('   Key:', supabaseAnonKey.substring(0, 20) + '...');
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    storage: AsyncStorage, // React Native'de oturumun kalıcı olması için kritik
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: false, // Mobil uygulama olduğu için gerekli
   },
 });
+
+console.log('✅ Supabase client oluşturuldu');
 
 // Auth helper functions
 

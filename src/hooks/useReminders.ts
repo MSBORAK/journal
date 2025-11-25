@@ -17,15 +17,21 @@ export const useReminders = (userId?: string) => {
     loadReminders();
   }, [userId]);
 
-  const loadReminders = async () => {
+  const loadReminders = async (): Promise<Reminder[]> => {
     try {
       setLoading(true);
       const remindersData = await AsyncStorage.getItem(REMINDERS_STORAGE_KEY);
       if (remindersData) {
-        setReminders(JSON.parse(remindersData));
+        const parsed = JSON.parse(remindersData);
+        setReminders(parsed);
+        console.log('📥 Loaded reminders from storage:', parsed.length);
+        return parsed;
       }
+      console.log('📭 No reminders found in storage');
+      return [];
     } catch (error) {
-      console.error('Error loading reminders:', error);
+      console.error('❌ Error loading reminders:', error);
+      return [];
     } finally {
       setLoading(false);
     }
@@ -34,19 +40,43 @@ export const useReminders = (userId?: string) => {
   // Save reminders to storage
   const saveReminders = async (newReminders: Reminder[]) => {
     try {
-      console.log('saveReminders called with:', newReminders.length, 'reminders');
+      console.log('💾 saveReminders called with:', newReminders.length, 'reminders');
+      console.log('💾 Reminders to save:', newReminders.map(r => ({ id: r.id, title: r.title })));
+      
       await AsyncStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(newReminders));
-      console.log('Reminders saved to AsyncStorage');
+      console.log('✅ Reminders saved to AsyncStorage');
+      
+      // State'i güncelle - React'in state güncellemesini tetiklemek için
       setReminders(newReminders);
-      console.log('Reminders state updated');
+      console.log('✅ Reminders state updated, new count:', newReminders.length);
+      
+      // State'in gerçekten güncellendiğini doğrula
+      setTimeout(() => {
+        console.log('🔍 State verification - reminders count should be:', newReminders.length);
+      }, 100);
     } catch (error) {
-      console.error('Error saving reminders:', error);
+      console.error('❌ Error saving reminders:', error);
+      throw error; // Hata durumunda throw et ki üst seviyede yakalanabilsin
     }
   };
 
   // Add new reminder
   const addReminder = async (reminder: Omit<Reminder, 'id' | 'createdAt' | 'updatedAt'>) => {
-    console.log('addReminder called with:', reminder);
+    console.log('📝 addReminder called with:', reminder);
+    
+    // Mevcut hatırlatıcıları AsyncStorage'dan direkt oku (stale closure sorununu önlemek için)
+    let currentReminders: Reminder[] = [];
+    try {
+      const remindersData = await AsyncStorage.getItem(REMINDERS_STORAGE_KEY);
+      if (remindersData) {
+        currentReminders = JSON.parse(remindersData);
+      }
+    } catch (error) {
+      console.error('❌ Error reading reminders from storage:', error);
+      currentReminders = reminders; // Fallback to state
+    }
+    
+    console.log('📋 Current reminders count:', currentReminders.length);
     
     const newReminder: Reminder = {
       ...reminder,
@@ -57,13 +87,14 @@ export const useReminders = (userId?: string) => {
       reminderType: reminder.reminderType || 'today',
     };
     
-    console.log('New reminder created:', newReminder);
+    console.log('✅ New reminder created:', newReminder);
     
-    const newReminders = [...reminders, newReminder];
-    console.log('New reminders array:', newReminders);
+    // Mevcut hatırlatıcılar + yeni hatırlatıcı
+    const newReminders = [...currentReminders, newReminder];
+    console.log('📦 New reminders array length:', newReminders.length);
     
     await saveReminders(newReminders);
-    console.log('Reminders saved to storage');
+    console.log('💾 Reminders saved to storage and state updated');
     
     // Bildirim planlama RemindersScreen.tsx'de yapılıyor (daha iyi hata yönetimi için)
     

@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -28,6 +29,8 @@ SplashScreen.preventAutoHideAsync();
 
 // Type definitions for navigation
 type RootStackParamList = {
+  Auth: undefined;
+  PasswordReset: undefined;
   MainTabs: undefined;
   WriteDiary: { entry?: any } | undefined;
   WriteDiaryStep1: undefined;
@@ -87,6 +90,8 @@ import AchievementsScreen from './src/screens/AchievementsScreen';
 import MindfulnessScreen from './src/screens/MindfulnessScreen';
 import HelpGuideScreen from './src/screens/HelpGuideScreen';
 import InsightsScreen from './src/screens/InsightsScreen';
+import AuthScreen from './src/screens/AuthScreen';
+import PasswordResetScreen from './src/screens/PasswordResetScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -215,10 +220,41 @@ function MainTabs() {
 }
 
 function AppNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAnonymous } = useAuth();
   const { t } = useLanguage();
   const { currentTheme } = useTheme();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const [hasSeenAuth, setHasSeenAuth] = useState<boolean | null>(null);
+
+  // Check if user has seen auth screen
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const hasSeen = await AsyncStorage.getItem('@has_completed_auth');
+        setHasSeenAuth(hasSeen === 'true');
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        setHasSeenAuth(false);
+      }
+    };
+    
+    if (!loading) {
+      checkAuthStatus();
+    }
+  }, [loading]);
+
+  // Navigate to Auth screen if needed
+  useEffect(() => {
+    if (!loading && hasSeenAuth === false && isAnonymous && navigationRef.current?.isReady()) {
+      // First time opening app and user is anonymous - show Auth screen
+      console.log('🔄 Navigating to Auth screen');
+      try {
+        navigationRef.current?.navigate('Auth' as never);
+      } catch (navError) {
+        console.error('❌ Navigation error:', navError);
+      }
+    }
+  }, [loading, hasSeenAuth, isAnonymous]);
 
   // Notification response handler (CTA)
   useEffect(() => {
@@ -241,7 +277,10 @@ function AppNavigator() {
   const linking = {
     prefixes: ['rhythm://'],
     config: {
-      screens: {},
+      screens: {
+        PasswordReset: 'PasswordReset',
+        Auth: 'auth',
+      },
     },
     async getInitialURL() {
       const url = await Linking.getInitialURL();
@@ -267,7 +306,7 @@ function AppNavigator() {
   };
 
   // Loading kontrolü
-  if (loading) {
+  if (loading || hasSeenAuth === null) {
     return null;
   }
 
@@ -313,6 +352,16 @@ function AppNavigator() {
           gestureDirection: 'horizontal',
         }}
       >
+        <Stack.Screen 
+          name="Auth" 
+          component={AuthScreen} 
+          options={{ headerShown: false, ...transitionConfig }} 
+        />
+        <Stack.Screen 
+          name="PasswordReset" 
+          component={PasswordResetScreen} 
+          options={{ headerShown: false, ...transitionConfig }} 
+        />
         <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen
               name="WriteDiary"

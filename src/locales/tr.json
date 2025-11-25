@@ -52,7 +52,7 @@
     "passwordResetLinkNotSent": "Şifre sıfırlama linki gönderilemedi. Lütfen tekrar deneyin.",
     "signIn": "Giriş Yap",
     "signUp": "Kayıt Ol",
-    "continueJournal": "Günlüğünüze devam edin",
+    "continueJournal": "Günlüğünüze devam edin📖",
     "startJournaling": "Günlük tutmaya başlayın",
     "signOut": "Çıkış Yap",
     "displayName": "Görünen Ad",
@@ -83,7 +83,9 @@
     "send": "Gönder",
     "unknownError": "Bir hata oluştu",
     "enterEmail": "Email adresinizi girin",
-    "passwordResetSent": "Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin."
+    "passwordResetSent": "Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.",
+    "guestContinue": "Misafir Olarak Devam Et",
+    "guestContinueDesc": "Kayıt olmadan uygulamayı deneyin. İstediğiniz zaman hesap oluşturabilirsiniz."
   },
   "dashboard": {
     "howAreYou": "Bugün kendini nasıl hissediyorsun?",

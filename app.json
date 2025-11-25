@@ -22,7 +22,17 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rhythm.app"
+      "bundleIdentifier": "com.rhythm.app",
+      "requireFullScreen": false,
+      "infoPlist": {
+        "UIRequiresFullScreen": false,
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
+      }
     },
     "android": {
       "package": "com.rhythm.app"
