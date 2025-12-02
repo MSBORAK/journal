@@ -7,6 +7,10 @@ import {
   Animated,
   Modal,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +20,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
 import { CustomAlert } from './CustomAlert';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface FocusModeProps {
   visible: boolean;
@@ -44,6 +49,9 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
   const [focusSubject, setFocusSubject] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [customDurations, setCustomDurations] = useState<number[]>([]);
+  const [showAddCustomModal, setShowAddCustomModal] = useState(false);
+  const [customDurationInput, setCustomDurationInput] = useState('');
 
   // Seçili görev varsa focusSubject'i otomatik set et
   useEffect(() => {
@@ -86,12 +94,46 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Duration options
-  const durations = [
+  // Load custom durations from AsyncStorage
+  useEffect(() => {
+    const loadCustomDurations = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('custom_focus_durations');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setCustomDurations(parsed);
+        }
+      } catch (error) {
+        console.error('Error loading custom durations:', error);
+      }
+    };
+    loadCustomDurations();
+  }, []);
+
+  // Save custom durations to AsyncStorage
+  const saveCustomDurations = async (durations: number[]) => {
+    try {
+      await AsyncStorage.setItem('custom_focus_durations', JSON.stringify(durations));
+      setCustomDurations(durations);
+    } catch (error) {
+      console.error('Error saving custom durations:', error);
+    }
+  };
+
+  // Duration options - default + custom
+  const defaultDurations = [
     { label: `15 ${t('focus.minuteAbbr')}`, value: 15 },
     { label: `25 ${t('focus.minuteAbbr')}`, value: 25 },
     { label: `45 ${t('focus.minuteAbbr')}`, value: 45 },
   ];
+  
+  const customDurationOptions = customDurations.map((duration) => ({
+    label: `${duration} ${t('focus.minuteAbbr')}`,
+    value: duration,
+    isCustom: true,
+  }));
+  
+  const durations = [...defaultDurations, ...customDurationOptions];
 
   // Mood options
   const moods = [
@@ -106,6 +148,80 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
   // Handle duration change
   const handleDurationChange = (duration: number) => {
     setDuration(duration);
+  };
+
+  // Handle add custom duration
+  const handleAddCustomDuration = async () => {
+    const minutes = parseInt(customDurationInput);
+    if (isNaN(minutes) || minutes <= 0 || minutes > 999) {
+      setAlertConfig({
+        visible: true,
+        title: t('focus.invalidDuration') || 'Geçersiz Süre',
+        message: t('focus.invalidDurationMessage') || 'Lütfen 1-999 arası bir sayı girin.',
+        type: 'error',
+        primaryButton: {
+          text: t('common.ok') || 'OK',
+          onPress: () => setAlertConfig({ ...alertConfig, visible: false }),
+          style: 'primary',
+        },
+        secondaryButton: undefined,
+      });
+      return;
+    }
+    
+    if (customDurations.includes(minutes)) {
+      setAlertConfig({
+        visible: true,
+        title: t('focus.duplicateDuration') || 'Zaten Mevcut',
+        message: t('focus.duplicateDurationMessage') || 'Bu süre zaten eklenmiş.',
+        type: 'warning',
+        primaryButton: {
+          text: t('common.ok') || 'OK',
+          onPress: () => setAlertConfig({ ...alertConfig, visible: false }),
+          style: 'primary',
+        },
+        secondaryButton: undefined,
+      });
+      return;
+    }
+    
+    // Check if it's already in default durations
+    if (defaultDurations.some(d => d.value === minutes)) {
+      setAlertConfig({
+        visible: true,
+        title: t('focus.duplicateDuration') || 'Zaten Mevcut',
+        message: t('focus.duplicateDurationMessage') || 'Bu süre zaten mevcut.',
+        type: 'warning',
+        primaryButton: {
+          text: t('common.ok') || 'OK',
+          onPress: () => setAlertConfig({ ...alertConfig, visible: false }),
+          style: 'primary',
+        },
+        secondaryButton: undefined,
+      });
+      return;
+    }
+    
+    const newCustomDurations = [...customDurations, minutes].sort((a, b) => a - b);
+    await saveCustomDurations(newCustomDurations);
+    setCustomDurationInput('');
+    setShowAddCustomModal(false);
+    setDuration(minutes); // Yeni eklenen süreyi seç
+    
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  // Handle delete custom duration
+  const handleDeleteCustomDuration = async (duration: number) => {
+    const newCustomDurations = customDurations.filter(d => d !== duration);
+    await saveCustomDurations(newCustomDurations);
+    
+    // Eğer silinen süre seçiliyse, varsayılan bir süre seç
+    if (selectedDuration === duration) {
+      setDuration(25); // Varsayılan 25 dakika
+    }
+    
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   // Handle completion
@@ -181,6 +297,7 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: currentTheme.colors.background,
     },
     gradient: {
       flex: 1,
@@ -247,6 +364,22 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
     },
     durationTextActive: {
       color: currentTheme.colors.background,
+    },
+    addCustomButton: {
+      borderWidth: 2,
+      borderColor: currentTheme.colors.primary,
+      borderStyle: 'dashed',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    deleteCustomButton: {
+      position: 'absolute',
+      top: -8,
+      right: -8,
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 10,
+      padding: 2,
     },
     timerContainer: {
       width: 250,
@@ -419,10 +552,105 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
       bottom: 0,
       pointerEvents: 'none',
     },
+    
+    // Modal styles
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    modalContent: {
+      width: '100%',
+      maxWidth: 400,
+    },
+    modalCard: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 20,
+      padding: 24,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      fontFamily: 'Poppins_700Bold',
+    },
+    modalCloseButton: {
+      padding: 4,
+    },
+    modalLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginBottom: 12,
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    modalInput: {
+      backgroundColor: currentTheme.colors.background,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 18,
+      color: currentTheme.colors.text,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      fontFamily: 'Poppins_400Regular',
+      marginBottom: 24,
+      textAlign: 'center',
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    modalButtonPrimary: {
+      backgroundColor: currentTheme.colors.primary,
+      borderColor: currentTheme.colors.primary,
+    },
+    modalButtonSecondary: {
+      backgroundColor: currentTheme.colors.background,
+      borderColor: currentTheme.colors.border,
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      fontFamily: 'Poppins_600SemiBold',
+    },
+    modalButtonTextPrimary: {
+      color: currentTheme.colors.background,
+    },
+    modalButtonTextSecondary: {
+      color: currentTheme.colors.text,
+    },
   });
 
+  if (!visible) return null;
+
   return (
-      <View style={dynamicStyles.container}>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={false}
+      onRequestClose={handleClose}
+    >
+      <SafeAreaView style={dynamicStyles.container}>
         <LinearGradient
           colors={getGradientColors()}
           style={dynamicStyles.gradient}
@@ -519,25 +747,53 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
               {/* Duration Selector */}
               <View style={dynamicStyles.durationSelector}>
                 {durations.map((duration) => (
+                  <View key={duration.value} style={{ position: 'relative' }}>
+                    <TouchableOpacity
+                      style={[
+                        dynamicStyles.durationButton,
+                        selectedDuration === duration.value && dynamicStyles.durationButtonActive,
+                      ]}
+                      onPress={() => handleDurationChange(duration.value)}
+                      disabled={isActive}
+                    >
+                      <Text
+                        style={[
+                          dynamicStyles.durationText,
+                          selectedDuration === duration.value && dynamicStyles.durationTextActive,
+                        ]}
+                      >
+                        {duration.label}
+                      </Text>
+                    </TouchableOpacity>
+                    {/* Özel süre silme butonu */}
+                    {(duration as any).isCustom && !isActive && (
+                      <TouchableOpacity
+                        style={dynamicStyles.deleteCustomButton}
+                        onPress={() => handleDeleteCustomDuration(duration.value)}
+                      >
+                        <Ionicons name="close-circle" size={18} color={currentTheme.colors.danger} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+                {/* Özel Süre Ekle Butonu */}
+                {!isActive && (
                   <TouchableOpacity
-                    key={duration.value}
                     style={[
                       dynamicStyles.durationButton,
-                      selectedDuration === duration.value && dynamicStyles.durationButtonActive,
+                      dynamicStyles.addCustomButton,
                     ]}
-                    onPress={() => handleDurationChange(duration.value)}
-                    disabled={isActive}
+                    onPress={() => {
+                      setShowAddCustomModal(true);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
                   >
-                    <Text
-                      style={[
-                        dynamicStyles.durationText,
-                        selectedDuration === duration.value && dynamicStyles.durationTextActive,
-                      ]}
-                    >
-                      {duration.label}
+                    <Ionicons name="add" size={20} color={currentTheme.colors.primary} />
+                    <Text style={[dynamicStyles.durationText, { color: currentTheme.colors.primary, marginLeft: 4 }]}>
+                      {t('focus.addCustom') || 'Özel'}
                     </Text>
                   </TouchableOpacity>
-                ))}
+                )}
               </View>
 
               {/* Timer Display */}
@@ -673,6 +929,74 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
           primaryButton={alertConfig.primaryButton}
           secondaryButton={alertConfig.secondaryButton}
         />
-      </View>
+
+        {/* Özel Süre Ekleme Modalı */}
+        <Modal
+          visible={showAddCustomModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAddCustomModal(false)}
+        >
+          <View style={dynamicStyles.modalOverlay}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={dynamicStyles.modalContent}
+            >
+              <View style={dynamicStyles.modalCard}>
+                <View style={dynamicStyles.modalHeader}>
+                  <Text style={dynamicStyles.modalTitle}>
+                    {t('focus.addCustomDuration') || 'Özel Süre Ekle'}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShowAddCustomModal(false);
+                      setCustomDurationInput('');
+                    }}
+                    style={dynamicStyles.modalCloseButton}
+                  >
+                    <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+                  </TouchableOpacity>
+                </View>
+                
+                <Text style={dynamicStyles.modalLabel}>
+                  {t('focus.durationInMinutes') || 'Süre (dakika)'}
+                </Text>
+                <TextInput
+                  style={dynamicStyles.modalInput}
+                  placeholder={t('focus.enterDuration') || 'Örn: 30'}
+                  placeholderTextColor={currentTheme.colors.muted}
+                  value={customDurationInput}
+                  onChangeText={setCustomDurationInput}
+                  keyboardType="number-pad"
+                  autoFocus={true}
+                />
+                
+                <View style={dynamicStyles.modalButtons}>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                    onPress={() => {
+                      setShowAddCustomModal(false);
+                      setCustomDurationInput('');
+                    }}
+                  >
+                    <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                      {t('common.cancel') || 'İptal'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                    onPress={handleAddCustomDuration}
+                  >
+                    <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                      {t('common.add') || 'Ekle'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </Modal>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Linking } from 'react-native';
+import { Linking, LogBox } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -26,6 +26,51 @@ import * as SplashScreen from 'expo-splash-screen';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
+
+// Network hatalarını gizle (kullanıcıya gösterme)
+LogBox.ignoreLogs([
+  'Network request failed',
+  'TypeError: Network request failed',
+  'NetworkError',
+  'Failed to fetch',
+  /Network.*failed/i,
+  /TypeError.*Network/i,
+]);
+
+// Global error handler - Network hatalarını yakala ve sessizce handle et
+// @ts-ignore - ErrorUtils React Native'de mevcut ama TypeScript'te tanımlı değil
+if (typeof ErrorUtils !== 'undefined' && ErrorUtils?.getGlobalHandler) {
+  try {
+    // @ts-ignore
+    const originalErrorHandler = ErrorUtils.getGlobalHandler();
+    // @ts-ignore
+    ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+      const errorMessage = error?.message || '';
+      const errorName = error?.name || '';
+      
+      // Network hatalarını sessizce handle et
+      if (
+        errorMessage.includes('Network request failed') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('Failed to fetch') ||
+        errorName.includes('NetworkError') ||
+        errorMessage.toLowerCase().includes('network')
+      ) {
+        // Network hatası - sadece logla, kullanıcıya gösterme
+        console.warn('⚠️ Network error (silently handled):', errorMessage);
+        return; // Hata gösterilmesin
+      }
+      
+      // Diğer hatalar için normal handler'ı çağır
+      if (originalErrorHandler) {
+        originalErrorHandler(error, isFatal);
+      }
+    });
+  } catch (e) {
+    // ErrorUtils mevcut değilse sessizce devam et
+    console.log('ErrorUtils not available, skipping global error handler');
+  }
+}
 
 // Type definitions for navigation
 type RootStackParamList = {

@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isNetworkError } from '../utils/networkUtils';
 
 const PROFILE_STORAGE_KEY = 'user_profile';
 
@@ -23,6 +24,20 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
       .single();
 
     if (error) {
+      // Network hatası ise AsyncStorage'dan yükle
+      if (isNetworkError(error)) {
+        console.warn('⚠️ Network error fetching profile, using local data');
+        try {
+          const storedProfile = await AsyncStorage.getItem(`${PROFILE_STORAGE_KEY}_${userId}`);
+          if (storedProfile) {
+            return JSON.parse(storedProfile) as Profile;
+          }
+        } catch (e) {
+          console.log('⚠️ Error reading profile from AsyncStorage:', e);
+        }
+        return null;
+      }
+      
       // PGRST116 means no rows found - this is normal for new users
       if (error.code === 'PGRST116') {
         console.log('✅ No profile found for user (normal for new users):', userId);
@@ -87,6 +102,21 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     
     return profile;
   } catch (error: any) {
+    // Network hatası ise AsyncStorage'dan yükle
+    if (isNetworkError(error)) {
+      console.warn('⚠️ Network error fetching profile, using local data');
+      try {
+        const storedProfile = await AsyncStorage.getItem(`${PROFILE_STORAGE_KEY}_${userId}`);
+        if (storedProfile) {
+          console.log('✅ Profile loaded from AsyncStorage (network error fallback)');
+          return JSON.parse(storedProfile) as Profile;
+        }
+      } catch (e) {
+        console.log('⚠️ Error reading profile from AsyncStorage:', e);
+      }
+      return null;
+    }
+    
     // Herhangi bir hata durumunda AsyncStorage'dan oku (fallback)
     try {
       const storedProfile = await AsyncStorage.getItem(`${PROFILE_STORAGE_KEY}_${userId}`);

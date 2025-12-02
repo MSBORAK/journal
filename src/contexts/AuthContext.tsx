@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '../types';
 import { supabase, signOut as supabaseSignOut, getCurrentUser } from '../lib/supabase';
+import { isNetworkError } from '../utils/networkUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -41,6 +42,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const { data, error } = await supabase.auth.signInAnonymously();
       if (error) {
+        // Network hatası ise sessizce handle et (offline mod)
+        if (isNetworkError(error)) {
+          console.warn('⚠️ Network error creating anonymous user (offline mode)');
+          // Network hatasında user null olarak kalır, uygulama offline modda çalışır
+          return;
+        }
+        
         // Özel hata mesajı göster (sadece bir kez)
         if ((error.message?.includes('disabled') || error.message?.includes('Anonymous sign-ins')) && !anonymousErrorShown) {
           console.error('⚠️ IMPORTANT: Anonymous sign-ins are disabled in Supabase!');

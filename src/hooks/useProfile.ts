@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getProfile } from '../services/profileService';
+import { isNetworkError } from '../utils/networkUtils';
 
 export const useProfile = (userId?: string) => {
   const [profile, setProfile] = useState<any>(null);
@@ -20,7 +21,13 @@ export const useProfile = (userId?: string) => {
         setProfile(profileData);
       } catch (err: any) {
         console.error('Error loading profile:', err);
-        setError(err.message);
+        // Network hatası ise kritik değil, sadece logla
+        if (isNetworkError(err)) {
+          console.warn('⚠️ Network error loading profile (non-critical)');
+          setError(null); // Network hatası kritik değil, profil null olabilir
+        } else {
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -38,6 +45,12 @@ export const useProfile = (userId?: string) => {
       setProfile(profileData);
     } catch (err: any) {
       console.error('Error refreshing profile:', err);
+      // Network hatası ise kritik değil
+      if (isNetworkError(err)) {
+        console.warn('⚠️ Network error refreshing profile (non-critical)');
+        setError(null);
+        return; // Network hatasında profil güncellemesi yapma
+      }
       // Bio kolonu hatası varsa, profil null olarak ayarla (kritik hata değil)
       if (err?.message?.includes('bio') || err?.message?.includes("column 'bio'")) {
         console.log('⚠️ Bio column error in refreshProfile, setting profile to null');

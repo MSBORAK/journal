@@ -3,6 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { DailyTask, TaskProgress, TaskCategory, TaskAchievement } from '../types';
+import { isNetworkError, getNetworkErrorMessage } from '../utils/networkUtils';
 
 const TASKS_STORAGE_KEY = '@daily_tasks';
 const PROGRESS_STORAGE_KEY = '@task_progress';
@@ -46,6 +47,10 @@ export const useTasks = (userId?: string) => {
 
         if (supabaseError) {
           console.error('Supabase fetch error:', supabaseError);
+          // Network hatası ise logla (error state yok bu hook'ta)
+          if (isNetworkError(supabaseError)) {
+            console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseError));
+          }
         } else if (supabaseTasks && supabaseTasks.length > 0) {
           // Supabase'den veri geldi, formatla
           const formattedTasks: DailyTask[] = supabaseTasks.map((task: any) => ({
@@ -70,6 +75,10 @@ export const useTasks = (userId?: string) => {
         }
       } catch (supabaseErr) {
         console.error('Supabase connection error:', supabaseErr);
+        // Network hatası ise logla
+        if (isNetworkError(supabaseErr)) {
+          console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseErr));
+        }
       }
 
       // Supabase'den veri gelmediyse AsyncStorage'dan yükle

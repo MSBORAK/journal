@@ -1389,7 +1389,15 @@
       "focused": "Odaklı",
       "energetic": "Enerjik",
       "peaceful": "Huzurlu"
-    }
+    },
+    "addCustom": "Özel",
+    "addCustomDuration": "Özel Süre Ekle",
+    "durationInMinutes": "Süre (dakika)",
+    "enterDuration": "Örn: 30",
+    "invalidDuration": "Geçersiz Süre",
+    "invalidDurationMessage": "Lütfen 1-999 arası bir sayı girin.",
+    "duplicateDuration": "Zaten Mevcut",
+    "duplicateDurationMessage": "Bu süre zaten eklenmiş."
   },
   "insights": {
     "noInsightsYet": "Henüz içgörü yok",

@@ -3,6 +3,7 @@ import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { DiaryEntry } from '../types';
+import { isNetworkError, getNetworkErrorMessage } from '../utils/networkUtils';
 
 const DIARY_STORAGE_KEY = 'diary_entries';
 
@@ -26,7 +27,13 @@ export const useDiary = (userId?: string) => {
           .order('created_at', { ascending: false });
 
         if (supabaseError) {
-          console.error('Supabase fetch error:', supabaseError);
+          // Network hatası ise sessizce handle et (kullanıcıya gösterme)
+          if (isNetworkError(supabaseError)) {
+            console.warn('⚠️ Network error (offline mode):', supabaseError.message);
+            // Network hatasında error state'ini set etme, sadece AsyncStorage'dan yükle
+          } else {
+            console.error('Supabase fetch error:', supabaseError);
+          }
           // Hata olsa bile AsyncStorage'dan yüklemeyi dene
         } else if (supabaseEntries && supabaseEntries.length > 0) {
           // Supabase'den veri geldi, formatla ve kullan
@@ -48,7 +55,13 @@ export const useDiary = (userId?: string) => {
           return;
         }
       } catch (supabaseErr) {
-        console.error('Supabase connection error:', supabaseErr);
+        // Network hatası ise sessizce handle et (kullanıcıya gösterme)
+        if (isNetworkError(supabaseErr)) {
+          console.warn('⚠️ Network error (offline mode):', supabaseErr);
+          // Network hatasında error state'ini set etme
+        } else {
+          console.error('Supabase connection error:', supabaseErr);
+        }
         // Supabase'e bağlanamazsa AsyncStorage'dan yükle
       }
       
@@ -65,13 +78,22 @@ export const useDiary = (userId?: string) => {
         });
         setEntries(uniqueEntries);
         console.log('📦 Loaded entries from AsyncStorage:', uniqueEntries.length);
+        // Offline modda veri yüklendi, error state'ini temizle
+        setError(null);
       } else {
         setEntries([]);
         console.log('🆕 First time - starting with empty entries');
       }
     } catch (err) {
-      console.error('Error fetching entries:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      // Network hatası ise sessizce handle et
+      if (isNetworkError(err)) {
+        console.warn('⚠️ Network error fetching entries (offline mode):', err);
+        // Network hatasında error state'ini set etme
+        setError(null);
+      } else {
+        console.error('Error fetching entries:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
     } finally {
       setLoading(false);
     }

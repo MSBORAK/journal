@@ -1388,7 +1388,15 @@
       "focused": "Focused",
       "energetic": "Energetic",
       "peaceful": "Peaceful"
-    }
+    },
+    "addCustom": "Custom",
+    "addCustomDuration": "Add Custom Duration",
+    "durationInMinutes": "Duration (minutes)",
+    "enterDuration": "E.g: 30",
+    "invalidDuration": "Invalid Duration",
+    "invalidDurationMessage": "Please enter a number between 1-999.",
+    "duplicateDuration": "Already Exists",
+    "duplicateDurationMessage": "This duration is already added."
   },
   "insights": {
     "noInsightsYet": "No insights yet",

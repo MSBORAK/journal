@@ -42,6 +42,7 @@ import AppTour from '../components/AppTour';
 import { replaceAppName, replaceNickname, replacePlaceholders } from '../utils/textUtils';
 import { getButtonTextColor } from '../utils/colorUtils';
 import { isIPad, getMaxContentWidth, getHorizontalPadding } from '../utils/deviceUtils';
+import { isNetworkError } from '../utils/networkUtils';
 
 const { width, height: screenHeight } = Dimensions.get('window');
 
@@ -112,7 +113,7 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
     reminders: new Animated.Value(1),
   }).current;
   // const { fontConfig } = useFont(); // Kaldırıldı
-  const { entries } = useDiary(user?.uid);
+  const { entries, error: diaryError } = useDiary(user?.uid);
   const { profile, refreshProfile } = useProfile(user?.uid);
   const { 
     getTodayTasks, 
@@ -294,6 +295,14 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
       }
     }, [user?.uid])
   );
+
+  // Network hatalarını sessizce logla (kullanıcıya gösterme)
+  useEffect(() => {
+    if (diaryError && !isNetworkError(diaryError)) {
+      // Sadece network olmayan hataları logla
+      console.warn('⚠️ Non-network error detected:', diaryError);
+    }
+  }, [diaryError]);
 
   // Animasyon fonksiyonları
   const animateTaskCompletion = async (taskId: string) => {
@@ -2803,9 +2812,6 @@ const DashboardScreen = React.memo(function DashboardScreen({ navigation }: Dash
         </Text>
         <Text style={dynamicStyles.userEmail}>{t('dashboard.howAreYou')}</Text>
       </View>
-
-
-
 
       {/* Today's Mood */}
       <Animated.View
