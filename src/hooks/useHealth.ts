@@ -10,11 +10,11 @@ export const useHealth = (userId: string | undefined) => {
 
   // Load health data from AsyncStorage
   const loadHealthData = async () => {
-    if (!userId) return;
-    
     try {
       setLoading(true);
-      const storedData = await AsyncStorage.getItem(`${HEALTH_STORAGE_KEY}_${userId}`);
+      // userId varsa user-specific key, yoksa global key kullan
+      const storageKey = userId ? `${HEALTH_STORAGE_KEY}_${userId}` : HEALTH_STORAGE_KEY;
+      const storedData = await AsyncStorage.getItem(storageKey);
       
       if (storedData) {
         const parsedData = JSON.parse(storedData);
@@ -31,10 +31,13 @@ export const useHealth = (userId: string | undefined) => {
     }
   };
 
+  // Load data on mount and when userId changes
+  useEffect(() => {
+    loadHealthData();
+  }, [userId]);
+
   // Save health data for a specific date
   const saveHealthData = async (date: string, data: Omit<HealthData, 'date'>) => {
-    if (!userId) throw new Error('User not authenticated');
-
     try {
       const newHealthData: HealthData = {
         date,
@@ -46,9 +49,11 @@ export const useHealth = (userId: string | undefined) => {
         [date]: newHealthData,
       };
 
-      console.log('Saving to AsyncStorage:', `${HEALTH_STORAGE_KEY}_${userId}`, updatedData);
+      // userId varsa user-specific key, yoksa global key kullan
+      const storageKey = userId ? `${HEALTH_STORAGE_KEY}_${userId}` : HEALTH_STORAGE_KEY;
+      console.log('Saving to AsyncStorage:', storageKey, updatedData);
       setHealthData(updatedData);
-      await AsyncStorage.setItem(`${HEALTH_STORAGE_KEY}_${userId}`, JSON.stringify(updatedData));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedData));
       console.log('Health data saved for date:', date, 'data:', newHealthData);
       
       return newHealthData;

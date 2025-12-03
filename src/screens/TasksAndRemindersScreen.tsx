@@ -185,7 +185,16 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   };
 
   const handleAddReminder = () => {
-    setShowAddReminderModal(true);
+    // FocusMode açıksa önce kapat
+    if (showFocusMode) {
+      setShowFocusMode(false);
+      // Kısa bir gecikme ile modal'ı aç (modal kapanma animasyonu için)
+      setTimeout(() => {
+        setShowAddReminderModal(true);
+      }, 300);
+    } else {
+      setShowAddReminderModal(true);
+    }
   };
 
   const handleSaveTask = async () => {
@@ -303,6 +312,25 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
           });
           
           console.log('✅ Görev hatırlatıcısı oluşturuldu:', reminder);
+          
+          // Bildirim planla
+          try {
+            const { scheduleReminderNotification } = await import('../services/notificationService');
+            await scheduleReminderNotification(
+              reminder.id,
+              reminder.emoji + ' ' + reminder.title,
+              reminder.description || 'Görev zamanı!',
+              reminder.time,
+              reminder.repeatType,
+              reminder.category,
+              reminder.date,
+              reminder.repeatDays
+            );
+            console.log('✅ Görev hatırlatıcı bildirimi planlandı');
+          } catch (notifError) {
+            console.error('Görev hatırlatıcı bildirimi planlanırken hata:', notifError);
+            // Bildirim planlanamasa bile hatırlatıcı oluşturuldu
+          }
         } catch (reminderError) {
           console.error('Görev hatırlatıcısı oluşturulurken hata:', reminderError);
           // Hatırlatıcı oluşturulamasa bile görev kaydedildi
@@ -331,6 +359,13 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       return;
     }
     
+    // FocusMode açıksa önce kapat
+    if (showFocusMode) {
+      setShowFocusMode(false);
+      // Kısa bir gecikme ile devam et (modal kapanma animasyonu için)
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+    
     const today = new Date().toISOString().split('T')[0];
     
     // Basit mantık: Günlük veya Tarih aralığı
@@ -347,6 +382,10 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       endDate = undefined; // Bitiş yok, sürekli
     } else if (reminderType === 'dateRange') {
       // Tarih aralığı hatırlatıcı - başlangıç ve bitiş tarihi arasında her gün
+      if (!reminderStartDate || !reminderEndDate) {
+        console.error('Başlangıç ve bitiş tarihi gerekli');
+        return;
+      }
       if (reminderEndDate < reminderStartDate) {
         console.error('Bitiş tarihi başlangıç tarihinden önce olamaz');
         return;
@@ -384,6 +423,27 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       
       console.log('Reminder saved successfully:', newReminder);
       
+      // Bildirim planla (sadece aktifse)
+      if (newReminder.isActive) {
+        try {
+          const { scheduleReminderNotification } = await import('../services/notificationService');
+          await scheduleReminderNotification(
+            newReminder.id,
+            newReminder.emoji + ' ' + newReminder.title,
+            newReminder.description || 'Hatırlatıcı zamanı!',
+            newReminder.time,
+            newReminder.repeatType,
+            newReminder.category,
+            newReminder.date,
+            newReminder.repeatDays
+          );
+          console.log('✅ Reminder notification scheduled');
+        } catch (notifError) {
+          console.error('Error scheduling reminder notification:', notifError);
+          // Bildirim planlanamasa bile hatırlatıcı kaydedildi
+        }
+      }
+      
       // Reset form
       setReminderTitle('');
       setReminderType('daily');
@@ -395,6 +455,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error('Error adding reminder:', error);
+      // Hata durumunda modal'ı kapatma, kullanıcı tekrar deneyebilsin
     }
   };
 
@@ -1226,7 +1287,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
 
       {/* Add Task Modal */}
       <Modal
-        visible={showAddTaskModal}
+        visible={showAddTaskModal && !showFocusMode}
         transparent={true}
         animationType="fade"
         onRequestClose={() => setShowAddTaskModal(false)}
@@ -1467,7 +1528,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
 
       {/* Add Reminder Modal */}
       <Modal
-        visible={showAddReminderModal}
+        visible={showAddReminderModal && !showFocusMode}
         transparent={true}
         animationType="fade"
         onRequestClose={() => setShowAddReminderModal(false)}

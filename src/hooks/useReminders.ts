@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 import { Reminder } from '../types';
 import { 
   scheduleReminderNotification, 
   cancelReminderNotification 
 } from '../services/notificationService';
+import { isNetworkError } from '../utils/networkUtils';
 
 const REMINDERS_STORAGE_KEY = '@daily_reminders';
 
@@ -13,29 +15,85 @@ export const useReminders = (userId?: string) => {
   const [loading, setLoading] = useState(true);
 
   // Load reminders from storage
-  useEffect(() => {
-    loadReminders();
-  }, [userId]);
-
-  const loadReminders = async (): Promise<Reminder[]> => {
+  const loadReminders = useCallback(async (): Promise<Reminder[]> => {
     try {
       setLoading(true);
+      
+      // userId varsa önce Supabase'den reminders çek
+      if (userId) {
+        try {
+          const { data: supabaseReminders, error: supabaseError } = await supabase
+            .from('reminders')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+          if (supabaseError) {
+            console.error('Supabase fetch error:', supabaseError);
+            if (isNetworkError(supabaseError)) {
+              console.warn('⚠️ Network error, using local data');
+            }
+          } else if (supabaseReminders && supabaseReminders.length > 0) {
+            // Supabase'den veri geldi, formatla
+            const formattedReminders: Reminder[] = supabaseReminders.map((reminder: any) => ({
+              id: reminder.id,
+              title: reminder.title,
+              description: reminder.description || undefined,
+              emoji: reminder.emoji || '🔔',
+              time: reminder.time,
+              date: reminder.date || undefined,
+              isActive: reminder.is_active !== false,
+              repeatType: reminder.repeat_type || 'daily',
+              repeatDays: reminder.repeat_days || undefined,
+              category: reminder.category || 'general',
+              priority: reminder.priority || 'medium',
+              reminderType: reminder.reminder_type || 'today',
+              createdAt: reminder.created_at,
+              updatedAt: reminder.updated_at,
+              lastTriggered: reminder.last_triggered || undefined,
+              linkedTaskId: reminder.linked_task_id || undefined,
+              isTaskReminder: reminder.is_task_reminder || false,
+            }));
+            
+            setReminders(formattedReminders);
+            // AsyncStorage'a da kaydet (offline için)
+            await AsyncStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(formattedReminders));
+            console.log('✅ Loaded reminders from Supabase:', formattedReminders.length);
+            setLoading(false);
+            return formattedReminders;
+          }
+        } catch (supabaseErr) {
+          console.error('Supabase connection error:', supabaseErr);
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error, using local data');
+          }
+        }
+      }
+
+      // Supabase'den veri gelmediyse veya userId yoksa AsyncStorage'dan yükle
       const remindersData = await AsyncStorage.getItem(REMINDERS_STORAGE_KEY);
       if (remindersData) {
         const parsed = JSON.parse(remindersData);
         setReminders(parsed);
         console.log('📥 Loaded reminders from storage:', parsed.length);
+        setLoading(false);
         return parsed;
       }
-      console.log('📭 No reminders found in storage');
+      console.log('📭 No reminders found');
+      setReminders([]);
+      setLoading(false);
       return [];
     } catch (error) {
       console.error('❌ Error loading reminders:', error);
-      return [];
-    } finally {
+      setReminders([]);
       setLoading(false);
+      return [];
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    loadReminders();
+  }, [loadReminders]);
 
   // Save reminders to storage
   const saveReminders = async (newReminders: Reminder[]) => {
@@ -78,16 +136,80 @@ export const useReminders = (userId?: string) => {
     
     console.log('📋 Current reminders count:', currentReminders.length);
     
-    const newReminder: Reminder = {
-      ...reminder,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      // Eğer reminderType belirtilmemişse varsayılan değer
-      reminderType: reminder.reminderType || 'today',
-    };
+    let newReminder: Reminder;
     
-    console.log('✅ New reminder created:', newReminder);
+    // Supabase'e kaydet (sadece userId varsa)
+    if (userId) {
+      try {
+        const { data: insertedData, error: insertError } = await supabase
+          .from('reminders')
+          .insert({
+            user_id: userId,
+          title: reminder.title,
+          description: reminder.description || null,
+          emoji: reminder.emoji || '🔔',
+          time: reminder.time,
+          date: reminder.date || null,
+          is_active: reminder.isActive !== false,
+          repeat_type: reminder.repeatType || 'daily',
+          repeat_days: reminder.repeatDays || null,
+          category: reminder.category || 'general',
+          priority: reminder.priority || 'medium',
+          reminder_type: reminder.reminderType || 'today',
+          linked_task_id: reminder.linkedTaskId || null,
+          is_task_reminder: reminder.isTaskReminder || false,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Supabase insert error:', insertError);
+        throw insertError;
+      }
+
+      newReminder = {
+        id: insertedData.id,
+        title: insertedData.title,
+        description: insertedData.description || undefined,
+        emoji: insertedData.emoji || '🔔',
+        time: insertedData.time,
+        date: insertedData.date || undefined,
+        isActive: insertedData.is_active !== false,
+        repeatType: insertedData.repeat_type || 'daily',
+        repeatDays: insertedData.repeat_days || undefined,
+        category: insertedData.category || 'general',
+        priority: insertedData.priority || 'medium',
+        reminderType: insertedData.reminder_type || 'today',
+        createdAt: insertedData.created_at,
+        updatedAt: insertedData.updated_at,
+        lastTriggered: insertedData.last_triggered || undefined,
+        linkedTaskId: insertedData.linked_task_id || undefined,
+        isTaskReminder: insertedData.is_task_reminder || false,
+      };
+      
+        console.log('✅ Reminder saved to Supabase:', newReminder.id);
+      } catch (supabaseErr) {
+        console.error('Supabase insert failed, using local ID:', supabaseErr);
+        // Supabase başarısız olursa local ID ile kaydet
+        newReminder = {
+          ...reminder,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          reminderType: reminder.reminderType || 'today',
+        };
+      }
+    } else {
+      // Anonymous user - sadece local ID ile kaydet
+      newReminder = {
+        ...reminder,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        reminderType: reminder.reminderType || 'today',
+      };
+      console.log('📝 Reminder saved locally (anonymous user):', newReminder.id);
+    }
     
     // Mevcut hatırlatıcılar + yeni hatırlatıcı
     const newReminders = [...currentReminders, newReminder];
@@ -103,10 +225,69 @@ export const useReminders = (userId?: string) => {
 
   // Update reminder
   const updateReminder = async (reminderId: string, updates: Partial<Reminder>) => {
-    const newReminders = reminders.map(reminder => 
-      reminder.id === reminderId 
-        ? { ...reminder, ...updates, updatedAt: new Date().toISOString() }
-        : reminder
+    // Mevcut hatırlatıcıları AsyncStorage'dan direkt oku
+    let currentReminders: Reminder[] = [];
+    try {
+      const remindersData = await AsyncStorage.getItem(REMINDERS_STORAGE_KEY);
+      if (remindersData) {
+        currentReminders = JSON.parse(remindersData);
+      }
+    } catch (error) {
+      currentReminders = reminders;
+    }
+    
+    const existingReminder = currentReminders.find(r => r.id === reminderId);
+    if (!existingReminder) throw new Error('Reminder not found');
+
+    // Supabase'de güncelle (sadece userId varsa)
+    if (userId) {
+      try {
+        const { data: updatedData, error: updateError } = await supabase
+          .from('reminders')
+          .update({
+          ...(updates.title !== undefined && { title: updates.title }),
+          ...(updates.description !== undefined && { description: updates.description || null }),
+          ...(updates.emoji !== undefined && { emoji: updates.emoji }),
+          ...(updates.time !== undefined && { time: updates.time }),
+          ...(updates.date !== undefined && { date: updates.date || null }),
+          ...(updates.isActive !== undefined && { is_active: updates.isActive }),
+          ...(updates.repeatType !== undefined && { repeat_type: updates.repeatType }),
+          ...(updates.repeatDays !== undefined && { repeat_days: updates.repeatDays || null }),
+          ...(updates.category !== undefined && { category: updates.category }),
+          ...(updates.priority !== undefined && { priority: updates.priority }),
+          ...(updates.reminderType !== undefined && { reminder_type: updates.reminderType }),
+          ...(updates.lastTriggered !== undefined && { last_triggered: updates.lastTriggered || null }),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', reminderId)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('Supabase update error:', updateError);
+        if (!isNetworkError(updateError)) {
+          throw updateError;
+        }
+        } else if (updatedData) {
+          console.log('✅ Reminder updated in Supabase:', reminderId);
+        }
+      } catch (supabaseErr) {
+        console.error('Supabase update failed, using local update:', supabaseErr);
+      }
+    } else {
+      console.log('📝 Reminder updated locally (anonymous user):', reminderId);
+    }
+    
+    // Local state'i güncelle
+    const updatedReminder = {
+      ...existingReminder,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    const newReminders = currentReminders.map(reminder => 
+      reminder.id === reminderId ? updatedReminder : reminder
     );
     await saveReminders(newReminders);
   };
@@ -120,7 +301,42 @@ export const useReminders = (userId?: string) => {
       console.error('Error cancelling reminder notification:', error);
     }
     
-    const newReminders = reminders.filter(reminder => reminder.id !== reminderId);
+    // Supabase'den sil (sadece userId varsa)
+    if (userId) {
+      try {
+        const { error: deleteError } = await supabase
+          .from('reminders')
+          .delete()
+          .eq('id', reminderId)
+          .eq('user_id', userId);
+
+        if (deleteError) {
+          console.error('Supabase delete error:', deleteError);
+          if (!isNetworkError(deleteError)) {
+            throw deleteError;
+          }
+        } else {
+          console.log('✅ Reminder deleted from Supabase:', reminderId);
+        }
+      } catch (supabaseErr) {
+        console.error('Supabase delete failed, using local delete:', supabaseErr);
+      }
+    } else {
+      console.log('📝 Reminder deleted locally (anonymous user):', reminderId);
+    }
+    
+    // Mevcut hatırlatıcıları AsyncStorage'dan direkt oku
+    let currentReminders: Reminder[] = [];
+    try {
+      const remindersData = await AsyncStorage.getItem(REMINDERS_STORAGE_KEY);
+      if (remindersData) {
+        currentReminders = JSON.parse(remindersData);
+      }
+    } catch (error) {
+      currentReminders = reminders;
+    }
+    
+    const newReminders = currentReminders.filter(reminder => reminder.id !== reminderId);
     await saveReminders(newReminders);
   };
 

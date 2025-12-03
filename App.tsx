@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Linking, LogBox } from 'react-native';
+import { Linking, LogBox, View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -35,7 +35,43 @@ LogBox.ignoreLogs([
   'Failed to fetch',
   /Network.*failed/i,
   /TypeError.*Network/i,
+  /fetch.*failed/i,
+  /request.*failed/i,
+  /ERROR.*Network/i,
+  /Network.*ERROR/i,
 ]);
+
+// Console.error'u override et - Network hatalarını gizle
+const originalConsoleError = console.error;
+console.error = (...args: any[]) => {
+  const message = args.map(arg => 
+    typeof arg === 'string' ? arg : 
+    arg?.message || arg?.toString() || JSON.stringify(arg)
+  ).join(' ');
+  
+  const lowerMessage = message.toLowerCase();
+  
+  if (
+    message.includes('Network request failed') ||
+    message.includes('NetworkError') ||
+    message.includes('Failed to fetch') ||
+    message.includes('TypeError: Network request failed') ||
+    message.includes('ERROR') && lowerMessage.includes('network') ||
+    (lowerMessage.includes('network') && lowerMessage.includes('failed')) ||
+    lowerMessage.includes('fetch failed') ||
+    lowerMessage.includes('request failed') ||
+    lowerMessage.includes('connection') ||
+    lowerMessage.includes('timeout')
+  ) {
+    // Network hatası - sessizce logla (sadece dev modda)
+    if (__DEV__) {
+      console.warn('⚠️ Network error (silently handled)');
+    }
+    return;
+  }
+  // Diğer hatalar için normal console.error
+  originalConsoleError.apply(console, args);
+};
 
 // Global error handler - Network hatalarını yakala ve sessizce handle et
 // @ts-ignore - ErrorUtils React Native'de mevcut ama TypeScript'te tanımlı değil
@@ -49,12 +85,19 @@ if (typeof ErrorUtils !== 'undefined' && ErrorUtils?.getGlobalHandler) {
       const errorName = error?.name || '';
       
       // Network hatalarını sessizce handle et
+      const lowerMessage = errorMessage.toLowerCase();
       if (
         errorMessage.includes('Network request failed') ||
         errorMessage.includes('NetworkError') ||
         errorMessage.includes('Failed to fetch') ||
+        errorMessage.includes('fetch failed') ||
+        errorMessage.includes('request failed') ||
         errorName.includes('NetworkError') ||
-        errorMessage.toLowerCase().includes('network')
+        lowerMessage.includes('network') ||
+        lowerMessage.includes('fetch') ||
+        lowerMessage.includes('connection') ||
+        lowerMessage.includes('timeout') ||
+        lowerMessage.includes('offline')
       ) {
         // Network hatası - sadece logla, kullanıcıya gösterme
         console.warn('⚠️ Network error (silently handled):', errorMessage);
@@ -294,7 +337,12 @@ function AppNavigator() {
       // First time opening app and user is anonymous - show Auth screen
       console.log('🔄 Navigating to Auth screen');
       try {
-        navigationRef.current?.navigate('Auth' as never);
+        // Navigation'ı bir sonraki tick'te yap (infinite loop önleme)
+        setTimeout(() => {
+          if (navigationRef.current?.isReady()) {
+            navigationRef.current?.navigate('Auth' as never);
+          }
+        }, 100);
       } catch (navError) {
         console.error('❌ Navigation error:', navError);
       }
@@ -350,9 +398,13 @@ function AppNavigator() {
     },
   };
 
-  // Loading kontrolü
+  // Loading kontrolü - Loading ekranı göster
   if (loading || hasSeenAuth === null) {
-    return null;
+    return (
+      <View style={{ flex: 1, backgroundColor: currentTheme.colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: currentTheme.colors.text }}>Yükleniyor...</Text>
+      </View>
+    );
   }
 
   // Optimized transition config for faster navigation

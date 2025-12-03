@@ -1096,6 +1096,6 @@ function RemindersScreen({ navigation }: RemindersScreenProps) {
       />
     </View>
   );
-});
+}
 
 export default React.memo(RemindersScreen);

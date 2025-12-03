@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dream, Goal, Promise } from '../types';
 
@@ -12,26 +12,19 @@ export const useDreamsGoals = (userId?: string) => {
   const [promises, setPromises] = useState<Promise[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load data from AsyncStorage
-  useEffect(() => {
-    if (userId) {
-      loadData();
-    }
-  }, [userId]);
-
-  const loadData = async () => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-    
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
+      // userId varsa user-specific key, yoksa global key kullan
+      const dreamsKey = userId ? `${DREAMS_KEY}_${userId}` : DREAMS_KEY;
+      const goalsKey = userId ? `${GOALS_KEY}_${userId}` : GOALS_KEY;
+      const promisesKey = userId ? `${PROMISES_KEY}_${userId}` : PROMISES_KEY;
+      
       // Promise.all yerine ayrı ayrı yükleyelim
-      const dreamsData = await AsyncStorage.getItem(`${DREAMS_KEY}_${userId}`);
-      const goalsData = await AsyncStorage.getItem(`${GOALS_KEY}_${userId}`);
-      const promisesData = await AsyncStorage.getItem(`${PROMISES_KEY}_${userId}`);
+      const dreamsData = await AsyncStorage.getItem(dreamsKey);
+      const goalsData = await AsyncStorage.getItem(goalsKey);
+      const promisesData = await AsyncStorage.getItem(promisesKey);
 
       if (dreamsData) {
         try {
@@ -74,7 +67,12 @@ export const useDreamsGoals = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  // Load data from AsyncStorage
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const saveDreams = async (newDreams: Dream[]) => {
     try {

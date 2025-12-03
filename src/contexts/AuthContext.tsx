@@ -37,16 +37,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [anonymousErrorShown, setAnonymousErrorShown] = useState(false);
+  const isCreatingAnonymousRef = React.useRef(false); // Infinite loop önleme
 
   const createAnonymousUser = async () => {
     try {
-      const { data, error } = await supabase.auth.signInAnonymously();
+      // Timeout ekle - 3 saniye içinde cevap gelmezse devam et
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Anonymous user creation timeout')), 3000)
+      );
+      
+      const { data, error } = await Promise.race([
+        supabase.auth.signInAnonymously(),
+        timeoutPromise
+      ]) as any;
+      
       if (error) {
         // Network hatası ise sessizce handle et (offline mod)
         if (isNetworkError(error)) {
           console.warn('⚠️ Network error creating anonymous user (offline mode)');
           // Network hatasında user null olarak kalır, uygulama offline modda çalışır
-          return;
+          throw error; // initializeAuth'da handle edilecek
         }
         
         // Özel hata mesajı göster (sadece bir kez)
@@ -89,7 +99,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const initializeAuth = async () => {
     try {
-      const currentUser = await getCurrentUser();
+      // Timeout ekle - 5 saniye içinde cevap gelmezse devam et
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Auth timeout')), 5000)
+      );
+      
+      const currentUser = await Promise.race([
+        getCurrentUser(),
+        timeoutPromise
+      ]) as any;
+      
       if (currentUser) {
         const isAnon = currentUser.is_anonymous || false;
         setIsAnonymous(isAnon);
@@ -102,13 +121,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           nickname: currentUser.user_metadata?.nickname || 'Guest',
         };
         setUser(user);
+        setLoading(false);
       } else {
         // Kullanıcı yoksa otomatik olarak anonim kullanıcı oluştur
-        await createAnonymousUser();
+        try {
+          await createAnonymousUser();
+        } catch (anonErr) {
+          // Anonim kullanıcı oluşturulamazsa offline modda devam et
+          console.warn('⚠️ Could not create anonymous user, continuing offline');
+          setUser(null);
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Auth initialization error:', error);
+      // Network hatası veya timeout durumunda offline modda devam et
+      if (isNetworkError(error) || error?.message === 'Auth timeout') {
+        console.warn('⚠️ Network/timeout error, continuing offline');
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      
       // Hata durumunda da anonim kullanıcı oluşturmayı dene
       try {
         await createAnonymousUser();
@@ -159,10 +193,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
             setUser(user);
             setLoading(false);
+            isCreatingAnonymousRef.current = false; // Reset flag
           } else {
-            // Session yoksa anonim kullanıcı oluştur (sadece SIGNED_OUT event'inde)
-            if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+            // Session yoksa anonim kullanıcı oluştur (sadece SIGNED_OUT event'inde ve daha önce oluşturulmadıysa)
+            if (event === 'SIGNED_OUT' && !isCreatingAnonymousRef.current && !user) {
               try {
+                isCreatingAnonymousRef.current = true;
                 await createAnonymousUser();
               } catch (error: any) {
                 console.error('Failed to create anonymous user:', error);
@@ -170,6 +206,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   setUser(null);
                   setLoading(false);
                 }
+              } finally {
+                isCreatingAnonymousRef.current = false;
               }
             } else {
               setLoading(false);

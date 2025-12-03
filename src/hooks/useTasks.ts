@@ -29,65 +29,86 @@ export const useTasks = (userId?: string) => {
 
   // Load data from storage
   const loadData = useCallback(async () => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       
-      // Önce Supabase'den tasks çek
-      try {
-        const { data: supabaseTasks, error: supabaseError } = await supabase
-          .from('daily_tasks')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
+      // userId varsa önce Supabase'den tasks çek
+      if (userId) {
+        try {
+          const { data: supabaseTasks, error: supabaseError } = await supabase
+            .from('daily_tasks')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
 
-        if (supabaseError) {
-          console.error('Supabase fetch error:', supabaseError);
-          // Network hatası ise logla (error state yok bu hook'ta)
-          if (isNetworkError(supabaseError)) {
-            console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseError));
+          if (supabaseError) {
+            console.error('Supabase fetch error:', supabaseError);
+            // Network hatası ise logla (error state yok bu hook'ta)
+            if (isNetworkError(supabaseError)) {
+              console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseError));
+            }
+          } else if (supabaseTasks && supabaseTasks.length > 0) {
+            // Supabase'den veri geldi, formatla
+            const formattedTasks: DailyTask[] = supabaseTasks.map((task: any) => ({
+              id: task.id,
+              title: task.title,
+              description: task.description || '',
+              category: task.category || 'custom',
+              emoji: task.emoji || '📝',
+              isCompleted: task.is_completed || false,
+              completedAt: task.completed_at || undefined,
+              priority: task.priority || 'medium',
+              estimatedTime: task.estimated_time || undefined,
+              date: task.date || new Date(task.created_at).toISOString().split('T')[0],
+              createdAt: task.created_at,
+              updatedAt: task.updated_at,
+            }));
+            
+            setTasks(formattedTasks);
+            // AsyncStorage'a da kaydet (offline için)
+            await AsyncStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(formattedTasks));
+            console.log('✅ Loaded tasks from Supabase:', formattedTasks.length);
+            
+            // Load progress, categories, achievements
+            const progressData = await AsyncStorage.getItem(PROGRESS_STORAGE_KEY);
+            if (progressData) {
+              setProgress(JSON.parse(progressData));
+            }
+
+            const categoriesData = await AsyncStorage.getItem(CATEGORIES_STORAGE_KEY);
+            if (categoriesData) {
+              setCategories(JSON.parse(categoriesData));
+            } else {
+              setCategories(defaultCategories);
+              await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCategories));
+            }
+
+            const achievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+            if (achievementsData) {
+              setAchievements(JSON.parse(achievementsData));
+            }
+            
+            setLoading(false);
+            return;
           }
-        } else if (supabaseTasks && supabaseTasks.length > 0) {
-          // Supabase'den veri geldi, formatla
-          const formattedTasks: DailyTask[] = supabaseTasks.map((task: any) => ({
-            id: task.id,
-            title: task.title,
-            description: task.description || '',
-            category: task.category || 'custom',
-            emoji: task.emoji || '📝',
-            isCompleted: task.is_completed || false,
-            completedAt: task.completed_at || undefined,
-            priority: task.priority || 'medium',
-            estimatedTime: task.estimated_time || undefined,
-            date: task.date || new Date(task.created_at).toISOString().split('T')[0],
-            createdAt: task.created_at,
-            updatedAt: task.updated_at,
-          }));
-          
-          setTasks(formattedTasks);
-          // AsyncStorage'a da kaydet (offline için)
-          await AsyncStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(formattedTasks));
-          console.log('✅ Loaded tasks from Supabase:', formattedTasks.length);
-        }
-      } catch (supabaseErr) {
-        console.error('Supabase connection error:', supabaseErr);
-        // Network hatası ise logla
-        if (isNetworkError(supabaseErr)) {
-          console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseErr));
+        } catch (supabaseErr) {
+          console.error('Supabase connection error:', supabaseErr);
+          // Network hatası ise logla
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseErr));
+          }
         }
       }
 
-      // Supabase'den veri gelmediyse AsyncStorage'dan yükle
-      if (tasks.length === 0) {
-        const tasksData = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
-        if (tasksData) {
-          setTasks(JSON.parse(tasksData));
-          console.log('📦 Loaded tasks from AsyncStorage');
-        }
+      // Supabase'den veri gelmediyse veya userId yoksa AsyncStorage'dan yükle
+      const tasksData = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
+      if (tasksData) {
+        const parsedTasks = JSON.parse(tasksData);
+        setTasks(parsedTasks);
+        console.log('📦 Loaded tasks from AsyncStorage:', parsedTasks.length);
+      } else {
+        setTasks([]);
+        console.log('🆕 First time - starting with empty tasks');
       }
 
       // Load progress (local only for now)
@@ -147,18 +168,17 @@ export const useTasks = (userId?: string) => {
 
   // Add new task
   const addTask = async (task: Omit<DailyTask, 'id' | 'createdAt' | 'updatedAt' | 'isCompleted'>) => {
-    if (!userId) throw new Error('User not authenticated');
-    
     console.log('addTask called with:', task);
     
     let newTask: DailyTask;
     
-    // Supabase'e kaydet
-    try {
-      const { data: insertedData, error: insertError } = await supabase
-        .from('daily_tasks')
-        .insert({
-          user_id: userId,
+    // Supabase'e kaydet (sadece userId varsa)
+    if (userId) {
+      try {
+        const { data: insertedData, error: insertError } = await supabase
+          .from('daily_tasks')
+          .insert({
+            user_id: userId,
           title: task.title,
           description: task.description || null,
           category: task.category || 'custom',
@@ -191,10 +211,20 @@ export const useTasks = (userId?: string) => {
         updatedAt: insertedData.updated_at,
       };
       
-      console.log('✅ Task saved to Supabase:', newTask.id);
-    } catch (supabaseErr) {
-      console.error('Supabase insert failed, using local ID:', supabaseErr);
-      // Supabase başarısız olursa local ID ile kaydet
+        console.log('✅ Task saved to Supabase:', newTask.id);
+      } catch (supabaseErr) {
+        console.error('Supabase insert failed, using local ID:', supabaseErr);
+        // Supabase başarısız olursa local ID ile kaydet
+        newTask = {
+          ...task,
+          id: Date.now().toString(),
+          isCompleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+    } else {
+      // Anonymous user - sadece local ID ile kaydet
       newTask = {
         ...task,
         id: Date.now().toString(),
@@ -202,6 +232,7 @@ export const useTasks = (userId?: string) => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+      console.log('📝 Task saved locally (anonymous user):', newTask.id);
     }
     
     const newTasks = [...tasks, newTask];
@@ -213,16 +244,15 @@ export const useTasks = (userId?: string) => {
 
   // Update task
   const updateTask = async (taskId: string, updates: Partial<DailyTask>) => {
-    if (!userId) throw new Error('User not authenticated');
-    
     const existingTask = tasks.find(t => t.id === taskId);
     if (!existingTask) throw new Error('Task not found');
 
-    // Supabase'de güncelle
-    try {
-      const { data: updatedData, error: updateError } = await supabase
-        .from('daily_tasks')
-        .update({
+    // Supabase'de güncelle (sadece userId varsa)
+    if (userId) {
+      try {
+        const { data: updatedData, error: updateError } = await supabase
+          .from('daily_tasks')
+          .update({
           ...(updates.title !== undefined && { title: updates.title }),
           ...(updates.description !== undefined && { description: updates.description || null }),
           ...(updates.category !== undefined && { category: updates.category }),
@@ -246,9 +276,12 @@ export const useTasks = (userId?: string) => {
         throw updateError;
       }
 
-      console.log('✅ Task updated in Supabase:', taskId);
-    } catch (supabaseErr) {
-      console.error('Supabase update failed, updating locally:', supabaseErr);
+        console.log('✅ Task updated in Supabase:', taskId);
+      } catch (supabaseErr) {
+        console.error('Supabase update failed, updating locally:', supabaseErr);
+      }
+    } else {
+      console.log('📝 Task updated locally (anonymous user):', taskId);
     }
 
     // Local state'i güncelle
@@ -262,23 +295,25 @@ export const useTasks = (userId?: string) => {
 
   // Delete task
   const deleteTask = async (taskId: string) => {
-    if (!userId) throw new Error('User not authenticated');
-    
-    // Supabase'den sil
-    try {
-      const { error: deleteError } = await supabase
-        .from('daily_tasks')
-        .delete()
-        .eq('id', taskId)
-        .eq('user_id', userId);
+    // Supabase'den sil (sadece userId varsa)
+    if (userId) {
+      try {
+        const { error: deleteError } = await supabase
+          .from('daily_tasks')
+          .delete()
+          .eq('id', taskId)
+          .eq('user_id', userId);
 
-      if (deleteError) {
-        console.error('Supabase delete error:', deleteError);
-      } else {
-        console.log('✅ Task deleted from Supabase:', taskId);
+        if (deleteError) {
+          console.error('Supabase delete error:', deleteError);
+        } else {
+          console.log('✅ Task deleted from Supabase:', taskId);
+        }
+      } catch (supabaseErr) {
+        console.error('Supabase delete failed, deleting locally:', supabaseErr);
       }
-    } catch (supabaseErr) {
-      console.error('Supabase delete failed, deleting locally:', supabaseErr);
+    } else {
+      console.log('📝 Task deleted locally (anonymous user):', taskId);
     }
 
     // Local state'i güncelle

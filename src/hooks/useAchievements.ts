@@ -332,16 +332,39 @@ export const useAchievements = (userId?: string) => {
     try {
       setLoading(true);
       
+      // userId varsa user-specific key, yoksa global key kullan
+      const achievementsKey = userId ? `${ACHIEVEMENTS_STORAGE_KEY}_${userId}` : ACHIEVEMENTS_STORAGE_KEY;
+      const statsKey = userId ? `${USER_STATS_STORAGE_KEY}_${userId}` : USER_STATS_STORAGE_KEY;
+      
       // Başarıları yükle
-      const achievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+      const achievementsData = await AsyncStorage.getItem(achievementsKey);
       if (achievementsData) {
         setAchievements(JSON.parse(achievementsData));
+      } else {
+        setAchievements([]);
       }
       
       // Kullanıcı istatistiklerini yükle
-      const statsData = await AsyncStorage.getItem(USER_STATS_STORAGE_KEY);
+      const statsData = await AsyncStorage.getItem(statsKey);
       if (statsData) {
         setUserStats(JSON.parse(statsData));
+      } else {
+        // Varsayılan stats
+        setUserStats({
+          totalDiaryEntries: 0,
+          currentStreak: 0,
+          longestStreak: 0,
+          totalTasksCompleted: 0,
+          tasksCompletedThisWeek: 0,
+          healthTrackingDays: 0,
+          totalReminders: 0,
+          activeReminders: 0,
+          appUsageDays: 0,
+          wellnessScore: 0,
+          level: 1,
+          experience: 0,
+          nextLevelExp: 10,
+        });
       }
     } catch (error) {
       console.error('Error loading achievements data:', error);
@@ -352,13 +375,15 @@ export const useAchievements = (userId?: string) => {
 
   const saveAchievements = async (newAchievements: Achievement[]) => {
     try {
+      // userId varsa user-specific key, yoksa global key kullan
+      const achievementsKey = userId ? `${ACHIEVEMENTS_STORAGE_KEY}_${userId}` : ACHIEVEMENTS_STORAGE_KEY;
       const achievementsJson = JSON.stringify(newAchievements);
-      await AsyncStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, achievementsJson);
+      await AsyncStorage.setItem(achievementsKey, achievementsJson);
       setAchievements(newAchievements);
       console.log(`💾 Achievements saved to AsyncStorage: ${newAchievements.length} achievements`);
       
       // Doğrulama: AsyncStorage'dan oku ve kontrol et
-      const verifyData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+      const verifyData = await AsyncStorage.getItem(achievementsKey);
       if (verifyData) {
         const verified = JSON.parse(verifyData);
         console.log(`✅ Verification: ${verified.length} achievements in AsyncStorage`);
@@ -371,7 +396,9 @@ export const useAchievements = (userId?: string) => {
 
   const saveUserStats = async (newStats: UserStats) => {
     try {
-      await AsyncStorage.setItem(USER_STATS_STORAGE_KEY, JSON.stringify(newStats));
+      // userId varsa user-specific key, yoksa global key kullan
+      const statsKey = userId ? `${USER_STATS_STORAGE_KEY}_${userId}` : USER_STATS_STORAGE_KEY;
+      await AsyncStorage.setItem(statsKey, JSON.stringify(newStats));
       setUserStats(newStats);
     } catch (error) {
       console.error('Error saving user stats:', error);
@@ -383,7 +410,8 @@ export const useAchievements = (userId?: string) => {
     console.log('🔍 checkAchievements called with stats:', stats);
     
     // Önce mevcut userStats'ı yeniden yükle (AsyncStorage'dan)
-    const currentStatsData = await AsyncStorage.getItem(USER_STATS_STORAGE_KEY);
+    const statsKey = userId ? `${USER_STATS_STORAGE_KEY}_${userId}` : USER_STATS_STORAGE_KEY;
+    const currentStatsData = await AsyncStorage.getItem(statsKey);
     let currentUserStats: UserStats = userStats;
     if (currentStatsData) {
       currentUserStats = JSON.parse(currentStatsData);
@@ -413,7 +441,8 @@ export const useAchievements = (userId?: string) => {
     const newAchievements: Achievement[] = [];
     
     // Önce mevcut achievements'ı yeniden yükle
-    const currentAchievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+    const achievementsKey = userId ? `${ACHIEVEMENTS_STORAGE_KEY}_${userId}` : ACHIEVEMENTS_STORAGE_KEY;
+    const currentAchievementsData = await AsyncStorage.getItem(achievementsKey);
     let currentAchievements = achievements;
     if (currentAchievementsData) {
       currentAchievements = JSON.parse(currentAchievementsData);

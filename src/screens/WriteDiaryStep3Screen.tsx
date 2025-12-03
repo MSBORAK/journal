@@ -289,8 +289,14 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       const savedEntry = await addEntry(entry);
       console.log('Entry saved successfully:', savedEntry);
       
+      // State'i güncellemek için refetch çağır
+      if (refetch) {
+        await refetch();
+      }
+      
       // addEntry state'i güncelledi, ama React state güncellemesi asenkron olduğu için
       // entries state'i henüz güncellenmemiş olabilir. Bu yüzden manuel olarak hesaplıyoruz.
+      // Refetch sonrası entries güncellenmiş olmalı, ama yine de manuel hesaplama yapalım
       const allEntries = [savedEntry, ...entries];
       const totalEntries = allEntries.length;
       const currentStreak = getCurrentStreak(allEntries, entry.date);
@@ -341,7 +347,8 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
           text: '📖 Günlükleri Gör',
           onPress: () => {
             setShowCustomAlert(false);
-            navigation.navigate('MainTabs', { screen: 'History' });
+            // Journal tab'ına git
+            navigation.navigate('MainTabs', { screen: 'Journal' });
           },
           style: 'primary'
         }

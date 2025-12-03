@@ -33,10 +33,10 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
   // Ekran focus olduğunda entries'i yenile
   useFocusEffect(
     React.useCallback(() => {
-      if (user?.uid && refetch) {
+      if (refetch) {
         refetch();
       }
-    }, [user?.uid, refetch])
+    }, [refetch])
   );
   
   // Compute simple luminance to adapt badge colors for light/dark themes
