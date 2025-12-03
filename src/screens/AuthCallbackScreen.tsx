@@ -34,43 +34,58 @@ export default function AuthCallbackScreen() {
       try {
         console.log('🔗 URL received:', url);
         
-        // URL'den token'ı çıkar (ChatGPT'nin önerdiği yöntem)
-        if (url.includes('token=')) {
-          const token = url.split('token=')[1].split('&')[0];
-          console.log('🔑 Token extracted:', token);
+        // Supabase email confirmation formatı: #access_token=xxx&refresh_token=yyy&type=signup
+        if (url.includes('#access_token') || url.includes('type=signup') || url.includes('type=email')) {
+          console.log('✅ Email confirmation token detected');
           
-          // Supabase verifyOtp ile token'ı doğrula
-          const { data, error } = await supabase.auth.verifyOtp({ 
-            token_hash: token,
-            type: 'email_change'
-          });
+          // Hash fragment'i parse et
+          let accessToken: string | null = null;
+          let refreshToken: string | null = null;
           
-          if (error) {
-            console.error('❌ Token verification error:', error);
-            showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
-            return;
+          if (url.includes('#')) {
+            const hashPart = url.split('#')[1];
+            const hashParams = new URLSearchParams(hashPart);
+            accessToken = hashParams.get('access_token');
+            refreshToken = hashParams.get('refresh_token');
           }
-
-          if (data.user) {
-            console.log('✅ Email confirmed successfully');
+          
+          if (accessToken && refreshToken) {
+            // Session'ı set et
+            const { data, error: setSessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
             
-            // UI state'ini güncelle
-            await refreshUser();
+            if (setSessionError) {
+              console.error('❌ Set session error:', setSessionError);
+              showAlert('❌ Hata', 'Email onayında hata oluştu. Lütfen tekrar deneyin.', 'error');
+              return;
+            }
             
-            showAlert(
-              '✅ Başarılı', 
-              'Email adresiniz başarıyla onaylandı ve güncellendi!',
-              'success'
-            );
-            
-            // Navigate back to settings after 2 seconds
-            setTimeout(() => {
-              navigation.navigate('AccountSettings' as never);
-            }, 2000);
+            if (data.user) {
+              console.log('✅ Email confirmed successfully');
+              
+              // UI state'ini güncelle
+              await refreshUser();
+              
+              showAlert(
+                '✅ Başarılı', 
+                'Email adresiniz başarıyla onaylandı! Artık uygulamayı kullanabilirsiniz.',
+                'success'
+              );
+              
+              // Navigate to main app after 2 seconds
+              setTimeout(() => {
+                navigation.navigate('MainTabs' as never);
+              }, 2000);
+            }
+          } else {
+            console.warn('⚠️ Tokens not found in URL');
+            showAlert('⚠️ Uyarı', 'Geçersiz onay linki. Lütfen email linkini tekrar kullanın.', 'warning');
           }
         } else {
-          console.warn('⚠️ No token found in URL');
-          showAlert('⚠️ Uyarı', 'Geçersiz onay linki.', 'warning');
+          console.warn('⚠️ No confirmation token found in URL');
+          showAlert('⚠️ Uyarı', 'Geçersiz onay linki. Lütfen email linkini tekrar kullanın.', 'warning');
         }
       } catch (error) {
         console.error('❌ URL handling error:', error);

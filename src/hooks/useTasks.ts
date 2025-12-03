@@ -30,6 +30,7 @@ export const useTasks = (userId?: string) => {
   // Load data from storage
   const loadData = useCallback(async () => {
     try {
+      console.log('🔄 useTasks: loadData başladı, userId:', userId);
       setLoading(true);
       
       // userId varsa önce Supabase'den tasks çek
@@ -47,22 +48,26 @@ export const useTasks = (userId?: string) => {
             if (isNetworkError(supabaseError)) {
               console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseError));
             }
-          } else if (supabaseTasks && supabaseTasks.length > 0) {
-            // Supabase'den veri geldi, formatla
-            const formattedTasks: DailyTask[] = supabaseTasks.map((task: any) => ({
-              id: task.id,
-              title: task.title,
-              description: task.description || '',
-              category: task.category || 'custom',
-              emoji: task.emoji || '📝',
-              isCompleted: task.is_completed || false,
-              completedAt: task.completed_at || undefined,
-              priority: task.priority || 'medium',
-              estimatedTime: task.estimated_time || undefined,
-              date: task.date || new Date(task.created_at).toISOString().split('T')[0],
-              createdAt: task.created_at,
-              updatedAt: task.updated_at,
-            }));
+            // Hata olsa bile loading'i false yap ve local data'yı yükle
+            setLoading(false);
+          } else if (supabaseTasks) {
+            // Supabase'den veri geldi (boş array de olabilir), formatla
+            const formattedTasks: DailyTask[] = supabaseTasks.length > 0 
+              ? supabaseTasks.map((task: any) => ({
+                  id: task.id,
+                  title: task.title,
+                  description: task.description || '',
+                  category: task.category || 'custom',
+                  emoji: task.emoji || '📝',
+                  isCompleted: task.is_completed || false,
+                  completedAt: task.completed_at || undefined,
+                  priority: task.priority || 'medium',
+                  estimatedTime: task.estimated_time || undefined,
+                  date: task.date || new Date(task.created_at).toISOString().split('T')[0],
+                  createdAt: task.created_at,
+                  updatedAt: task.updated_at,
+                }))
+              : [];
             
             setTasks(formattedTasks);
             // AsyncStorage'a da kaydet (offline için)
@@ -79,8 +84,16 @@ export const useTasks = (userId?: string) => {
             if (categoriesData) {
               setCategories(JSON.parse(categoriesData));
             } else {
-              setCategories(defaultCategories);
-              await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCategories));
+              // defaultCategories'i hook'un üst seviyesinden al (closure)
+              const defaultCats = [
+                { id: 'health', name: t('tasks.categoryHealth'), emoji: '🏥', color: '#ef4444', description: t('tasks.categoryHealthDesc') },
+                { id: 'personal', name: t('tasks.categoryPersonal'), emoji: '🌱', color: '#10b981', description: t('tasks.categoryPersonalDesc') },
+                { id: 'work', name: t('tasks.categoryWork'), emoji: '💼', color: '#3b82f6', description: t('tasks.categoryWorkDesc') },
+                { id: 'hobby', name: t('tasks.categoryHobby'), emoji: '🎨', color: '#8b5cf6', description: t('tasks.categoryHobbyDesc') },
+                { id: 'custom', name: t('tasks.categoryCustom'), emoji: '⭐', color: '#f59e0b', description: t('tasks.categoryCustomDesc') },
+              ];
+              setCategories(defaultCats);
+              await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCats));
             }
 
             const achievementsData = await AsyncStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
@@ -97,6 +110,8 @@ export const useTasks = (userId?: string) => {
           if (isNetworkError(supabaseErr)) {
             console.warn('⚠️ Network error, using local data:', getNetworkErrorMessage(supabaseErr));
           }
+          // Hata olsa bile loading'i false yap, local data'yı yükle
+          // Loading state'i finally bloğunda da false yapılacak ama burada da yapalım
         }
       }
 
@@ -122,8 +137,16 @@ export const useTasks = (userId?: string) => {
       if (categoriesData) {
         setCategories(JSON.parse(categoriesData));
       } else {
-        setCategories(defaultCategories);
-        await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCategories));
+        // defaultCategories'i hook'un üst seviyesinden al (closure)
+        const defaultCats = [
+          { id: 'health', name: t('tasks.categoryHealth'), emoji: '🏥', color: '#ef4444', description: t('tasks.categoryHealthDesc') },
+          { id: 'personal', name: t('tasks.categoryPersonal'), emoji: '🌱', color: '#10b981', description: t('tasks.categoryPersonalDesc') },
+          { id: 'work', name: t('tasks.categoryWork'), emoji: '💼', color: '#3b82f6', description: t('tasks.categoryWorkDesc') },
+          { id: 'hobby', name: t('tasks.categoryHobby'), emoji: '🎨', color: '#8b5cf6', description: t('tasks.categoryHobbyDesc') },
+          { id: 'custom', name: t('tasks.categoryCustom'), emoji: '⭐', color: '#f59e0b', description: t('tasks.categoryCustomDesc') },
+        ];
+        setCategories(defaultCats);
+        await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCats));
       }
 
       // Load achievements
@@ -133,15 +156,57 @@ export const useTasks = (userId?: string) => {
       }
 
     } catch (error) {
-      console.error('Error loading tasks data:', error);
+      console.error('❌ Error loading tasks data:', error);
     } finally {
+      console.log('✅ useTasks: loadData tamamlandı, loading false yapılıyor');
       setLoading(false);
     }
-  }, [defaultCategories, userId]);
+  }, [userId]); // defaultCategories'i dependency'den çıkar - içinde doğrudan oluşturuluyor
 
   useEffect(() => {
-    loadData();
-  }, [userId, loadData]);
+    console.log('🔄 useTasks: useEffect çalıştı, userId:', userId);
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+    
+    const load = async () => {
+      if (!isMounted) {
+        console.log('⚠️ useTasks: Component unmounted, loadData iptal edildi');
+        return;
+      }
+      
+      // Timeout ekle - 10 saniye içinde tamamlanmazsa loading'i false yap
+      timeoutId = setTimeout(() => {
+        if (isMounted) {
+          console.warn('⚠️ useTasks: loadData timeout (10 saniye), loading false yapılıyor');
+          setLoading(false);
+        }
+      }, 10000);
+      
+      try {
+        await loadData();
+      } catch (error) {
+        console.error('❌ useTasks: loadData hatası:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      }
+    };
+    
+    load();
+    
+    return () => {
+      console.log('🔄 useTasks: useEffect cleanup');
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]); // Sadece userId değiştiğinde çalışsın - loadData'yı dependency'den çıkar
 
   // Save tasks to storage
   const saveTasks = async (newTasks: DailyTask[]) => {

@@ -2,12 +2,15 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '../types';
 import { supabase, signOut as supabaseSignOut, getCurrentUser } from '../lib/supabase';
 import { isNetworkError } from '../utils/networkUtils';
+import { AuthService, OtpRequestData, OtpVerifyData } from '../services/authService';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signInWithOtp: (data: OtpRequestData) => Promise<{ success: boolean; error?: string }>;
+  verifyOtp: (data: OtpVerifyData) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   refreshUser: () => Promise<void>;
@@ -311,6 +314,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               throw new Error('Şifre en az 6 karakter olmalıdır');
             }
 
+            // Production için email confirmation URL'i
+            const emailRedirectUrl = 'https://jblqkhgwitktbfeppume.supabase.co/storage/v1/object/public/auth-confirm/auth-confirm.html';
+            
             const { data, error } = await supabase.auth.signUp({
               email: email.toLowerCase().trim(),
               password,
@@ -318,6 +324,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 data: {
                   full_name: displayName.trim(),
                 },
+                emailRedirectTo: emailRedirectUrl,
               },
             });
             
@@ -342,17 +349,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               throw new Error(errorMessage || 'Hesap oluşturulamadı');
             }
             
+            // Kullanıcı oluşturuldu
             if (data.user) {
-              const user: User = {
-                uid: data.user.id,
-                email: data.user.email || '',
-                displayName: displayName.trim(),
-                photoURL: data.user.user_metadata?.avatar_url || undefined,
-                appAlias: data.user.user_metadata?.app_alias || 'Rhythm',
-                nickname: data.user.user_metadata?.nickname || 'Guest',
-              };
-              setUser(user);
-              console.log('✅ User signed up successfully:', user);
+              // Email confirmation açıksa kullanıcı henüz onaylanmamış olabilir
+              // Session oluştur ama email confirmation gerekiyorsa kullanıcıya bilgi ver
+              if (data.session) {
+                // Session varsa direkt login yap
+                const user: User = {
+                  uid: data.user.id,
+                  email: data.user.email || '',
+                  displayName: displayName.trim(),
+                  photoURL: data.user.user_metadata?.avatar_url || undefined,
+                  appAlias: data.user.user_metadata?.app_alias || 'Rhythm',
+                  nickname: data.user.user_metadata?.nickname || 'Guest',
+                };
+                setUser(user);
+                console.log('✅ User signed up and logged in successfully:', user);
+              } else {
+                // Session yoksa email confirmation gerekiyor
+                // Kullanıcıya email onayı gerektiğini söyle ama hata fırlatma
+                console.log('📧 Email confirmation required for:', data.user.email);
+                // User state'ini set et ama email confirmation mesajı gösterilecek
+                const user: User = {
+                  uid: data.user.id,
+                  email: data.user.email || '',
+                  displayName: displayName.trim(),
+                  photoURL: data.user.user_metadata?.avatar_url || undefined,
+                  appAlias: data.user.user_metadata?.app_alias || 'Rhythm',
+                  nickname: data.user.user_metadata?.nickname || 'Guest',
+                };
+                // Email confirmation gerekiyor ama kullanıcı oluşturuldu
+                // AuthScreen'de toast mesajı gösterilecek
+              }
             }
           } catch (error: any) {
             console.error('❌ Sign up catch error:', error);
@@ -695,11 +723,75 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const signInWithOtp = async (data: OtpRequestData) => {
+    // Context'teki loading'i set etme, sadece AuthService'i çağır
+    // Çünkü AuthScreen kendi loading state'ini yönetiyor
+    try {
+      console.log('🔐 AuthContext: signInWithOtp çağrıldı', data);
+      const result = await AuthService.signInWithOtp(data);
+      console.log('🔐 AuthContext: AuthService sonucu', result);
+      
+      if (!result.success) {
+        console.error('❌ AuthContext: OTP başarısız', result.error);
+        return {
+          success: false,
+          error: result.error || 'OTP gönderilemedi',
+        };
+      }
+      
+      console.log('✅ AuthContext: OTP başarılı');
+      return { success: true };
+    } catch (error: any) {
+      console.error('❌ AuthContext: Sign in with OTP catch error:', error);
+      return {
+        success: false,
+        error: error?.message || 'OTP gönderilemedi',
+      };
+    }
+  };
+
+  const verifyOtp = async (data: OtpVerifyData) => {
+    setLoading(true);
+    try {
+      const result = await AuthService.verifyOtp(data);
+      if (!result.success) {
+        throw new Error(result.error || 'OTP doğrulanamadı');
+      }
+      
+      // User state'ini güncelle
+      if (result.user) {
+        const user: User = {
+          uid: result.user.id,
+          email: result.user.email || '',
+          displayName: result.user.user_metadata?.full_name || result.user.email?.split('@')[0] || '',
+          photoURL: result.user.user_metadata?.avatar_url || undefined,
+          appAlias: result.user.user_metadata?.app_alias || 'Rhythm',
+          nickname: result.user.user_metadata?.nickname || 'Guest',
+        };
+        setUser(user);
+        setIsAnonymous(false);
+        console.log('✅ OTP verified successfully:', user);
+      }
+      
+      return { success: true };
+    } catch (error: any) {
+      console.error('Verify OTP error:', error);
+      return {
+        success: false,
+        error: error?.message || 'OTP doğrulanamadı',
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
     signIn,
     signUp,
+    signInWithOtp,
+    verifyOtp,
     signOut,
     refreshSession,
     refreshUser,

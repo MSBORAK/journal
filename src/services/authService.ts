@@ -19,12 +19,27 @@ export interface SignInData {
   password: string;
 }
 
+export interface OtpRequestData {
+  email: string;
+  shouldCreateUser?: boolean;
+  emailRedirectTo?: string;
+}
+
+export interface OtpVerifyData {
+  email: string;
+  token: string;
+  type?: 'email' | 'recovery' | 'invite' | 'email_change';
+}
+
 export class AuthService {
   /**
    * Register a new user
    */
   static async signUp({ email, password, fullName }: SignUpData): Promise<AuthResponse> {
     try {
+      // Production için email confirmation URL'i
+      const emailRedirectUrl = 'https://jblqkhgwitktbfeppume.supabase.co/storage/v1/object/public/auth-confirm/auth-confirm.html';
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -32,6 +47,7 @@ export class AuthService {
           data: {
             full_name: fullName || '',
           },
+          emailRedirectTo: emailRedirectUrl,
         },
       });
 
@@ -114,8 +130,10 @@ export class AuthService {
    */
   static async resetPassword(email: string): Promise<AuthResponse> {
     try {
+      const redirectUrl = 'https://jblqkhgwitktbfeppume.supabase.co/storage/v1/object/public/auth-reset/auth-reset.html';
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://daily-app.netlify.app/reset-password',
+        redirectTo: redirectUrl,
       });
 
       if (error) {
@@ -204,6 +222,147 @@ export class AuthService {
     } catch (error) {
       console.error('Error getting session:', error);
       return null;
+    }
+  }
+
+  /**
+   * Get current user
+   */
+  static async getCurrentUser(): Promise<User | null> {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        // Auth session missing is normal when user is not logged in
+        if (error.message?.includes('Auth session missing')) {
+          return null;
+        }
+        throw error;
+      }
+      return user;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Passwordless Authentication: Request OTP (One-Time Password)
+   * Sends a unique, time-sensitive code to the user's email
+   * 
+   * @param {OtpRequestData} data - Email and optional configuration
+   * @returns {Promise<AuthResponse>} Success status (no user returned until verification)
+   */
+  static async signInWithOtp({ 
+    email, 
+    shouldCreateUser = true,
+    emailRedirectTo 
+  }: OtpRequestData): Promise<AuthResponse> {
+    try {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        return {
+          success: false,
+          error: 'Geçersiz e-posta adresi',
+        };
+      }
+
+      console.log('📧 AuthService: Supabase signInWithOtp çağrılıyor...', email.toLowerCase().trim());
+      
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email.toLowerCase().trim(),
+        options: {
+          shouldCreateUser, // Auto-create user if they don't exist
+          // emailRedirectTo kaldırıldı - OTP flow'unda magic link'e gerek yok
+          // Kullanıcı kodu direkt uygulamaya girecek
+        },
+      });
+
+      console.log('📧 AuthService: Supabase response - data:', data, 'error:', error);
+
+      if (error) {
+        console.error('❌ AuthService: Supabase hatası:', error);
+        return {
+          success: false,
+          error: this.getErrorMessage(error.message),
+        };
+      }
+
+      // OTP sent successfully (no session created yet)
+      console.log('✅ AuthService: OTP başarıyla gönderildi');
+      return {
+        success: true,
+        user: null, // User will be set after OTP verification
+      };
+    } catch (error: any) {
+      console.error('Sign in with OTP error:', error);
+      return {
+        success: false,
+        error: error?.message || 'OTP gönderilirken beklenmeyen bir hata oluştu',
+      };
+    }
+  }
+
+  /**
+   * Passwordless Authentication: Verify OTP (One-Time Password)
+   * Verifies the email and OTP code, creates a session if valid
+   * 
+   * @param {OtpVerifyData} data - Email, token (OTP code), and verification type
+   * @returns {Promise<AuthResponse>} Success status with authenticated user and session
+   */
+  static async verifyOtp({ 
+    email, 
+    token, 
+    type = 'email' 
+  }: OtpVerifyData): Promise<AuthResponse> {
+    try {
+      // Validate inputs
+      if (!email || !token) {
+        return {
+          success: false,
+          error: 'E-posta ve kod gereklidir',
+        };
+      }
+
+      if (token.length < 4 || token.length > 8) {
+        return {
+          success: false,
+          error: 'Geçersiz kod formatı',
+        };
+      }
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.toLowerCase().trim(),
+        token: token.trim(),
+        type: type || 'email',
+      });
+
+      if (error) {
+        return {
+          success: false,
+          error: this.getErrorMessage(error.message),
+        };
+      }
+
+      // Check if session was created
+      if (!data.session) {
+        return {
+          success: false,
+          error: 'Oturum oluşturulamadı. Lütfen tekrar deneyin.',
+        };
+      }
+
+      // Authentication successful
+      return {
+        success: true,
+        user: data.user,
+      };
+    } catch (error: any) {
+      console.error('Verify OTP error:', error);
+      return {
+        success: false,
+        error: error?.message || 'OTP doğrulanırken beklenmeyen bir hata oluştu',
+      };
     }
   }
 
@@ -312,6 +471,15 @@ export class AuthService {
     }
     if (errorLower.includes('user not found')) {
       return 'Kullanıcı bulunamadı';
+    }
+    if (errorLower.includes('invalid otp') || errorLower.includes('invalid token')) {
+      return 'Geçersiz veya süresi dolmuş kod. Lütfen yeni bir kod isteyin.';
+    }
+    if (errorLower.includes('otp expired') || errorLower.includes('token expired')) {
+      return 'Kodun süresi dolmuş. Lütfen yeni bir kod isteyin.';
+    }
+    if (errorLower.includes('otp') && errorLower.includes('rate limit')) {
+      return 'Çok fazla kod istendi. Lütfen birkaç dakika bekleyin.';
     }
 
     return error;

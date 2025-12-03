@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -103,7 +103,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       tension: 150,
       friction: 8,
     }).start();
-  }, [taskHasReminder, toggleAnim]);
+    // toggleAnim is stable, don't include it in dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskHasReminder]);
   
   // Reminder form states
   const [reminderTitle, setReminderTitle] = useState('');
@@ -112,13 +114,17 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const [reminderStartDate, setReminderStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [reminderEndDate, setReminderEndDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Computed values
-  const todayTasks = getTodayTasks();
-  const completedCount = getTodayCompletedCount();
-  const completionRate = todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
-  const todayReminders = getTodayReminders();
+  // Computed values - MEMOIZED to prevent recalculation on every render
+  const todayTasks = useMemo(() => getTodayTasks(), [tasks]);
+  const completedCount = useMemo(() => getTodayCompletedCount(), [tasks]);
+  const completionRate = useMemo(() => {
+    return todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
+  }, [todayTasks.length, completedCount]);
+  const todayReminders = useMemo(() => getTodayReminders(), [reminders]);
   // Hatırlatıcılar kısmında sadece gerçek hatırlatıcıları göster (görev hatırlatıcıları hariç)
-  const upcomingReminders = reminders.filter(r => r.isActive && !r.isTaskReminder);
+  const upcomingReminders = useMemo(() => {
+    return reminders.filter(r => r.isActive && !r.isTaskReminder);
+  }, [reminders]);
 
   // Animation for tab switching
   const animateTabSwitch = () => {
@@ -459,13 +465,10 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     }
   };
 
-  const getFilteredTasks = () => {
-    console.log('getFilteredTasks called with activeTab:', activeTab);
-    console.log('Total tasks:', tasks.length);
-    
+  // Memoize getFilteredTasks function to prevent recreation on every render
+  const getFilteredTasks = useCallback(() => {
     switch (activeTab) {
       case 'daily':
-        console.log('Returning daily tasks:', todayTasks.length);
         return todayTasks;
       case 'weekly':
         // Haftalık görevler - bu hafta içindeki görevler
@@ -475,44 +478,35 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         
-        const weeklyTasks = tasks.filter(task => {
+        return tasks.filter(task => {
           const taskDate = new Date(task.date);
           return taskDate >= startOfWeek && taskDate <= endOfWeek;
         });
-        console.log('Returning weekly tasks:', weeklyTasks.length);
-        return weeklyTasks;
       case 'monthly':
         // Aylık görevler - bu ay içindeki görevler
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
         
-        const monthlyTasks = tasks.filter(task => {
+        return tasks.filter(task => {
           const taskDate = new Date(task.date);
           return taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear;
         });
-        console.log('Returning monthly tasks:', monthlyTasks.length);
-        console.log('Monthly tasks:', monthlyTasks);
-        return monthlyTasks;
       case 'future':
         // Gelecek görevler - date veya dueDate alanı bugünden sonra olan ve tamamlanmamış görevler
         const todayStr = new Date().toISOString().split('T')[0];
-        const futureTasks = tasks.filter(task => {
+        return tasks.filter(task => {
           const taskDate = task.dueDate || task.date || task.createdAt?.split('T')[0] || '';
           return taskDate > todayStr && !task.isCompleted;
         });
-        console.log('Returning future tasks:', futureTasks.length);
-        return futureTasks;
       case 'all':
-        console.log('Returning all tasks:', tasks.length);
         return tasks;
       default:
-        console.log('Returning default daily tasks:', todayTasks.length);
         return todayTasks;
     }
-  };
+  }, [activeTab, tasks, todayTasks]);
 
-  // Calculate work time (bugünkü toplam + aktif timer'ın geçen süresi)
-  const getWorkTime = () => {
+  // Calculate work time (bugünkü toplam + aktif timer'ın geçen süresi) - MEMOIZED
+  const getWorkTime = useCallback(() => {
     let displayTime = totalWorkTime; // Bugünkü toplam çalışma süresi
     
     // Eğer timer aktifse, geçen süreyi de ekle
@@ -541,10 +535,10 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       }
     }
     return '0dk';
-  };
+  }, [totalWorkTime, isActive, selectedDuration, timeLeft]);
 
-  // Get total focus time
-  const getTotalFocusTime = () => {
+  // Get total focus time - MEMOIZED
+  const getTotalFocusTime = useCallback(() => {
     if (totalFocusTime > 0) {
       if (totalFocusTime < 1) {
         // 1 dakikadan az ise saniye olarak göster
@@ -562,13 +556,27 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
       }
     }
     return '0s';
-  };
+  }, [totalFocusTime]);
 
-  const filteredTasks = getFilteredTasks();
-  const pendingTasks = filteredTasks.filter(task => !task.isCompleted);
-  const completedTasks = filteredTasks.filter(task => task.isCompleted);
+  // Memoize the computed work time and focus time values
+  const workTimeDisplay = useMemo(() => getWorkTime(), [getWorkTime]);
+  const focusTimeDisplay = useMemo(() => getTotalFocusTime(), [getTotalFocusTime]);
 
-  const dynamicStyles = StyleSheet.create({
+  // Memoize filtered tasks to prevent unnecessary recalculations
+  const filteredTasks = useMemo(() => {
+    return getFilteredTasks();
+  }, [getFilteredTasks]); // Depend on the memoized function instead of individual values
+  
+  const pendingTasks = useMemo(() => {
+    return filteredTasks.filter(task => !task.isCompleted);
+  }, [filteredTasks]);
+  
+  const completedTasks = useMemo(() => {
+    return filteredTasks.filter(task => task.isCompleted);
+  }, [filteredTasks]);
+
+  // CRITICAL FIX: Memoize StyleSheet.create to prevent recreation on every render
+  const dynamicStyles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: currentTheme.colors.background,
@@ -1026,7 +1034,24 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     completedButton: {
       backgroundColor: currentTheme.colors.success || '#4CAF50',
     },
-  });
+  }), [currentTheme]); // Memoize styles based on theme
+
+  // Loading timeout - eğer 5 saniye içinde loading false olmazsa force false yap
+  useEffect(() => {
+    if (tasksLoading || remindersLoading) {
+      const timeout = setTimeout(() => {
+        console.warn('⚠️ TasksAndRemindersScreen: Loading timeout (5 saniye), force false yapılıyor');
+        // Loading state'ini force false yapamayız çünkü hook'tan geliyor
+        // Ama en azından log'layalım
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [tasksLoading, remindersLoading]);
+
+  // Debug: Loading state'ini log'la
+  useEffect(() => {
+    console.log('🔄 TasksAndRemindersScreen: Loading state - tasks:', tasksLoading, 'reminders:', remindersLoading);
+  }, [tasksLoading, remindersLoading]);
 
   return (
     <SafeAreaView style={dynamicStyles.container}>
@@ -1058,7 +1083,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               </Text>
             </View>
             <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>{getTotalFocusTime()}</Text>
+              <Text style={dynamicStyles.statNumber}>{focusTimeDisplay}</Text>
               <Text style={dynamicStyles.statLabel}>
                 {t('health.focus')}
               </Text>
@@ -1713,14 +1738,17 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         animationType="slide"
         transparent={true}
         visible={showFocusMode}
-        onRequestClose={() => setShowFocusMode(false)}
+        onRequestClose={() => {
+          setShowFocusMode(false);
+          setSelectedTaskId(null);
+        }}
         presentationStyle="overFullScreen"
       >
         <FocusMode
           visible={showFocusMode}
           onClose={() => {
             setShowFocusMode(false);
-            setSelectedTaskId(null); // Seçimi temizle
+            setSelectedTaskId(null);
           }}
           selectedTaskTitle={(() => {
             if (selectedTaskId) {

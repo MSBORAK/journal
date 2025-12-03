@@ -61,8 +61,22 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
     } else if (!visible) {
       // Modal kapandığında temizle
       setFocusSubject('');
+      setSelectedMood('');
+      setShowReflection(false);
+      setShowConfetti(false);
     }
   }, [selectedTaskTitle, visible]);
+
+  // Modal kapandığında timer'ı temizle (ayrı useEffect)
+  useEffect(() => {
+    if (!visible) {
+      // Modal kapandığında timer aktif veya duraklatılmışsa sıfırla
+      if (isActive || isPaused) {
+        resetTimer();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]); // Sadece visible değiştiğinde çalış (isActive/isPaused kontrolü için)
   
   // Alert state
   const [alertConfig, setAlertConfig] = useState({

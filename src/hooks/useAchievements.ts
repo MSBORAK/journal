@@ -1,8 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 import { Achievement } from '../types';
 import { sendAchievementNotification } from '../services/notificationService';
 import { useLanguage } from '../contexts/LanguageContext';
+import { isNetworkError } from '../utils/networkUtils';
 
 const ACHIEVEMENTS_STORAGE_KEY = '@daily_achievements';
 const USER_STATS_STORAGE_KEY = '@daily_user_stats';
@@ -324,15 +326,82 @@ export const useAchievements = (userId?: string) => {
     }
   ], [currentLanguage]);
 
-  useEffect(() => {
-    loadData();
-  }, [userId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
-      // userId varsa user-specific key, yoksa global key kullan
+      // userId varsa önce Supabase'den veri çek
+      if (userId) {
+        try {
+          // Achievements yükle
+          const { data: supabaseAchievements, error: achievementsError } = await supabase
+            .from('achievements')
+            .select('*')
+            .eq('user_id', userId)
+            .order('unlocked_at', { ascending: false });
+
+          if (!achievementsError && supabaseAchievements && supabaseAchievements.length > 0) {
+            const formattedAchievements: Achievement[] = supabaseAchievements.map((a: any) => ({
+              id: a.achievement_id || a.id,
+              title: a.title,
+              description: a.description || '',
+              icon: a.icon || '🏆',
+              unlockedAt: a.unlocked_at || a.created_at,
+              category: (a.category || 'streak') as Achievement['category'],
+            }));
+            setAchievements(formattedAchievements);
+            await AsyncStorage.setItem(`${ACHIEVEMENTS_STORAGE_KEY}_${userId}`, JSON.stringify(formattedAchievements));
+            console.log('✅ Loaded achievements from Supabase:', formattedAchievements.length);
+          } else if (achievementsError && !isNetworkError(achievementsError)) {
+            console.error('Supabase achievements fetch error:', achievementsError);
+          }
+
+          // User Stats yükle
+          const { data: supabaseStats, error: statsError } = await supabase
+            .from('user_stats')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+          if (!statsError && supabaseStats) {
+            const formattedStats: UserStats = {
+              totalDiaryEntries: supabaseStats.total_diary_entries || 0,
+              currentStreak: supabaseStats.current_streak || 0,
+              longestStreak: supabaseStats.longest_streak || 0,
+              lastDiaryDate: supabaseStats.last_diary_date,
+              totalTasksCompleted: supabaseStats.total_tasks_completed || 0,
+              tasksCompletedThisWeek: supabaseStats.tasks_completed_this_week || 0,
+              healthTrackingDays: supabaseStats.health_tracking_days || 0,
+              lastHealthDate: supabaseStats.last_health_date,
+              totalReminders: supabaseStats.total_reminders || 0,
+              activeReminders: supabaseStats.active_reminders || 0,
+              appUsageDays: supabaseStats.app_usage_days || 0,
+              firstAppUseDate: supabaseStats.first_app_use_date,
+              wellnessScore: supabaseStats.wellness_score || 0,
+              level: supabaseStats.level || 1,
+              experience: supabaseStats.experience || 0,
+              nextLevelExp: supabaseStats.next_level_exp || 10,
+            };
+            setUserStats(formattedStats);
+            await AsyncStorage.setItem(`${USER_STATS_STORAGE_KEY}_${userId}`, JSON.stringify(formattedStats));
+            console.log('✅ Loaded user stats from Supabase');
+            
+            // Supabase'den veri geldiyse AsyncStorage'dan yükleme
+            setLoading(false);
+            return;
+          } else if (statsError && !isNetworkError(statsError)) {
+            console.error('Supabase stats fetch error:', statsError);
+          }
+        } catch (supabaseErr) {
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error loading from Supabase, using local:', supabaseErr);
+          } else {
+            console.error('Supabase load error:', supabaseErr);
+          }
+        }
+      }
+      
+      // Supabase'den veri gelmediyse veya userId yoksa AsyncStorage'dan yükle
       const achievementsKey = userId ? `${ACHIEVEMENTS_STORAGE_KEY}_${userId}` : ACHIEVEMENTS_STORAGE_KEY;
       const statsKey = userId ? `${USER_STATS_STORAGE_KEY}_${userId}` : USER_STATS_STORAGE_KEY;
       
@@ -371,23 +440,68 @@ export const useAchievements = (userId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const saveAchievements = async (newAchievements: Achievement[]) => {
     try {
-      // userId varsa user-specific key, yoksa global key kullan
+      setAchievements(newAchievements);
+      
+      // Supabase'e kaydet (userId varsa)
+      if (userId) {
+        try {
+          // Mevcut achievements'ları sil ve yenilerini ekle (veya upsert kullan)
+          // Önce mevcut olanları sil
+          const { error: deleteError } = await supabase
+            .from('achievements')
+            .delete()
+            .eq('user_id', userId);
+
+          if (deleteError && !isNetworkError(deleteError)) {
+            console.error('Supabase delete error:', deleteError);
+          }
+
+          // Yeni achievements'ları ekle
+          if (newAchievements.length > 0) {
+            const achievementsToInsert = newAchievements.map(a => ({
+              user_id: userId,
+              achievement_id: a.id,
+              title: a.title,
+              description: a.description,
+              icon: a.icon,
+              category: a.category,
+              unlocked_at: a.unlockedAt,
+            }));
+
+            const { error: insertError } = await supabase
+              .from('achievements')
+              .insert(achievementsToInsert);
+
+            if (insertError) {
+              if (!isNetworkError(insertError)) {
+                console.error('Supabase insert error:', insertError);
+              }
+            } else {
+              console.log(`✅ Saved ${newAchievements.length} achievements to Supabase`);
+            }
+          }
+        } catch (supabaseErr) {
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error saving to Supabase, using local:', supabaseErr);
+          } else {
+            console.error('Supabase save error:', supabaseErr);
+          }
+        }
+      }
+
+      // Her zaman AsyncStorage'a da kaydet (offline için)
       const achievementsKey = userId ? `${ACHIEVEMENTS_STORAGE_KEY}_${userId}` : ACHIEVEMENTS_STORAGE_KEY;
       const achievementsJson = JSON.stringify(newAchievements);
       await AsyncStorage.setItem(achievementsKey, achievementsJson);
-      setAchievements(newAchievements);
-      console.log(`💾 Achievements saved to AsyncStorage: ${newAchievements.length} achievements`);
-      
-      // Doğrulama: AsyncStorage'dan oku ve kontrol et
-      const verifyData = await AsyncStorage.getItem(achievementsKey);
-      if (verifyData) {
-        const verified = JSON.parse(verifyData);
-        console.log(`✅ Verification: ${verified.length} achievements in AsyncStorage`);
-      }
+      console.log(`💾 Achievements saved locally: ${newAchievements.length} achievements`);
     } catch (error) {
       console.error('❌ Error saving achievements:', error);
       throw error;
@@ -396,10 +510,56 @@ export const useAchievements = (userId?: string) => {
 
   const saveUserStats = async (newStats: UserStats) => {
     try {
-      // userId varsa user-specific key, yoksa global key kullan
+      setUserStats(newStats);
+      
+      // Supabase'e kaydet (userId varsa)
+      if (userId) {
+        try {
+          const { error: upsertError } = await supabase
+            .from('user_stats')
+            .upsert({
+              user_id: userId,
+              total_diary_entries: newStats.totalDiaryEntries || 0,
+              current_streak: newStats.currentStreak || 0,
+              longest_streak: newStats.longestStreak || 0,
+              last_diary_date: newStats.lastDiaryDate || null,
+              total_tasks_completed: newStats.totalTasksCompleted || 0,
+              tasks_completed_this_week: newStats.tasksCompletedThisWeek || 0,
+              health_tracking_days: newStats.healthTrackingDays || 0,
+              last_health_date: newStats.lastHealthDate || null,
+              total_reminders: newStats.totalReminders || 0,
+              active_reminders: newStats.activeReminders || 0,
+              app_usage_days: newStats.appUsageDays || 0,
+              first_app_use_date: newStats.firstAppUseDate || null,
+              wellness_score: newStats.wellnessScore || 0,
+              level: newStats.level || 1,
+              experience: newStats.experience || 0,
+              next_level_exp: newStats.nextLevelExp || 10,
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: 'user_id'
+            });
+
+          if (upsertError) {
+            if (!isNetworkError(upsertError)) {
+              console.error('Supabase upsert error:', upsertError);
+            }
+          } else {
+            console.log('✅ User stats saved to Supabase');
+          }
+        } catch (supabaseErr) {
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error saving to Supabase, using local:', supabaseErr);
+          } else {
+            console.error('Supabase save error:', supabaseErr);
+          }
+        }
+      }
+
+      // Her zaman AsyncStorage'a da kaydet (offline için)
       const statsKey = userId ? `${USER_STATS_STORAGE_KEY}_${userId}` : USER_STATS_STORAGE_KEY;
       await AsyncStorage.setItem(statsKey, JSON.stringify(newStats));
-      setUserStats(newStats);
+      console.log('💾 User stats saved locally');
     } catch (error) {
       console.error('Error saving user stats:', error);
     }

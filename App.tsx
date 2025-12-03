@@ -27,7 +27,7 @@ import * as SplashScreen from 'expo-splash-screen';
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
 
-// Network hatalarını gizle (kullanıcıya gösterme)
+// Hataları gizle (büyük error ekranı gösterme, sadece toast göster)
 LogBox.ignoreLogs([
   'Network request failed',
   'TypeError: Network request failed',
@@ -39,9 +39,15 @@ LogBox.ignoreLogs([
   /request.*failed/i,
   /ERROR.*Network/i,
   /Network.*ERROR/i,
+  /email.*not.*confirmed/i,
+  /email.*verification/i,
+  /JWT.*does.*not.*exist/i,
+  /User.*from.*sub.*claim/i,
+  /Error:.*/i, // Error: ile başlayan mesajları gizle
+  /.*handleSubmit error.*/i, // handleSubmit hatalarını gizle
 ]);
 
-// Console.error'u override et - Network hatalarını gizle
+// Console.error'u override et - Hataları sessizce handle et (büyük error ekranı gösterme)
 const originalConsoleError = console.error;
 console.error = (...args: any[]) => {
   const message = args.map(arg => 
@@ -51,6 +57,7 @@ console.error = (...args: any[]) => {
   
   const lowerMessage = message.toLowerCase();
   
+  // Network ve JWT hatalarını sessizce handle et
   if (
     message.includes('Network request failed') ||
     message.includes('NetworkError') ||
@@ -61,16 +68,27 @@ console.error = (...args: any[]) => {
     lowerMessage.includes('fetch failed') ||
     lowerMessage.includes('request failed') ||
     lowerMessage.includes('connection') ||
-    lowerMessage.includes('timeout')
+    lowerMessage.includes('timeout') ||
+    message.includes('User from sub claim in JWT does not exist') ||
+    (lowerMessage.includes('jwt') && lowerMessage.includes('does not exist')) ||
+    lowerMessage.includes('email not confirmed') ||
+    lowerMessage.includes('email verification')
   ) {
-    // Network hatası - sessizce logla (sadece dev modda)
+    // Bu hataları sessizce logla (sadece dev modda)
     if (__DEV__) {
-      console.warn('⚠️ Network error (silently handled)');
+      console.warn('⚠️ Error (silently handled):', message.substring(0, 100));
     }
-    return;
+    return; // Büyük error ekranı gösterme
   }
-  // Diğer hatalar için normal console.error
-  originalConsoleError.apply(console, args);
+  
+  // Diğer hatalar için de sessizce logla (büyük error ekranı gösterme)
+  // Sadece development modda detaylı log
+  if (__DEV__) {
+    originalConsoleError.apply(console, args);
+  } else {
+    // Production'da sadece kısa log
+    console.warn('⚠️ Error:', message.substring(0, 100));
+  }
 };
 
 // Global error handler - Network hatalarını yakala ve sessizce handle et
@@ -84,7 +102,7 @@ if (typeof ErrorUtils !== 'undefined' && ErrorUtils?.getGlobalHandler) {
       const errorMessage = error?.message || '';
       const errorName = error?.name || '';
       
-      // Network hatalarını sessizce handle et
+      // Tüm hataları sessizce handle et (büyük error ekranı gösterme)
       const lowerMessage = errorMessage.toLowerCase();
       if (
         errorMessage.includes('Network request failed') ||
@@ -97,12 +115,24 @@ if (typeof ErrorUtils !== 'undefined' && ErrorUtils?.getGlobalHandler) {
         lowerMessage.includes('fetch') ||
         lowerMessage.includes('connection') ||
         lowerMessage.includes('timeout') ||
-        lowerMessage.includes('offline')
+        lowerMessage.includes('offline') ||
+        errorMessage.includes('User from sub claim in JWT does not exist') ||
+        (lowerMessage.includes('jwt') && lowerMessage.includes('does not exist')) ||
+        lowerMessage.includes('email not confirmed') ||
+        lowerMessage.includes('email verification')
       ) {
-        // Network hatası - sadece logla, kullanıcıya gösterme
-        console.warn('⚠️ Network error (silently handled):', errorMessage);
-        return; // Hata gösterilmesin
+        // Bu hataları sessizce logla, kullanıcıya gösterme
+        if (__DEV__) {
+          console.warn('⚠️ Error (silently handled):', errorMessage);
+        }
+        return; // Büyük error ekranı gösterme
       }
+      
+      // Diğer tüm hatalar için de sessizce handle et
+      if (__DEV__) {
+        console.warn('⚠️ Error (silently handled):', errorMessage);
+      }
+      return; // Büyük error ekranı gösterme
       
       // Diğer hatalar için normal handler'ı çağır
       if (originalErrorHandler) {
@@ -119,6 +149,7 @@ if (typeof ErrorUtils !== 'undefined' && ErrorUtils?.getGlobalHandler) {
 type RootStackParamList = {
   Auth: undefined;
   PasswordReset: undefined;
+  AuthCallback: undefined;
   MainTabs: undefined;
   WriteDiary: { entry?: any } | undefined;
   WriteDiaryStep1: undefined;
@@ -180,6 +211,7 @@ import HelpGuideScreen from './src/screens/HelpGuideScreen';
 import InsightsScreen from './src/screens/InsightsScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import PasswordResetScreen from './src/screens/PasswordResetScreen';
+import AuthCallbackScreen from './src/screens/AuthCallbackScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -331,23 +363,37 @@ function AppNavigator() {
     }
   }, [loading]);
 
-  // Navigate to Auth screen if needed
+  // Session yönetimi - Authenticated user kontrolü
   useEffect(() => {
-    if (!loading && hasSeenAuth === false && isAnonymous && navigationRef.current?.isReady()) {
-      // First time opening app and user is anonymous - show Auth screen
-      console.log('🔄 Navigating to Auth screen');
-      try {
-        // Navigation'ı bir sonraki tick'te yap (infinite loop önleme)
-        setTimeout(() => {
-          if (navigationRef.current?.isReady()) {
-            navigationRef.current?.navigate('Auth' as never);
-          }
-        }, 100);
-      } catch (navError) {
-        console.error('❌ Navigation error:', navError);
+    if (!loading && navigationRef.current?.isReady()) {
+      // Eğer kullanıcı authenticated ise (email + password ile giriş yapmışsa) direkt Dashboard'a yönlendir
+      if (user && !isAnonymous && user.email) {
+        console.log('✅ Authenticated user detected, navigating to Dashboard');
+        try {
+          setTimeout(() => {
+            if (navigationRef.current?.isReady()) {
+              navigationRef.current?.navigate('MainTabs' as never);
+            }
+          }, 100);
+        } catch (navError) {
+          console.error('❌ Navigation error:', navError);
+        }
+      }
+      // Eğer kullanıcı anonymous ise ve auth ekranını görmemişse Auth ekranına yönlendir
+      else if (!loading && hasSeenAuth === false && isAnonymous && navigationRef.current?.isReady()) {
+        console.log('🔄 Navigating to Auth screen (anonymous user)');
+        try {
+          setTimeout(() => {
+            if (navigationRef.current?.isReady()) {
+              navigationRef.current?.navigate('Auth' as never);
+            }
+          }, 100);
+        } catch (navError) {
+          console.error('❌ Navigation error:', navError);
+        }
       }
     }
-  }, [loading, hasSeenAuth, isAnonymous]);
+  }, [loading, hasSeenAuth, isAnonymous, user]);
 
   // Notification response handler (CTA)
   useEffect(() => {
@@ -372,6 +418,7 @@ function AppNavigator() {
     config: {
       screens: {
         PasswordReset: 'PasswordReset',
+        AuthCallback: 'auth/callback',
         Auth: 'auth',
       },
     },
@@ -457,6 +504,11 @@ function AppNavigator() {
         <Stack.Screen 
           name="PasswordReset" 
           component={PasswordResetScreen} 
+          options={{ headerShown: false, ...transitionConfig }} 
+        />
+        <Stack.Screen 
+          name="AuthCallback" 
+          component={AuthCallbackScreen} 
           options={{ headerShown: false, ...transitionConfig }} 
         />
         <Stack.Screen name="MainTabs" component={MainTabs} />

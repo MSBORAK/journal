@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 import { HealthData } from '../types';
+import { isNetworkError } from '../utils/networkUtils';
 
 const HEALTH_STORAGE_KEY = 'health_data';
 
@@ -8,33 +10,74 @@ export const useHealth = (userId: string | undefined) => {
   const [healthData, setHealthData] = useState<{ [date: string]: HealthData }>({});
   const [loading, setLoading] = useState(true);
 
-  // Load health data from AsyncStorage
-  const loadHealthData = async () => {
+  // Load health data from Supabase or AsyncStorage
+  const loadHealthData = useCallback(async () => {
     try {
       setLoading(true);
-      // userId varsa user-specific key, yoksa global key kullan
+      
+      // userId varsa önce Supabase'den veri çek
+      if (userId) {
+        try {
+          const { data: supabaseData, error: supabaseError } = await supabase
+            .from('wellness_checks')
+            .select('*')
+            .eq('user_id', userId)
+            .order('date', { ascending: false });
+
+          if (!supabaseError && supabaseData && supabaseData.length > 0) {
+            // Supabase'den veri geldi, formatla ve kullan
+            const formattedData: { [date: string]: HealthData } = {};
+            supabaseData.forEach((check: any) => {
+              formattedData[check.date] = {
+                date: check.date,
+                water: check.water_glasses || 0,
+                exercise: check.exercise_minutes || 0,
+                sleep: 0, // wellness_checks'te sleep yok, HealthData'da var
+                meditation: 0, // wellness_checks'te meditation yok, HealthData'da var
+              };
+            });
+            
+            setHealthData(formattedData);
+            await AsyncStorage.setItem(`${HEALTH_STORAGE_KEY}_${userId}`, JSON.stringify(formattedData));
+            console.log('✅ Loaded health data from Supabase:', Object.keys(formattedData).length, 'days');
+            setLoading(false);
+            return;
+          } else if (supabaseError && !isNetworkError(supabaseError)) {
+            console.error('Supabase fetch error:', supabaseError);
+          }
+        } catch (supabaseErr) {
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error loading from Supabase, using local:', supabaseErr);
+          } else {
+            console.error('Supabase load error:', supabaseErr);
+          }
+        }
+      }
+      
+      // Supabase'den veri gelmediyse veya userId yoksa AsyncStorage'dan yükle
       const storageKey = userId ? `${HEALTH_STORAGE_KEY}_${userId}` : HEALTH_STORAGE_KEY;
       const storedData = await AsyncStorage.getItem(storageKey);
       
       if (storedData) {
         const parsedData = JSON.parse(storedData);
         setHealthData(parsedData);
-        console.log('Loaded health data from AsyncStorage');
+        console.log('📦 Loaded health data from AsyncStorage:', Object.keys(parsedData).length, 'days');
       } else {
         setHealthData({});
-        console.log('First time - starting with empty health data');
+        console.log('🆕 First time - starting with empty health data');
       }
     } catch (error) {
       console.error('Error loading health data:', error);
+      setHealthData({});
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   // Load data on mount and when userId changes
   useEffect(() => {
     loadHealthData();
-  }, [userId]);
+  }, [loadHealthData]);
 
   // Save health data for a specific date
   const saveHealthData = async (date: string, data: Omit<HealthData, 'date'>) => {
@@ -49,12 +92,44 @@ export const useHealth = (userId: string | undefined) => {
         [date]: newHealthData,
       };
 
-      // userId varsa user-specific key, yoksa global key kullan
+      // Supabase'e kaydet (userId varsa)
+      if (userId) {
+        try {
+          // wellness_checks tablosuna kaydet (water_glasses ve exercise_minutes var)
+          const { error: upsertError } = await supabase
+            .from('wellness_checks')
+            .upsert({
+              user_id: userId,
+              date: date,
+              water_glasses: data.water || 0,
+              exercise_minutes: data.exercise || 0,
+              // wellness_checks'te sleep ve meditation yok, sadece water ve exercise var
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: 'user_id,date'
+            });
+
+          if (upsertError) {
+            if (!isNetworkError(upsertError)) {
+              console.error('Supabase upsert error:', upsertError);
+            }
+          } else {
+            console.log('✅ Health data saved to Supabase for date:', date);
+          }
+        } catch (supabaseErr) {
+          if (isNetworkError(supabaseErr)) {
+            console.warn('⚠️ Network error saving to Supabase, using local:', supabaseErr);
+          } else {
+            console.error('Supabase save error:', supabaseErr);
+          }
+        }
+      }
+
+      // Her zaman AsyncStorage'a da kaydet (offline için)
       const storageKey = userId ? `${HEALTH_STORAGE_KEY}_${userId}` : HEALTH_STORAGE_KEY;
-      console.log('Saving to AsyncStorage:', storageKey, updatedData);
       setHealthData(updatedData);
       await AsyncStorage.setItem(storageKey, JSON.stringify(updatedData));
-      console.log('Health data saved for date:', date, 'data:', newHealthData);
+      console.log('💾 Health data saved locally for date:', date);
       
       return newHealthData;
     } catch (error) {

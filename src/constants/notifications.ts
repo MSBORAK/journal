@@ -383,11 +383,6 @@ export const nightMessages: NotificationMessage[] = [
     title: "Uyku zamanı 😴",
     body: "Huzurlu bir uyku için zihnini boşalt",
     emoji: "😴"
-  },
-  {
-    title: "Rahat uyu zzz",
-    body: "Bugünü yazdıysan, rahat uyu. Yazmadıysan yarın başla!",
-    emoji: "💤"
   }
 ];
 
@@ -1028,9 +1023,9 @@ export const getMessageByTimeOfDay = (moodValue?: number, timezone?: string): No
     // Sessiz saatler (23:00 - 05:00) - mesaj gönderilmemeli
     console.log('💤 Silent hours (23-5) - no message');
     return {
-      title: "Sessiz Saatler",
-      body: "Rahat uyu 💤",
-      emoji: "💤"
+      title: "İyi geceler 🌙",
+      body: "Yarın yeni bir gün başlıyor",
+      emoji: "🌙"
     };
   }
 };

@@ -47,10 +47,34 @@ export const getCurrentUser = async () => {
       if (error.message?.includes('Auth session missing')) {
         return null;
       }
+      
+      // JWT'deki kullanıcı artık mevcut değilse session'ı temizle
+      if (error.message?.includes('User from sub claim in JWT does not exist') ||
+          error.message?.includes('user does not exist') ||
+          error.message?.includes('JWT')) {
+        console.warn('⚠️ Invalid JWT - user does not exist, clearing session');
+        // Session'ı temizle
+        await supabase.auth.signOut();
+        return null;
+      }
+      
       throw error;
     }
     return user;
-  } catch (error) {
+  } catch (error: any) {
+    // JWT hatası ise session'ı temizle
+    if (error?.message?.includes('User from sub claim in JWT does not exist') ||
+        error?.message?.includes('user does not exist') ||
+        error?.message?.includes('JWT')) {
+      console.warn('⚠️ Invalid JWT in catch - clearing session');
+      try {
+        await supabase.auth.signOut();
+      } catch (signOutError) {
+        // Sign out hatası önemsiz, devam et
+      }
+      return null;
+    }
+    
     console.error('Get user error:', error);
     return null;
   }
