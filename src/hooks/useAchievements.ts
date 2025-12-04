@@ -750,9 +750,16 @@ export const useAchievements = (userId?: string) => {
 
   // Görev başarısı kontrolü
   const checkTaskAchievements = async (completedTasks: number) => {
+    console.log('🎯 checkTaskAchievements called with completedTasks:', completedTasks);
+    console.log('📊 Current userStats.totalTasksCompleted:', userStats.totalTasksCompleted);
+    
+    // Mevcut totalTasksCompleted'ı al ve yeni tamamlanan görevle birleştir
+    const newTotalTasksCompleted = Math.max(completedTasks, userStats.totalTasksCompleted || 0);
+    console.log('📈 New totalTasksCompleted:', newTotalTasksCompleted);
+    
     return await checkAchievements({
-      totalTasksCompleted: completedTasks,
-      tasksCompletedThisWeek: userStats.tasksCompletedThisWeek + 1,
+      totalTasksCompleted: newTotalTasksCompleted,
+      tasksCompletedThisWeek: (userStats.tasksCompletedThisWeek || 0) + 1,
     });
   };
 

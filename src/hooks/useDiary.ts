@@ -110,7 +110,7 @@ export const useDiary = (userId?: string) => {
       let savedEntry: DiaryEntry;
 
       if (existingEntryIndex >= 0) {
-        // Aynı tarihte entry varsa update et
+        // Aynı tarihte entry varsa update et (günde bir günlük mantığı)
         const existingEntry = entries[existingEntryIndex];
         
         // Supabase'de güncelle (userId varsa)
@@ -226,24 +226,27 @@ export const useDiary = (userId?: string) => {
         
         // Local ID ile kaydet (userId yoksa veya Supabase başarısız olduysa)
         savedEntry = {
-          id: Date.now().toString(),
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Daha benzersiz ID
           ...entry,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
         updatedEntries = [savedEntry, ...entries];
         console.log('✅ New entry added locally:', savedEntry.id);
+        
+        // State'i güncelle
+        setEntries(updatedEntries);
+        
+        // AsyncStorage'a kaydet (offline için)
+        const storageKey = userId ? `${DIARY_STORAGE_KEY}_${userId}` : DIARY_STORAGE_KEY;
+        await AsyncStorage.setItem(storageKey, JSON.stringify(updatedEntries));
+        console.log('💾 Entry saved to AsyncStorage:', savedEntry.id);
+        
+        return savedEntry;
       }
 
-      // State'i güncelle
-      setEntries(updatedEntries);
-      
-      // AsyncStorage'a kaydet (offline için)
-      const storageKey = userId ? `${DIARY_STORAGE_KEY}_${userId}` : DIARY_STORAGE_KEY;
-      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedEntries));
-      console.log('💾 Entry saved to AsyncStorage:', savedEntry.id);
-      
-      return savedEntry;
+      // Eğer buraya geldiyse bir hata var (her durumda return edilmeli)
+      throw new Error('Unexpected error: Entry could not be saved');
     } catch (err) {
       console.error('Error adding entry:', err);
       setError(err instanceof Error ? err.message : 'Failed to add entry');

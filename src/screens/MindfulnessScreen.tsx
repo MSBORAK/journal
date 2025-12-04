@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { getButtonTextColor } from '../utils/colorUtils';
 import { useMindfulnessRoutines } from '../hooks/useMindfulnessRoutines';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MindfulnessScreenProps {
   navigation: any;
@@ -29,13 +30,22 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
   const { morningRoutines, eveningRoutines, toggleRoutine } = useMindfulnessRoutines(user?.uid);
   
   const [activeTab, setActiveTab] = useState<'morning' | 'evening' | 'weekly'>('morning');
+  const [weeklyStats, setWeeklyStats] = useState<{
+    morningCompleted: number;
+    eveningCompleted: number;
+    totalDays: number;
+    streak: number;
+    completionRate: number;
+  } | null>(null);
+  const [loadingWeeklyStats, setLoadingWeeklyStats] = useState(false);
   const [showAffirmationModal, setShowAffirmationModal] = useState(false);
   const [showBreathingModal, setShowBreathingModal] = useState(false);
   const [isBreathing, setIsBreathing] = useState(false);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale' | 'pause'>('inhale');
   const [breathCount, setBreathCount] = useState(0);
   const [currentBreathNumber, setCurrentBreathNumber] = useState(1); // Mevcut nefes numarası
-  const [breathingPattern, setBreathingPattern] = useState<'3-3-3' | '4-4-4' | '4-7-8'>('4-4-4'); // Nefes deseni
+  const [breathingPattern, setBreathingPattern] = useState<'3-3-3' | '4-4-4' | '4-7-8'>('3-3-3'); // Nefes deseni - Başlangıç için daha güvenli
+  const [showHealthWarning, setShowHealthWarning] = useState(true); // İlk açılışta sağlık uyarısı göster
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null); // Seans başlangıç zamanı
   const [totalSessionTime, setTotalSessionTime] = useState(0); // Toplam seans süresi (saniye)
   const isBreathingRef = useRef(false);
@@ -177,16 +187,157 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
     };
   }, [showBreathingModal]);
 
+  // Haftalık istatistikleri yükle
+  useEffect(() => {
+    const loadWeeklyStats = async () => {
+      if (activeTab !== 'weekly') return;
+      
+      setLoadingWeeklyStats(true);
+      try {
+        const MORNING_ROUTINES_KEY = '@mindfulness_morning_routines';
+        const EVENING_ROUTINES_KEY = '@mindfulness_evening_routines';
+        const userId = user?.uid || '';
+        
+        // Son 7 günün tarihlerini oluştur
+        const dates = Array.from({ length: 7 }, (_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - (6 - i));
+          return date.toISOString().split('T')[0];
+        });
+
+        let morningCompleted = 0;
+        let eveningCompleted = 0;
+        let totalDays = 0;
+        let currentStreak = 0;
+        let streakBroken = false;
+
+        // Her gün için kontrol et
+        for (let i = dates.length - 1; i >= 0; i--) {
+          const date = dates[i];
+          const morningKey = `${MORNING_ROUTINES_KEY}_${userId}_${date}`;
+          const eveningKey = `${EVENING_ROUTINES_KEY}_${userId}_${date}`;
+
+          const morningData = await AsyncStorage.getItem(morningKey);
+          const eveningData = await AsyncStorage.getItem(eveningKey);
+
+          const morningRoutines = morningData ? JSON.parse(morningData) : [];
+          const eveningRoutines = eveningData ? JSON.parse(eveningData) : [];
+
+          const morningCompletedCount = morningRoutines.filter((r: any) => r.completed).length;
+          const eveningCompletedCount = eveningRoutines.filter((r: any) => r.completed).length;
+
+          // Eğer o gün en az bir rutin tamamlanmışsa
+          if (morningCompletedCount > 0 || eveningCompletedCount > 0) {
+            totalDays++;
+            morningCompleted += morningCompletedCount;
+            eveningCompleted += eveningCompletedCount;
+
+            // Streak hesapla (geriye doğru)
+            if (!streakBroken) {
+              currentStreak++;
+            }
+          } else {
+            streakBroken = true;
+          }
+        }
+
+        // Tamamlanma yüzdesi (7 gün * 4 rutin * 2 = 56 maksimum)
+        const maxPossible = 7 * 4 * 2; // 7 gün, 4 rutin, sabah+akşam
+        const totalCompleted = morningCompleted + eveningCompleted;
+        const completionRate = maxPossible > 0 ? Math.round((totalCompleted / maxPossible) * 100) : 0;
+
+        setWeeklyStats({
+          morningCompleted,
+          eveningCompleted,
+          totalDays,
+          streak: currentStreak,
+          completionRate,
+        });
+      } catch (error) {
+        console.error('Error loading weekly stats:', error);
+        setWeeklyStats({
+          morningCompleted: 0,
+          eveningCompleted: 0,
+          totalDays: 0,
+          streak: 0,
+          completionRate: 0,
+        });
+      } finally {
+        setLoadingWeeklyStats(false);
+      }
+    };
+
+    loadWeeklyStats();
+  }, [activeTab, user?.uid]);
 
   const positiveAffirmations = [
+    // Günlük Motivasyon
     "Bugün harika bir gün olacak! 🌟",
-    "Ben değerli ve sevilmeye layığım 💖",
     "Her gün yeni fırsatlar sunuyor 🚀",
-    "İçimde güçlü ve güvenli hissediyorum 💪",
-    "Hayallerim gerçek olacak ✨",
     "Bugün kendime karşı nazik olacağım 🤗",
+    "Bugün pozitif enerjiyle dolu! ✨",
+    "Bugün kendim için en iyisini yapacağım 💪",
+    "Bugün hayallerime bir adım daha yaklaşacağım 🎯",
+    
+    // Öz-Değer & Öz-Sevgi
+    "Ben değerli ve sevilmeye layığım 💖",
+    "Kendime karşı şefkatliyim ve kendimi seviyorum 💕",
+    "Yeterince iyiyim, yeterince değerliyim ✨",
+    "Kendimle barışığım ve huzurluyum 🕊️",
+    "Kendimi olduğum gibi kabul ediyorum 🌸",
+    "Kendime karşı sabırlı ve anlayışlıyım 🤲",
+    "Kendimi sevmeyi hak ediyorum 💝",
+    "Kendime karşı nazik ve şefkatliyim 🌺",
+    
+    // Güç & Güven
+    "İçimde güçlü ve güvenli hissediyorum 💪",
     "Zorluklar beni güçlendiriyor 🌱",
+    "Her zorluk beni daha güçlü yapıyor ⚡",
+    "Kendime inanıyorum ve güveniyorum 🦁",
+    "İçimdeki gücü hissediyorum ve kullanıyorum 🔥",
+    "Her gün daha güçlü ve daha bilge oluyorum 📚",
+    
+    // Hayaller & Hedefler
+    "Hayallerim gerçek olacak ✨",
+    "Hedeflerime ulaşma gücüne sahibim 🎯",
+    "Her adımım beni hayallerime yaklaştırıyor 🚶‍♀️",
+    "Büyük hayaller kurma cesaretim var 🌈",
+    "Hayallerim için çalışmaya devam ediyorum 💫",
+    
+    // Minnettarlık & Mutluluk
     "Minettarım ve mutluyum 🙏",
+    "Hayatımdaki güzel şeyler için minnettarım 🌻",
+    "Her gün yeni bir neden buluyorum mutlu olmak için 😊",
+    "Hayat bana gülümsüyor ve ben de ona gülümsüyorum 😄",
+    "İçimde huzur ve mutluluk var 🧘‍♀️",
+    
+    // Cesaret & İlerleme
+    "Korkularıma rağmen ilerlemeye devam ediyorum 🚀",
+    "Her gün yeni bir şey öğreniyorum 📖",
+    "Değişimden korkmuyorum, onu kucaklıyorum 🦋",
+    "Kendime yeni şeyler deneme cesareti veriyorum 🎨",
+    "Hatalarımdan öğreniyor ve büyüyorum 🌱",
+    
+    // Huzur & Denge
+    "İçimde huzur ve denge var ⚖️",
+    "Stresli anlarda bile sakin kalabiliyorum 🌊",
+    "Kendime zaman ayırmayı hak ediyorum ⏰",
+    "İçsel huzurum dışsal kaostan bağımsız 🕯️",
+    "Her nefesimle daha sakin ve huzurlu oluyorum 🧘",
+    
+    // Pozitif Enerji
+    "Pozitif enerjiyle doluyum ve bunu paylaşıyorum ☀️",
+    "İçimdeki ışık parıldıyor ve etrafı aydınlatıyor ✨",
+    "Her gün daha iyi bir versiyonum oluyorum 🌟",
+    "Enerjim yüksek ve hayata hazırım ⚡",
+    "Pozitif düşüncelerle dolu bir gün geçiriyorum 🌈",
+    
+    // Başarı & Gelişim
+    "Her gün biraz daha iyi oluyorum 📈",
+    "Küçük adımlarım büyük değişiklikler yaratıyor 👣",
+    "Kendime verdiğim sözleri tutuyorum ✅",
+    "İlerlemem durmuyor, her gün büyüyorum 🌳",
+    "Başarılarımı kutluyor ve kutlanmayı hak ediyorum 🎉",
   ];
 
   const dynamicStyles = StyleSheet.create({
@@ -535,9 +686,215 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
             <Text style={dynamicStyles.routineIcon}>📊</Text>
             <Text style={dynamicStyles.routineTitle}>{t('settings.weeklySummary')}</Text>
           </View>
-          <Text style={{ color: currentTheme.colors.secondary, textAlign: 'center', marginTop: 20 }}>
-            {t('settings.weeklySummaryDesc')}
-          </Text>
+
+          {loadingWeeklyStats ? (
+            <View style={{ marginTop: 40, alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{
+                fontSize: 16,
+                color: currentTheme.colors.secondary,
+                textAlign: 'center',
+              }}>
+                {t('settings.weeklySummaryDesc')}
+              </Text>
+            </View>
+          ) : weeklyStats ? (
+            <View style={{ marginTop: 20 }}>
+              {/* Streak Card */}
+              <View style={{
+                backgroundColor: currentTheme.colors.primary + '15',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 2,
+                borderColor: currentTheme.colors.primary + '30',
+                alignItems: 'center',
+              }}>
+                <Text style={{
+                  fontSize: 48,
+                  fontWeight: '800',
+                  color: currentTheme.colors.primary,
+                  marginBottom: 8,
+                }}>
+                  {weeklyStats.streak}
+                </Text>
+                <Text style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: currentTheme.colors.text,
+                  marginBottom: 4,
+                }}>
+                  🔥 {t('settings.weeklyStreak')}
+                </Text>
+                <Text style={{
+                  fontSize: 12,
+                  color: currentTheme.colors.secondary,
+                  textAlign: 'center',
+                }}>
+                  {t('settings.weeklyStreakDesc')}
+                </Text>
+              </View>
+
+              {/* Stats Grid */}
+              <View style={{
+                flexDirection: 'row',
+                gap: 12,
+                marginBottom: 16,
+              }}>
+                {/* Morning Stats */}
+                <View style={{
+                  flex: 1,
+                  backgroundColor: currentTheme.colors.background + '60',
+                  borderRadius: 16,
+                  padding: 16,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: currentTheme.colors.border,
+                }}>
+                  <Text style={{
+                    fontSize: 32,
+                    fontWeight: '700',
+                    color: currentTheme.colors.primary,
+                    marginBottom: 4,
+                  }}>
+                    {weeklyStats.morningCompleted}
+                  </Text>
+                  <Text style={{
+                    fontSize: 12,
+                    color: currentTheme.colors.secondary,
+                    textAlign: 'center',
+                  }}>
+                    🌅 {t('settings.weeklyMorningRoutines')}
+                  </Text>
+                </View>
+
+                {/* Evening Stats */}
+                <View style={{
+                  flex: 1,
+                  backgroundColor: currentTheme.colors.background + '60',
+                  borderRadius: 16,
+                  padding: 16,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: currentTheme.colors.border,
+                }}>
+                  <Text style={{
+                    fontSize: 32,
+                    fontWeight: '700',
+                    color: currentTheme.colors.primary,
+                    marginBottom: 4,
+                  }}>
+                    {weeklyStats.eveningCompleted}
+                  </Text>
+                  <Text style={{
+                    fontSize: 12,
+                    color: currentTheme.colors.secondary,
+                    textAlign: 'center',
+                  }}>
+                    🌙 {t('settings.weeklyEveningRoutines')}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Completion Rate */}
+              <View style={{
+                backgroundColor: currentTheme.colors.background + '60',
+                borderRadius: 16,
+                padding: 16,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: currentTheme.colors.border,
+              }}>
+                <View style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 8,
+                }}>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: currentTheme.colors.text,
+                  }}>
+                    {t('settings.weeklyCompletionRate')}
+                  </Text>
+                  <Text style={{
+                    fontSize: 18,
+                    fontWeight: '700',
+                    color: currentTheme.colors.primary,
+                  }}>
+                    {weeklyStats.completionRate}%
+                  </Text>
+                </View>
+                {/* Progress Bar */}
+                <View style={{
+                  height: 8,
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                }}>
+                  <View style={{
+                    height: '100%',
+                    width: `${weeklyStats.completionRate}%`,
+                    backgroundColor: currentTheme.colors.primary,
+                    borderRadius: 4,
+                  }} />
+                </View>
+              </View>
+
+              {/* Total Days */}
+              <View style={{
+                backgroundColor: currentTheme.colors.background + '60',
+                borderRadius: 16,
+                padding: 16,
+                borderWidth: 1,
+                borderColor: currentTheme.colors.border,
+                alignItems: 'center',
+              }}>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: '700',
+                  color: currentTheme.colors.text,
+                  marginBottom: 4,
+                }}>
+                  {weeklyStats.totalDays} / 7
+                </Text>
+                <Text style={{
+                  fontSize: 12,
+                  color: currentTheme.colors.secondary,
+                  textAlign: 'center',
+                }}>
+                  {t('settings.weeklyActiveDays')}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <View style={{ marginTop: 40, alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{
+                fontSize: 48,
+                marginBottom: 16,
+              }}>
+                📊
+              </Text>
+              <Text style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: currentTheme.colors.text,
+                marginBottom: 8,
+                textAlign: 'center',
+              }}>
+                {t('settings.weeklyNoData')}
+              </Text>
+              <Text style={{
+                fontSize: 14,
+                color: currentTheme.colors.secondary,
+                textAlign: 'center',
+                paddingHorizontal: 20,
+                lineHeight: 20,
+              }}>
+                {t('settings.weeklyNoDataDesc')}
+              </Text>
+            </View>
+          )}
         </View>
       );
     }
@@ -739,6 +1096,45 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
                 </Text>
               )}
 
+              {/* Sağlık Uyarısı */}
+              {showHealthWarning && !isBreathing && (
+                <View style={{
+                  marginTop: 20,
+                  padding: 16,
+                  backgroundColor: currentTheme.colors.primary + '15',
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: currentTheme.colors.primary + '30',
+                  width: '100%',
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <Ionicons name="medical-outline" size={20} color={currentTheme.colors.primary} style={{ marginRight: 8, marginTop: 2 }} />
+                    <Text style={{
+                      fontSize: 13,
+                      fontWeight: '700',
+                      color: currentTheme.colors.primary,
+                      flex: 1,
+                    }}>
+                      {t('settings.healthWarning')}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => setShowHealthWarning(false)}
+                      style={{ padding: 4 }}
+                    >
+                      <Ionicons name="close" size={18} color={currentTheme.colors.secondary} />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={{
+                    fontSize: 12,
+                    color: currentTheme.colors.text,
+                    lineHeight: 18,
+                    opacity: 0.9,
+                  }}>
+                    {t('settings.healthWarningDesc')}
+                  </Text>
+                </View>
+              )}
+
               {/* Nefes Deseni Seçimi - Sadece başlamadan önce */}
               {!isBreathing && (
                 <View style={{
@@ -758,13 +1154,18 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
                     flexDirection: 'row',
                     gap: 10,
                     justifyContent: 'center',
+                    flexWrap: 'wrap',
                   }}>
-                    {(['3-3-3', '4-4-4', '4-7-8'] as const).map((pattern) => (
+                    {([
+                      { pattern: '3-3-3' as const, label: t('settings.breathingPatternBeginner'), desc: t('settings.breathingPatternBeginnerDesc') },
+                      { pattern: '4-4-4' as const, label: t('settings.breathingPatternIntermediate'), desc: t('settings.breathingPatternIntermediateDesc') },
+                      { pattern: '4-7-8' as const, label: t('settings.breathingPatternAdvanced'), desc: t('settings.breathingPatternAdvancedDesc') },
+                    ]).map(({ pattern, label, desc }) => (
                       <TouchableOpacity
                         key={pattern}
                         onPress={() => setBreathingPattern(pattern)}
                         style={{
-                          paddingVertical: 8,
+                          paddingVertical: 10,
                           paddingHorizontal: 16,
                           borderRadius: 12,
                           backgroundColor: breathingPattern === pattern 
@@ -774,21 +1175,48 @@ export default function MindfulnessScreen({ navigation }: MindfulnessScreenProps
                           borderColor: breathingPattern === pattern 
                             ? currentTheme.colors.primary 
                             : currentTheme.colors.border,
+                          minWidth: 100,
+                          alignItems: 'center',
                         }}
                         activeOpacity={0.7}
                       >
                         <Text style={{
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: '700',
                           color: breathingPattern === pattern 
                             ? currentTheme.colors.primary 
                             : currentTheme.colors.text,
+                          marginBottom: 4,
                         }}>
                           {pattern}
+                        </Text>
+                        <Text style={{
+                          fontSize: 11,
+                          color: breathingPattern === pattern 
+                            ? currentTheme.colors.primary 
+                            : currentTheme.colors.secondary,
+                          textAlign: 'center',
+                          opacity: 0.8,
+                        }}>
+                          {label}
                         </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
+                  {/* Seçili tekniğin açıklaması */}
+                  <Text style={{
+                    marginTop: 12,
+                    fontSize: 12,
+                    color: currentTheme.colors.secondary,
+                    textAlign: 'center',
+                    paddingHorizontal: 20,
+                    lineHeight: 18,
+                    opacity: 0.8,
+                  }}>
+                    {breathingPattern === '3-3-3' && t('settings.breathingPatternBeginnerDesc')}
+                    {breathingPattern === '4-4-4' && t('settings.breathingPatternIntermediateDesc')}
+                    {breathingPattern === '4-7-8' && t('settings.breathingPatternAdvancedDesc')}
+                  </Text>
                 </View>
               )}
 

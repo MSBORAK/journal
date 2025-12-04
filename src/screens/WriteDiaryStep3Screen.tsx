@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Modal,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -19,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomAlert } from '../components/CustomAlert';
 import { QUESTION_ORDER } from '../constants/diaryQuestions';
 import { getButtonTextColor } from '../utils/colorUtils';
+import { analyzeDiaryEntry, isGeminiAvailable, canUseAIAnalysis, markAIAnalysisUsed } from '../services/geminiService';
 
 interface WriteDiaryStep3ScreenProps {
   navigation: any;
@@ -49,6 +51,12 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
   const [loading, setLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
+  // AI Analysis States
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string>('');
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
+  
   // Custom Alert States
   const [showCustomAlert, setShowCustomAlert] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
@@ -58,6 +66,144 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
     primaryButton: null as any,
     secondaryButton: null as any,
   });
+
+  // AI availability kontrolü
+  React.useEffect(() => {
+    const checkAIAvailability = async () => {
+      if (!user?.uid) {
+        setAiAvailable(false);
+        return;
+      }
+      
+      const available = isGeminiAvailable();
+      if (available) {
+        const canUse = await canUseAIAnalysis(user.uid);
+        setAiAvailable(canUse);
+      } else {
+        setAiAvailable(false);
+      }
+    };
+    
+    checkAIAvailability();
+  }, [user?.uid]);
+
+  // AI Analizi fonksiyonu
+  const handleAIAnalysis = async () => {
+    if (!user?.uid || analyzing) return;
+    
+    // API kullanılabilirliğini kontrol et
+    if (!isGeminiAvailable()) {
+      showAlert(
+        t('diary.aiAnalysisUnavailable'),
+        'AI analizi şu anda kullanılamıyor. Lütfen API anahtarınızı kontrol edin.',
+        'warning',
+        {
+          text: t('common.ok'),
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        }
+      );
+      return;
+    }
+    
+    // Rate limiting kontrolü
+    const canUse = await canUseAIAnalysis(user.uid);
+    if (!canUse) {
+      showAlert(
+        t('diary.aiAnalysisLimitReached'),
+        '',
+        'warning',
+        {
+          text: t('common.ok'),
+          onPress: () => setShowCustomAlert(false),
+          style: 'primary'
+        }
+      );
+      return;
+    }
+    
+    setAnalyzing(true);
+    setShowAIModal(true);
+    setAiAnalysis(''); // Önceki analizi temizle
+    
+    try {
+      console.log('🤖 AI Analizi başlatılıyor...');
+      
+      // Günlük içeriğini birleştir
+      const diaryText = [
+        `Başlık: ${title}`,
+        `Ruh Hali: ${mood === 1 ? t('mood.emojiSad') : mood === 2 ? t('mood.emojiNormal') : mood === 3 ? t('mood.emojiTired') : mood === 4 ? t('mood.emojiHappy') : t('mood.emojiAmazing')}`,
+        freeWriting ? `Serbest Yazı: ${freeWriting}` : '',
+        answers && Object.keys(answers).length > 0 
+          ? `Cevaplar: ${Object.entries(answers).filter(([_, value]: any) => value && String(value).trim().length > 0).map(([key, value]: any) => `${key}: ${value}`).join(', ')}`
+          : ''
+      ].filter(Boolean).join('\n\n');
+      
+      if (!diaryText.trim()) {
+        throw new Error('Günlük içeriği boş');
+      }
+      
+      console.log('📝 Günlük içeriği hazırlandı, uzunluk:', diaryText.length);
+      
+      const analysis = await analyzeDiaryEntry(diaryText);
+      
+      if (!analysis || analysis.trim().length === 0) {
+        throw new Error('AI\'dan boş yanıt alındı');
+      }
+      
+      console.log('✅ AI analizi başarılı, uzunluk:', analysis.length);
+      setAiAnalysis(analysis);
+      
+      // Rate limiting: kullanıldığını işaretle
+      await markAIAnalysisUsed(user.uid);
+      setAiAvailable(false); // Bugün tekrar kullanılamaz
+    } catch (error: any) {
+      // Hata detaylarını güvenli bir şekilde logla
+      const errorDetails = {
+        message: error?.message || 'Bilinmeyen hata',
+        name: error?.name || 'Error',
+        stack: error?.stack ? error.stack.substring(0, 200) : 'Stack trace yok',
+        code: error?.code || 'N/A',
+        status: error?.status || 'N/A',
+      };
+      
+      console.error('❌ AI analizi hatası:', errorDetails.message);
+      console.error('❌ Hata tipi:', errorDetails.name);
+      if (errorDetails.stack !== 'Stack trace yok') {
+        console.error('❌ Stack trace:', errorDetails.stack);
+      }
+      
+      // Daha açıklayıcı hata mesajı göster
+      let errorMessage = t('diary.aiAnalysisError');
+      
+      if (error?.message) {
+        const msg = error.message.toLowerCase();
+        // Türkçe hata mesajlarını kontrol et
+        if (msg.includes('api anahtarı') || msg.includes('api key') || msg.includes('yapılandırılmamış')) {
+          errorMessage = 'API anahtarı geçersiz veya eksik. Lütfen ayarları kontrol edin.';
+        } else if (msg.includes('kota') || msg.includes('quota') || msg.includes('429')) {
+          errorMessage = 'API kotası aşıldı. Lütfen yarın tekrar deneyin.';
+        } else if (msg.includes('internet') || msg.includes('bağlantı') || msg.includes('network') || msg.includes('fetch')) {
+          errorMessage = 'İnternet bağlantısı hatası. Lütfen bağlantınızı kontrol edin.';
+        } else if (msg.includes('boş') || msg.includes('empty')) {
+          errorMessage = 'AI\'dan yanıt alınamadı. Lütfen tekrar deneyin.';
+        } else if (msg.includes('timeout') || msg.includes('zaman aşımı')) {
+          errorMessage = 'İstek zaman aşımına uğradı. Lütfen tekrar deneyin.';
+        } else {
+          // İlk 100 karakteri göster
+          errorMessage = error.message.length > 100 
+            ? error.message.substring(0, 100) + '...' 
+            : error.message;
+        }
+      } else if (error?.toString) {
+        errorMessage = error.toString();
+      }
+      
+      setAiAnalysis(`❌ ${errorMessage}`);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -212,6 +358,88 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
       fontSize: 16,
       color: currentTheme.colors.text,
       fontWeight: '600',
+    },
+    aiButton: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    aiButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    aiButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: currentTheme.colors.text,
+      marginLeft: 12,
+    },
+    aiButtonDesc: {
+      fontSize: 12,
+      color: currentTheme.colors.secondary,
+      marginTop: 4,
+      marginLeft: 12,
+    },
+    aiButtonDisabled: {
+      opacity: 0.5,
+    },
+    aiModal: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    aiModalContent: {
+      backgroundColor: currentTheme.colors.card,
+      borderRadius: 20,
+      padding: 24,
+      width: '100%',
+      maxHeight: '80%',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8,
+    },
+    aiModalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    aiModalTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+    },
+    aiModalClose: {
+      padding: 8,
+    },
+    aiModalBody: {
+      maxHeight: 400,
+    },
+    aiAnalysisText: {
+      fontSize: 16,
+      color: currentTheme.colors.text,
+      lineHeight: 24,
+    },
+    aiLoadingContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 40,
+    },
+    aiLoadingText: {
+      fontSize: 16,
+      color: currentTheme.colors.secondary,
+      marginTop: 16,
     },
   });
 
@@ -447,6 +675,27 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
           </View>
         </View>
 
+        {/* AI Analysis Button */}
+        {isGeminiAvailable() && (
+          <TouchableOpacity
+            style={[
+              dynamicStyles.aiButton,
+              (!aiAvailable || analyzing) && dynamicStyles.aiButtonDisabled
+            ]}
+            onPress={handleAIAnalysis}
+            disabled={!aiAvailable || analyzing}
+          >
+            <View style={dynamicStyles.aiButtonContent}>
+              <Ionicons name="sparkles" size={24} color={currentTheme.colors.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={dynamicStyles.aiButtonText}>{t('diary.aiAnalysis')}</Text>
+                <Text style={dynamicStyles.aiButtonDesc}>{t('diary.aiAnalysisDesc')}</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={currentTheme.colors.secondary} />
+          </TouchableOpacity>
+        )}
+
         {/* Tags */}
         <View style={dynamicStyles.tagsSection}>
           <Text style={dynamicStyles.label}>{t('mood.tags')}</Text>
@@ -487,6 +736,41 @@ export default function WriteDiaryStep3Screen({ navigation, route }: WriteDiaryS
         secondaryButton={alertConfig.secondaryButton}
         onClose={() => setShowCustomAlert(false)}
       />
+
+      {/* AI Analysis Modal */}
+      <Modal
+        visible={showAIModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAIModal(false)}
+      >
+        <View style={dynamicStyles.aiModal}>
+          <View style={dynamicStyles.aiModalContent}>
+            <View style={dynamicStyles.aiModalHeader}>
+              <Text style={dynamicStyles.aiModalTitle}>{t('diary.aiAnalysisTitle')}</Text>
+              <TouchableOpacity
+                style={dynamicStyles.aiModalClose}
+                onPress={() => setShowAIModal(false)}
+              >
+                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={dynamicStyles.aiModalBody}>
+              {analyzing ? (
+                <View style={dynamicStyles.aiLoadingContainer}>
+                  <Ionicons name="sparkles" size={48} color={currentTheme.colors.primary} />
+                  <Text style={dynamicStyles.aiLoadingText}>{t('diary.analyzing')}</Text>
+                </View>
+              ) : aiAnalysis ? (
+                <Text style={dynamicStyles.aiAnalysisText}>{aiAnalysis}</Text>
+              ) : (
+                <Text style={dynamicStyles.aiAnalysisText}>{t('diary.aiAnalysisUnavailable')}</Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }

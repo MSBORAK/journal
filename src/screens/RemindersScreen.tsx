@@ -178,9 +178,11 @@ function RemindersScreen({ navigation }: RemindersScreenProps) {
       borderRadius: 16,
       padding: 16,
       marginBottom: 12,
+      borderWidth: 1,
+      borderColor: currentTheme.colors.border,
       shadowColor: currentTheme.colors.shadow,
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.15,
       shadowRadius: 8,
       elevation: 4,
     },
@@ -746,13 +748,28 @@ function RemindersScreen({ navigation }: RemindersScreenProps) {
             </Text>
           </View>
         ) : (
-          getSortedReminders().map((reminder) => (
-            <View key={reminder.id} style={dynamicStyles.reminderCard}>
+          getSortedReminders()
+            .filter(reminder => !reminder.isTaskReminder) // Görev hatırlatıcılarını gizle
+            .map((reminder) => (
+            <TouchableOpacity 
+              key={reminder.id} 
+              style={dynamicStyles.reminderCard}
+              onPress={() => handleEdit(reminder)}
+              activeOpacity={0.7}
+            >
               <View style={dynamicStyles.reminderHeader}>
                 <View style={dynamicStyles.reminderLeft}>
                   <Text style={dynamicStyles.reminderEmoji}>{reminder.emoji}</Text>
                   <View style={dynamicStyles.reminderContent}>
-                    <Text style={dynamicStyles.reminderTitle}>{reminder.title}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={dynamicStyles.reminderTitle}>{reminder.title}</Text>
+                      <Ionicons 
+                        name="create-outline" 
+                        size={14} 
+                        color={currentTheme.colors.secondary} 
+                        style={{ opacity: 0.6 }}
+                      />
+                    </View>
                     {reminder.description && (
                       <Text style={dynamicStyles.reminderDescription}>
                         {reminder.description}
@@ -798,7 +815,10 @@ function RemindersScreen({ navigation }: RemindersScreenProps) {
                   
                   <TouchableOpacity
                     style={dynamicStyles.actionButton}
-                    onPress={() => toggleReminder(reminder.id)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      toggleReminder(reminder.id);
+                    }}
                   >
                     <Ionicons 
                       name={reminder.isActive ? "checkmark-circle" : "checkmark-circle-outline"} 
@@ -809,20 +829,26 @@ function RemindersScreen({ navigation }: RemindersScreenProps) {
 
                   <TouchableOpacity
                     style={dynamicStyles.actionButton}
-                    onPress={() => handleEdit(reminder)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleEdit(reminder);
+                    }}
                   >
                     <Ionicons name="create-outline" size={20} color={currentTheme.colors.secondary} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={dynamicStyles.actionButton}
-                    onPress={() => handleDelete(reminder.id)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleDelete(reminder.id);
+                    }}
                   >
                     <Ionicons name="trash-outline" size={20} color={currentTheme.colors.danger} />
                   </TouchableOpacity>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>

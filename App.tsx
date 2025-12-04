@@ -631,6 +631,11 @@ function AppNavigator() {
               component={DiaryDetailScreen} 
               options={{ headerShown: false, ...transitionConfig }} 
             />
+            <Stack.Screen 
+              name="Reminders" 
+              component={RemindersScreen} 
+              options={{ headerShown: false, ...transitionConfig }} 
+            />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -208,28 +208,44 @@ export const sendLocalNotification = async (
     }
   }
 
-  // Sadece sistem sesi kullan
-  const selectedSound = getSystemSound();
-  if (__DEV__) console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
+  try {
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping notification');
+      return;
+    }
 
-  // Sistem titreşimi kullan
-  if (__DEV__) console.log('📳 Using system vibration');
+    // Sadece sistem sesi kullan
+    const selectedSound = getSystemSound();
+    if (__DEV__) console.log('🎵 Sending notification:', { title, body, channelId, sound: selectedSound, platform: Platform.OS });
 
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      data,
-      sound: selectedSound, // Sistem sesi kullan
-      priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
-      ...(Platform.OS === 'android' && { 
-        channelId: 'default',
-      }),
-    },
-    trigger: null, // Hemen gönder
-  });
-  
-  if (__DEV__) console.log('Notification sent successfully');
+    // Sistem titreşimi kullan
+    if (__DEV__) console.log('📳 Using system vibration');
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        data,
+        sound: selectedSound, // Sistem sesi kullan
+        priority: Notifications.AndroidNotificationPriority.MAX, // MAX priority
+        ...(Platform.OS === 'android' && { 
+          channelId: 'default',
+        }),
+      },
+      trigger: null, // Hemen gönder
+    });
+    
+    if (__DEV__) console.log('✅ Notification sent successfully');
+  } catch (error: any) {
+    console.error('❌ Error sending local notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    // Hata durumunda sessizce devam et (kullanıcıya gösterme)
+  }
 };
 
 /**
@@ -257,46 +273,80 @@ export const scheduleNotification = async (
     // ⚠️ timezone parametresi YOK - cihazın yerel saatine göre çalışır
   };
 
-  // Sadece sistem sesi kullan
-  const selectedSound = getSystemSound();
-  if (__DEV__) console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
+  try {
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping scheduled notification');
+      throw new Error('Notification permission not granted');
+    }
 
-  return await Notifications.scheduleNotificationAsync({
-    identifier,
-    content: {
-      title,
-      body,
-      sound: selectedSound, // String path kullan
-      priority: Notifications.AndroidNotificationPriority.HIGH, // HIGH priority
+    // Sadece sistem sesi kullan
+    const selectedSound = getSystemSound();
+    if (__DEV__) console.log('🎵 Scheduling notification:', { identifier, title, hour, minute, channelId, sound: selectedSound, platform: Platform.OS });
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      identifier,
+      content: {
+        title,
+        body,
+        sound: selectedSound, // String path kullan
+        priority: Notifications.AndroidNotificationPriority.HIGH, // HIGH priority
         ...(Platform.OS === 'android' && { 
           channelId,
         }),
-    },
-    trigger,
-  });
+      },
+      trigger,
+    });
+
+    if (__DEV__) console.log('✅ Notification scheduled successfully:', notificationId);
+    return notificationId;
+  } catch (error: any) {
+    console.error('❌ Error scheduling notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+      identifier,
+    });
+    throw error; // Üst seviyede handle edilsin
+  }
 };
 
 /**
  * Sabah Bildirimi Planla
  */
 export const scheduleMorningNotification = async (): Promise<void> => {
-  const settings = await loadNotificationSettings();
+  try {
+    const settings = await loadNotificationSettings();
 
-  if (!settings.enabled || !settings.morningEnabled) return;
+    if (!settings.enabled || !settings.morningEnabled) return;
 
-  const [hour, minute] = settings.morningTime.split(':').map(Number);
-  
-  // Kullanıcının timezone'unu al
-  const userTimezone = settings.timezone || getUserTimezone();
-  
-  // Sabah saatleri kontrolü (05:00 - 11:00)
-  if (hour < 5 || hour >= 11) {
-    if (__DEV__) console.warn(`⚠️ Morning notification scheduled for ${hour}:${minute} (not morning hours 5-11!)`);
-  }
-  
-  if (__DEV__) {
-    console.log(`🌍 Scheduling morning notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
-  }
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping morning notification');
+      return;
+    }
+
+    const [hour, minute] = settings.morningTime.split(':').map(Number);
+    
+    // Validasyon
+    if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      console.error(`❌ Invalid morning notification time: ${settings.morningTime}`);
+      return;
+    }
+    
+    // Kullanıcının timezone'unu al
+    const userTimezone = settings.timezone || getUserTimezone();
+    
+    // Sabah saatleri kontrolü (05:00 - 11:00)
+    if (hour < 5 || hour >= 11) {
+      if (__DEV__) console.warn(`⚠️ Morning notification scheduled for ${hour}:${minute} (not morning hours 5-11!)`);
+    }
+    
+    if (__DEV__) {
+      console.log(`🌍 Scheduling morning notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
+    }
   
   // Hafta içi/sonu kontrolü - bildirimler her gün tekrar ediyor, bu yüzden
   // Hafta içi ve hafta sonu için ayrı bildirimler planlamalıyız
@@ -384,20 +434,42 @@ export const scheduleMorningNotification = async (): Promise<void> => {
     }
     
     if (__DEV__) console.log(`✅ Morning weekend notifications scheduled for ${hour}:${minute} (Saturday-Sunday)`);
-  }
+    }
 
-  if (__DEV__) console.log(`✅ Morning notifications scheduled for ${hour}:${minute}`);
+    if (__DEV__) console.log(`✅ Morning notifications scheduled for ${hour}:${minute}`);
+  } catch (error: any) {
+    console.error('❌ Error scheduling morning notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    // Hata durumunda sessizce devam et
+  }
 };
 
 /**
  * Öğlen Bildirimi Planla
  */
 export const scheduleLunchNotification = async (): Promise<void> => {
-  const settings = await loadNotificationSettings();
+  try {
+    const settings = await loadNotificationSettings();
 
-  if (!settings.enabled || settings.lunchEnabled === false) return;
+    if (!settings.enabled || settings.lunchEnabled === false) return;
 
-  const [hour, minute] = (settings.lunchTime || '12:00').split(':').map(Number);
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping lunch notification');
+      return;
+    }
+
+    const [hour, minute] = (settings.lunchTime || '12:00').split(':').map(Number);
+    
+    // Validasyon
+    if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      console.error(`❌ Invalid lunch notification time: ${settings.lunchTime || '12:00'}`);
+      return;
+    }
 
   // Kullanıcının timezone'unu al
   const userTimezone = settings.timezone || getUserTimezone();
@@ -425,17 +497,25 @@ export const scheduleLunchNotification = async (): Promise<void> => {
     message = getRandomMessage(afternoonMessagesToUse);
   }
 
-  await scheduleNotification(
-    'lunch-reminder',
-    message.title,
-    message.body,
-    hour,
-    minute,
-    true,
-    'default'
-  );
+    await scheduleNotification(
+      'lunch-reminder',
+      message.title,
+      message.body,
+      hour,
+      minute,
+      true,
+      'default'
+    );
 
-  if (__DEV__) console.log(`Lunch notification scheduled for ${hour}:${minute}`);
+    if (__DEV__) console.log(`✅ Lunch notification scheduled for ${hour}:${minute}`);
+  } catch (error: any) {
+    console.error('❌ Error scheduling lunch notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    // Hata durumunda sessizce devam et
+  }
 };
 
 /**
@@ -468,21 +548,35 @@ const checkTodayDiaryWritten = async (userId?: string, timezone?: string): Promi
  * Akşam Bildirimi Planla
  */
 export const scheduleEveningNotification = async (userId?: string): Promise<void> => {
-  const settings = await loadNotificationSettings();
+  try {
+    const settings = await loadNotificationSettings();
 
-  if (!settings.enabled || !settings.eveningEnabled) return;
+    if (!settings.enabled || !settings.eveningEnabled) return;
 
-  const [hour, minute] = settings.eveningTime.split(':').map(Number);
-  
-  // CRITICAL FIX: Validate evening notification time - should be between 16:00-23:59
-  // If user has set an invalid time (like 10:15 AM), don't schedule night messages
-  if (hour < 16 || hour >= 24) {
-    console.warn(`⚠️ Evening notification time ${hour}:${minute} is invalid. Evening notifications should be scheduled between 16:00-23:59. Skipping scheduling.`);
-    return; // Don't schedule if time is invalid
-  }
-  
-  // Kullanıcının timezone'unu al
-  const userTimezone = settings.timezone || getUserTimezone();
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping evening notification');
+      return;
+    }
+
+    const [hour, minute] = settings.eveningTime.split(':').map(Number);
+    
+    // Validasyon
+    if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      console.error(`❌ Invalid evening notification time: ${settings.eveningTime}`);
+      return;
+    }
+    
+    // CRITICAL FIX: Validate evening notification time - should be between 16:00-23:59
+    // If user has set an invalid time (like 10:15 AM), don't schedule night messages
+    if (hour < 16 || hour >= 24) {
+      console.warn(`⚠️ Evening notification time ${hour}:${minute} is invalid. Evening notifications should be scheduled between 16:00-23:59. Skipping scheduling.`);
+      return; // Don't schedule if time is invalid
+    }
+    
+    // Kullanıcının timezone'unu al
+    const userTimezone = settings.timezone || getUserTimezone();
   
   // Saat kontrolü ile doğru mesaj tipini belirle (timezone-aware)
   // Not: Expo Notifications CalendarTriggerInput zaten cihazın yerel saatine göre çalışır
@@ -631,84 +725,124 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
     }
     
     if (__DEV__) console.log(`✅ Evening weekend notifications scheduled for ${hour}:${minute} (Saturday-Sunday, type: ${messageType})`);
-  }
+    }
 
-  if (__DEV__) console.log(`✅ Evening notifications scheduled for ${hour}:${minute}`);
+    if (__DEV__) console.log(`✅ Evening notifications scheduled for ${hour}:${minute}`);
+  } catch (error: any) {
+    console.error('❌ Error scheduling evening notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    // Hata durumunda sessizce devam et
+  }
 };
 
 /**
  * Günlük Özet Bildirimi Planla
  */
 export const scheduleDailySummaryNotification = async (): Promise<void> => {
-  const settings = await loadNotificationSettings();
+  try {
+    const settings = await loadNotificationSettings();
 
-  if (!settings.enabled || !settings.dailySummaryEnabled) return;
+    if (!settings.enabled || !settings.dailySummaryEnabled) return;
 
-  // Kullanıcının timezone'unu al
-  const userTimezone = settings.timezone || getUserTimezone();
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping daily summary notification');
+      return;
+    }
 
-  // Gün sonu özeti için saat 22:00
-  const hour = 22;
-  const minute = 0;
+    // Kullanıcının timezone'unu al
+    const userTimezone = settings.timezone || getUserTimezone();
 
-  // Dil kontrolü ile mesaj seç
-  const userLanguage = await getCurrentLanguage();
-  
-  if (__DEV__) {
-    console.log(`🌍 Scheduling daily summary notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
+    // Gün sonu özeti için saat 22:00
+    const hour = 22;
+    const minute = 0;
+
+    // Dil kontrolü ile mesaj seç
+    const userLanguage = await getCurrentLanguage();
+    
+    if (__DEV__) {
+      console.log(`🌍 Scheduling daily summary notification for timezone: ${userTimezone}, hour: ${hour}:${minute}`);
+    }
+    
+    const title = userLanguage === 'en' ? '📊 Daily Summary' : '📊 Günlük Özet';
+    const body = userLanguage === 'en' 
+      ? 'Check out today\'s summary! How close are you to your goals?'
+      : 'Bugünün özetine göz at! Hedeflerine ne kadar yaklaştın?';
+
+    await scheduleNotification(
+      'daily-summary',
+      title,
+      body,
+      hour,
+      minute,
+      true,
+      'default'
+    );
+
+    if (__DEV__) console.log(`✅ Daily summary notification scheduled for ${hour}:${minute} (language: ${userLanguage})`);
+  } catch (error: any) {
+    console.error('❌ Error scheduling daily summary notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    // Hata durumunda sessizce devam et
   }
-  
-  const title = userLanguage === 'en' ? '📊 Daily Summary' : '📊 Günlük Özet';
-  const body = userLanguage === 'en' 
-    ? 'Check out today\'s summary! How close are you to your goals?'
-    : 'Bugünün özetine göz at! Hedeflerine ne kadar yaklaştın?';
-
-  await scheduleNotification(
-    'daily-summary',
-    title,
-    body,
-    hour,
-    minute,
-    true,
-    'default'
-  );
-
-  if (__DEV__) console.log(`Daily summary notification scheduled for ${hour}:${minute} (language: ${userLanguage})`);
 };
 
 /**
  * Günlük Görev Kontrolü Bildirimi (20:00)
  */
 export const scheduleDailyTaskCheck = async (): Promise<void> => {
-  const settings = await loadNotificationSettings();
-  
-  if (!settings.enabled || !settings.taskRemindersEnabled) return;
+  try {
+    const settings = await loadNotificationSettings();
+    
+    if (!settings.enabled || !settings.taskRemindersEnabled) return;
 
-  // Kullanıcının timezone'unu al
-  const userTimezone = settings.timezone || getUserTimezone();
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping daily task check notification');
+      return;
+    }
 
-  // Dil kontrolü ile mesaj seç
-  const userLanguage = await getCurrentLanguage();
-  
-  if (__DEV__) {
-    console.log(`🌍 Scheduling daily task check notification for timezone: ${userTimezone}, hour: 20:00`);
+    // Kullanıcının timezone'unu al
+    const userTimezone = settings.timezone || getUserTimezone();
+
+    // Dil kontrolü ile mesaj seç
+    const userLanguage = await getCurrentLanguage();
+    
+    if (__DEV__) {
+      console.log(`🌍 Scheduling daily task check notification for timezone: ${userTimezone}, hour: 20:00`);
+    }
+    const title = userLanguage === 'en' ? '📝 Daily Task Check' : '📝 Günlük Görev Kontrolü';
+    const body = userLanguage === 'en'
+      ? 'How are your tasks going today? Let\'s check! 🎯'
+      : 'Bugünkü görevlerin nasıl gidiyor? Hadi kontrol edelim! 🎯';
+
+    await scheduleNotification(
+      'daily-task-check',
+      title,
+      body,
+      20,
+      0,
+      true,
+      'default'
+    );
+
+    if (__DEV__) console.log(`✅ Daily task check notification scheduled for 20:00 (language: ${userLanguage})`);
+  } catch (error: any) {
+    console.error('❌ Error scheduling daily task check notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    // Hata durumunda sessizce devam et
   }
-  const title = userLanguage === 'en' ? '📝 Daily Task Check' : '📝 Günlük Görev Kontrolü';
-  const body = userLanguage === 'en'
-    ? 'How are your tasks going today? Let\'s check! 🎯'
-    : 'Bugünkü görevlerin nasıl gidiyor? Hadi kontrol edelim! 🎯';
-
-  await scheduleNotification(
-    'daily-task-check',
-    title,
-    body,
-    20,
-    0,
-    true,
-    'default'
-  );
-
-  if (__DEV__) console.log(`Daily task check notification scheduled for 20:00 (language: ${userLanguage})`);
 };
 
 /**
@@ -793,15 +927,26 @@ export const scheduleAllNotifications = async (userId?: string): Promise<void> =
  * Belirli Bir Bildirimi İptal Et
  */
 export const cancelNotification = async (identifier: string): Promise<void> => {
-  await Notifications.cancelScheduledNotificationAsync(identifier);
+  try {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+    if (__DEV__) console.log(`✅ Notification cancelled: ${identifier}`);
+  } catch (error: any) {
+    console.error(`❌ Error cancelling notification ${identifier}:`, error);
+    // Hata durumunda sessizce devam et
+  }
 };
 
 /**
  * Tüm Bildirimleri İptal Et
  */
 export const cancelAllNotifications = async (): Promise<void> => {
-  await Notifications.cancelAllScheduledNotificationsAsync();
-  console.log('All notifications cancelled');
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    if (__DEV__) console.log('✅ All notifications cancelled');
+  } catch (error: any) {
+    console.error('❌ Error cancelling all notifications:', error);
+    // Hata durumunda sessizce devam et
+  }
 };
 
 /**
@@ -836,20 +981,40 @@ export const sendTaskReminder = async (
     ? `In ${minutesBefore} minutes: ${taskTitle}`
     : `${minutesBefore} dakika sonra: ${taskTitle}`;
 
-  return await Notifications.scheduleNotificationAsync({
-    identifier,
-    content: {
-      title,
-      body,
-      sound: true,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
-      ...(Platform.OS === 'android' && { channelId: 'task-reminders' }),
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: notificationTime,
-    },
-  });
+  try {
+    // Bildirim izni kontrolü
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      if (__DEV__) console.warn('⚠️ Notification permission not granted, skipping task reminder');
+      return '';
+    }
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      identifier,
+      content: {
+        title,
+        body,
+        sound: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+        ...(Platform.OS === 'android' && { channelId: 'task-reminders' }),
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: notificationTime,
+      },
+    });
+
+    if (__DEV__) console.log('✅ Task reminder scheduled:', notificationId);
+    return notificationId;
+  } catch (error: any) {
+    console.error('❌ Error scheduling task reminder:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      taskTitle,
+      taskTime,
+    });
+    return ''; // Hata durumunda boş string döndür
+  }
 };
 
 /**
@@ -1142,24 +1307,43 @@ export const scheduleReminderNotification = async (
  * Hatırlatıcı Bildirimini İptal Et
  */
 export const cancelReminderNotification = async (reminderId: string): Promise<void> => {
-  await Notifications.cancelScheduledNotificationAsync(`reminder-${reminderId}`);
-  console.log(`Reminder notification cancelled: ${reminderId}`);
+  try {
+    await Notifications.cancelScheduledNotificationAsync(`reminder-${reminderId}`);
+    if (__DEV__) console.log(`✅ Reminder notification cancelled: ${reminderId}`);
+  } catch (error: any) {
+    console.error('❌ Error cancelling reminder notification:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      reminderId,
+    });
+    // Hata durumunda sessizce devam et (bildirim zaten olmayabilir)
+  }
 };
 
 /**
  * Tüm Hatırlatıcı Bildirimlerini İptal Et
  */
 export const cancelAllReminderNotifications = async (): Promise<void> => {
-  const notifications = await Notifications.getAllScheduledNotificationsAsync();
-  const reminderNotifications = notifications ? notifications.filter(n => 
-    n.identifier.startsWith('reminder-')
-  ) : [];
-  
-  for (const notification of reminderNotifications) {
-    await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+  try {
+    const notifications = await Notifications.getAllScheduledNotificationsAsync();
+    const reminderNotifications = notifications ? notifications.filter(n => 
+      n.identifier.startsWith('reminder-')
+    ) : [];
+    
+    for (const notification of reminderNotifications) {
+      try {
+        await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+      } catch (error: any) {
+        console.error(`❌ Error cancelling notification ${notification.identifier}:`, error);
+        // Devam et, diğer bildirimleri iptal etmeye çalış
+      }
+    }
+    
+    if (__DEV__) console.log(`✅ Cancelled ${reminderNotifications.length} reminder notifications`);
+  } catch (error: any) {
+    console.error('❌ Error cancelling all reminder notifications:', error);
+    // Hata durumunda sessizce devam et
   }
-  
-  if (__DEV__) console.log(`Cancelled ${reminderNotifications.length} reminder notifications`);
 };
 
 /**

@@ -326,9 +326,10 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
       const trimmedEmail = linkEmail.trim().toLowerCase();
-      console.log('🔗 Link Account: OTP gönderiliyor...', trimmedEmail);
+      console.log('🔗 Link Account: OTP gönderiliyor (signInWithOtp)...', trimmedEmail);
       
       // Anonymous kullanıcı için email bağlama: signInWithOtp kullan
+      // Bu "Magic Link" template'ini kullanır ve OTP kodu gönderir (dünkü gibi)
       // shouldCreateUser: true - email henüz kayıtlı değilse kullanıcı oluştur
       const result = await signInWithOtp({
         email: trimmedEmail,
@@ -354,9 +355,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         return;
       }
 
-      console.log('✅ Link Account: OTP başarıyla gönderildi');
+      console.log('✅ Link Account: OTP başarıyla gönderildi (Magic Link template)');
 
-      // OTP gönderildi
+      // OTP gönderildi - Magic Link template'i kullanıldı, OTP kodu email'de olacak
       setLinkOtpSent(true);
       setLinkOtpCode('');
       

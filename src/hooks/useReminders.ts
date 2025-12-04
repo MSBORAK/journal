@@ -95,6 +95,42 @@ export const useReminders = (userId?: string) => {
     loadReminders();
   }, [loadReminders]);
 
+  // Hatırlatıcılar yüklendiğinde aktif olanlar için bildirimleri planla
+  useEffect(() => {
+    const scheduleActiveReminders = async () => {
+      if (reminders.length === 0 || loading) return;
+      
+      try {
+        // Aktif hatırlatıcılar için bildirimleri planla
+        const activeReminders = reminders.filter(r => r.isActive);
+        
+        for (const reminder of activeReminders) {
+          try {
+            await scheduleReminderNotification(
+              reminder.id,
+              reminder.emoji + ' ' + reminder.title,
+              reminder.description || 'Hatırlatıcı zamanı!',
+              reminder.time,
+              reminder.repeatType,
+              reminder.category,
+              reminder.date,
+              reminder.repeatDays
+            );
+            if (__DEV__) {
+              console.log('✅ Reminder notification scheduled on load:', reminder.id);
+            }
+          } catch (error) {
+            console.error(`Error scheduling notification for reminder ${reminder.id}:`, error);
+          }
+        }
+      } catch (error) {
+        console.error('Error scheduling reminder notifications on load:', error);
+      }
+    };
+
+    scheduleActiveReminders();
+  }, [reminders.length, loading]); // Sadece reminders yüklendiğinde çalış
+
   // Save reminders to storage
   const saveReminders = async (newReminders: Reminder[]) => {
     try {
@@ -301,8 +337,8 @@ export const useReminders = (userId?: string) => {
     const existingReminder = currentReminders.find(r => r.id === reminderId);
     if (!existingReminder) throw new Error('Reminder not found');
 
-    // Supabase'de güncelle (sadece userId varsa)
-    if (userId) {
+    // Supabase'de güncelle (sadece userId varsa VE reminderId UUID formatındaysa)
+    if (userId && isValidUUID(reminderId)) {
       try {
         const { data: updatedData, error: updateError } = await supabase
           .from('reminders')
@@ -358,7 +394,11 @@ export const useReminders = (userId?: string) => {
         console.error('Supabase update failed, using local update:', supabaseErr);
       }
     } else {
-      console.log('📝 Reminder updated locally (anonymous user):', reminderId);
+      if (!userId) {
+        console.log('📝 Reminder updated locally (anonymous user):', reminderId);
+      } else {
+        console.log('📝 Reminder updated locally (local ID, not in Supabase):', reminderId);
+      }
     }
     
     // Local state'i güncelle
@@ -375,6 +415,12 @@ export const useReminders = (userId?: string) => {
   };
 
   // Delete reminder
+  // UUID formatını kontrol et (Supabase UUID formatı: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+  const isValidUUID = (id: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
+
   const deleteReminder = async (reminderId: string) => {
     // Önce bildirimi iptal et
     try {
@@ -383,8 +429,8 @@ export const useReminders = (userId?: string) => {
       console.error('Error cancelling reminder notification:', error);
     }
     
-    // Supabase'den sil (sadece userId varsa)
-    if (userId) {
+    // Supabase'den sil (sadece userId varsa VE reminderId UUID formatındaysa)
+    if (userId && isValidUUID(reminderId)) {
       try {
         const { error: deleteError } = await supabase
           .from('reminders')
@@ -404,7 +450,11 @@ export const useReminders = (userId?: string) => {
         console.error('Supabase delete failed, using local delete:', supabaseErr);
       }
     } else {
-      console.log('📝 Reminder deleted locally (anonymous user):', reminderId);
+      if (!userId) {
+        console.log('📝 Reminder deleted locally (anonymous user):', reminderId);
+      } else {
+        console.log('📝 Reminder deleted locally (local ID, not in Supabase):', reminderId);
+      }
     }
     
     // Mevcut hatırlatıcıları AsyncStorage'dan direkt oku

@@ -75,23 +75,32 @@ export const analyzeMood = (entries: DiaryEntry[], t: any, locale: string): Insi
     }
   }
 
-  // En mutlu gün
-  const happiest = entries.reduce((max, entry) => 
-    entry.mood > max.mood ? entry : max, entries[0]
-  );
+  // En mutlu gün - sadece son günlük pozitifse göster
+  const lastEntry = entries[0]; // En yeni giriş
+  const lastMood = lastEntry?.mood || 3;
   
-  const happyDate = new Date(happiest.createdAt);
-  const dayName = happyDate.toLocaleDateString(locale || 'en-US', { weekday: 'long' });
-  
-  insights.push({
-    type: 'pattern',
-    title: t('insights.happiestDay'),
-    description: t('insights.happiestDayDesc').replace('{day}', dayName).replace('{mood}', happiest.mood.toString()),
-    icon: '🌟',
-    color: '#f59e0b',
-    priority: 'low',
-    data: { day: dayName, mood: happiest.mood }
-  });
+  // Eğer son günlük pozitifse (mood >= 4) en mutlu günü göster
+  if (lastMood >= 4 && entries.length > 1) {
+    const happiest = entries.reduce((max, entry) => 
+      entry.mood > max.mood ? entry : max, entries[0]
+    );
+    
+    // En mutlu gün son günlük değilse göster
+    if (happiest.id !== lastEntry.id) {
+      const happyDate = new Date(happiest.createdAt);
+      const dayName = happyDate.toLocaleDateString(locale || 'en-US', { weekday: 'long' });
+      
+      insights.push({
+        type: 'pattern',
+        title: t('insights.happiestDay'),
+        description: t('insights.happiestDayDesc').replace('{day}', dayName).replace('{mood}', happiest.mood.toString()),
+        icon: '🌟',
+        color: '#f59e0b',
+        priority: 'low',
+        data: { day: dayName, mood: happiest.mood }
+      });
+    }
+  }
 
   return insights;
 };
@@ -470,9 +479,16 @@ export const analyzeAchievements = (entries: DiaryEntry[], t: any, _locale: stri
 };
 
 /**
- * Tüm İçgörüleri Getir
+ * Tüm İçgörüleri Getir (Günlük içeriğine göre filtrelenmiş)
  */
 export const getAllInsights = (entries: DiaryEntry[], t: any, locale: string): Insight[] => {
+  if (entries.length === 0) return [];
+  
+  // Son günlük girişinin ruh halini kontrol et
+  const lastEntry = entries[0];
+  const lastMood = lastEntry?.mood || 3;
+  const isLowMood = lastMood <= 2; // Mood 1 veya 2 ise düşük
+  
   const allInsights = [
     ...analyzeMood(entries, t, locale),
     ...analyzeWritingHabits(entries, t, locale),
@@ -481,8 +497,47 @@ export const getAllInsights = (entries: DiaryEntry[], t: any, locale: string): I
     ...analyzeAchievements(entries, t, locale)
   ];
 
+  // Eğer son günlük düşük ruh halindeyse, pozitif içgörüleri filtrele
+  let filteredInsights = allInsights;
+  
+  if (isLowMood) {
+    // Düşük ruh halindeyken pozitif içgörüleri filtrele
+    filteredInsights = allInsights.filter(insight => {
+      // Pozitif içgörüleri gizle
+      const positiveTypes = ['achievement', 'pattern'];
+      const positiveIcons = ['🎉', '🌟', '🏆', '✨', '📈'];
+      const positiveTitles = [
+        t('insights.happiestDay'),
+        t('insights.greatWeek'),
+        t('insights.weekendHappiness'),
+        t('insights.positiveEnergy'),
+        t('insights.risingTrend')
+      ];
+      
+      // Eğer pozitif bir içgörü ise ve son günlük düşük ruh halindeyse gizle
+      if (positiveTypes.includes(insight.type) && 
+          (positiveIcons.includes(insight.icon) || positiveTitles.includes(insight.title))) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    // Eğer hiç içgörü kalmadıysa, destekleyici bir içgörü ekle
+    if (filteredInsights.length === 0) {
+      filteredInsights.push({
+        type: 'suggestion',
+        title: t('insights.takeCare') || 'Kendine İyi Bak',
+        description: t('insights.takeCareDesc') || 'Zor günler geçer. Kendine karşı nazik ol ve küçük adımlarla ilerle.',
+        icon: '💙',
+        color: '#3b82f6',
+        priority: 'high'
+      });
+    }
+  }
+
   // Önceliğe göre sırala
-  return allInsights.sort((a, b) => {
+  return filteredInsights.sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
   });

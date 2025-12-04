@@ -507,7 +507,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // OTP'yi doğrula (email tipinde - signInWithOtp ile gönderildi)
+      // signInWithOtp "Magic Link" template'ini kullanır ve email tipinde OTP gönderir
       // Önce email tipinde dene, eğer olmazsa email_change tipinde dene
+      console.log('🔗 Link Account: OTP doğrulanıyor (email)...');
       let verifyData, verifyError;
       
       // İlk olarak email tipinde dene (signInWithOtp ile gönderilen OTP'ler)
@@ -520,7 +522,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       verifyData = emailVerifyResult.data;
       verifyError = emailVerifyResult.error;
       
-      // Eğer email tipi başarısız olduysa, email_change tipinde dene
+      // Eğer email tipi başarısız olduysa, email_change tipinde dene (fallback)
       if (verifyError && (verifyError.message?.toLowerCase().includes('invalid') || 
                          verifyError.message?.toLowerCase().includes('expired'))) {
         console.log('⚠️ Email tipi başarısız, email_change tipinde deneniyor...');

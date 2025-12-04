@@ -291,21 +291,32 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         }
       }
       
+      const task = tasks.find(t => t.id === taskId);
+      const wasCompleted = task?.isCompleted || false;
+      
       await toggleTaskCompletion(taskId);
       
-      // Başarıları kontrol et
-      try {
-        // Toggle işleminden sonra güncel task listesini al
-        const updatedTasks = tasks.map(t => t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t);
-        const completedTasksCount = updatedTasks.filter(t => t.isCompleted).length;
-        const newAchievements = await checkTaskAchievements(completedTasksCount);
-        
-        if (newAchievements && newAchievements.length > 0) {
-          console.log('🎉 New achievements unlocked:', newAchievements.length);
+      // Başarıları kontrol et (sadece görev tamamlandığında, geri alındığında değil)
+      if (!wasCompleted) {
+        try {
+          // Toggle işleminden sonra güncel task listesini al
+          const updatedTasks = tasks.map(t => t.id === taskId ? { ...t, isCompleted: true } : t);
+          // Tüm zamanlardan tamamlanan görev sayısını hesapla (sadece tamamlanan görevler)
+          const totalCompletedTasks = updatedTasks.filter(t => t.isCompleted).length;
+          console.log('📊 Total completed tasks (all time):', totalCompletedTasks);
+          console.log('📋 Total tasks:', updatedTasks.length);
+          const newAchievements = await checkTaskAchievements(totalCompletedTasks);
+          
+          if (newAchievements && newAchievements.length > 0) {
+            console.log('🎉 New achievements unlocked:', newAchievements.length);
+            console.log('🏆 Achievements:', newAchievements.map(a => `${a.title} (${a.id})`));
+          } else {
+            console.log('ℹ️ No new achievements unlocked');
+          }
+        } catch (achievementError) {
+          console.error('Error checking achievements:', achievementError);
+          // Başarı kontrolü hatası görev tamamlamayı engellemesin
         }
-      } catch (achievementError) {
-        console.error('Error checking achievements:', achievementError);
-        // Başarı kontrolü hatası görev tamamlamayı engellemesin
       }
       
       await soundService.playSuccess();
@@ -1393,7 +1404,12 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                 </View>
               ) : (
                 upcomingReminders.slice(0, 3).map((reminder) => (
-                  <View key={reminder.id} style={dynamicStyles.reminderCard}>
+                  <TouchableOpacity 
+                    key={reminder.id} 
+                    style={dynamicStyles.reminderCard}
+                    onPress={() => navigation.navigate('Reminders')}
+                    activeOpacity={0.7}
+                  >
                     <Text style={dynamicStyles.reminderEmoji}>{reminder.emoji || '🔔'}</Text>
                     <View style={dynamicStyles.reminderContent}>
                       <Text style={dynamicStyles.reminderTitle}>{reminder.title}</Text>
@@ -1401,7 +1417,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
                         {reminder.time || '15 dk kaldı'}
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 ))
               )}
             </Animated.View>
