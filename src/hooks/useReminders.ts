@@ -141,7 +141,33 @@ export const useReminders = (userId?: string) => {
     // Supabase'e kaydet (sadece userId varsa)
     if (userId) {
       try {
-        const { data: insertedData, error: insertError } = await supabase
+        // CRITICAL FIX: Map category to database allowed values
+        // Database schema allows: 'task', 'medicine', 'health', 'personal', 'custom'
+        // Map 'general' and other values to 'personal'
+        const mapCategoryToDb = (cat: string | undefined): 'task' | 'medicine' | 'health' | 'personal' | 'custom' => {
+          if (!cat) return 'personal';
+          const categoryMap: Record<string, 'task' | 'medicine' | 'health' | 'personal' | 'custom'> = {
+            'general': 'personal',
+            'appointment': 'personal',
+            'birthday': 'personal',
+            'meeting': 'personal',
+            'exercise': 'health',
+            'meal': 'health',
+            'work': 'personal',
+            'study': 'personal',
+            'task': 'task',
+            'medicine': 'medicine',
+            'health': 'health',
+            'personal': 'personal',
+            'custom': 'custom',
+          };
+          return categoryMap[cat.toLowerCase()] || 'personal';
+        };
+        
+        const dbCategory = mapCategoryToDb(reminder.category);
+        
+        let insertedData: any;
+        const { data, error: insertError } = await supabase
           .from('reminders')
           .insert({
             user_id: userId,
@@ -153,7 +179,7 @@ export const useReminders = (userId?: string) => {
           is_active: reminder.isActive !== false,
           repeat_type: reminder.repeatType || 'daily',
           repeat_days: reminder.repeatDays || null,
-          category: reminder.category || 'general',
+          category: dbCategory,
           priority: reminder.priority || 'medium',
           reminder_type: reminder.reminderType || 'today',
           linked_task_id: reminder.linkedTaskId || null,
@@ -164,7 +190,43 @@ export const useReminders = (userId?: string) => {
 
       if (insertError) {
         console.error('Supabase insert error:', insertError);
-        throw insertError;
+        
+        // CRITICAL FIX: If category column doesn't exist, try insert without it
+        if (insertError.code === 'PGRST204' && insertError.message?.includes('category')) {
+          console.warn('⚠️ Category column not found, retrying without category field');
+          const { data: retryData, error: retryError } = await supabase
+            .from('reminders')
+            .insert({
+              user_id: userId,
+              title: reminder.title,
+              description: reminder.description || null,
+              emoji: reminder.emoji || '🔔',
+              time: reminder.time,
+              date: reminder.date || null,
+              is_active: reminder.isActive !== false,
+              repeat_type: reminder.repeatType || 'daily',
+              repeat_days: reminder.repeatDays || null,
+              // category field removed - column doesn't exist in database
+              priority: reminder.priority || 'medium',
+              reminder_type: reminder.reminderType || 'today',
+              linked_task_id: reminder.linkedTaskId || null,
+              is_task_reminder: reminder.isTaskReminder || false,
+            })
+            .select()
+            .single();
+            
+          if (retryError) {
+            console.error('Retry insert also failed:', retryError);
+            throw retryError;
+          }
+          
+          // Use retry data instead
+          insertedData = retryData;
+        } else {
+          throw insertError;
+        }
+      } else {
+        insertedData = data;
       }
 
       newReminder = {
@@ -253,7 +315,27 @@ export const useReminders = (userId?: string) => {
           ...(updates.isActive !== undefined && { is_active: updates.isActive }),
           ...(updates.repeatType !== undefined && { repeat_type: updates.repeatType }),
           ...(updates.repeatDays !== undefined && { repeat_days: updates.repeatDays || null }),
-          ...(updates.category !== undefined && { category: updates.category }),
+          ...(updates.category !== undefined && { 
+            category: (() => {
+              // Map category to database allowed values
+              const categoryMap: Record<string, 'task' | 'medicine' | 'health' | 'personal' | 'custom'> = {
+                'general': 'personal',
+                'appointment': 'personal',
+                'birthday': 'personal',
+                'meeting': 'personal',
+                'exercise': 'health',
+                'meal': 'health',
+                'work': 'personal',
+                'study': 'personal',
+                'task': 'task',
+                'medicine': 'medicine',
+                'health': 'health',
+                'personal': 'personal',
+                'custom': 'custom',
+              };
+              return categoryMap[updates.category] || 'personal';
+            })()
+          }),
           ...(updates.priority !== undefined && { priority: updates.priority }),
           ...(updates.reminderType !== undefined && { reminder_type: updates.reminderType }),
           ...(updates.lastTriggered !== undefined && { last_triggered: updates.lastTriggered || null }),

@@ -400,21 +400,22 @@ export const useTasks = (userId?: string) => {
     await updateDailyProgress();
   };
 
-  // Get today's tasks
-  const getTodayTasks = () => {
+  // CRITICAL FIX: Memoize helper functions to prevent re-render storms
+  // Get today's tasks - memoized with useCallback
+  const getTodayTasks = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
     return tasks.filter(task => {
       // Use task.date if available, otherwise use createdAt date
       const taskDate = task.date || new Date(task.createdAt).toISOString().split('T')[0];
       return taskDate === today;
     });
-  };
+  }, [tasks]); // Only recreate when tasks array changes
 
-  // Get completed tasks count for today
-  const getTodayCompletedCount = () => {
+  // Get completed tasks count for today - memoized with useCallback
+  const getTodayCompletedCount = useCallback(() => {
     const todayTasks = getTodayTasks();
     return todayTasks.filter(task => task.isCompleted).length;
-  };
+  }, [getTodayTasks]); // Depend on memoized getTodayTasks
 
   // Get today's completion rate
   const getTodayCompletionRate = () => {
@@ -584,11 +585,11 @@ export const useTasks = (userId?: string) => {
     checkAchievements,
     updateDailyProgress,
     
-    // Alias for compatibility
-    todayTasks: getTodayTasks(),
-    todayCompletedCount: getTodayCompletedCount(),
-    getTasksByDateRange: (startDate: string, endDate: string) => {
+    // CRITICAL FIX: Don't compute these on every render - let components memoize them
+    // Removed todayTasks and todayCompletedCount from return to prevent recalculation
+    // Components should use getTodayTasks() and getTodayCompletedCount() with useMemo
+    getTasksByDateRange: useCallback((startDate: string, endDate: string) => {
       return tasks.filter(task => task.date >= startDate && task.date <= endDate);
-    },
+    }, [tasks]),
   };
 };

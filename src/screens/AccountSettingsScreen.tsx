@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, startTransition } from 'react';
 import {
   View,
   Text,
@@ -16,15 +16,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { updateEmail, updatePassword } from '../lib/supabase';
+import { updateEmail } from '../lib/supabase';
 import { getProfile, updateProfile, createProfile } from '../services/profileService';
 import { useProfile } from '../hooks/useProfile';
 import { BackupService } from '../services/backupService';
 import { CustomAlert } from '../components/CustomAlert';
 import { AuthService } from '../services/authService';
 import { getButtonTextColor } from '../utils/colorUtils';
+import OtpInput from '../components/OtpInput';
 
 interface AccountSettingsScreenProps {
   navigation: any;
@@ -33,7 +35,7 @@ interface AccountSettingsScreenProps {
 export default function AccountSettingsScreen({ navigation }: AccountSettingsScreenProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
-  const { user, signOut, refreshUser, linkAccount, updateDisplayName, updateNickname, isAnonymous } = useAuth();
+  const { user, signOut, refreshUser, linkAccount, updateDisplayName, updateNickname, isAnonymous, signInWithOtp } = useAuth();
   const { refreshProfile } = useProfile(user?.uid);
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
@@ -58,14 +60,13 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   const [loading, setLoading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showLinkAccountModal, setShowLinkAccountModal] = useState(false);
-  const [showDisplayNameModal, setShowDisplayNameModal] = useState(false);
   // App alias modal kaldırıldı - app adı sabit "Rhythm"
-  const [showNicknameModal, setShowNicknameModal] = useState(false);
+  // showDisplayNameModal ve showNicknameModal kaldırıldı - tek bir showProfileModal kullanıyoruz
   const [linkEmail, setLinkEmail] = useState('');
-  const [linkPassword, setLinkPassword] = useState('');
-  const [linkConfirmPassword, setLinkConfirmPassword] = useState('');
+  const [linkOtpSent, setLinkOtpSent] = useState(false);
+  const [linkOtpCode, setLinkOtpCode] = useState('');
+  const [linkOtpResendTimer, setLinkOtpResendTimer] = useState(0);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   // App adı her zaman "Rhythm" - değişmez
   const [nickname, setNickname] = useState(user?.nickname || '');
@@ -78,16 +79,45 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // User prop'u değiştiğinde state'leri güncelle
+  // Ama sadece gerçekten değiştiğinde (profil düzenleme sonrası güncelleme için)
+  const prevDisplayNameRef = useRef<string>('');
+  const prevNicknameRef = useRef<string>('');
+  
+  useEffect(() => {
+    if (user) {
+      // displayName değiştiyse güncelle
+      if (user.displayName !== prevDisplayNameRef.current) {
+        setDisplayName(user.displayName || '');
+        prevDisplayNameRef.current = user.displayName || '';
+        
+        // profileData'yı da güncelle
+        setProfileData(prev => ({
+          full_name: user.displayName || prev.full_name,
+          bio: prev.bio, // Bio'yu koru
+        }));
+      }
+      
+      // nickname değiştiyse güncelle
+      if (user.nickname !== prevNicknameRef.current) {
+        setNickname(user.nickname || '');
+        prevNicknameRef.current = user.nickname || '';
+      }
+    }
+  }, [user?.displayName, user?.nickname, user?.uid]);
+
   const loadProfile = async () => {
     if (!user?.uid) return;
     
     try {
       const profile = await getProfile(user.uid);
       if (profile) {
-        setProfileData({
-          full_name: profile.full_name || '',
-          bio: profile.bio || '',
-        });
+        // Sadece bio'yu güncelle, full_name için user.displayName kullan
+        // loadProfile eski değeri yükleyebilir, bu yüzden full_name'i güncelleme
+        setProfileData(prev => ({
+          full_name: user?.displayName || prev.full_name, // user.displayName'i kullan, profile.full_name değil
+          bio: profile.bio || prev.bio || '',
+        }));
       }
     } catch (error) {
       console.log('Profile yüklenemedi:', error);
@@ -101,29 +131,39 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      // Profil güncellemesini dene
+      // 1. Display Name güncelle (eğer değiştiyse)
+      if (profileData.full_name && profileData.full_name !== user?.displayName) {
+        try {
+          await updateDisplayName(profileData.full_name);
+          console.log('✅ Display name updated:', profileData.full_name);
+        } catch (displayNameError: any) {
+          console.warn('⚠️ Error updating displayName:', displayNameError);
+          throw new Error(displayNameError?.message || 'İsim güncellenemedi');
+        }
+      }
+      
+      // 2. Nickname güncelle (eğer değiştiyse)
+      if (nickname && nickname !== user?.nickname) {
+        try {
+          await updateNickname(nickname);
+          console.log('✅ Nickname updated:', nickname);
+        } catch (nicknameError: any) {
+          console.warn('⚠️ Error updating nickname:', nicknameError);
+          throw new Error(nicknameError?.message || 'Takma isim güncellenemedi');
+        }
+      }
+      
+      // 3. Bio güncelle (profil servisi üzerinden)
       try {
+        console.log('🔄 Updating profile bio:', { userId: user.uid, profileData });
         const updatedProfile = await updateProfile(user.uid, profileData);
-        // Eğer başarılı döndü (veritabanı veya local), devam et
+        console.log('✅ Profile update result:', updatedProfile);
+        
         if (updatedProfile) {
           setProfileData({
             full_name: updatedProfile.full_name || profileData.full_name,
             bio: updatedProfile.bio || profileData.bio,
           });
-          
-          // AuthContext'i güncelle (displayName için)
-          try {
-            await refreshUser();
-          } catch (refreshError) {
-            console.log('⚠️ Error refreshing user in AuthContext:', refreshError);
-          }
-          
-          // Profil hook'unu da refresh et (Dashboard için)
-          try {
-            await refreshProfile();
-          } catch (refreshError) {
-            console.log('⚠️ Error refreshing profile hook:', refreshError);
-          }
         }
       } catch (updateError: any) {
         // Eğer veritabanı şema hatası ise, local state'te kal (uygulama donmasın)
@@ -139,13 +179,9 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
       
       setShowProfileModal(false);
       
-      // Profili yeniden yükle (opsiyonel, kritik değil)
-      try {
-        await loadProfile();
-      } catch (reloadError) {
-        console.log('Profile reload error (non-critical):', reloadError);
-        // Profil yükleme hatası kritik değil, devam et
-      }
+      // loadProfile çağrısını kaldırdık - eski değeri yükleyebilir
+      // updateDisplayName başarılı olduğunda user prop'u zaten güncelleniyor
+      // useEffect ile profileData otomatik güncelleniyor
       
       showAlert(t('settings.profileUpdated'), t('settings.profileUpdateSuccess'), 'success');
     } catch (error: any) {
@@ -199,55 +235,6 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     }
   };
 
-  const handlePasswordUpdate = async () => {
-    // Validasyonlar
-    if (!oldPassword) {
-      showAlert(t('settings.warning'), t('settings.enterCurrentPasswordRequired'), 'warning');
-      return;
-    }
-    
-    if (!newPassword || newPassword.length < 6) {
-      showAlert(t('settings.warning'), t('auth.passwordTooShort'), 'warning');
-      return;
-    }
-    
-    if (newPassword.length > 128) {
-      showAlert(t('settings.warning'), t('settings.passwordTooLong'), 'warning');
-      return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-      showAlert(t('settings.warning'), t('auth.passwordsDoNotMatch'), 'warning');
-      return;
-    }
-
-    // Eski ve yeni şifre aynıysa uyarı ver
-    if (oldPassword === newPassword) {
-      showAlert(t('settings.warning'), t('settings.passwordCannotBeSame'), 'warning');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await updatePassword(newPassword, oldPassword);
-      
-      // Form temizle
-      setShowPasswordModal(false);
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      
-      // UI state'ini güncelle (ChatGPT'nin önerdiği gibi)
-      await refreshUser();
-      
-      showAlert(t('settings.success'), t('settings.passwordUpdated'), 'success');
-    } catch (error: any) {
-      showAlert(t('auth.error'), error.message || t('settings.passwordUpdateFailed'), 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDeleteAccount = () => {
     setAlertConfig({
@@ -321,33 +308,98 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     }
   };
 
-  const handleLinkAccount = async () => {
-    // Validasyonlar
-    if (!linkEmail || !linkPassword) {
-      showAlert(t('settings.warning'), t('auth.emailAndPasswordRequired'), 'warning');
+  const handleLinkAccountSendOtp = async () => {
+    // Email validasyonu
+    if (!linkEmail || !linkEmail.trim()) {
+      showAlert(t('settings.warning'), t('auth.emailRequired'), 'warning');
       return;
     }
-    
-    if (linkPassword.length < 6) {
-      showAlert(t('settings.warning'), t('auth.passwordTooShort'), 'warning');
-      return;
-    }
-    
-    if (linkPassword !== linkConfirmPassword) {
-      showAlert(t('settings.warning'), t('auth.passwordsDoNotMatch'), 'warning');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(linkEmail.trim())) {
+      showAlert(t('settings.warning'), t('auth.invalidEmail'), 'warning');
       return;
     }
 
     setLoading(true);
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await linkAccount(linkEmail, linkPassword);
+      
+      const trimmedEmail = linkEmail.trim().toLowerCase();
+      console.log('🔗 Link Account: OTP gönderiliyor...', trimmedEmail);
+      
+      // Anonymous kullanıcı için email bağlama: signInWithOtp kullan
+      // shouldCreateUser: true - email henüz kayıtlı değilse kullanıcı oluştur
+      const result = await signInWithOtp({
+        email: trimmedEmail,
+        shouldCreateUser: true,
+      });
+
+      console.log('🔗 Link Account: signInWithOtp sonucu:', result);
+
+      if (!result.success) {
+        const errorMessage = result.error || '';
+        console.error('❌ Link Account: OTP gönderme hatası:', errorMessage);
+        
+        if (errorMessage.toLowerCase().includes('already registered') || 
+            errorMessage.toLowerCase().includes('already been registered') ||
+            errorMessage.toLowerCase().includes('user already registered')) {
+          showAlert(t('settings.error'), 'Bu email adresi zaten kullanılıyor.', 'error');
+          setLoading(false);
+          return;
+        }
+        
+        showAlert(t('settings.error'), result.error || t('auth.otpSendFailed'), 'error');
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Link Account: OTP başarıyla gönderildi');
+
+      // OTP gönderildi
+      setLinkOtpSent(true);
+      setLinkOtpCode('');
+      
+      // Resend timer başlat (60 saniye)
+      setLinkOtpResendTimer(60);
+      const timerInterval = setInterval(() => {
+        setLinkOtpResendTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      showAlert(t('settings.success'), 'Email adresinize gönderilen doğrulama kodunu girin.', 'success');
+    } catch (error: any) {
+      console.error('❌ Link Account: Catch error:', error);
+      showAlert(t('settings.error'), error.message || t('auth.otpSendFailed'), 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLinkAccountVerifyOtp = async (otp: string) => {
+    if (!otp || otp.length !== 6) {
+      showAlert(t('settings.warning'), t('auth.invalidOtp'), 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      // OTP doğrula ve hesabı bağla
+      await linkAccount(linkEmail.trim(), otp);
       
       // Form temizle
       setShowLinkAccountModal(false);
       setLinkEmail('');
-      setLinkPassword('');
-      setLinkConfirmPassword('');
+      setLinkOtpSent(false);
+      setLinkOtpCode('');
+      setLinkOtpResendTimer(0);
       
       // User state'ini güncelle
       await refreshUser();
@@ -360,75 +412,22 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     }
   };
 
-  const handleDisplayNameUpdate = async () => {
-    // Validasyonlar
-    if (!displayName || displayName.trim().length === 0) {
-      showAlert(t('settings.warning'), t('settings.nameRequired'), 'warning');
-      return;
-    }
+  // handleDisplayNameUpdate ve handleNicknameUpdate kaldırıldı
+  // Artık saveProfile fonksiyonu tüm profil bilgilerini (isim, nickname, bio) güncelliyor
 
-    if (displayName.trim().length < 2) {
-      showAlert(t('settings.warning'), t('settings.nameTooShort'), 'warning');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await updateDisplayName(displayName.trim());
-      
-      // Modal'ı kapat
-      setShowDisplayNameModal(false);
-      
-      // User state'ini güncelle
-      await refreshUser();
-      
-      showAlert(t('settings.success'), t('settings.nameUpdatedSuccess'), 'success');
-    } catch (error: any) {
-      showAlert(t('settings.error'), error.message || t('settings.nameUpdateFailed'), 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // App adı artık sabit "Rhythm" - düzenleme kaldırıldı
-
-  const handleNicknameUpdate = async () => {
-    // Validasyonlar
-    if (!nickname || nickname.trim().length === 0) {
-      showAlert(t('settings.warning'), t('settings.nicknameRequired'), 'warning');
-      return;
-    }
-
-    if (nickname.trim().length > 25) {
-      showAlert(t('settings.warning'), t('settings.nicknameTooLong'), 'warning');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await updateNickname(nickname.trim());
-      
-      // Modal'ı kapat
-      setShowNicknameModal(false);
-      
-      // User state'ini güncelle
-      await refreshUser();
-      
-      showAlert(t('settings.success'), t('settings.nicknameUpdatedSuccess'), 'success');
-    } catch (error: any) {
-      showAlert(t('settings.error'), error.message || t('settings.nicknameUpdateFailed'), 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // İlk açılışta profil yükle - ama sadece bir kez ve sadece bio için
+  // displayName için user prop'u yeterli, loadProfile eski değeri yükleyebilir
+  const profileLoadedRef = useRef(false);
   useEffect(() => {
-    loadProfile();
-  }, []);
+    if (user?.uid && !profileLoadedRef.current) {
+      // Sadece bir kez yükle, displayName için user prop'u yeterli
+      loadProfile();
+      profileLoadedRef.current = true;
+    }
+  }, [user?.uid]); // Sadece user.uid değiştiğinde yükle, her render'da değil
 
-  const dynamicStyles = StyleSheet.create({
+  // StyleSheet.create'i memoize et - her render'da yeniden oluşturma
+  const dynamicStyles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: currentTheme.colors.background,
@@ -603,7 +602,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
     modalButtonTextSecondary: {
       color: currentTheme.colors.text,
     },
-  });
+  }), [currentTheme.colors]);
 
   return (
     <SafeAreaView style={dynamicStyles.container}>
@@ -638,31 +637,7 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         <View style={dynamicStyles.section}>
           <Text style={dynamicStyles.sectionTitle}>{t('settings.profileInformation')}</Text>
           
-          {/* Guest kullanıcı için İsim Belirle butonu */}
-          {isAnonymous && (user?.displayName === 'Guest' || !user?.displayName) && (
-            <View style={dynamicStyles.settingCard}>
-              <View style={dynamicStyles.settingHeader}>
-                <View style={dynamicStyles.settingIcon}>
-                  <Ionicons name="person-add" size={20} color={currentTheme.colors.primary} />
-                </View>
-                <Text style={dynamicStyles.settingTitle}>{t('settings.setYourName')}</Text>
-              </View>
-              <Text style={dynamicStyles.settingDescription}>
-                {t('settings.setYourNameDescription')}
-              </Text>
-              <TouchableOpacity
-                style={[dynamicStyles.actionButton, { backgroundColor: currentTheme.colors.success }]}
-                onPress={() => {
-                  setDisplayName(user?.displayName || '');
-                  setShowDisplayNameModal(true);
-                }}
-                activeOpacity={0.8}
-              >
-                <Text style={dynamicStyles.actionButtonText}>✨ {t('settings.setName')}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          
+          {/* Profil Düzenle - Tek birleşik bölüm */}
           <View style={dynamicStyles.settingCard}>
             <View style={dynamicStyles.settingHeader}>
               <View style={dynamicStyles.settingIcon}>
@@ -673,41 +648,27 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
             <Text style={dynamicStyles.settingDescription}>
               {t('settings.updateNameAndBio')}
             </Text>
-            <TouchableOpacity
-              style={dynamicStyles.actionButton}
-              onPress={() => setShowProfileModal(true)}
-              activeOpacity={0.8}
-            >
-              <Text style={dynamicStyles.actionButtonText}>✏️ {t('settings.edit')}</Text>
-            </TouchableOpacity>
-          </View>
-
-
-          {/* Nickname Düzenleme */}
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="heart" size={20} color={currentTheme.colors.primary} />
+            {user?.nickname && (
+              <View style={{ marginTop: 8, marginBottom: 8 }}>
+                <Text style={[dynamicStyles.settingDescription, { fontSize: 14 }]}>
+                  {t('settings.currentNickname')}: <Text style={{ fontWeight: 'bold' }}>{user.nickname}</Text>
+                </Text>
               </View>
-              <Text style={dynamicStyles.settingTitle}>{t('settings.nickname')}</Text>
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              {t('settings.nicknameDescription')}
-            </Text>
-            <View style={{ marginBottom: 8 }}>
-              <Text style={[dynamicStyles.settingDescription, { fontSize: 14, fontStyle: 'italic' }]}>
-                {t('settings.currentNickname')}: <Text style={{ fontWeight: 'bold' }}>{user?.nickname || 'Guest'}</Text>
-              </Text>
-            </View>
+            )}
             <TouchableOpacity
               style={dynamicStyles.actionButton}
               onPress={() => {
+                setDisplayName(user?.displayName || '');
                 setNickname(user?.nickname || '');
-                setShowNicknameModal(true);
+                setProfileData({
+                  full_name: user?.displayName || '',
+                  bio: profileData.bio || '',
+                });
+                setShowProfileModal(true);
               }}
               activeOpacity={0.8}
             >
-              <Text style={dynamicStyles.actionButtonText}>✨ {t('settings.editNickname')}</Text>
+              <Text style={dynamicStyles.actionButtonText}>✏️ {t('settings.edit')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -732,9 +693,12 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
                 style={[dynamicStyles.actionButton, { backgroundColor: currentTheme.colors.success }]}
                 onPress={() => {
                   setLinkEmail('');
-                  setLinkPassword('');
-                  setLinkConfirmPassword('');
-                  setShowLinkAccountModal(true);
+                  setLinkOtpSent(false);
+                  setLinkOtpCode('');
+                  setLinkOtpResendTimer(0);
+                  startTransition(() => {
+                    setShowLinkAccountModal(true);
+                  });
                 }}
                 activeOpacity={0.8}
               >
@@ -765,29 +729,6 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
             </TouchableOpacity>
           </View>
 
-          <View style={dynamicStyles.settingCard}>
-            <View style={dynamicStyles.settingHeader}>
-              <View style={dynamicStyles.settingIcon}>
-                <Ionicons name="key" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <Text style={dynamicStyles.settingTitle}>{t('settings.changePassword')}</Text>
-            </View>
-            <Text style={dynamicStyles.settingDescription}>
-              {t('settings.updateAccountPassword')}
-            </Text>
-            <TouchableOpacity
-              style={dynamicStyles.actionButton}
-              onPress={() => {
-                setOldPassword('');
-                setNewPassword('');
-                setConfirmPassword('');
-                setShowPasswordModal(true);
-              }}
-              activeOpacity={0.8}
-            >
-              <Text style={dynamicStyles.actionButtonText}>🔑 {t('settings.change')}</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* Hesap İşlemleri */}
@@ -842,15 +783,25 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>Profil Düzenle</Text>
+            <Text style={dynamicStyles.modalTitle}>{t('settings.editProfile')}</Text>
             
             <Text style={dynamicStyles.inputLabel}>Ad Soyad</Text>
             <TextInput
               style={dynamicStyles.textInput}
               value={profileData.full_name}
               onChangeText={(text) => setProfileData({...profileData, full_name: text})}
-              placeholder={t('settings.enterYourName')}
+              placeholder={t('settings.enterYourName') || 'Adınızı girin'}
               placeholderTextColor={currentTheme.colors.muted}
+            />
+            
+            <Text style={dynamicStyles.inputLabel}>Takma İsim</Text>
+            <TextInput
+              style={dynamicStyles.textInput}
+              value={nickname}
+              onChangeText={setNickname}
+              placeholder={t('settings.enterNickname') || 'Takma isminizi girin'}
+              placeholderTextColor={currentTheme.colors.muted}
+              maxLength={25}
             />
             
             <Text style={dynamicStyles.inputLabel}>Bio</Text>
@@ -943,241 +894,137 @@ export default function AccountSettingsScreen({ navigation }: AccountSettingsScr
         </TouchableOpacity>
       </Modal>
 
-      {/* Password Modal */}
-      <Modal visible={showPasswordModal} transparent animationType="fade" onRequestClose={() => setShowPasswordModal(false)}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>{t('settings.changePassword')}</Text>
-            
-            <Text style={dynamicStyles.inputLabel}>{t('settings.currentPasswordLabel')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={oldPassword}
-              onChangeText={setOldPassword}
-              placeholder={t('settings.enterCurrentPassword')}
-              placeholderTextColor={currentTheme.colors.muted}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            
-            <Text style={dynamicStyles.inputLabel}>{t('settings.newPasswordLabel')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              placeholder={t('settings.enterNewPassword')}
-              placeholderTextColor={currentTheme.colors.muted}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            
-            <Text style={dynamicStyles.inputLabel}>{t('settings.confirmPasswordLabel')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder={t('settings.confirmNewPassword')}
-              placeholderTextColor={currentTheme.colors.muted}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            
-            <View style={dynamicStyles.modalButtons}>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowPasswordModal(false)}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={handlePasswordUpdate}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? t('settings.updating') : t('settings.update')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
       {/* Link Account Modal */}
-      <Modal visible={showLinkAccountModal} transparent animationType="fade" onRequestClose={() => setShowLinkAccountModal(false)}>
+      <Modal 
+        visible={showLinkAccountModal} 
+        transparent 
+        animationType="fade" 
+        hardwareAccelerated={true}
+        onRequestClose={() => {
+          startTransition(() => {
+            setShowLinkAccountModal(false);
+            setLinkOtpSent(false);
+            setLinkOtpCode('');
+            setLinkOtpResendTimer(0);
+          });
+        }}
+      >
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>{t('settings.linkAccount')}</Text>
+            <Text style={dynamicStyles.modalTitle}>
+              {linkOtpSent ? t('auth.verifyOtp') : t('settings.linkAccount')}
+            </Text>
             <Text style={[dynamicStyles.settingDescription, { marginBottom: 20, textAlign: 'center' }]}>
-              {t('settings.linkAccountInfo')}
+              {linkOtpSent 
+                ? t('auth.enterOtpCode').replace('email adresinize', `${linkEmail} adresine`)
+                : t('settings.linkAccountInfo')
+              }
             </Text>
             
-            <Text style={dynamicStyles.inputLabel}>{t('settings.newEmailLabel')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={linkEmail}
-              onChangeText={setLinkEmail}
-              placeholder={t('settings.newEmailPlaceholder')}
-              placeholderTextColor={currentTheme.colors.muted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            
-            <Text style={dynamicStyles.inputLabel}>{t('settings.newPasswordLabel')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={linkPassword}
-              onChangeText={setLinkPassword}
-              placeholder={t('settings.enterNewPassword')}
-              placeholderTextColor={currentTheme.colors.muted}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            
-            <Text style={dynamicStyles.inputLabel}>{t('settings.confirmPasswordLabel')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={linkConfirmPassword}
-              onChangeText={setLinkConfirmPassword}
-              placeholder={t('settings.confirmNewPassword')}
-              placeholderTextColor={currentTheme.colors.muted}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            
-            <View style={dynamicStyles.modalButtons}>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowLinkAccountModal(false)}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={handleLinkAccount}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? t('settings.updating') : t('settings.linkAccount')}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            {!linkOtpSent ? (
+              <>
+                <Text style={dynamicStyles.inputLabel}>{t('settings.newEmailLabel')}</Text>
+                <TextInput
+                  style={dynamicStyles.textInput}
+                  value={linkEmail}
+                  onChangeText={setLinkEmail}
+                  placeholder={t('settings.newEmailPlaceholder')}
+                  placeholderTextColor={currentTheme.colors.muted}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+                
+                <View style={dynamicStyles.modalButtons}>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                    onPress={() => {
+                      setShowLinkAccountModal(false);
+                      setLinkOtpSent(false);
+                      setLinkOtpCode('');
+                      setLinkOtpResendTimer(0);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                      {t('common.cancel')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                    onPress={handleLinkAccountSendOtp}
+                    disabled={loading}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                      {loading ? t('common.loading') : '📧 Kod Gönder'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <OtpInput
+                  length={6}
+                  onComplete={handleLinkAccountVerifyOtp}
+                  autoFocus={true}
+                />
+                
+                {linkOtpResendTimer > 0 ? (
+                  <Text style={[dynamicStyles.settingDescription, { textAlign: 'center', marginTop: 10, color: currentTheme.colors.muted }]}>
+                    {t('auth.resendOtpIn')?.replace('{seconds}', linkOtpResendTimer.toString()) || `${linkOtpResendTimer} saniye sonra tekrar gönderebilirsiniz`}
+                  </Text>
+                ) : (
+                  <TouchableOpacity
+                    onPress={handleLinkAccountSendOtp}
+                    disabled={loading}
+                    style={{ marginTop: 10 }}
+                  >
+                    <Text style={[dynamicStyles.settingDescription, { textAlign: 'center', color: currentTheme.colors.primary }]}>
+                      {t('auth.resendOtp')}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                
+                <View style={dynamicStyles.modalButtons}>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                    onPress={() => {
+                      setLinkOtpSent(false);
+                      setLinkOtpCode('');
+                      setLinkOtpResendTimer(0);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                      {t('common.back')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                    onPress={() => {
+                      setShowLinkAccountModal(false);
+                      setLinkOtpSent(false);
+                      setLinkOtpCode('');
+                      setLinkOtpResendTimer(0);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                      {t('common.cancel')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
             </View>
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Display Name Modal */}
-      <Modal visible={showDisplayNameModal} transparent animationType="fade" onRequestClose={() => setShowDisplayNameModal(false)}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>{t('settings.setYourName')}</Text>
-            <Text style={[dynamicStyles.settingDescription, { marginBottom: 20, textAlign: 'center' }]}>
-              {t('settings.setYourNameDescription')}
-            </Text>
-            
-            <Text style={dynamicStyles.inputLabel}>{t('settings.displayName')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder={t('settings.enterYourName')}
-              placeholderTextColor={currentTheme.colors.muted}
-              autoCapitalize="words"
-              maxLength={50}
-            />
-            
-            <View style={dynamicStyles.modalButtons}>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowDisplayNameModal(false)}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={handleDisplayNameUpdate}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? t('settings.updating') : t('common.save')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Nickname Modal */}
-      <Modal visible={showNicknameModal} transparent animationType="fade" onRequestClose={() => setShowNicknameModal(false)}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>{t('settings.nickname')}</Text>
-            <Text style={[dynamicStyles.settingDescription, { marginBottom: 20, textAlign: 'center' }]}>
-              {t('settings.nicknameDescription')}
-            </Text>
-            
-            <Text style={dynamicStyles.inputLabel}>{t('onboarding.howShouldWeAddressYouNickname')}</Text>
-            <TextInput
-              style={dynamicStyles.textInput}
-              value={nickname}
-              onChangeText={setNickname}
-              placeholder={t('onboarding.enterNickname') || 'Luna, Melis, Friend...'}
-              placeholderTextColor={currentTheme.colors.muted}
-              autoCapitalize="words"
-              maxLength={25}
-            />
-            <Text style={[dynamicStyles.settingDescription, { fontSize: 12, marginTop: 4, color: currentTheme.colors.muted }]}>
-              {t('onboarding.nicknameHint')}
-            </Text>
-            
-            <View style={dynamicStyles.modalButtons}>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowNicknameModal(false)}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {t('common.cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={handleNicknameUpdate}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {loading ? t('settings.updating') : t('common.save')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Display Name ve Nickname modal'ları kaldırıldı - artık tek bir Profil Düzenle modal'ı kullanılıyor */}
 
       {/* Custom Alert */}
       <CustomAlert

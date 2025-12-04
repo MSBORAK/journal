@@ -23,13 +23,147 @@ import { useReminders } from '../hooks/useReminders';
 import { useAchievements } from '../hooks/useAchievements';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
-import { useTimer } from '../contexts/TimerContext';
+import { useTimerControl, useTimerValue } from '../contexts/TimerContext';
 import FocusMode from '../components/FocusMode';
 import { useAppTour } from '../hooks/useAppTour';
 import AppTour from '../components/AppTour';
 import { getButtonTextColor } from '../utils/colorUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
+
+// CRITICAL FIX: Component for timer display values
+// This prevents timer updates from re-rendering the entire Tasks screen
+const FocusTimeDisplay = React.memo(() => {
+  const { totalFocusTime } = useTimerControl();
+  const { currentTheme } = useTheme();
+  
+  const display = useMemo(() => {
+    if (totalFocusTime > 0) {
+      if (totalFocusTime < 1) {
+        const seconds = Math.floor(totalFocusTime * 60);
+        return `${seconds}s`;
+      } else {
+        const minutes = Math.floor(totalFocusTime);
+        const remainingSeconds = Math.floor((totalFocusTime - minutes) * 60);
+        if (remainingSeconds > 0) {
+          return `${minutes}dk ${remainingSeconds}s`;
+        } else {
+          return `${minutes}dk`;
+        }
+      }
+    }
+    return '0s';
+  }, [totalFocusTime]);
+  
+  return (
+    <Text style={{
+      fontSize: 20,
+      fontWeight: '700',
+      color: currentTheme.colors.primary,
+      fontFamily: 'Poppins_700Bold',
+    }}>
+      {display}
+    </Text>
+  );
+});
+
+// CRITICAL FIX: Separate component for floating timer button
+// This prevents timer state changes (timeLeft changes every second!) from re-rendering the entire Tasks screen
+const FloatingTimerButton = React.memo(({ 
+  selectedTaskId, 
+  tasks, 
+  onPress 
+}: { 
+  selectedTaskId: string | null; 
+  tasks: any[]; 
+  onPress: () => void;
+}) => {
+  const { currentTheme } = useTheme();
+  const { isActive, scaleAnim } = useTimerControl();
+  const { timeLeft, progressAnim } = useTimerValue();
+  
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    timerButtonContent: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    timerDisplay: {
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    timerText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: currentTheme.colors.background,
+      fontFamily: 'Poppins_700Bold',
+      zIndex: 2,
+    },
+    progressRing: {
+      position: 'absolute',
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    progressFill: {
+      position: 'absolute',
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      borderWidth: 2,
+      borderColor: currentTheme.colors.background,
+      borderRightColor: 'transparent',
+      borderBottomColor: 'transparent',
+      transform: [{ rotate: '-90deg' }],
+    },
+  }), [currentTheme]);
+  
+  return (
+    <Animated.View
+      style={[
+        dynamicStyles.timerButtonContent,
+        { transform: [{ scale: scaleAnim }] },
+      ]}
+    >
+      {isActive ? (
+        <View style={dynamicStyles.timerDisplay}>
+          <Text style={dynamicStyles.timerText}>
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          </Text>
+          <View style={dynamicStyles.progressRing}>
+            <Animated.View
+              style={[
+                dynamicStyles.progressFill,
+                {
+                  transform: [
+                    {
+                      rotate: progressAnim.interpolate({
+                        inputRange: [0, 100],
+                        outputRange: ['0deg', '360deg'],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          </View>
+        </View>
+      ) : (
+        <Ionicons 
+          name="timer-outline" 
+          size={24} 
+          color={currentTheme.colors.background} 
+        />
+      )}
+    </Animated.View>
+  );
+});
 
 interface TasksAndRemindersScreenProps {
   navigation: any;
@@ -69,18 +203,14 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const [fadeAnim] = useState(new Animated.Value(1));
   const [toggleAnim] = useState(new Animated.Value(0)); // Toggle animation
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  
+  // CRITICAL FIX: Only subscribe to showFocusMode to prevent re-render storms
+  // Timer state changes (timeLeft changes every second!) should NOT trigger Tasks screen re-renders
+  // Use useTimerControl instead of useTimer to avoid subscribing to timeLeft/progressAnim
   const { 
     setShowFocusMode, 
-    showFocusMode, 
-    isActive, 
-    isPaused, 
-    timeLeft, 
-    selectedDuration,
-    totalFocusTime,
-    totalWorkTime,
-    progressAnim, 
-    scaleAnim 
-  } = useTimer();
+    showFocusMode,
+  } = useTimerControl();
   
   // Modal states
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
@@ -114,9 +244,10 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const [reminderStartDate, setReminderStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [reminderEndDate, setReminderEndDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Computed values - MEMOIZED to prevent recalculation on every render
-  const todayTasks = useMemo(() => getTodayTasks(), [tasks]);
-  const completedCount = useMemo(() => getTodayCompletedCount(), [tasks]);
+  // CRITICAL FIX: Use memoized functions from useTasks hook
+  // getTodayTasks and getTodayCompletedCount are now stable references (useCallback)
+  const todayTasks = useMemo(() => getTodayTasks(), [getTodayTasks]);
+  const completedCount = useMemo(() => getTodayCompletedCount(), [getTodayCompletedCount]);
   const completionRate = useMemo(() => {
     return todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
   }, [todayTasks.length, completedCount]);
@@ -505,62 +636,9 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
     }
   }, [activeTab, tasks, todayTasks]);
 
-  // Calculate work time (bugünkü toplam + aktif timer'ın geçen süresi) - MEMOIZED
-  const getWorkTime = useCallback(() => {
-    let displayTime = totalWorkTime; // Bugünkü toplam çalışma süresi
-    
-    // Eğer timer aktifse, geçen süreyi de ekle
-    if (isActive && selectedDuration > 0) {
-      const totalSeconds = selectedDuration * 60;
-      const elapsedSeconds = totalSeconds - timeLeft;
-      const elapsedMinutes = elapsedSeconds / 60;
-      displayTime = totalWorkTime + elapsedMinutes;
-    }
-    
-    // Formatı göster
-    if (displayTime > 0) {
-      if (displayTime < 1) {
-        // 1 dakikadan az ise saniye olarak göster
-        const seconds = Math.floor(displayTime * 60);
-        return `${seconds}s`;
-      } else {
-        // 1 dakika ve üzeri ise dakika olarak göster
-        const minutes = Math.floor(displayTime);
-        const remainingSeconds = Math.floor((displayTime - minutes) * 60);
-        if (remainingSeconds > 0) {
-          return `${minutes}dk ${remainingSeconds}s`;
-        } else {
-          return `${minutes}dk`;
-        }
-      }
-    }
-    return '0dk';
-  }, [totalWorkTime, isActive, selectedDuration, timeLeft]);
-
-  // Get total focus time - MEMOIZED
-  const getTotalFocusTime = useCallback(() => {
-    if (totalFocusTime > 0) {
-      if (totalFocusTime < 1) {
-        // 1 dakikadan az ise saniye olarak göster
-        const seconds = Math.floor(totalFocusTime * 60);
-        return `${seconds}s`;
-      } else {
-        // 1 dakika ve üzeri ise dakika olarak göster
-        const minutes = Math.floor(totalFocusTime);
-        const remainingSeconds = Math.floor((totalFocusTime - minutes) * 60);
-        if (remainingSeconds > 0) {
-          return `${minutes}dk ${remainingSeconds}s`;
-        } else {
-          return `${minutes}dk`;
-        }
-      }
-    }
-    return '0s';
-  }, [totalFocusTime]);
-
-  // Memoize the computed work time and focus time values
-  const workTimeDisplay = useMemo(() => getWorkTime(), [getWorkTime]);
-  const focusTimeDisplay = useMemo(() => getTotalFocusTime(), [getTotalFocusTime]);
+  // CRITICAL FIX: Timer display values are now in a separate component
+  // This prevents timer updates from re-rendering the entire Tasks screen
+  // We'll use a component that subscribes to timer values separately
 
   // Memoize filtered tasks to prevent unnecessary recalculations
   const filteredTasks = useMemo(() => {
@@ -574,6 +652,28 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
   const completedTasks = useMemo(() => {
     return filteredTasks.filter(task => task.isCompleted);
   }, [filteredTasks]);
+
+  // CRITICAL FIX: Memoize selectedTaskTitle to prevent recalculation on every render
+  const selectedTaskTitle = useMemo(() => {
+    if (selectedTaskId) {
+      const task = tasks.find(t => t.id === selectedTaskId);
+      return task?.title;
+    }
+    return undefined;
+  }, [selectedTaskId, tasks]);
+
+  // CRITICAL FIX: Memoize FocusMode close handler to prevent re-renders
+  const handleFocusModeClose = useCallback(() => {
+    // Batch state updates together
+    setShowFocusMode(false);
+    setSelectedTaskId(null);
+  }, [setShowFocusMode]);
+
+  // CRITICAL FIX: Memoize FocusMode request close handler
+  const handleFocusModeRequestClose = useCallback(() => {
+    setShowFocusMode(false);
+    setSelectedTaskId(null);
+  }, [setShowFocusMode]);
 
   // CRITICAL FIX: Memoize StyleSheet.create to prevent recreation on every render
   const dynamicStyles = useMemo(() => StyleSheet.create({
@@ -1083,7 +1183,7 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
               </Text>
             </View>
             <View style={dynamicStyles.statItem}>
-              <Text style={dynamicStyles.statNumber}>{focusTimeDisplay}</Text>
+              <FocusTimeDisplay />
               <Text style={dynamicStyles.statLabel}>
                 {t('health.focus')}
               </Text>
@@ -1694,73 +1794,31 @@ export default function TasksAndRemindersScreen({ navigation }: TasksAndReminder
         }}
         activeOpacity={0.8}
       >
-        <Animated.View
-          style={[
-            dynamicStyles.timerButtonContent,
-            { transform: [{ scale: scaleAnim }] },
-          ]}
-        >
-          {isActive ? (
-            <View style={dynamicStyles.timerDisplay}>
-              <Text style={dynamicStyles.timerText}>
-                {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-              </Text>
-              <View style={dynamicStyles.progressRing}>
-                <Animated.View
-                  style={[
-                    dynamicStyles.progressFill,
-                    {
-                      transform: [
-                        {
-                          rotate: progressAnim.interpolate({
-                            inputRange: [0, 100],
-                            outputRange: ['0deg', '360deg'],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          ) : (
-            <Ionicons 
-              name="timer-outline" 
-              size={24} 
-              color={currentTheme.colors.background} 
-            />
-          )}
-        </Animated.View>
+        <FloatingTimerButton
+          selectedTaskId={selectedTaskId}
+          tasks={tasks}
+          onPress={() => setShowFocusMode(true)}
+        />
       </TouchableOpacity>
 
       {/* Focus Mode Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showFocusMode}
-        onRequestClose={() => {
-          setShowFocusMode(false);
-          setSelectedTaskId(null);
-        }}
-        presentationStyle="overFullScreen"
-      >
-        <FocusMode
-          visible={showFocusMode}
-          onClose={() => {
-            setShowFocusMode(false);
-            setSelectedTaskId(null);
-          }}
-          selectedTaskTitle={(() => {
-            if (selectedTaskId) {
-              const task = tasks.find(t => t.id === selectedTaskId);
-              console.log('🔍 Seçili görev bulundu:', task?.title, 'ID:', selectedTaskId);
-              return task?.title;
-            }
-            console.log('⚠️ Seçili görev yok');
-            return undefined;
-          })()}
-        />
-      </Modal>
+      {/* CRITICAL FIX: Only render Modal when showFocusMode is true to prevent performance issues */}
+      {showFocusMode && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={true}
+          onRequestClose={handleFocusModeRequestClose}
+          presentationStyle="overFullScreen"
+          hardwareAccelerated={true}
+        >
+          <FocusMode
+            visible={true}
+            onClose={handleFocusModeClose}
+            selectedTaskTitle={selectedTaskTitle}
+          />
+        </Modal>
+      )}
 
       {/* App Tour */}
       {tour.currentStep && (

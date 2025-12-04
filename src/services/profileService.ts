@@ -174,6 +174,27 @@ export const updateProfile = async (
       .single();
 
     if (error) {
+      // Detaylı hata loglama
+      console.error('❌ Supabase error updating profile:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        userId: userId,
+        updateData: updateData
+      });
+      
+      // RLS hatası kontrolü (403 Forbidden veya 42501)
+      if (error.code === '42501' || error.code === 'PGRST301' || 
+          error.message?.toLowerCase().includes('row-level security') ||
+          error.message?.toLowerCase().includes('permission denied') ||
+          error.message?.toLowerCase().includes('new row violates')) {
+        console.error('🚫 RLS POLICY ERROR: User does not have permission to update profile');
+        console.error('   Check RLS policies for UPDATE on public.users table');
+        console.error('   Policy should allow: auth.uid() = id');
+        throw new Error('Profil güncellenemedi: Yetkilendirme hatası. Lütfen tekrar giriş yapın.');
+      }
+      
       // Eğer kolon hatası varsa (full_name, bio vs veritabanında yoksa)
       if (error.message?.includes('column') || 
           error.message?.includes('schema cache') ||
@@ -194,21 +215,15 @@ export const updateProfile = async (
         try {
           await AsyncStorage.setItem(`${PROFILE_STORAGE_KEY}_${userId}`, JSON.stringify(localProfile));
           console.log('✅ Profile saved to AsyncStorage');
-        } catch (error) {
-          console.log('⚠️ Error saving profile to AsyncStorage:', error);
+        } catch (storageError) {
+          console.log('⚠️ Error saving profile to AsyncStorage:', storageError);
         }
         
         return localProfile;
       }
       
       // Diğer hatalar için hata fırlat
-      console.error('❌ Supabase error updating profile:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
-      throw new Error(`Failed to update profile: ${error.message}`);
+      throw new Error(`Profil güncellenemedi: ${error.message || 'Bilinmeyen hata'}`);
     }
 
     console.log('✅ Profile updated successfully:', data);

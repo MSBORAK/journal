@@ -14,7 +14,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   refreshUser: () => Promise<void>;
-  linkAccount: (email: string, password: string) => Promise<void>;
+  linkAccount: (email: string, otp: string) => Promise<void>;
   updateDisplayName: (displayName: string) => Promise<void>;
   updateAppAlias: (appAlias: string) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
@@ -465,126 +465,105 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(updatedUser);
         console.log('✅ User data refreshed:', updatedUser);
       } else {
-        console.warn('⚠️ No user found during refresh');
+        // Kullanıcı bulunamadıysa, mevcut user state'ini koru (giriş ekranına yönlendirme)
+        // Session kaybı durumunda bile user state'ini korumalıyız
+        if (user) {
+          console.warn('⚠️ No user found during refresh, but user exists in state - keeping current user state');
+          // User state'ini koru, güncelleme yapma
+          // Anonymous kullanıcı oluşturmayı deneme - bu giriş ekranına yönlendirmeye neden olabilir
+        } else {
+          console.warn('⚠️ No user found during refresh');
+        }
       }
     } catch (error) {
       console.error('❌ Error refreshing user:', error);
+      // Hata durumunda da user state'ini koru (giriş ekranına yönlendirme)
+      if (user) {
+        console.warn('⚠️ Error during refresh, keeping current user state');
+      }
     }
   };
 
-  const linkAccount = async (email: string, password: string): Promise<void> => {
+  const linkAccount = async (email: string, otp: string): Promise<void> => {
     setLoading(true);
     try {
       // Validasyon
-      if (!email || !password) {
-        throw new Error('Email ve şifre zorunludur');
+      if (!email || !otp) {
+        throw new Error('Email ve kod zorunludur');
       }
 
-      if (password.length < 6) {
-        throw new Error('Şifre en az 6 karakter olmalıdır');
+      if (otp.length !== 6) {
+        throw new Error('Kod 6 haneli olmalıdır');
       }
 
       const trimmedEmail = email.toLowerCase().trim();
 
-      // Email ve şifreyi aynı anda güncellemeyi dene
-      // Anonim kullanıcılar için bu daha güvenilir
-      const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+      // Anonymous kullanıcının mevcut session'ını sakla
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const anonymousUserId = currentSession?.user?.id;
+
+      if (!anonymousUserId) {
+        throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+
+      // OTP'yi doğrula (email tipinde - signInWithOtp ile gönderildi)
+      // Önce email tipinde dene, eğer olmazsa email_change tipinde dene
+      let verifyData, verifyError;
+      
+      // İlk olarak email tipinde dene (signInWithOtp ile gönderilen OTP'ler)
+      const emailVerifyResult = await supabase.auth.verifyOtp({
         email: trimmedEmail,
-        password: password,
+        token: otp,
+        type: 'email',
       });
-
-      if (updateError) {
-        console.error('❌ Link account update error:', updateError);
-        const errorMessage = updateError?.message || '';
+      
+      verifyData = emailVerifyResult.data;
+      verifyError = emailVerifyResult.error;
+      
+      // Eğer email tipi başarısız olduysa, email_change tipinde dene
+      if (verifyError && (verifyError.message?.toLowerCase().includes('invalid') || 
+                         verifyError.message?.toLowerCase().includes('expired'))) {
+        console.log('⚠️ Email tipi başarısız, email_change tipinde deneniyor...');
+        const emailChangeVerifyResult = await supabase.auth.verifyOtp({
+          email: trimmedEmail,
+          token: otp,
+          type: 'email_change',
+        });
         
-        // Eğer aynı anda güncelleme başarısız olursa, önce email'i güncellemeyi dene
-        if (errorMessage.toLowerCase().includes('password') || 
-            errorMessage.toLowerCase().includes('invalid')) {
-          console.log('⚠️ Trying to update email first, then password...');
-          
-          // Önce email'i güncelle
-          const { data: emailData, error: emailError } = await supabase.auth.updateUser({
-            email: trimmedEmail,
-          });
+        verifyData = emailChangeVerifyResult.data;
+        verifyError = emailChangeVerifyResult.error;
+      }
 
-          if (emailError) {
-            console.error('❌ Link account email error:', emailError);
-            const emailErrorMessage = emailError?.message || '';
-            if (emailErrorMessage.toLowerCase().includes('already registered') || 
-                emailErrorMessage.toLowerCase().includes('already been registered')) {
-              throw new Error('Bu email adresi zaten kullanılıyor.');
-            }
-            if (emailErrorMessage.toLowerCase().includes('invalid email')) {
-              throw new Error('Geçersiz email adresi.');
-            }
-            throw new Error(emailErrorMessage || 'Email güncellenemedi');
-          }
-
-          // Email güncelleme başarılı, şimdi şifreyi güncelle
-          // Kısa bir bekleme ekle (email güncelleme işleminin tamamlanması için)
-          await new Promise(resolve => setTimeout(resolve, 500));
-
-          const { data: passwordData, error: passwordError } = await supabase.auth.updateUser({
-            password: password,
-          });
-
-          if (passwordError) {
-            console.error('❌ Link account password error:', passwordError);
-            const passwordErrorMessage = passwordError?.message || '';
-            
-            // Şifre güncelleme hatası için daha açıklayıcı mesaj
-            if (passwordErrorMessage.toLowerCase().includes('same') || 
-                passwordErrorMessage.toLowerCase().includes('identical')) {
-              throw new Error('Yeni şifre mevcut şifreyle aynı olamaz.');
-            }
-            if (passwordErrorMessage.toLowerCase().includes('weak') || 
-                passwordErrorMessage.toLowerCase().includes('strength')) {
-              throw new Error('Şifre çok zayıf. Daha güçlü bir şifre seçin.');
-            }
-            throw new Error('Şifre güncellenemedi. Lütfen tekrar deneyin.');
-          }
-
-          // Başarılı - email ve şifre ayrı ayrı güncellendi
-          const finalUser = passwordData?.user || emailData?.user;
-          if (finalUser) {
-            setIsAnonymous(false);
-            const updatedUser: User = {
-              uid: finalUser.id,
-              email: finalUser.email || trimmedEmail,
-              displayName: finalUser.user_metadata?.full_name || trimmedEmail.split('@')[0],
-              photoURL: finalUser.user_metadata?.avatar_url || undefined,
-              appAlias: finalUser.user_metadata?.app_alias || 'Rhythm',
-              nickname: finalUser.user_metadata?.nickname || 'Guest',
-            };
-            setUser(updatedUser);
-            console.log('✅ Account linked successfully (separate updates):', updatedUser);
-          }
-        } else {
-          // Diğer hatalar
-          if (errorMessage.toLowerCase().includes('already registered') || 
-              errorMessage.toLowerCase().includes('already been registered')) {
-            throw new Error('Bu email adresi zaten kullanılıyor.');
-          }
-          if (errorMessage.toLowerCase().includes('invalid email')) {
-            throw new Error('Geçersiz email adresi.');
-          }
-          throw new Error(errorMessage || 'Hesap bağlanamadı. Lütfen tekrar deneyin.');
+      if (verifyError) {
+        console.error('❌ OTP verification error:', verifyError);
+        const errorMessage = verifyError?.message || '';
+        if (errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('expired')) {
+          throw new Error('Geçersiz veya süresi dolmuş kod. Lütfen yeni bir kod isteyin.');
         }
+        throw new Error(errorMessage || 'Kod doğrulanamadı. Lütfen tekrar deneyin.');
+      }
+
+      // OTP doğrulandı - yeni bir session oluşturuldu
+      // Artık anonymous kullanıcı değil, email ile giriş yapmış kullanıcı
+      if (verifyData?.user) {
+        setIsAnonymous(false);
+        const updatedUser: User = {
+          uid: verifyData.user.id,
+          email: verifyData.user.email || trimmedEmail,
+          displayName: verifyData.user.user_metadata?.full_name || trimmedEmail.split('@')[0],
+          photoURL: verifyData.user.user_metadata?.avatar_url || undefined,
+          appAlias: verifyData.user.user_metadata?.app_alias || 'Rhythm',
+          nickname: verifyData.user.user_metadata?.nickname || 'Guest',
+        };
+        setUser(updatedUser);
+        console.log('✅ Account linked successfully - OTP verified:', updatedUser);
+        
+        // NOT: Anonymous kullanıcının verileri aynı user_id ile kalır çünkü
+        // OTP doğrulaması yeni kullanıcı oluşturmaz, sadece email ekler
+        // Ancak eğer shouldCreateUser: true kullanıldıysa yeni kullanıcı oluşturulur
+        // Bu durumda verileri transfer etmemiz gerekebilir
       } else {
-        // Başarılı - email ve şifre aynı anda güncellendi
-        if (updateData?.user) {
-          setIsAnonymous(false);
-          const updatedUser: User = {
-            uid: updateData.user.id,
-            email: updateData.user.email || trimmedEmail,
-            displayName: updateData.user.user_metadata?.full_name || trimmedEmail.split('@')[0],
-            photoURL: updateData.user.user_metadata?.avatar_url || undefined,
-            appAlias: updateData.user.user_metadata?.app_alias || 'Rhythm',
-            nickname: updateData.user.user_metadata?.nickname || 'Guest',
-          };
-          setUser(updatedUser);
-          console.log('✅ Account linked successfully (simultaneous update):', updatedUser);
-        }
+        throw new Error('Kullanıcı bilgileri alınamadı. Lütfen tekrar deneyin.');
       }
     } catch (error: any) {
       console.error('❌ Link account catch error:', error);
@@ -603,6 +582,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const trimmedName = displayName.trim();
       
+      // Mevcut kullanıcı kontrolü
+      if (!user?.uid) {
+        throw new Error('Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+      
       // Supabase user_metadata'yı güncelle
       const { data, error } = await supabase.auth.updateUser({
         data: { full_name: trimmedName },
@@ -610,11 +594,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('❌ Update display name error:', error);
+        const errorMessage = error?.message || '';
+        
+        // Session veya auth hatası ise özel mesaj
+        if (errorMessage.toLowerCase().includes('session') || 
+            errorMessage.toLowerCase().includes('jwt') ||
+            errorMessage.toLowerCase().includes('auth')) {
+          throw new Error('Oturum hatası. Lütfen uygulamayı yeniden başlatın.');
+        }
+        
         throw new Error('İsim güncellenemedi. Lütfen tekrar deneyin.');
       }
 
       if (data?.user) {
-        // Local user state'i güncelle
+        // Local user state'i güncelle - mevcut user state'ini koru
         const updatedUser: User = {
           uid: data.user.id,
           email: data.user.email || user?.email || '',
@@ -624,10 +617,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           nickname: data.user.user_metadata?.nickname || user?.nickname || 'Guest',
         };
         setUser(updatedUser);
+        // isAnonymous değerini KESINLIKLE değiştirme - mevcut değeri koru
+        // updateDisplayName sadece displayName'i günceller, isAnonymous'u değiştirmez
+        // setIsAnonymous çağrısı yapma - mevcut değeri koru
         console.log('✅ Display name updated successfully:', trimmedName);
+      } else {
+        // Eğer data.user yoksa, sadece local state'i güncelle (fallback)
+        // Bu durum anonymous kullanıcılar için normal olabilir
+        if (user) {
+          const updatedUser: User = {
+            ...user,
+            displayName: trimmedName,
+          };
+          setUser(updatedUser);
+          console.log('✅ Display name updated locally (fallback):', trimmedName);
+        }
       }
     } catch (error: any) {
       console.error('❌ Update display name catch error:', error);
+      // Hata durumunda user state'ini koru (giriş ekranına yönlendirme)
       throw error;
     } finally {
       setLoading(false);
@@ -692,6 +700,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('Takma isim en fazla 25 karakter olabilir');
       }
       
+      // Mevcut kullanıcı kontrolü
+      if (!user?.uid) {
+        throw new Error('Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+      
       // Supabase user_metadata'yı güncelle
       const { data, error } = await supabase.auth.updateUser({
         data: { nickname: trimmedNickname },
@@ -699,11 +712,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('❌ Update nickname error:', error);
+        const errorMessage = error?.message || '';
+        
+        // Session veya auth hatası ise özel mesaj
+        if (errorMessage.toLowerCase().includes('session') || 
+            errorMessage.toLowerCase().includes('jwt') ||
+            errorMessage.toLowerCase().includes('auth')) {
+          throw new Error('Oturum hatası. Lütfen uygulamayı yeniden başlatın.');
+        }
+        
         throw new Error('Takma isim güncellenemedi. Lütfen tekrar deneyin.');
       }
 
       if (data?.user) {
-        // Local user state'i güncelle
+        // Local user state'i güncelle - mevcut user state'ini koru
         const updatedUser: User = {
           uid: data.user.id,
           email: data.user.email || user?.email || '',
@@ -713,10 +735,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           nickname: trimmedNickname,
         };
         setUser(updatedUser);
+        // isAnonymous değerini KESINLIKLE değiştirme - mevcut değeri koru
+        // updateNickname sadece nickname'i günceller, isAnonymous'u değiştirmez
+        // setIsAnonymous çağrısı yapma - mevcut değeri koru
         console.log('✅ Nickname updated successfully:', trimmedNickname);
+      } else {
+        // Eğer data.user yoksa, sadece local state'i güncelle (fallback)
+        // Bu durum anonymous kullanıcılar için normal olabilir
+        if (user) {
+          const updatedUser: User = {
+            ...user,
+            nickname: trimmedNickname,
+          };
+          setUser(updatedUser);
+          console.log('✅ Nickname updated locally (fallback):', trimmedNickname);
+        }
       }
     } catch (error: any) {
       console.error('❌ Update nickname catch error:', error);
+      // Hata durumunda user state'ini koru (giriş ekranına yönlendirme)
       throw error;
     } finally {
       setLoading(false);

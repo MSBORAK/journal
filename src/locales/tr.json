@@ -85,7 +85,14 @@
     "enterEmail": "Email adresinizi girin",
     "passwordResetSent": "Şifre sıfırlama linki email adresinize gönderildi. Lütfen email kutunuzu kontrol edin.",
     "guestContinue": "Misafir Olarak Devam Et",
-    "guestContinueDesc": "Kayıt olmadan uygulamayı deneyin. İstediğiniz zaman hesap oluşturabilirsiniz."
+    "guestContinueDesc": "Kayıt olmadan uygulamayı deneyin. İstediğiniz zaman hesap oluşturabilirsiniz.",
+    "otpSent": "Doğrulama kodu gönderildi",
+    "otpSendFailed": "Kod gönderilemedi. Lütfen tekrar deneyin.",
+    "invalidOtp": "Geçersiz kod. Lütfen tekrar deneyin.",
+    "resendOtp": "Kodu Tekrar Gönder",
+    "resendOtpIn": "{seconds} saniye sonra tekrar gönderebilirsiniz",
+    "enterOtpCode": "Email adresinize gönderilen 6 haneli kodu girin",
+    "verifyOtp": "Kodu Doğrula"
   },
   "dashboard": {
     "howAreYou": "Bugün kendini nasıl hissediyorsun?",
@@ -724,8 +731,8 @@
     "passwordCannotBeSame": "Yeni şifre mevcut şifrenizle aynı olamaz!",
     "passwordUpdated": "Şifreniz başarıyla güncellendi!",
     "linkAccount": "Hesabını Bağla",
-    "linkAccountDescription": "Anonim hesabınızı email ve şifre ile bağlayarak verilerinizi kalıcı hale getirin. Cihaz değiştirdiğinizde verileriniz kaybolmaz.",
-    "linkAccountInfo": "Email ve şifre belirleyerek anonim hesabınızı kalıcı hesaba dönüştürün. Tüm verileriniz korunur.",
+    "linkAccountDescription": "Anonim hesabınızı email ile bağlayarak verilerinizi kalıcı hale getirin. Cihaz değiştirdiğinizde verileriniz kaybolmaz.",
+    "linkAccountInfo": "Email adresinize gönderilecek kod ile anonim hesabınızı kalıcı hesaba dönüştürün. Tüm verileriniz korunur.",
     "accountLinkedSuccess": "Hesabınız başarıyla bağlandı! Artık verileriniz kalıcı olarak saklanıyor.",
     "linkAccountFailed": "Hesap bağlanamadı. Lütfen tekrar deneyin.",
     "anonymousUser": "Misafir Kullanıcı",

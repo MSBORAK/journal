@@ -229,15 +229,32 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
     return { hours: parseInt(hours), minutes: parseInt(minutes) };
   };
 
-  const adjustTime = (time: string, delta: number) => {
+  const adjustTime = (time: string, delta: number, type?: 'morning' | 'evening') => {
     const { hours, minutes } = parseTime(time);
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
     date.setMinutes(date.getMinutes() + delta);
     
-    const newHours = date.getHours().toString().padStart(2, '0');
-    const newMinutes = date.getMinutes().toString().padStart(2, '0');
-    return `${newHours}:${newMinutes}`;
+    let newHours = date.getHours();
+    const newMinutes = date.getMinutes();
+    
+    // CRITICAL FIX: Validate evening time - must be between 16:00-23:59
+    if (type === 'evening') {
+      // If adjusting would go below 16:00, clamp to 16:00
+      if (newHours < 16) {
+        newHours = 16;
+        date.setHours(16, 0, 0, 0);
+      }
+      // If adjusting would go above 23:59, clamp to 23:59
+      if (newHours >= 24) {
+        newHours = 23;
+        date.setHours(23, 59, 0, 0);
+      }
+    }
+    
+    const hoursStr = newHours.toString().padStart(2, '0');
+    const minutesStr = date.getMinutes().toString().padStart(2, '0');
+    return `${hoursStr}:${minutesStr}`;
   };
 
   const dynamicStyles = StyleSheet.create({
@@ -606,7 +623,21 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
               }}>
                 <TouchableOpacity
                   style={dynamicStyles.timeButton}
-                  onPress={() => updateSetting('eveningTime', adjustTime(settings.eveningTime, -15))}
+                  onPress={() => {
+                    const newTime = adjustTime(settings.eveningTime, -15, 'evening');
+                    const [hour] = newTime.split(':').map(Number);
+                    // CRITICAL FIX: Prevent setting evening time before 16:00
+                    if (hour >= 16) {
+                      updateSetting('eveningTime', newTime);
+                    } else {
+                      // Show alert if trying to set invalid time
+                      showAlert(
+                        t('settings.error') || 'Error',
+                        'Evening notifications must be scheduled between 16:00-23:59',
+                        'warning'
+                      );
+                    }
+                  }}
                 >
                   <Ionicons name="remove" size={20} color={currentTheme.colors.primary} />
                 </TouchableOpacity>
@@ -617,7 +648,21 @@ export default function NotificationSettingsScreen({ navigation }: NotificationS
                 
                 <TouchableOpacity
                   style={dynamicStyles.timeButton}
-                  onPress={() => updateSetting('eveningTime', adjustTime(settings.eveningTime, 15))}
+                  onPress={() => {
+                    const newTime = adjustTime(settings.eveningTime, 15, 'evening');
+                    const [hour] = newTime.split(':').map(Number);
+                    // CRITICAL FIX: Prevent setting evening time after 23:59
+                    if (hour < 24) {
+                      updateSetting('eveningTime', newTime);
+                    } else {
+                      // Show alert if trying to set invalid time
+                      showAlert(
+                        t('settings.error') || 'Error',
+                        'Evening notifications must be scheduled between 16:00-23:59',
+                        'warning'
+                      );
+                    }
+                  }}
                 >
                   <Ionicons name="add" size={20} color={currentTheme.colors.primary} />
                 </TouchableOpacity>

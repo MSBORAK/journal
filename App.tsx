@@ -379,17 +379,35 @@ function AppNavigator() {
           console.error('❌ Navigation error:', navError);
         }
       }
-      // Eğer kullanıcı anonymous ise ve auth ekranını görmemişse Auth ekranına yönlendir
-      else if (!loading && hasSeenAuth === false && isAnonymous && navigationRef.current?.isReady()) {
-        console.log('🔄 Navigating to Auth screen (anonymous user)');
-        try {
-          setTimeout(() => {
-            if (navigationRef.current?.isReady()) {
-              navigationRef.current?.navigate('Auth' as never);
-            }
-          }, 100);
-        } catch (navError) {
-          console.error('❌ Navigation error:', navError);
+      // Eğer kullanıcı anonymous ise ve auth ekranını görmemişse MainTabs'a yönlendir
+      // Ama sadece ilk açılışta, kullanıcı zaten bir ekrandaysa yönlendirme yapma
+      else if (!loading && hasSeenAuth === false && isAnonymous && user && navigationRef.current?.isReady()) {
+        // Kullanıcı zaten bir ekrandaysa (örneğin AccountSettings), yönlendirme yapma
+        const currentRoute = navigationRef.current?.getCurrentRoute();
+        const routeName = currentRoute?.name as string | undefined;
+        // Eğer kullanıcı zaten herhangi bir ekrandaysa, yönlendirme yapma
+        if (routeName && routeName !== 'Auth') {
+          // Kullanıcı zaten bir ekranda, yönlendirme yapma
+          console.log('⚠️ User already on screen:', routeName, '- skipping navigation');
+          return;
+        }
+        // Sadece ilk açılışta veya Auth ekranındaysa yönlendirme yap
+        if (!routeName || routeName === 'Auth') {
+          console.log('🔄 Navigating to MainTabs (anonymous user, first time)');
+          try {
+            setTimeout(() => {
+              if (navigationRef.current?.isReady()) {
+                const route = navigationRef.current?.getCurrentRoute();
+                const routeNameCheck = route?.name as string | undefined;
+                // Eğer hala Auth ekranındaysa veya hiçbir ekranda değilse yönlendir
+                if (!routeNameCheck || routeNameCheck === 'Auth') {
+                  navigationRef.current?.navigate('MainTabs' as never);
+                }
+              }
+            }, 100);
+          } catch (navError) {
+            console.error('❌ Navigation error:', navError);
+          }
         }
       }
     }

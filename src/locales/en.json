@@ -85,7 +85,14 @@
     "unknownError": "An error occurred",
     "enterEmail": "Enter your email address",
     "guestContinue": "Continue as Guest",
-    "guestContinueDesc": "Try the app without signing up. You can create an account anytime."
+    "guestContinueDesc": "Try the app without signing up. You can create an account anytime.",
+    "otpSent": "Verification code sent",
+    "otpSendFailed": "Failed to send code. Please try again.",
+    "invalidOtp": "Invalid code. Please try again.",
+    "resendOtp": "Resend Code",
+    "resendOtpIn": "You can resend in {seconds} seconds",
+    "enterOtpCode": "Enter the 6-digit code sent to your email address",
+    "verifyOtp": "Verify Code"
   },
   "dashboard": {
     "howAreYou": "How are you feeling today?",
@@ -730,7 +737,7 @@
     "passwordUpdated": "Password updated successfully!",
     "linkAccount": "Link Account",
     "linkAccountDescription": "Link your anonymous account with email and password to make your data permanent. Your data won't be lost when you change devices.",
-    "linkAccountInfo": "Convert your anonymous account to a permanent account by setting an email and password. All your data will be preserved.",
+    "linkAccountInfo": "Convert your anonymous account to a permanent account by verifying your email with a code. All your data will be preserved.",
     "accountLinkedSuccess": "Account linked successfully! Your data is now permanently stored.",
     "linkAccountFailed": "Failed to link account. Please try again.",
     "anonymousUser": "Guest User",

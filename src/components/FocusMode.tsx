@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, memo, startTransition } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,12 @@ import {
   Platform,
   ScrollView,
   SafeAreaView,
+  InteractionManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
-import { useTimer } from '../contexts/TimerContext';
+import { useTimerControl, useTimerValue } from '../contexts/TimerContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as Haptics from 'expo-haptics';
 import { soundService } from '../services/soundService';
@@ -28,21 +29,136 @@ interface FocusModeProps {
   selectedTaskTitle?: string;
 }
 
-export default function FocusMode({ visible, onClose, selectedTaskTitle }: FocusModeProps) {
+// CRITICAL FIX: Isolate timer display to prevent full component re-renders
+// Timer display component subscribes directly to value context, so only it re-renders every second
+const TimerDisplay = memo(({ 
+  scaleAnim, 
+  isActive, 
+  isPaused,
+  currentTheme,
+  t 
+}: {
+  scaleAnim: Animated.Value;
+  isActive: boolean;
+  isPaused: boolean;
+  currentTheme: any;
+  t: (key: string) => string;
+}) => {
+  // CRITICAL: Subscribe to value context INSIDE this component
+  // This way only TimerDisplay re-renders every second, not the entire FocusMode
+  const { timeLeft, progressAnim } = useTimerValue();
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const dynamicStyles = useMemo(() => StyleSheet.create({
+    timerContainer: {
+      width: 250,
+      height: 250,
+      marginBottom: 40,
+    },
+    timerCircle: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 125,
+      backgroundColor: currentTheme.colors.card,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 3,
+      borderColor: currentTheme.colors.border,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    progressCircle: {
+      position: 'absolute',
+      width: 250,
+      height: 250,
+      borderRadius: 125,
+      borderWidth: 3,
+      borderColor: currentTheme.colors.primary,
+      borderStyle: 'solid',
+      transform: [{ rotate: '-90deg' }],
+    },
+    timeText: {
+      fontSize: 48,
+      fontWeight: '700',
+      color: currentTheme.colors.text,
+      fontFamily: 'Poppins_700Bold',
+      textShadowColor: 'rgba(0,0,0,0.3)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 3,
+    },
+    statusText: {
+      fontSize: 16,
+      color: currentTheme.colors.secondary,
+      marginTop: 8,
+      fontFamily: 'Poppins_400Regular',
+      textShadowColor: 'rgba(0,0,0,0.2)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 1,
+    },
+  }), [currentTheme]);
+
+  return (
+    <Animated.View
+      style={[
+        dynamicStyles.timerContainer,
+        { transform: [{ scale: scaleAnim }] },
+      ]}
+    >
+      <View style={dynamicStyles.timerCircle}>
+        <Animated.View
+          style={[
+            dynamicStyles.progressCircle,
+            {
+              borderRightColor: 'transparent',
+              borderBottomColor: 'transparent',
+              borderLeftColor: progressAnim.interpolate({
+                inputRange: [0, 50, 100],
+                outputRange: ['rgba(255,255,255,0.8)', 'rgba(255,255,255,0.8)', 'transparent'],
+              }),
+              borderTopColor: progressAnim.interpolate({
+                inputRange: [0, 50, 100],
+                outputRange: ['rgba(255,255,255,0.8)', 'transparent', 'transparent'],
+              }),
+            },
+          ]}
+        />
+        <Text style={dynamicStyles.timeText}>{formatTime(timeLeft)}</Text>
+        {isActive && (
+          <Text style={dynamicStyles.statusText}>
+            {isPaused ? t('focus.paused') : t('focus.focusing')}
+          </Text>
+        )}
+      </View>
+    </Animated.View>
+  );
+});
+
+// CRITICAL FIX: Memoize FocusMode to prevent unnecessary re-renders
+// Timer display is isolated, so FocusMode only re-renders when control values change
+const FocusMode = memo(function FocusMode({ visible, onClose, selectedTaskTitle }: FocusModeProps) {
   const { currentTheme } = useTheme();
   const { t } = useLanguage();
+  
+  // CRITICAL FIX: Split context subscription
+  // Control context: Stable values (rarely changes) - prevents unnecessary re-renders
+  // Value context (timeLeft, progressAnim) is subscribed inside TimerDisplay component only
   const {
     isActive,
     isPaused,
-    timeLeft,
     selectedDuration,
-    progressAnim,
     scaleAnim,
     startTimer,
     pauseTimer,
     resetTimer,
     setDuration,
-  } = useTimer();
+  } = useTimerControl();
   
   // States
   const [showReflection, setShowReflection] = useState(false);
@@ -54,29 +170,27 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
   const [customDurationInput, setCustomDurationInput] = useState('');
 
   // Seçili görev varsa focusSubject'i otomatik set et
+  // CRITICAL FIX: Use startTransition to prevent blocking when modal opens
   useEffect(() => {
     if (selectedTaskTitle && visible) {
-      setFocusSubject(selectedTaskTitle);
-      console.log('✅ Seçili görev FocusMode\'e geçirildi:', selectedTaskTitle);
+      startTransition(() => {
+        setFocusSubject(selectedTaskTitle);
+        console.log('✅ Seçili görev FocusMode\'e geçirildi:', selectedTaskTitle);
+      });
     } else if (!visible) {
-      // Modal kapandığında temizle
-      setFocusSubject('');
-      setSelectedMood('');
-      setShowReflection(false);
-      setShowConfetti(false);
+      // Modal kapandığında temizle - use startTransition to prevent blocking
+      startTransition(() => {
+        setFocusSubject('');
+        setSelectedMood('');
+        setShowReflection(false);
+        setShowConfetti(false);
+      });
     }
   }, [selectedTaskTitle, visible]);
 
-  // Modal kapandığında timer'ı temizle (ayrı useEffect)
-  useEffect(() => {
-    if (!visible) {
-      // Modal kapandığında timer aktif veya duraklatılmışsa sıfırla
-      if (isActive || isPaused) {
-        resetTimer();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]); // Sadece visible değiştiğinde çalış (isActive/isPaused kontrolü için)
+  // CRITICAL FIX: Don't reset timer when modal closes - let user control it
+  // Timer will continue running in background and can be controlled via floating button
+  // This prevents screen freeze when closing Focus Mode
   
   // Alert state
   const [alertConfig, setAlertConfig] = useState({
@@ -109,20 +223,26 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
   };
 
   // Load custom durations from AsyncStorage
+  // CRITICAL FIX: Only load when modal is visible to prevent blocking on mount
   useEffect(() => {
+    if (!visible) return;
+    
     const loadCustomDurations = async () => {
       try {
         const stored = await AsyncStorage.getItem('custom_focus_durations');
         if (stored) {
           const parsed = JSON.parse(stored);
-          setCustomDurations(parsed);
+          // Use startTransition to prevent blocking
+          startTransition(() => {
+            setCustomDurations(parsed);
+          });
         }
       } catch (error) {
         console.error('Error loading custom durations:', error);
       }
     };
     loadCustomDurations();
-  }, []);
+  }, [visible]);
 
   // Save custom durations to AsyncStorage
   const saveCustomDurations = async (durations: number[]) => {
@@ -256,8 +376,8 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
     setShowReflection(false);
     setFocusSubject('');
     setSelectedMood('');
+    // Reset timer after reflection is submitted
     resetTimer();
-    
     setAlertConfig({
       visible: true,
       title: t('focus.completedTitle'),
@@ -276,6 +396,8 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
   };
 
   // Handle close with confirmation
+  // CRITICAL FIX: Don't reset timer on close - just close the modal
+  // Timer will continue running and can be controlled via floating button
   const handleClose = () => {
     if (isActive && !isPaused) {
       setAlertConfig({
@@ -286,29 +408,29 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
         primaryButton: {
           text: t('focus.quit'),
           onPress: () => {
-            setAlertConfig({ ...alertConfig, visible: false });
-            resetTimer();
-            setTimeout(() => {
-              onClose();
-            }, 100);
+            // CRITICAL FIX: Batch state updates - React 18 auto-batches, but be explicit
+            setAlertConfig(prev => ({ ...prev, visible: false }));
+            // Just pause timer, don't reset - prevents freeze
+            pauseTimer();
+            // Close modal immediately - no setTimeout needed, React batches updates
+            onClose();
           },
           style: 'danger',
         },
         secondaryButton: {
           text: t('focus.continue'),
-          onPress: () => setAlertConfig({ ...alertConfig, visible: false }),
+          onPress: () => setAlertConfig(prev => ({ ...prev, visible: false })),
           style: 'secondary',
         },
       });
     } else {
-      resetTimer();
-      setTimeout(() => {
-        onClose();
-      }, 100);
+      // Just close modal, don't reset timer
+      onClose();
     }
   };
 
-  const dynamicStyles = StyleSheet.create({
+  // CRITICAL FIX: Memoize StyleSheet.create to prevent recreation on every render
+  const dynamicStyles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: currentTheme.colors.background,
@@ -653,16 +775,21 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
     modalButtonTextSecondary: {
       color: currentTheme.colors.text,
     },
-  });
+  }), [currentTheme]);
 
-  if (!visible) return null;
+  // CRITICAL FIX: Don't render Modal at all when not visible to prevent performance issues
+  // React Native Modals can cause performance problems when rendered but hidden
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Modal
-      visible={visible}
+      visible={true}
       animationType="fade"
       transparent={false}
       onRequestClose={handleClose}
+      hardwareAccelerated={true}
     >
       <SafeAreaView style={dynamicStyles.container}>
         <LinearGradient
@@ -810,39 +937,15 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
                 )}
               </View>
 
-              {/* Timer Display */}
-              <Animated.View
-                style={[
-                  dynamicStyles.timerContainer,
-                  { transform: [{ scale: scaleAnim }] },
-                ]}
-              >
-                <View style={dynamicStyles.timerCircle}>
-                  <Animated.View
-                    style={[
-                      dynamicStyles.progressCircle,
-                      {
-                        borderRightColor: 'transparent',
-                        borderBottomColor: 'transparent',
-                        borderLeftColor: progressAnim.interpolate({
-                          inputRange: [0, 50, 100],
-                          outputRange: ['rgba(255,255,255,0.8)', 'rgba(255,255,255,0.8)', 'transparent'],
-                        }),
-                        borderTopColor: progressAnim.interpolate({
-                          inputRange: [0, 50, 100],
-                          outputRange: ['rgba(255,255,255,0.8)', 'transparent', 'transparent'],
-                        }),
-                      },
-                    ]}
-                  />
-                  <Text style={dynamicStyles.timeText}>{formatTime(timeLeft)}</Text>
-                  {isActive && (
-                    <Text style={dynamicStyles.statusText}>
-                      {isPaused ? t('focus.paused') : t('focus.focusing')}
-                    </Text>
-                  )}
-                </View>
-              </Animated.View>
+              {/* Timer Display - Isolated component to prevent full re-renders */}
+              {/* TimerDisplay subscribes to value context internally, so only it re-renders every second */}
+              <TimerDisplay
+                scaleAnim={scaleAnim}
+                isActive={isActive}
+                isPaused={isPaused}
+                currentTheme={currentTheme}
+                t={t}
+              />
 
               {/* Controls */}
               <View style={dynamicStyles.controls}>
@@ -1013,4 +1116,6 @@ export default function FocusMode({ visible, onClose, selectedTaskTitle }: Focus
       </SafeAreaView>
     </Modal>
   );
-}
+});
+
+export default FocusMode;

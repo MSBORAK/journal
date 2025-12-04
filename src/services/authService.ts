@@ -268,6 +268,7 @@ export class AuthService {
       }
 
       console.log('📧 AuthService: Supabase signInWithOtp çağrılıyor...', email.toLowerCase().trim());
+      console.log('📧 AuthService: shouldCreateUser:', shouldCreateUser);
       
       const { data, error } = await supabase.auth.signInWithOtp({
         email: email.toLowerCase().trim(),
@@ -278,7 +279,12 @@ export class AuthService {
         },
       });
 
-      console.log('📧 AuthService: Supabase response - data:', data, 'error:', error);
+      console.log('📧 AuthService: Supabase response - data:', JSON.stringify(data, null, 2));
+      console.log('📧 AuthService: Supabase response - error:', error ? {
+        message: error.message,
+        status: error.status,
+        name: error.name,
+      } : null);
 
       if (error) {
         console.error('❌ AuthService: Supabase hatası:', error);

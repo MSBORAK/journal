@@ -474,23 +474,25 @@ export const scheduleEveningNotification = async (userId?: string): Promise<void
 
   const [hour, minute] = settings.eveningTime.split(':').map(Number);
   
+  // CRITICAL FIX: Validate evening notification time - should be between 16:00-23:59
+  // If user has set an invalid time (like 10:15 AM), don't schedule night messages
+  if (hour < 16 || hour >= 24) {
+    console.warn(`⚠️ Evening notification time ${hour}:${minute} is invalid. Evening notifications should be scheduled between 16:00-23:59. Skipping scheduling.`);
+    return; // Don't schedule if time is invalid
+  }
+  
   // Kullanıcının timezone'unu al
   const userTimezone = settings.timezone || getUserTimezone();
   
   // Saat kontrolü ile doğru mesaj tipini belirle (timezone-aware)
   // Not: Expo Notifications CalendarTriggerInput zaten cihazın yerel saatine göre çalışır
   // Bu yüzden hour ve minute değerleri kullanıcının timezone'una göre yorumlanmalı
-  let messageType: 'night' | 'evening' | 'afternoon' | 'morning' = 'evening';
-  if (hour >= 21 || hour < 5) {
+  let messageType: 'night' | 'evening' = 'evening';
+  if (hour >= 21 && hour < 24) {
     messageType = 'night';
-  } else if (hour >= 16 && hour < 21) {
-    messageType = 'evening';
-  } else if (hour >= 11 && hour < 16) {
-    messageType = 'afternoon';
-    if (__DEV__) console.warn(`⚠️ Evening notification scheduled for ${hour}:${minute} (afternoon hours!)`);
   } else {
-    messageType = 'morning';
-    if (__DEV__) console.warn(`⚠️ Evening notification scheduled for ${hour}:${minute} (morning hours!)`);
+    // 16:00-20:59 arası akşam mesajları
+    messageType = 'evening';
   }
   
   if (__DEV__) {
@@ -731,6 +733,19 @@ export const scheduleAllNotifications = async (userId?: string): Promise<void> =
     // Önce tüm mevcut bildirimleri iptal et
     await Notifications.cancelAllScheduledNotificationsAsync();
     if (__DEV__) console.log('✅ Tüm eski bildirimler iptal edildi');
+
+    // CRITICAL FIX: Validate and fix evening notification time if invalid
+    // This prevents "Sleep tight zzz" notifications at wrong times (like 10:15 AM)
+    const settings = await loadNotificationSettings();
+    if (settings.eveningEnabled) {
+      const [hour] = settings.eveningTime.split(':').map(Number);
+      if (hour < 16 || hour >= 24) {
+        console.warn(`⚠️ Invalid evening notification time detected: ${settings.eveningTime}. Resetting to default 21:00.`);
+        // Reset to default evening time
+        settings.eveningTime = '21:00';
+        await saveNotificationSettings(settings, userId);
+      }
+    }
 
     // Yeni bildirimleri planla - her birini ayrı try-catch ile yakala
     try {
@@ -1092,7 +1107,9 @@ export const scheduleReminderNotification = async (
         title,
         body,
         sound: selectedSound,
-        priority: Notifications.IOSNotificationPriority.HIGH,
+        ...(Platform.OS === 'android' && { 
+          priority: Notifications.AndroidNotificationPriority.HIGH 
+        }),
         data: { type: 'reminder', reminderId, category },
       },
       trigger,
